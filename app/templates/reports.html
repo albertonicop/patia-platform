@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block title %}Reportes IA{% endblock %}{% block content %}
+<section class="grid metrics"><div class="card metric"><span>Utilidad estimada</span><strong>{{ profit|money }}</strong></div><div class="card metric"><span>Productos activos</span><strong>{{ total_products }}</strong></div><div class="card metric"><span>Alertas</span><strong>{{ alerts|length }}</strong></div><div class="card metric"><span>Valor inventario</span><strong>{{ inventory_value|money }}</strong></div></section>
+<section class="grid two"><div class="card"><h3>Ventas por categoría</h3><canvas id="categoryChart"></canvas></div><div class="card"><h3>Recomendaciones para vender más</h3><div class="ai-box">{% for r in recommendations %}<p>→ {{r}}</p>{% endfor %}</div></div></section>
+<script>window.catLabels={{ category_sales|map(attribute='category')|list|tojson }}; window.catValues={{ category_sales|map(attribute='revenue')|list|tojson }};</script>
+{% endblock %}

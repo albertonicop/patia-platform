@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PATIA</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+<div class="brand"><div class="logo">P</div><div><strong>PATIA</strong><span>by NP Ventures</span></div></div>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/products">Inventario</a>
+      <a href="/sell">Punto de venta</a>
+      <a href="/reports">Reportes IA</a>
+      <a href="/suppliers">Proveedores</a>
+    </nav>
+    <div class="sidebar-card"><b>Plan Pro</b><p>Diseñado para abarrotes, minisúpers y tiendas familiares.</p></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><span class="eyebrow">Demo profesional</span><h1>{% block title %}{% endblock %}</h1></div>
+      <a class="btn ghost" href="/reset-demo">Cargar datos demo</a>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-wrap">{% for cat,msg in messages %}<div class="flash {{cat}}">{{msg}}</div>{% endfor %}</div>{% endif %}{% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

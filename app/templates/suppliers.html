@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block title %}Proveedores{% endblock %}{% block content %}
+<section class="grid two"><div class="card"><h3>Nuevo proveedor</h3><form method="post" class="stack"><input name="name" placeholder="Nombre" required><input name="contact" placeholder="Contacto"><input name="phone" placeholder="Teléfono"><textarea name="notes" placeholder="Notas"></textarea><button class="btn">Guardar proveedor</button></form></div><div class="card"><h3>Idea vendible</h3><div class="ai-box"><p>En la versión comercial, TiendaIA puede generar pedidos sugeridos por proveedor y enviarlos por WhatsApp.</p></div></div></section>
+<section class="card"><h3>Lista</h3><table><thead><tr><th>Proveedor</th><th>Contacto</th><th>Teléfono</th><th>Notas</th></tr></thead><tbody>{% for s in suppliers %}<tr><td><b>{{s.name}}</b></td><td>{{s.contact or '-'}}</td><td>{{s.phone or '-'}}</td><td>{{s.notes or '-'}}</td></tr>{% endfor %}</tbody></table></section>
+{% endblock %}

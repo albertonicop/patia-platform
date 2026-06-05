@@ -1,0 +1,21 @@
+{% extends 'base.html' %}{% block title %}Panel ejecutivo{% endblock %}{% block content %}
+<section class="hero">
+  <div><h2>Controla la tienda como una cadena grande.</h2><p>Inventario, ventas, alertas y recomendaciones comerciales en un solo lugar.</p></div>
+  <div class="hero-badge">IA accionable<br><strong>para PyMEs</strong></div>
+</section>
+<section class="grid metrics">
+  <div class="card metric"><span>Ventas hoy</span><strong>{{ today_sales|money }}</strong></div>
+  <div class="card metric"><span>Ventas 7 días</span><strong>{{ week_sales|money }}</strong></div>
+  <div class="card metric"><span>Valor inventario</span><strong>{{ inventory_value|money }}</strong></div>
+  <div class="card metric"><span>Stock bajo</span><strong>{{ low_stock }}</strong></div>
+</section>
+<section class="grid two">
+  <div class="card"><h3>Productos más vendidos</h3><canvas id="topProducts"></canvas></div>
+  <div class="card"><h3>Copiloto IA</h3><div class="ai-box">{% for r in recommendations %}<p>✦ {{ r }}</p>{% endfor %}</div></div>
+</section>
+<section class="card"><h3>Alertas críticas</h3><div class="alerts">{% for a in alerts %}<div class="alert {{a.type}}"><b>{{a.title}}</b><span>{{a.text}}</span></div>{% else %}<p>Todo se ve estable por ahora.</p>{% endfor %}</div></section>
+<script>
+window.topLabels = {{ top_products|map(attribute='name')|list|tojson }};
+window.topValues = {{ top_products|map(attribute='qty')|list|tojson }};
+</script>
+{% endblock %}
