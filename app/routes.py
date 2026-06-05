@@ -1,16 +1,71 @@
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from sqlalchemy import func
 from . import db
-from .models import Product, Sale, Supplier
-
+from .models import Product, Sale, Supplier, User
 main = Blueprint("main", __name__)
+def current_user():
+    user_id = session.get("user_id")
+    if not user_id:
+        return None
+    return User.query.get(user_id)
 
+
+def login_required():
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
 
 def money(value):
     return f"${value:,.2f} MXN"
 
+@main.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+        company_name = request.form["company_name"].strip()
 
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash("Ese correo ya está registrado.", "danger")
+            return redirect(url_for("main.register"))
+
+        user = User(email=email, company_name=company_name)
+        user.set_password(password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        session["user_id"] = user.id
+        flash("Cuenta creada correctamente.", "success")
+        return redirect(url_for("main.dashboard"))
+
+    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register")
+
+
+@main.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+
+        user = User.query.filter_by(email=email).first()
+        if not user or not user.check_password(password):
+            flash("Correo o contraseña incorrectos.", "danger")
+            return redirect(url_for("main.login"))
+
+        session["user_id"] = user.id
+        flash("Sesión iniciada correctamente.", "success")
+        return redirect(url_for("main.dashboard"))
+
+    return render_template("auth.html", title="Iniciar sesión", button="Entrar", mode="login")
+
+
+@main.route("/logout")
+def logout():
+    session.clear()
+    flash("Sesión cerrada.", "success")
+    return redirect(url_for("main.login"))
 @main.app_template_filter("money")
 def money_filter(value):
     return money(value or 0)
