@@ -175,7 +175,11 @@ def analytics():
 
 @main.route("/")
 def dashboard():
-    return render_template("dashboard.html", **analytics())
+   return render_template(
+    "dashboard.html",
+    company_name=current_user().company_name if current_user() else "PATIA",
+    **analytics()
+)
 
 
 @main.route("/products")
