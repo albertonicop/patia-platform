@@ -180,16 +180,26 @@ def dashboard():
 
 @main.route("/products")
 def products():
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+
     q = request.args.get("q", "").strip()
-    query = Product.query
+    query = Product.query.filter(Product.user_id == session["user_id"])
+
     if q:
-        query = query.filter(Product.name.ilike(f"%{q}%") | Product.category.ilike(f"%{q}%") | Product.sku.ilike(f"%{q}%"))
+        query = query.filter(
+            Product.name.ilike(f"%{q}%") |
+            Product.category.ilike(f"%{q}%") |
+            Product.sku.ilike(f"%{q}%")
+        )
+
     return render_template("products.html", products=query.order_by(Product.name).all(), q=q)
 
 
 @main.route("/products/new", methods=["POST"])
 def add_product():
     p = Product(
+        user_id=session["user_id"],
         sku=request.form["sku"],
         barcode=request.form.get("barcode") or None,
         name=request.form["name"],
@@ -200,11 +210,12 @@ def add_product():
         stock=int(request.form.get("stock", 0)),
         min_stock=int(request.form.get("min_stock", 5)),
     )
+
     db.session.add(p)
     db.session.commit()
+
     flash("Producto creado correctamente.", "success")
     return redirect(url_for("main.products"))
-
 
 @main.route("/sell", methods=["GET", "POST"])
 def sell():

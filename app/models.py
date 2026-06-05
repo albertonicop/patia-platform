@@ -5,6 +5,7 @@ from . import db
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     sku = db.Column(db.String(64), unique=True, nullable=False)
     barcode = db.Column(db.String(64), unique=True, nullable=True)
     name = db.Column(db.String(160), nullable=False)
@@ -29,6 +30,7 @@ class Product(db.Model):
 
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     unit_price = db.Column(db.Float, nullable=False, default=0)
@@ -39,6 +41,7 @@ class Sale(db.Model):
 
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     name = db.Column(db.String(120), nullable=False, unique=True)
     contact = db.Column(db.String(120), nullable=True)
     phone = db.Column(db.String(50), nullable=True)
