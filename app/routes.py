@@ -209,10 +209,10 @@ def add_product():
         name=request.form["name"],
         category=request.form.get("category") or "General",
         supplier=request.form.get("supplier"),
-        cost_price=float(request.form.get("cost_price", 0)),
-        sale_price=float(request.form.get("sale_price", 0)),
-        stock=int(request.form.get("stock", 0)),
-        min_stock=int(request.form.get("min_stock", 5)),
+       cost_price=float(request.form.get("cost_price") or 0),
+sale_price=float(request.form.get("sale_price") or 0),
+stock=int(request.form.get("stock") or 0),
+min_stock=int(request.form.get("min_stock") or 5),
     )
 
     db.session.add(p)
