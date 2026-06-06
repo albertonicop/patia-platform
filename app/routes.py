@@ -150,14 +150,31 @@ def analytics():
 
     recommendations = []
 
-    if top_products:
-        recommendations.append(f"Tu producto estrella es {top_products[0].name}. Ponlo visible cerca de caja y evita quedarte sin stock.")
-    if low_stock:
-        recommendations.append(f"Tienes {low_stock} productos en nivel bajo. Prioriza reabastecer los de mayor rotación.")
-    if week_sales > 0:
-        recommendations.append("Crea paquetes con productos complementarios para subir el ticket promedio.")
 
-    recommendations.append("Activa recordatorios por WhatsApp para pedidos a proveedores y reduce ventas perdidas por falta de inventario.")
+    if top_products:
+        recommendations.append(
+            f"{top_products[0].name} es tu producto más vendido actualmente."
+        )
+
+    if week_sales > 0:
+        recommendations.append(
+            f"Las ventas de los últimos 7 días suman ${week_sales:,.0f} MXN."
+        )
+
+    if profit > 0:
+        recommendations.append(
+            f"La utilidad estimada de la semana fue de ${profit:,.0f} MXN."
+        )
+
+    if low_stock:
+        recommendations.append(
+            f"Tienes {low_stock} productos con inventario bajo. Reabastécelos pronto."
+        )
+
+    if top_products and low_stock:
+        recommendations.append(
+            f"{top_products[0].name} tiene alta rotación. Mantén suficiente stock disponible."
+        )
 
     return dict(
         total_products=total_products,
