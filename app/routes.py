@@ -224,7 +224,10 @@ min_stock=int(request.form.get("min_stock") or 5),
 @main.route("/sell", methods=["GET", "POST"])
 def sell():
     if request.method == "POST":
-        product = Product.query.get_or_404(int(request.form["product_id"]))
+       product = Product.query.filter_by(
+    id=int(request.form["product_id"]),
+    user_id=session["user_id"]
+).first_or_404()
         qty = int(request.form.get("quantity", 1))
         if qty <= 0:
             flash("La cantidad debe ser mayor a cero.", "danger")
@@ -232,7 +235,7 @@ def sell():
             flash("No hay suficiente inventario.", "danger")
         else:
             product.stock -= qty
-            sale = Sale(product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
+           sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
             db.session.add(sale)
             db.session.commit()
             flash(f"Venta registrada: {product.name} x{qty}.", "success")
