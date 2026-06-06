@@ -10,11 +10,7 @@
 <body>
   <aside class="sidebar">
 <div class="brand">
-    <div class="logo">P</div>
-    <div>
-        <strong>PATIA</strong>
-        <span>{{ company_name if company_name else "by NP Ventures" }}</span>
-    </div>
+  <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
 </div>
     <nav>
       <a href="/">Dashboard</a>
