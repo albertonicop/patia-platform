@@ -223,26 +223,46 @@ min_stock=int(request.form.get("min_stock") or 5),
 
 @main.route("/sell", methods=["GET", "POST"])
 def sell():
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+
     if request.method == "POST":
-       product = Product.query.filter_by(
-    id=int(request.form["product_id"]),
-    user_id=session["user_id"]
-).first_or_404()
-        qty = int(request.form.get("quantity", 1))
+        product = Product.query.filter_by(
+            id=int(request.form["product_id"]),
+            user_id=session["user_id"]
+        ).first_or_404()
+
+        qty = int(request.form.get("quantity") or 1)
+
         if qty <= 0:
             flash("La cantidad debe ser mayor a cero.", "danger")
+
         elif product.stock < qty:
             flash("No hay suficiente inventario.", "danger")
+
         else:
             product.stock -= qty
-           sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
+            sale = Sale(
+                user_id=session["user_id"],
+                product_id=product.id,
+                quantity=qty,
+                unit_price=product.sale_price,
+                total=qty * product.sale_price
+            )
             db.session.add(sale)
             db.session.commit()
             flash(f"Venta registrada: {product.name} x{qty}.", "success")
+
         return redirect(url_for("main.sell"))
 
-    sales = Sale.query.order_by(Sale.created_at.desc()).limit(12).all()
-    products = Product.query.order_by(Product.name).all()
+    sales = Sale.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(Sale.created_at.desc()).limit(12).all()
+
+    products = Product.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(Product.name).all()
+
     return render_template("sell.html", products=products, sales=sales)
 
 
