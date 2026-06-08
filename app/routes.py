@@ -133,51 +133,54 @@ def analytics():
 
     alerts = []
 
-    for p in Product.query.order_by(Product.stock.asc()).limit(20).all():
-        sold_7_days = (
-            db.session.query(func.sum(Sale.quantity))
-            .filter(
-                Sale.product_id == p.id,
-                Sale.created_at >= week_start,
+    for p in Product.query.filter_by(
+    user_id=user_id
+    ).order_by(Product.stock.asc()).limit(20).all():
+        
+            sold_7_days = (
+                db.session.query(func.sum(Sale.quantity))
+                .filter(
+                    Sale.product_id == p.id,
+                    Sale.created_at >= week_start,
+                )
+                .scalar()
+                or 0
             )
-            .scalar()
-            or 0
-        )
 
-        avg_daily_sales = sold_7_days / 7
+            avg_daily_sales = sold_7_days / 7
 
-        if avg_daily_sales > 0:
-            days_left = round(p.stock / avg_daily_sales, 1)
-        else:
-            days_left = None
+            if avg_daily_sales > 0:
+                days_left = round(p.stock / avg_daily_sales, 1)
+            else:
+                days_left = None
 
-        if p.stock <= p.min_stock:
-            alerts.append({
-                "type": "critical",
-                "title": f"Reordenar {p.name}",
-                "text": f"Stock actual: {p.stock}. Está en nivel crítico."
-            })
+            if p.stock <= p.min_stock:
+                alerts.append({
+                    "type": "critical",
+                    "title": f"Reordenar {p.name}",
+                    "text": f"Stock actual: {p.stock}. Está en nivel crítico."
+                })
 
-        elif days_left is not None and days_left <= 3:
-            alerts.append({
-                "type": "critical",
-                "title": f"{p.name} se agotará pronto",
-                "text": f"Con el ritmo actual de ventas, se acabará en aproximadamente {days_left} días."
-            })
+            elif days_left is not None and days_left <= 3:
+                alerts.append({
+                    "type": "critical",
+                    "title": f"{p.name} se agotará pronto",
+                    "text": f"Con el ritmo actual de ventas, se acabará en aproximadamente {days_left} días."
+                })
 
-        elif days_left is not None and days_left <= 7:
-            alerts.append({
-                "type": "warning",
-                "title": f"Vigilar {p.name}",
-                "text": f"Inventario estimado para {days_left} días."
-            })
+            elif days_left is not None and days_left <= 7:
+                alerts.append({
+                    "type": "warning",
+                    "title": f"Vigilar {p.name}",
+                    "text": f"Inventario estimado para {days_left} días."
+                })
 
-        elif p.margin < 18:
-            alerts.append({
-                "type": "warning",
-                "title": f"Margen bajo en {p.name}",
-                "text": f"Margen actual: {p.margin}%."
-            })
+            elif p.margin < 18:
+                alerts.append({
+                    "type": "warning",
+                    "title": f"Margen bajo en {p.name}",
+                    "text": f"Margen actual: {p.margin}%."
+                })
 
     recommendations = []
 
