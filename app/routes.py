@@ -215,7 +215,51 @@ def products():
         )
 
     return render_template("products.html", products=query.order_by(Product.name).all(), q=q)
+@main.route("/import-products", methods=["POST"])
+def import_products():
+    import pandas as pd
 
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+
+    file = request.files.get("catalog_file")
+
+    if not file:
+        flash("Selecciona un archivo.", "danger")
+        return redirect(url_for("main.products"))
+
+    try:
+        if file.filename.endswith(".csv"):
+            df = pd.read_csv(file)
+        else:
+            df = pd.read_excel(file)
+
+        for _, row in df.iterrows():
+
+            product = Product(
+                user_id=session["user_id"],
+                sku=str(row.get("sku", "")).strip(),
+                barcode=str(row.get("barcode", "")).strip(),
+                name=str(row.get("name", "")).strip(),
+                category=str(row.get("category", "General")).strip(),
+                supplier=str(row.get("supplier", "")).strip(),
+                cost_price=float(row.get("cost_price", 0) or 0),
+                sale_price=float(row.get("sale_price", 0) or 0),
+                stock=int(row.get("stock", 0) or 0),
+                min_stock=int(row.get("min_stock", 5) or 5)
+            )
+
+            db.session.add(product)
+
+        db.session.commit()
+
+        flash("Catálogo importado correctamente.", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al importar: {e}", "danger")
+
+    return redirect(url_for("main.products"))
 
 @main.route("/products/new", methods=["POST"])
 def add_product():
