@@ -290,14 +290,28 @@ def reports():
 
 @main.route("/suppliers", methods=["GET", "POST"])
 def suppliers():
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+
     if request.method == "POST":
-        s = Supplier(name=request.form["name"], contact=request.form.get("contact"), phone=request.form.get("phone"), notes=request.form.get("notes"))
+        s = Supplier(
+            user_id=session["user_id"],
+            name=request.form["name"],
+            contact=request.form.get("contact"),
+            phone=request.form.get("phone"),
+            notes=request.form.get("notes")
+        )
+
         db.session.add(s)
         db.session.commit()
         flash("Proveedor guardado.", "success")
         return redirect(url_for("main.suppliers"))
 
-    return render_template("suppliers.html", suppliers=Supplier.query.order_by(Supplier.name).all())
+    suppliers = Supplier.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(Supplier.name).all()
+
+    return render_template("suppliers.html", suppliers=suppliers)
 
 
 @main.route("/reset-demo")
