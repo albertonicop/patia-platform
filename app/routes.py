@@ -6,8 +6,10 @@ from .models import Product, Sale, Supplier, User
 main = Blueprint("main", __name__)
 def current_user():
     user_id = session.get("user_id")
+
     if not user_id:
         return None
+
     return User.query.get(user_id)
 
 
@@ -75,30 +77,59 @@ def analytics():
     today = datetime.utcnow().date()
     start = datetime.combine(today, datetime.min.time())
     week_start = datetime.utcnow() - timedelta(days=7)
+    user_id = session.get("user_id")
 
-    total_products = Product.query.count()
-    inventory_value = sum(p.inventory_value for p in Product.query.all())
-    low_stock = Product.query.filter(Product.stock <= Product.min_stock).count()
-    today_sales = db.session.query(func.sum(Sale.total)).filter(Sale.created_at >= start).scalar() or 0
-    week_sales = db.session.query(func.sum(Sale.total)).filter(Sale.created_at >= week_start).scalar() or 0
-    profit = db.session.query(func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity)).join(Product).scalar() or 0
+    products = Product.query.filter_by(user_id=user_id).all()
+
+    total_products = len(products)
+    inventory_value = sum(p.inventory_value for p in products)
+    low_stock = sum(1 for p in products if p.stock <= p.min_stock)
+
+    today_sales = db.session.query(func.sum(Sale.total)).filter(
+        Sale.user_id == user_id,
+        Sale.created_at >= start
+    ).scalar() or 0
+
+    week_sales = db.session.query(func.sum(Sale.total)).filter(
+        Sale.user_id == user_id,
+        Sale.created_at >= week_start
+    ).scalar() or 0
+   
+    profit = (
+    db.session.query(
+        func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity)
+    )
+    .join(Product)
+    .filter(Product.user_id == user_id)
+    .scalar() or 0
+)
 
     top_products = (
-        db.session.query(Product.name, func.sum(Sale.quantity).label("qty"), func.sum(Sale.total).label("revenue"))
-        .join(Sale)
-        .group_by(Product.id)
-        .order_by(func.sum(Sale.quantity).desc())
-        .limit(5)
-        .all()
+    db.session.query(
+        Product.name,
+        func.sum(Sale.quantity).label("qty"),
+        func.sum(Sale.total).label("revenue")
     )
+    .join(Sale)
+    .filter(Product.user_id == user_id)
+    .group_by(Product.id)
+    .order_by(func.sum(Sale.quantity).desc())
+    .limit(5)
+    .all()
+)
+    
 
     category_sales = (
-        db.session.query(Product.category, func.sum(Sale.total).label("revenue"))
-        .join(Sale)
-        .group_by(Product.category)
-        .order_by(func.sum(Sale.total).desc())
-        .all()
+    db.session.query(
+        Product.category,
+        func.sum(Sale.total).label("revenue")
     )
+    .join(Sale)
+    .filter(Product.user_id == user_id)
+    .group_by(Product.category)
+    .order_by(func.sum(Sale.total).desc())
+    .all()
+)
 
     alerts = []
 
