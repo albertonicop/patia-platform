@@ -139,10 +139,11 @@ def analytics():
         
             sold_7_days = (
                 db.session.query(func.sum(Sale.quantity))
-                .filter(
-                    Sale.product_id == p.id,
-                    Sale.created_at >= week_start,
-                )
+               .filter(
+    Sale.user_id == user_id,
+    Sale.product_id == p.id,
+    Sale.created_at >= week_start,
+)
                 .scalar()
                 or 0
             )
@@ -219,18 +220,21 @@ def analytics():
         profit=profit,
         top_products=top_products,
         category_sales=category_sales,
-        alerts=alerts[:6],
+       alerts=[],
         recommendations=recommendations,
     )
 
 
 @main.route("/")
 def dashboard():
-   return render_template(
-    "dashboard.html",
-    company_name=current_user().company_name if current_user() else "PATIA",
-    **analytics()
-)
+    if not session.get("user_id"):
+        return render_template("landing.html")
+
+    return render_template(
+        "dashboard.html",
+        company_name=current_user().company_name,
+        **analytics()
+    )
 
 
 @main.route("/products")

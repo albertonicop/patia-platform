@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PATIA | Control inteligente para empresas</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,sans-serif}
+body{background:#050b18;color:white;overflow-x:hidden}
+section{padding:90px 8%}
+.hero{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    background:radial-gradient(circle at 20% 20%,rgba(123,97,255,.25),transparent 30%),
+               radial-gradient(circle at 80% 10%,rgba(0,212,255,.18),transparent 30%),
+               #050b18;
+}
+.container{width:100%;max-width:1300px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.logo{width:220px;margin-bottom:35px}
+.badge{color:#38e8c6;letter-spacing:4px;text-transform:uppercase;font-size:13px;margin-bottom:20px}
+h1{font-size:72px;line-height:1;margin-bottom:25px}
+h2{font-size:46px;line-height:1.1;margin-bottom:20px}
+.gradient{background:linear-gradient(90deg,#7b61ff,#00d4ff);-webkit-background-clip:text;color:transparent}
+p{color:#aebad5;font-size:18px;line-height:1.7}
+.subtitle{font-size:20px;margin-bottom:35px}
+.buttons{display:flex;gap:15px;margin-top:28px}
+.btn{padding:16px 28px;border-radius:15px;text-decoration:none;font-weight:800;display:inline-block}
+.primary{background:linear-gradient(90deg,#7b61ff,#4d9cff);color:white}
+.secondary{border:1px solid rgba(255,255,255,.2);color:white}
+.mockup{background:#0c1226;border:1px solid rgba(255,255,255,.08);border-radius:25px;padding:25px;box-shadow:0 25px 60px rgba(0,0,0,.45);animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.metric-grid,.cards-3,.target-grid,.before-after{display:grid;gap:18px}
+.metric-grid{grid-template-columns:1fr 1fr}
+.metric,.card,.target,.compare{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:26px}
+.metric span{display:block;color:#9fb0d2;margin-bottom:8px}
+.metric strong{font-size:26px}
+.ai{margin-top:18px;padding:18px;border-radius:18px;background:linear-gradient(135deg,rgba(123,97,255,.2),rgba(0,212,255,.08));color:#dce7ff}
+.section-header{max-width:850px;margin-bottom:45px}
+.cards-3{grid-template-columns:repeat(3,1fr)}
+.target-grid{grid-template-columns:repeat(6,1fr)}
+.target{text-align:center;font-weight:800}
+.dark{background:linear-gradient(135deg,#080f22,#061827)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.before-after{grid-template-columns:1fr 1fr}
+.compare h3,.card h3{font-size:24px;margin-bottom:16px}
+.compare ul{list-style:none}
+.compare li{color:#aebad5;margin:13px 0;font-size:17px}
+.final-cta{
+    text-align:center;
+    padding:120px 8%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.final-cta p{margin:15px 0 35px;max-width:720px}
+.footer{padding:35px 8%;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:20px;color:#8f9bb8;font-size:14px}
+@media(max-width:1000px){
+    .container,.split,.before-after{grid-template-columns:1fr}
+    .cards-3,.target-grid{grid-template-columns:1fr}
+    h1{font-size:48px}
+    h2{font-size:34px}
+    .footer{flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<section class="hero">
+<div class="container">
+<div>
+<img class="logo" src="{{ url_for('static', filename='img/logo-patia.png') }}">
+<div class="badge">Plataforma empresarial con IA</div>
+<h1>Controla tu negocio como una <span class="gradient">empresa grande.</span></h1>
+<p class="subtitle">Inventario, ventas, proveedores, análisis y recomendaciones inteligentes en una sola plataforma.</p>
+<div class="buttons">
+<a href="/register" class="btn primary">Crear cuenta</a>
+<a href="/login" class="btn secondary">Iniciar sesión</a>
+</div>
+</div>
+
+<div class="mockup">
+<div class="metric-grid">
+<div class="metric"><span>Ventas hoy</span><strong>$4,820</strong></div>
+<div class="metric"><span>Stock bajo</span><strong>3</strong></div>
+<div class="metric"><span>Inventario</span><strong>$82,400</strong></div>
+<div class="metric"><span>Margen</span><strong>31%</strong></div>
+</div>
+<div class="ai">🤖 Copiloto IA: Coca Cola 600ml presenta alta rotación. Se recomienda reabastecer antes del fin de semana.</div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-header">
+<div class="badge">¿Qué es PATIA?</div>
+<h2>Un copiloto inteligente para operar mejor tu negocio.</h2>
+<p>PATIA ayuda a tiendas, abarrotes, minisúpers y PyMEs a controlar inventario, ventas, proveedores y decisiones comerciales desde un solo lugar.</p>
+</div>
+
+<div class="cards-3">
+<div class="card"><h3>Inventario centralizado</h3><p>Controla productos, costos, precios, stock mínimo y valor total de inventario.</p></div>
+<div class="card"><h3>Ventas conectadas</h3><p>Cada venta actualiza el inventario y alimenta reportes de rendimiento.</p></div>
+<div class="card"><h3>Alertas inteligentes</h3><p>Detecta productos en riesgo de agotarse y reduce ventas perdidas.</p></div>
+</div>
+</section>
+
+<section class="dark">
+<div class="split">
+<div>
+<div class="badge">Impacto real</div>
+<h2>Decisiones con datos, no con intuición.</h2>
+<p>Muchos negocios operan con libretas, Excel o memoria. PATIA convierte esa operación diaria en información útil para saber qué comprar, qué vender más y qué productos dejan mejor margen.</p>
+</div>
+<div class="mockup">
+<div class="metric-grid">
+<div class="metric"><span>Ventas 7 días</span><strong>$18,430</strong></div>
+<div class="metric"><span>Producto estrella</span><strong>Coca Cola</strong></div>
+<div class="metric"><span>Proveedor clave</span><strong>FEMSA</strong></div>
+<div class="metric"><span>Stock crítico</span><strong>2</strong></div>
+</div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-header">
+<div class="badge">¿Para quién es?</div>
+<h2>Diseñado para negocios que quieren crecer con más control.</h2>
+</div>
+<div class="target-grid">
+<div class="target">🛒 Minisúpers</div>
+<div class="target">🏪 Abarrotes</div>
+<div class="target">🔩 Ferreterías</div>
+<div class="target">💊 Farmacias</div>
+<div class="target">📦 Distribuidoras</div>
+<div class="target">🏢 PyMEs</div>
+</div>
+</section>
+
+<section class="dark">
+<div class="section-header">
+<div class="badge">Antes vs Después</div>
+<h2>De operación desordenada a inteligencia comercial.</h2>
+</div>
+
+<div class="before-after">
+<div class="compare">
+<h3>Antes</h3>
+<ul>
+<li>Inventario en libretas o Excel.</li>
+<li>No saber qué producto se vende más.</li>
+<li>Faltantes de stock inesperados.</li>
+<li>Pedidos a proveedores sin datos claros.</li>
+</ul>
+</div>
+<div class="compare">
+<h3>Después con PATIA</h3>
+<ul>
+<li>Inventario centralizado.</li>
+<li>Ventas y reportes en tiempo real.</li>
+<li>Alertas de stock bajo.</li>
+<li>Recomendaciones inteligentes para decidir mejor.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section>
+<div class="cards-3">
+<div class="card"><h3>Misión</h3><p>Dar a las PyMEs herramientas inteligentes y accesibles para operar con el nivel de control de una gran cadena.</p></div>
+<div class="card"><h3>Visión</h3><p>Convertir a PATIA en la plataforma de inteligencia operativa para negocios modernos en México y Latinoamérica.</p></div>
+<div class="card"><h3>Propósito</h3><p>Ayudar a los negocios familiares y empresas en crecimiento a vender más, perder menos y tomar mejores decisiones.</p></div>
+</div>
+</section>
+
+<section class="final-cta">
+<h2>Empieza a controlar tu negocio con PATIA.</h2>
+<p>Inventario, ventas, alertas y análisis en una sola plataforma inteligente.</p>
+<a href="/register" class="btn primary">Crear cuenta</a>
+</section>
+
+<footer class="footer">
+<div>PATIA © 2026</div>
+<div>Built by NP Ventures · Founded by Alberto Nicolás Patjane</div>
+</footer>
+
+</body>
+</html>
