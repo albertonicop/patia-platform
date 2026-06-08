@@ -1,4 +1,25 @@
 {% extends 'base.html' %}{% block title %}Inventario inteligente{% endblock %}{% block content %}
+<div class="card" style="margin-bottom:20px;">
+    <h3>Importar catálogo</h3>
+
+    <form method="POST"
+          action="/import-products"
+          enctype="multipart/form-data">
+
+        <input type="file"
+               name="catalog_file"
+               accept=".csv,.xlsx"
+               required>
+
+        <button class="btn" type="submit">
+            Importar archivo
+        </button>
+    </form>
+
+    <p style="margin-top:10px;">
+        Sube un archivo Excel o CSV con tus productos.
+    </p>
+</div>
 <section class="card"><h3>Agregar producto</h3><form class="form-grid" method="post" action="/products/new">
 <input name="sku" placeholder="SKU" required><input name="barcode" placeholder="Código de barras"><input name="name" placeholder="Nombre" required><input name="category" placeholder="Categoría"><input name="supplier" placeholder="Proveedor"><input name="cost_price" type="number" step="0.01" placeholder="Costo"><input name="sale_price" type="number" step="0.01" placeholder="Precio venta"><input name="stock" type="number" placeholder="Stock"><input name="min_stock" type="number" placeholder="Mínimo"><button class="btn">Guardar producto</button>
 </form></section>
