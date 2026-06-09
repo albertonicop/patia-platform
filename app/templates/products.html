@@ -1,6 +1,9 @@
 {% extends 'base.html' %}{% block title %}Inventario inteligente{% endblock %}{% block content %}
 <div class="card" style="margin-bottom:20px;">
     <h3>Importar catálogo</h3>
+    <a href="/download-template" class="btn ghost" style="margin-bottom:15px;display:inline-block;">
+    📥 Descargar plantilla PATIA
+</a>
 
     <form method="POST"
           action="/import-products"

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from io import BytesIO
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file
 from sqlalchemy import func
 from . import db
 from .models import Product, Sale, Supplier, User
@@ -25,14 +26,34 @@ def register():
     if request.method == "POST":
         email = request.form["email"].strip().lower()
         password = request.form["password"]
-        company_name = request.form["company_name"].strip()
+
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
+        company_name = request.form.get("company_name", "").strip()
+        phone = request.form.get("phone", "").strip()
+        address = request.form.get("address", "").strip()
+        city = request.form.get("city", "").strip()
+        state = request.form.get("state", "").strip()
+        business_type = request.form.get("business_type", "").strip()
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             flash("Ese correo ya está registrado.", "danger")
             return redirect(url_for("main.register"))
 
-        user = User(email=email, company_name=company_name)
+        user = User(
+            email=email,
+            company_name=company_name
+        )
+
+        user.first_name = first_name
+        user.last_name = last_name
+        user.phone = phone
+        user.address = address
+        user.city = city
+        user.state = state
+        user.business_type = business_type
+
         user.set_password(password)
 
         db.session.add(user)
@@ -253,6 +274,140 @@ def products():
         )
 
     return render_template("products.html", products=query.order_by(Product.name).all(), q=q)
+@main.route("/download-template")
+def download_template():
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+
+    import pandas as pd
+
+    columns = [
+        "SKU",
+        "Código de barras",
+        "Nombre del producto",
+        "Categoría",
+        "Proveedor",
+        "Costo",
+        "Precio de venta",
+        "Stock inicial",
+        "Stock mínimo"
+    ]
+
+    df = pd.DataFrame(columns=columns)
+
+    output = BytesIO()
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="PRODUCTOS", startrow=3)
+
+        workbook = writer.book
+        ws = writer.sheets["PRODUCTOS"]
+
+        # Título
+        ws["A1"] = "PATIA - Plantilla oficial de productos"
+        ws["A2"] = "Llena esta tabla con tus productos. No cambies los nombres de las columnas."
+        ws.merge_cells("A1:I1")
+        ws.merge_cells("A2:I2")
+
+        # Estilos
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.worksheet.table import Table, TableStyleInfo
+
+        title_fill = PatternFill("solid", fgColor="0B1020")
+        header_fill = PatternFill("solid", fgColor="00D4FF")
+        white_font = Font(color="FFFFFF", bold=True)
+        dark_font = Font(color="0B1020", bold=True)
+        center = Alignment(horizontal="center", vertical="center")
+        thin = Side(border_style="thin", color="D9E2F3")
+
+        ws["A1"].fill = title_fill
+        ws["A1"].font = Font(color="FFFFFF", bold=True, size=18)
+        ws["A1"].alignment = center
+
+        ws["A2"].font = Font(color="666666", italic=True)
+        ws["A2"].alignment = center
+
+        # Encabezados
+        for cell in ws[4]:
+            cell.fill = header_fill
+            cell.font = dark_font
+            cell.alignment = center
+            cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+
+        # Crear filas vacías para que se vea como tabla
+        for row in range(5, 105):
+            for col in range(1, 10):
+                ws.cell(row=row, column=col).border = Border(
+                    top=thin, left=thin, right=thin, bottom=thin
+                )
+
+        # Tabla
+        table = Table(displayName="TablaProductosPATIA", ref="A4:I104")
+        style = TableStyleInfo(
+            name="TableStyleMedium2",
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False
+        )
+        table.tableStyleInfo = style
+        ws.add_table(table)
+
+        # Anchos
+        widths = {
+            "A": 18, "B": 22, "C": 32, "D": 20, "E": 24,
+            "F": 14, "G": 18, "H": 18, "I": 18
+        }
+
+        for col, width in widths.items():
+            ws.column_dimensions[col].width = width
+
+        ws.freeze_panes = "A5"
+
+        # Hoja instrucciones
+        instrucciones = workbook.create_sheet("INSTRUCCIONES")
+
+        instrucciones["A1"] = "PATIA - Guía para llenar tu catálogo"
+        instrucciones["A1"].font = Font(bold=True, size=18, color="FFFFFF")
+        instrucciones["A1"].fill = title_fill
+
+        instrucciones["A3"] = "1. No modifiques los nombres de las columnas."
+        instrucciones["A4"] = "2. Cada fila debe representar un producto."
+        instrucciones["A5"] = "3. SKU es el código interno del producto."
+        instrucciones["A6"] = "4. Código de barras puede ser el código del empaque."
+        instrucciones["A7"] = "5. Costo es lo que te cuesta comprar el producto."
+        instrucciones["A8"] = "6. Precio de venta es el precio al público."
+        instrucciones["A9"] = "7. Stock inicial es la cantidad actual disponible."
+        instrucciones["A10"] = "8. Stock mínimo activa alertas de reabastecimiento."
+
+        instrucciones.column_dimensions["A"].width = 90
+
+        # Hoja nota preliminar
+        nota = workbook.create_sheet("NOTA PRELIMINAR")
+
+        nota["A1"] = "Bienvenido a PATIA"
+        nota["A1"].font = Font(bold=True, size=20, color="FFFFFF")
+        nota["A1"].fill = title_fill
+
+        nota["A3"] = "Para comenzar, llena la hoja PRODUCTOS con la información actual de tu negocio."
+        nota["A4"] = "Después sube este archivo en la sección Inventario dentro de PATIA."
+        nota["A6"] = "PATIA utilizará esta información para configurar:"
+        nota["A7"] = "• Inventario"
+        nota["A8"] = "• Alertas de stock"
+        nota["A9"] = "• Punto de venta"
+        nota["A10"] = "• Reportes"
+        nota["A11"] = "• Análisis inteligente de ventas"
+
+        nota.column_dimensions["A"].width = 90
+
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="plantilla_productos_PATIA.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 @main.route("/import-products", methods=["POST"])
 def import_products():
     import pandas as pd
@@ -270,8 +425,18 @@ def import_products():
         if file.filename.endswith(".csv"):
             df = pd.read_csv(file)
         else:
-            df = pd.read_excel(file)
-
+            df = pd.read_excel(file, sheet_name="PRODUCTOS", header=3)
+        df = df.rename(columns={
+    "SKU": "sku",
+    "Código de barras": "barcode",
+    "Nombre del producto": "name",
+    "Categoría": "category",
+    "Proveedor": "supplier",
+    "Costo": "cost_price",
+    "Precio de venta": "sale_price",
+    "Stock inicial": "stock",
+    "Stock mínimo": "min_stock"
+})
         for _, row in df.iterrows():
 
             product = Product(
