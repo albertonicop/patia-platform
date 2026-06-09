@@ -23,7 +23,7 @@
 <section class="card">
     <h3>Agregar producto</h3>
 
-    <form class="form-grid" method="post" action="/products/new">
+    <form class="form-grid" method="post" action="/products/new#catalogo">
         <input name="sku" placeholder="SKU" required>
         <input name="barcode" placeholder="Código de barras">
         <input name="name" placeholder="Nombre" required>
@@ -37,7 +37,7 @@
     </form>
 </section>
 
-<section class="card">
+<section id="catalogo" class="card">
     <div class="section-head">
         <h3>Catálogo</h3>
         <form>
@@ -74,8 +74,10 @@
                     <td>{{p.margin}}%</td>
                     <td>{{p.inventory_value|money}}</td>
                     <td>
-                        <form method="POST"
-                              action="/products/{{p.id}}/delete"
+                        <form class="keep-scroll" method="POST"
+                              action="/products/{{p.id}}/delete#catalogo"
+                              
+                        
                               onsubmit="return confirm('¿Eliminar este producto?');">
                             <button class="btn ghost" type="submit">Eliminar</button>
                         </form>

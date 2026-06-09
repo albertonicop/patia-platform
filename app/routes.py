@@ -422,7 +422,7 @@ def import_products():
 
     if not file:
         flash("Selecciona un archivo.", "danger")
-        return redirect(url_for("main.products"))
+        return redirect(url_for("main.products") + "#catalogo")
 
     try:
         if file.filename.endswith(".csv"):
@@ -609,5 +609,13 @@ def delete_supplier(supplier_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
 
-    flash("La eliminación de proveedores estará disponible pronto.", "danger")
+    supplier = Supplier.query.filter_by(
+        id=supplier_id,
+        user_id=session["user_id"]
+    ).first_or_404()
+
+    db.session.delete(supplier)
+    db.session.commit()
+
+    flash("Proveedor eliminado correctamente.", "success")
     return redirect(url_for("main.suppliers"))

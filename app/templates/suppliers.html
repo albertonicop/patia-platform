@@ -23,6 +23,7 @@
           <th>Contacto</th>
           <th>Teléfono</th>
           <th>WhatsApp</th>
+<th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -41,6 +42,17 @@
               -
             {% endif %}
           </td>
+          <td>
+<form class="keep-scroll" method="POST"
+      action="/suppliers/{{s.id}}/delete"
+      onsubmit="return confirm('¿Eliminar este proveedor?');">
+
+<button class="btn ghost" type="submit">
+Eliminar
+</button>
+
+</form>
+</td>
         </tr>
         {% endfor %}
       </tbody>
