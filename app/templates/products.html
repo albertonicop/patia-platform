@@ -36,7 +36,19 @@
         <button class="btn">Guardar producto</button>
     </form>
 </section>
-
+<div class="card" style="margin-bottom:20px;">
+    <h3>Resumen de inventario</h3>
+    <p><b>Total de productos:</b> {{ products|length }}</p>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for cat,msg in messages %}
+{% if cat == "catalog-success" %}
+<div class="flash success">
+    {{ msg }}
+</div>
+{% endif %}
+{% endfor %}
+{% endwith %}
 <section id="catalogo" class="card">
     <div class="section-head">
         <h3>Catálogo</h3>

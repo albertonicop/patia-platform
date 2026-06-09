@@ -601,7 +601,7 @@ def delete_product(product_id):
     db.session.delete(product)
     db.session.commit()
 
-    flash("Producto eliminado correctamente.", "success")
+    return redirect(url_for("main.products") + "#catalogo")
     return redirect(url_for("main.products"))
 
 @main.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
