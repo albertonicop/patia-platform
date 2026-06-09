@@ -248,12 +248,15 @@ def analytics():
 
 @main.route("/")
 def dashboard():
-    if not session.get("user_id"):
+    user = current_user()
+
+    if not user:
+        session.clear()
         return render_template("landing.html")
 
     return render_template(
         "dashboard.html",
-        company_name=current_user().company_name,
+        company_name=user.company_name,
         **analytics()
     )
 
