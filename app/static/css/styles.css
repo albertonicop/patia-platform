@@ -425,23 +425,23 @@ table {
     display:none;
 }
 .pricing-banner{
-    display:flex;
-    gap:12px;
+    display:inline-flex;
+    gap:10px;
     align-items:center;
-    margin:20px 0;
-    padding:14px 18px;
-    border-radius:14px;
-    background:rgba(0,255,200,.08);
-    border:1px solid rgba(0,255,200,.18);
-    width:fit-content;
+    margin:22px 0 26px;
+    padding:12px 16px;
+    border-radius:999px;
+    background:linear-gradient(90deg, rgba(116,92,255,.18), rgba(0,212,255,.13));
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    color:#fff;
+    font-weight:800;
 }
 
 .pricing-banner span{
     color:#8df5d5;
-    font-weight:600;
 }
 
 .pricing-banner strong{
     color:#fff;
-    font-size:18px;
 }
