@@ -445,3 +445,62 @@ table {
 .pricing-banner strong{
     color:#fff;
 }
+.plan-status{
+    display:inline-block;
+    margin:12px 0;
+    padding:8px 14px;
+    border-radius:999px;
+    background:rgba(0,255,150,.08);
+    border:1px solid rgba(0,255,150,.20);
+    color:#7dffb3;
+    font-size:14px;
+    font-weight:700;
+}
+.features{
+    margin-bottom:24px;
+}
+
+.feature-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;
+    margin-top:18px;
+}
+
+.feature-list div{
+    padding:14px;
+    border-radius:12px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.06);
+    color:#fff;
+    font-weight:600;
+}
+.upgrade-link{
+    margin-left:10px;
+    color:#fff;
+    text-decoration:none;
+    font-weight:800;
+}
+
+.upgrade-link:hover{
+    text-decoration:underline;
+}
+
+.pricing-card{
+    margin-top:24px;
+    padding:28px;
+    max-width:460px;
+    border-radius:24px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.10);
+}
+
+.pricing-card span{
+    color:#8df5d5;
+    font-weight:700;
+}
+
+.pricing-card h3{
+    font-size:40px;
+    margin:12px 0;
+}

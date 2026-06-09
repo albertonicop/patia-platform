@@ -64,6 +64,9 @@ class User(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     plan = db.Column(db.String(20), default="trial")
+    subscription_start = db.Column(db.DateTime, nullable=True)
+    subscription_end = db.Column(db.DateTime, nullable=True)
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
