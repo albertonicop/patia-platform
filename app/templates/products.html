@@ -1,30 +1,90 @@
-{% extends 'base.html' %}{% block title %}Inventario inteligente{% endblock %}{% block content %}
+{% extends 'base.html' %}
+{% block title %}Inventario inteligente{% endblock %}
+
+{% block content %}
+
 <div class="card" style="margin-bottom:20px;">
     <h3>Importar catálogo</h3>
+
     <a href="/download-template" class="btn ghost" style="margin-bottom:15px;display:inline-block;">
-    📥 Descargar plantilla PATIA
-</a>
+        📥 Descargar plantilla PATIA
+    </a>
 
-    <form method="POST"
-          action="/import-products"
-          enctype="multipart/form-data">
-
-        <input type="file"
-               name="catalog_file"
-               accept=".csv,.xlsx"
-               required>
-
-        <button class="btn" type="submit">
-            Importar archivo
-        </button>
+    <form method="POST" action="/import-products" enctype="multipart/form-data">
+        <input type="file" name="catalog_file" accept=".csv,.xlsx" required>
+        <button class="btn" type="submit">Importar archivo</button>
     </form>
 
     <p style="margin-top:10px;">
         Sube un archivo Excel o CSV con tus productos.
     </p>
 </div>
-<section class="card"><h3>Agregar producto</h3><form class="form-grid" method="post" action="/products/new">
-<input name="sku" placeholder="SKU" required><input name="barcode" placeholder="Código de barras"><input name="name" placeholder="Nombre" required><input name="category" placeholder="Categoría"><input name="supplier" placeholder="Proveedor"><input name="cost_price" type="number" step="0.01" placeholder="Costo"><input name="sale_price" type="number" step="0.01" placeholder="Precio venta"><input name="stock" type="number" placeholder="Stock"><input name="min_stock" type="number" placeholder="Mínimo"><button class="btn">Guardar producto</button>
-</form></section>
-<section class="card"><div class="section-head"><h3>Catálogo</h3><form><input name="q" value="{{q}}" placeholder="Buscar producto..."></form></div><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Proveedor</th><th>Stock</th><th>Precio</th><th>Margen</th><th>Valor</th></tr></thead><tbody>{% for p in products %}<tr class="{% if p.stock <= p.min_stock %}danger-row{% endif %}"><td><b>{{p.name}}</b><small>{{p.sku}} · {{p.barcode or 'sin código'}}</small></td><td>{{p.category}}</td><td>{{p.supplier or '-'}}</td><td>{{p.stock}} / min {{p.min_stock}}</td><td>{{p.sale_price|money}}</td><td>{{p.margin}}%</td><td>{{p.inventory_value|money}}</td></tr>{% endfor %}</tbody></table></div></section>
+
+<section class="card">
+    <h3>Agregar producto</h3>
+
+    <form class="form-grid" method="post" action="/products/new">
+        <input name="sku" placeholder="SKU" required>
+        <input name="barcode" placeholder="Código de barras">
+        <input name="name" placeholder="Nombre" required>
+        <input name="category" placeholder="Categoría">
+        <input name="supplier" placeholder="Proveedor">
+        <input name="cost_price" type="number" step="0.01" placeholder="Costo">
+        <input name="sale_price" type="number" step="0.01" placeholder="Precio venta">
+        <input name="stock" type="number" placeholder="Stock">
+        <input name="min_stock" type="number" placeholder="Mínimo">
+        <button class="btn">Guardar producto</button>
+    </form>
+</section>
+
+<section class="card">
+    <div class="section-head">
+        <h3>Catálogo</h3>
+        <form>
+            <input name="q" value="{{q}}" placeholder="Buscar producto...">
+        </form>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Proveedor</th>
+                    <th>Stock</th>
+                    <th>Precio</th>
+                    <th>Margen</th>
+                    <th>Valor</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in products %}
+                <tr class="{% if p.stock <= p.min_stock %}danger-row{% endif %}">
+                    <td>
+                        <b>{{p.name}}</b>
+                        <small>{{p.sku}} · {{p.barcode or 'sin código'}}</small>
+                    </td>
+                    <td>{{p.category}}</td>
+                    <td>{{p.supplier or '-'}}</td>
+                    <td>{{p.stock}} / min {{p.min_stock}}</td>
+                    <td>{{p.sale_price|money}}</td>
+                    <td>{{p.margin}}%</td>
+                    <td>{{p.inventory_value|money}}</td>
+                    <td>
+                        <form method="POST"
+                              action="/products/{{p.id}}/delete"
+                              onsubmit="return confirm('¿Eliminar este producto?');">
+                            <button class="btn ghost" type="submit">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
 {% endblock %}

@@ -541,9 +541,20 @@ def suppliers():
         return redirect(url_for("main.login"))
 
     if request.method == "POST":
+        supplier_name = request.form["name"].strip()
+
+        existing_supplier = Supplier.query.filter_by(
+            user_id=session["user_id"],
+            name=supplier_name
+        ).first()
+
+        if existing_supplier:
+            flash("Ese proveedor ya existe.", "danger")
+            return redirect(url_for("main.suppliers"))
+
         s = Supplier(
             user_id=session["user_id"],
-            name=request.form["name"],
+            name=supplier_name,
             contact=request.form.get("contact"),
             phone=request.form.get("phone"),
             notes=request.form.get("notes")
@@ -551,6 +562,7 @@ def suppliers():
 
         db.session.add(s)
         db.session.commit()
+
         flash("Proveedor guardado.", "success")
         return redirect(url_for("main.suppliers"))
 
@@ -567,3 +579,20 @@ def reset_demo():
     seed_data()
     flash("Datos demo cargados.", "success")
     return redirect(url_for("main.dashboard"))
+
+@main.route("/products/<int:product_id>/delete", methods=["POST"])
+def delete_product(product_id):
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+
+    flash("La eliminación de productos estará disponible pronto.", "danger")
+    return redirect(url_for("main.products"))
+
+
+@main.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
+def delete_supplier(supplier_id):
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+
+    flash("La eliminación de proveedores estará disponible pronto.", "danger")
+    return redirect(url_for("main.suppliers"))
