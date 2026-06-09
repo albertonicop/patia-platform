@@ -588,9 +588,21 @@ def delete_product(product_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
 
-    flash("La eliminación de productos estará disponible pronto.", "danger")
-    return redirect(url_for("main.products"))
+    product = Product.query.filter_by(
+        id=product_id,
+        user_id=session["user_id"]
+    ).first_or_404()
 
+    Sale.query.filter_by(
+        product_id=product.id,
+        user_id=session["user_id"]
+    ).delete()
+
+    db.session.delete(product)
+    db.session.commit()
+
+    flash("Producto eliminado correctamente.", "success")
+    return redirect(url_for("main.products"))
 
 @main.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
 def delete_supplier(supplier_id):
