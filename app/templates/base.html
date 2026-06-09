@@ -14,14 +14,19 @@
       <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
     </div>
 
-    <nav class="sidebar-nav">
-      <a href="/">Dashboard</a>
-      <a href="/products">Inventario</a>
-      <a href="/sell">Punto de venta</a>
-      <a href="/reports">Reportes IA</a>
-      <a href="/suppliers">Proveedores</a>
-      <a href="/logout">Cerrar sesión</a>
-    </nav>
+   <nav class="sidebar-nav">
+    <a href="/">Dashboard</a>
+    <a href="/products">Inventario</a>
+    <a href="/sell">Punto de venta</a>
+    <a href="/reports">Reportes IA</a>
+    <a href="/suppliers">Proveedores</a>
+
+    <a href="https://wa.me/522381186483" target="_blank">
+        Soporte WhatsApp
+    </a>
+
+    <a href="/logout">Cerrar sesión</a>
+</nav>
 
     <div class="sidebar-card">
       <b>Plan Pro</b>
@@ -52,5 +57,12 @@
   </main>
 
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<a
+    href="https://wa.me/522381186483?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20PATIA"
+    class="whatsapp-float"
+    target="_blank"
+>
+    💬 WhatsApp
+</a>
 </body>
 </html>
