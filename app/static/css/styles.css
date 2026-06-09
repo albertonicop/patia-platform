@@ -402,3 +402,46 @@ table {
     margin-bottom: 0 !important;
   }
 }
+.whatsapp-float{
+    position:fixed;
+    bottom:25px;
+    right:25px;
+    background:#25D366;
+    color:white;
+    padding:14px 20px;
+    border-radius:50px;
+    text-decoration:none;
+    font-weight:700;
+    z-index:9999;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+    transition:.2s;
+}
+
+.whatsapp-float:hover{
+    transform:translateY(-2px);
+    opacity:.95;
+}
+.flash.catalog-success{
+    display:none;
+}
+.pricing-banner{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin:20px 0;
+    padding:14px 18px;
+    border-radius:14px;
+    background:rgba(0,255,200,.08);
+    border:1px solid rgba(0,255,200,.18);
+    width:fit-content;
+}
+
+.pricing-banner span{
+    color:#8df5d5;
+    font-weight:600;
+}
+
+.pricing-banner strong{
+    color:#fff;
+    font-size:18px;
+}
