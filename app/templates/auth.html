@@ -2,31 +2,103 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} | PATIA</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body style="background:#0b1020;color:white;font-family:Arial;padding:40px;">
-  <h1>{{ title }}</h1>
 
-  <form method="POST">
-    {% if mode == "register" %}
-      <p>Empresa</p>
-      <input name="company_name" required>
-    {% endif %}
+<body class="auth-body">
+  <main class="auth-page">
+    <section class="auth-card">
+      <div class="auth-brand">
+        <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
+        <p>Control inteligente para empresas modernas</p>
+      </div>
 
-    <p>Correo</p>
-    <input type="email" name="email" required>
+      <div class="auth-header">
+        <h1>{{ title }}</h1>
+        {% if mode == "login" %}
+          <p>Entra a tu panel para controlar inventario, ventas y reportes.</p>
+        {% else %}
+          <p>Registra tu negocio y comienza a controlar inventario, ventas y reportes desde una sola plataforma.</p>
+        {% endif %}
+      </div>
 
-    <p>Contraseña</p>
-    <input type="password" name="password" required>
+      <form method="POST" class="auth-form">
+        {% if mode == "register" %}
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre</label>
+              <input name="first_name" placeholder="Tu nombre" required>
+            </div>
 
-    <br><br>
-    <button type="submit">{{ button }}</button>
-  </form>
+            <div class="form-group">
+              <label>Apellido</label>
+              <input name="last_name" placeholder="Tu apellido" required>
+            </div>
+          </div>
 
-  {% if mode == "login" %}
-    <p><a href="{{ url_for('main.register') }}">Crear cuenta</a></p>
-  {% else %}
-    <p><a href="{{ url_for('main.login') }}">Iniciar sesión</a></p>
-  {% endif %}
+          <div class="form-group">
+            <label>Nombre de la empresa</label>
+            <input name="company_name" placeholder="Nombre de tu empresa" required>
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input name="phone" placeholder="Número telefónico">
+          </div>
+
+          <div class="form-group">
+            <label>Dirección</label>
+            <input name="address" placeholder="Calle, número, colonia">
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Ciudad</label>
+              <input name="city" placeholder="Ciudad">
+            </div>
+
+            <div class="form-group">
+              <label>Estado</label>
+              <input name="state" placeholder="Estado">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Giro del negocio</label>
+            <select name="business_type">
+              <option value="Minisúper">Minisúper</option>
+              <option value="Abarrotes">Abarrotes</option>
+              <option value="Ferretería">Ferretería</option>
+              <option value="Farmacia">Farmacia</option>
+              <option value="Distribuidora">Distribuidora</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label>Correo</label>
+          <input type="email" name="email" placeholder="correo@empresa.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" name="password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="auth-button">{{ button }}</button>
+      </form>
+
+      <div class="auth-switch">
+        {% if mode == "login" %}
+          <p>¿Todavía no tienes cuenta? <a href="{{ url_for('main.register') }}">Crear cuenta</a></p>
+        {% else %}
+          <p>¿Ya tienes cuenta? <a href="{{ url_for('main.login') }}">Iniciar sesión</a></p>
+        {% endif %}
+      </div>
+    </section>
+  </main>
 </body>
 </html>
