@@ -3,6 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon"
+          type="image/png"
+          href="{{ url_for('static', filename='img/favicon.png') }}">
+
+    <title>PATIA</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
   <title>PATIA</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -21,9 +36,13 @@
     <a href="/reports">Reportes IA</a>
     <a href="/suppliers">Proveedores</a>
 
-    <a href="https://wa.me/522381186483" target="_blank">
-        Soporte WhatsApp
-    </a>
+<a href="https://wa.me/522381186483" target="_blank">
+    Soporte WhatsApp
+</a>
+
+<a href="/logout" style="margin-top:25px;color:#ff8a8a;">
+    Cerrar sesión
+</a>
 
     <a href="/logout">Cerrar sesión</a>
 </nav>
