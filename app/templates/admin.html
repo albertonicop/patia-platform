@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Panel Admin{% endblock %}
+
+{% block content %}
+
+<section class="card" style="margin-bottom:20px;">
+  <h2>Centro de control PATIA</h2>
+  <p style="opacity:.75;">Clientes, pruebas, ventas procesadas y actividad general.</p>
+</section>
+
+<section class="grid three" style="margin-bottom:20px;">
+  <div class="card">
+    <h3>Clientes registrados</h3>
+    <h2>{{ total_clients }}</h2>
+  </div>
+
+  <div class="card">
+    <h3>Productos totales</h3>
+    <h2>{{ total_products }}</h2>
+  </div>
+
+  <div class="card">
+    <h3>Ventas procesadas</h3>
+    <h2>{{ total_sales_money|money }}</h2>
+  </div>
+</section>
+
+<section class="grid three" style="margin-bottom:20px;">
+  <div class="card">
+    <h3>En prueba</h3>
+    <h2>{{ trial_clients }}</h2>
+  </div>
+
+  <div class="card">
+    <h3>Vencen esta semana</h3>
+    <h2>{{ expiring_soon }}</h2>
+  </div>
+
+  <div class="card">
+    <h3>Pruebas vencidas</h3>
+    <h2>{{ expired_clients }}</h2>
+  </div>
+</section>
+
+<section class="grid two" style="margin-bottom:20px;">
+  <div class="card">
+    <h3>Último cliente registrado</h3>
+    {% if latest_client %}
+      <h2>{{ latest_client.user.company_name or "Sin empresa" }}</h2>
+      <p>{{ latest_client.user.email }}</p>
+    {% else %}
+      <p>No hay clientes todavía.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Cliente con más productos</h3>
+    {% if top_client %}
+      <h2>{{ top_client.user.company_name or "Sin empresa" }}</h2>
+      <p>{{ top_client.products_count }} productos registrados</p>
+    {% else %}
+      <p>No hay productos todavía.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="grid two" style="margin-bottom:20px;">
+  <div class="card">
+    <h3>Nuevos esta semana</h3>
+    <h2>{{ new_this_week }}</h2>
+  </div>
+
+  <div class="card">
+    <h3>Nuevos este mes</h3>
+    <h2>{{ new_this_month }}</h2>
+  </div>
+</section>
+
+<section class="card">
+  <div class="section-head">
+    <section id="clientes" class="card">
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Contacto</th>
+          <th>Correo</th>
+          <th>Teléfono</th>
+          <th>Días en PATIA</th>
+          <th>Prueba</th>
+          <th>Productos</th>
+          <th>Ventas</th>
+          <th>Estado</th>
+          <th>WhatsApp</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for c in clients %}
+        <tr>
+          <td>
+            <b>{{ c.user.company_name or "Sin empresa" }}</b>
+            <small>{{ c.user.business_type or "Sin giro" }}</small>
+          </td>
+
+          <td>
+            {{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or "Sin nombre" }}
+          </td>
+
+          <td>{{ c.user.email }}</td>
+
+          <td>{{ c.user.phone or "-" }}</td>
+
+          <td>{{ c.days_in_patia }} días</td>
+
+          <td>
+            {% if c.trial_days_left > 0 %}
+              Quedan {{ c.trial_days_left }} días
+            {% else %}
+              Finalizada
+            {% endif %}
+          </td>
+
+          <td>{{ c.products_count }}</td>
+
+          <td>{{ c.sales_money|money }}</td>
+
+          <td>
+           {% if c.status == "Pro" %}
+    <b style="color:#00ff66;">Pro</b>
+
+{% elif c.status == "Prueba" %}
+    <b style="color:#00ffcc;">Prueba</b>
+
+{% else %}
+    <b style="color:#ff8a8a;">Vencido</b>
+{% endif %}
+          </td>
+
+          <td>
+            {% if c.user.phone %}
+              <a class="btn ghost" target="_blank"
+                 href="https://wa.me/{{ c.user.phone|replace(' ', '')|replace('-', '') }}?text=Hola%20{{ c.user.first_name or c.user.company_name }},%20soy%20Alberto%20de%20PATIA.">
+                Contactar
+              </a>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+  <form method="POST"
+      action="/admin/delete-user/{{c.user.id}}#clientes"
+        onsubmit="return confirm('¿Eliminar este cliente?');">
+    <button class="btn ghost" type="submit">
+      Eliminar
+    </button>
+  </form>
+</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}

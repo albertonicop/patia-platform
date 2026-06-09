@@ -575,7 +575,90 @@ def suppliers():
 
     return render_template("suppliers.html", suppliers=suppliers)
 
+@main.route("/admin")
+def admin():
+    user = current_user()
 
+    if not user:
+        session.clear()
+        return redirect(url_for("main.login"))
+
+    if user.email != "albertonicopat@gmail.com":
+        flash("No autorizado.", "danger")
+        return redirect(url_for("main.dashboard"))
+
+    users = User.query.order_by(User.created_at.desc()).all()
+    today = datetime.utcnow()
+
+    clients = []
+    total_products = 0
+    total_sales_count = 0
+    total_sales_money = 0
+    trial_clients = 0
+    expired_clients = 0
+    expiring_soon = 0
+    new_this_week = 0
+    new_this_month = 0
+
+    for u in users:
+        products_count = Product.query.filter_by(user_id=u.id).count()
+        sales_count = Sale.query.filter_by(user_id=u.id).count()
+        sales_money = db.session.query(func.sum(Sale.total)).filter_by(user_id=u.id).scalar() or 0
+
+        days_in_patia = (today - u.created_at).days if u.created_at else 0
+        trial_days_left = max(0, 14 - days_in_patia)
+
+        if u.plan == "pro":
+            status = "Pro"
+            trial_days_left = "∞"
+        elif trial_days_left > 0:
+            status = "Prueba"
+            trial_clients += 1
+        else:
+            status = "Vencido"
+            expired_clients += 1
+
+        if trial_days_left != "∞" and 0 < trial_days_left <= 7:
+            expiring_soon += 1
+
+        if days_in_patia <= 7:
+            new_this_week += 1
+
+        if days_in_patia <= 30:
+            new_this_month += 1
+
+        total_products += products_count
+        total_sales_count += sales_count
+        total_sales_money += sales_money
+
+        clients.append({
+            "user": u,
+            "products_count": products_count,
+            "sales_count": sales_count,
+            "sales_money": sales_money,
+            "days_in_patia": days_in_patia,
+            "trial_days_left": trial_days_left,
+            "status": status
+        })
+
+    top_client = max(clients, key=lambda c: c["products_count"], default=None)
+    latest_client = clients[0] if clients else None
+
+    return render_template(
+        "admin.html",
+        clients=clients,
+        total_clients=len(users),
+        total_products=total_products,
+        total_sales_count=total_sales_count,
+        total_sales_money=total_sales_money,
+        trial_clients=trial_clients,
+        expired_clients=expired_clients,
+        expiring_soon=expiring_soon,
+        new_this_week=new_this_week,
+        new_this_month=new_this_month,
+        top_client=top_client,
+        latest_client=latest_client
+    )
 @main.route("/reset-demo")
 def reset_demo():
     from seed import seed_data
@@ -602,7 +685,6 @@ def delete_product(product_id):
     db.session.commit()
 
     return redirect(url_for("main.products") + "#catalogo")
-    return redirect(url_for("main.products"))
 
 @main.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
 def delete_supplier(supplier_id):
