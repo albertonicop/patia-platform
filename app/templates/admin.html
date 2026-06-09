@@ -118,11 +118,13 @@
           <td>{{ c.days_in_patia }} días</td>
 
           <td>
-            {% if c.trial_days_left > 0 %}
-              Quedan {{ c.trial_days_left }} días
-            {% else %}
-              Finalizada
-            {% endif %}
+           {% if c.status == "Pro" %}
+    ∞
+{% elif c.trial_days_left > 0 %}
+    Quedan {{ c.trial_days_left }} días
+{% else %}
+    Finalizada
+{% endif %}
           </td>
 
           <td>{{ c.products_count }}</td>
@@ -154,11 +156,19 @@
           <td>
   <form method="POST"
       action="/admin/delete-user/{{c.user.id}}#clientes"
-        onsubmit="return confirm('¿Eliminar este cliente?');">
+      onsubmit="return confirm('¿Eliminar este cliente?');">
     <button class="btn ghost" type="submit">
-      Eliminar
+        Eliminar
     </button>
-  </form>
+</form>
+
+<form method="POST"
+      action="/admin/make-pro/{{c.user.id}}"
+      style="margin-top:8px;">
+    <button class="btn ghost" type="submit">
+        Marcar Pro
+    </button>
+</form>
 </td>
         </tr>
         {% endfor %}

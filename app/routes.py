@@ -14,6 +14,17 @@ def current_user():
     return User.query.get(user_id)
 
 
+def trial_expired(user):
+    if not user:
+        return True
+
+    if user.plan == "pro":
+        return False
+
+    days_used = (datetime.utcnow() - user.created_at).days
+    return days_used >= 14
+
+
 def login_required():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
@@ -115,123 +126,105 @@ def analytics():
         Sale.user_id == user_id,
         Sale.created_at >= week_start
     ).scalar() or 0
-   
+
     profit = (
-    db.session.query(
-        func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity)
+        db.session.query(
+            func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity)
+        )
+        .join(Product)
+        .filter(Product.user_id == user_id)
+        .scalar() or 0
     )
-    .join(Product)
-    .filter(Product.user_id == user_id)
-    .scalar() or 0
-)
 
     top_products = (
-    db.session.query(
-        Product.name,
-        func.sum(Sale.quantity).label("qty"),
-        func.sum(Sale.total).label("revenue")
+        db.session.query(
+            Product.name,
+            func.sum(Sale.quantity).label("qty"),
+            func.sum(Sale.total).label("revenue")
+        )
+        .join(Sale)
+        .filter(Product.user_id == user_id)
+        .group_by(Product.id)
+        .order_by(func.sum(Sale.quantity).desc())
+        .limit(5)
+        .all()
     )
-    .join(Sale)
-    .filter(Product.user_id == user_id)
-    .group_by(Product.id)
-    .order_by(func.sum(Sale.quantity).desc())
-    .limit(5)
-    .all()
-)
-    
 
     category_sales = (
-    db.session.query(
-        Product.category,
-        func.sum(Sale.total).label("revenue")
+        db.session.query(
+            Product.category,
+            func.sum(Sale.total).label("revenue")
+        )
+        .join(Sale)
+        .filter(Product.user_id == user_id)
+        .group_by(Product.category)
+        .order_by(func.sum(Sale.total).desc())
+        .all()
     )
-    .join(Sale)
-    .filter(Product.user_id == user_id)
-    .group_by(Product.category)
-    .order_by(func.sum(Sale.total).desc())
-    .all()
-)
 
     alerts = []
 
-    for p in Product.query.filter_by(
-    user_id=user_id
-    ).order_by(Product.stock.asc()).limit(20).all():
-        
-            sold_7_days = (
-                db.session.query(func.sum(Sale.quantity))
-               .filter(
-    Sale.user_id == user_id,
-    Sale.product_id == p.id,
-    Sale.created_at >= week_start,
-)
-                .scalar()
-                or 0
+    for p in products:
+        sold_7_days = (
+            db.session.query(func.sum(Sale.quantity))
+            .filter(
+                Sale.user_id == user_id,
+                Sale.product_id == p.id,
+                Sale.created_at >= week_start
             )
+            .scalar() or 0
+        )
 
-            avg_daily_sales = sold_7_days / 7
+        avg_daily_sales = sold_7_days / 7
 
-            if avg_daily_sales > 0:
-                days_left = round(p.stock / avg_daily_sales, 1)
-            else:
-                days_left = None
+        if avg_daily_sales > 0:
+            days_left = round(p.stock / avg_daily_sales, 1)
+        else:
+            days_left = None
 
-            if p.stock <= p.min_stock:
-                alerts.append({
-                    "type": "critical",
-                    "title": f"Reordenar {p.name}",
-                    "text": f"Stock actual: {p.stock}. Está en nivel crítico."
-                })
+        if p.stock <= 0:
+            alerts.append({
+                "type": "critical",
+                "title": f"{p.name} agotado",
+                "text": "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
+            })
 
-            elif days_left is not None and days_left <= 3:
-                alerts.append({
-                    "type": "critical",
-                    "title": f"{p.name} se agotará pronto",
-                    "text": f"Con el ritmo actual de ventas, se acabará en aproximadamente {days_left} días."
-                })
+        elif p.stock <= p.min_stock:
+            alerts.append({
+                "type": "critical",
+                "title": f"Reordenar {p.name}",
+                "text": f"Stock actual: {p.stock}. Mínimo recomendado: {p.min_stock}."
+            })
 
-            elif days_left is not None and days_left <= 7:
-                alerts.append({
-                    "type": "warning",
-                    "title": f"Vigilar {p.name}",
-                    "text": f"Inventario estimado para {days_left} días."
-                })
+        elif days_left is not None and days_left <= 3:
+            alerts.append({
+                "type": "critical",
+                "title": f"{p.name} se agotará pronto",
+                "text": f"Con el ritmo actual de ventas, se acabará en aproximadamente {days_left} días."
+            })
 
-            elif p.margin < 18:
-                alerts.append({
-                    "type": "warning",
-                    "title": f"Margen bajo en {p.name}",
-                    "text": f"Margen actual: {p.margin}%."
-                })
+        elif days_left is not None and days_left <= 7:
+            alerts.append({
+                "type": "warning",
+                "title": f"Vigilar {p.name}",
+                "text": f"Inventario estimado para {days_left} días."
+            })
+
 
     recommendations = []
 
-
     if top_products:
-        recommendations.append(
-            f"{top_products[0].name} es tu producto más vendido actualmente."
-        )
+        recommendations.append(f"{top_products[0].name} es tu producto más vendido actualmente.")
 
     if week_sales > 0:
-        recommendations.append(
-            f"Las ventas de los últimos 7 días suman ${week_sales:,.0f} MXN."
-        )
+        recommendations.append(f"Las ventas de los últimos 7 días suman ${week_sales:,.0f} MXN.")
 
     if profit > 0:
-        recommendations.append(
-            f"La utilidad estimada de la semana fue de ${profit:,.0f} MXN."
-        )
+        recommendations.append(f"La utilidad estimada de la semana fue de ${profit:,.0f} MXN.")
 
     if low_stock:
-        recommendations.append(
-            f"Tienes {low_stock} productos con inventario bajo. Reabastécelos pronto."
-        )
-
-    if top_products and low_stock:
-        recommendations.append(
-            f"{top_products[0].name} tiene alta rotación. Mantén suficiente stock disponible."
-        )
-
+        recommendations.append(f"Tienes {low_stock} productos con inventario bajo. Reabastécelos pronto.")
+    alerts = alerts[:5]
     return dict(
         total_products=total_products,
         inventory_value=inventory_value,
@@ -241,11 +234,9 @@ def analytics():
         profit=profit,
         top_products=top_products,
         category_sales=category_sales,
-       alerts=[],
+        alerts=alerts,
         recommendations=recommendations,
     )
-
-
 @main.route("/")
 def dashboard():
     user = current_user()
@@ -260,11 +251,15 @@ def dashboard():
         **analytics()
     )
 
-
 @main.route("/products")
 def products():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
+
+    user = current_user()
+
+    if trial_expired(user):
+        return render_template("trial_expired.html")
 
     q = request.args.get("q", "").strip()
     query = Product.query.filter(Product.user_id == session["user_id"])
@@ -493,6 +488,11 @@ def sell():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
 
+    user = current_user()
+
+    if trial_expired(user):
+        return render_template("trial_expired.html")
+
     if request.method == "POST":
         product = Product.query.filter_by(
             id=int(request.form["product_id"]),
@@ -535,6 +535,14 @@ def sell():
 
 @main.route("/reports")
 def reports():
+    user = current_user()
+
+    if not user:
+        return redirect(url_for("main.login"))
+
+    if trial_expired(user):
+        return render_template("trial_expired.html")
+
     return render_template("reports.html", **analytics())
 
 
