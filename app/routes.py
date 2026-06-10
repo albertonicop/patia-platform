@@ -5,6 +5,7 @@ from sqlalchemy import func
 from . import db
 from .models import Product, Sale, Supplier, User
 main = Blueprint("main", __name__)
+
 def current_user():
     user_id = session.get("user_id")
 
@@ -248,6 +249,8 @@ def dashboard():
     return render_template(
         "dashboard.html",
         company_name=user.company_name,
+        user=user,
+trial_days_left=max(0, 14 - (datetime.utcnow() - user.created_at).days) if user.created_at else 14,
         **analytics()
     )
 
@@ -582,7 +585,14 @@ def suppliers():
     ).order_by(Supplier.name).all()
 
     return render_template("suppliers.html", suppliers=suppliers)
+@main.route("/subscribe")
+def subscribe():
+    user = current_user()
 
+    if not user:
+        return redirect(url_for("main.login"))
+
+    return render_template("subscribe.html", user=user)
 @main.route("/admin")
 def admin():
     user = current_user()
