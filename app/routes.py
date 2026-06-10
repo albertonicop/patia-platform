@@ -73,20 +73,21 @@ def register():
         db.session.commit()
 
         session["user_id"] = user.id
-        flash("Cuenta creada correctamente.", "success")
 
-        next_page = request.args.get("next")
-
-        if next_page == "subscribe":
+        if request.args.get("plan") == "pro" or request.form.get("plan") == "pro":
+            flash("Cuenta creada correctamente. Activa PATIA Pro para continuar.", "success")
             return redirect(url_for("main.subscribe"))
 
+        flash("Cuenta creada correctamente. Tu prueba gratis de 14 días ha comenzado.", "success")
         return redirect(url_for("main.dashboard"))
 
-    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register")
-
-    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register")
-
-
+    return render_template(
+    "auth.html",
+    title="Crear cuenta",
+    button="Crear cuenta",
+    mode="register",
+    plan=request.args.get("plan")
+)
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
