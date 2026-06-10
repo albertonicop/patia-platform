@@ -29,7 +29,7 @@ def trial_expired(user):
 
 def login_required():
     if not session.get("user_id"):
-        return redirect(url_for("main.login"))
+        return redirect(url_for("main.landing"))
 
 def money(value):
     return f"${value:,.2f} MXN"
@@ -101,7 +101,7 @@ def login():
 def logout():
     session.clear()
     flash("Sesión cerrada.", "success")
-    return redirect(url_for("main.login"))
+    return redirect("/")
 @main.app_template_filter("money")
 def money_filter(value):
     return money(value or 0)
@@ -258,7 +258,7 @@ trial_days_left=max(0, 14 - (datetime.utcnow() - user.created_at).days) if user.
 @main.route("/products")
 def products():
     if not session.get("user_id"):
-        return redirect(url_for("main.login"))
+        return redirect(url_for("main.landing"))
 
     user = current_user()
 
