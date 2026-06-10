@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from io import BytesIO
 import stripe
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file, current_app
 from sqlalchemy import func
 from . import db
 from .models import Product, Sale, Supplier, User
@@ -629,7 +629,22 @@ def create_checkout_session():
 
     return redirect(checkout_session.url, code=303)
 
+@main.route("/stripe-webhook", methods=["POST"])
+def stripe_webhook():
+    payload = request.data
 
+    try:
+        event = stripe.Event.construct_from(
+            request.get_json(),
+            stripe.api_key
+        )
+    except Exception:
+        return "", 400
+
+    if event["type"] == "checkout.session.completed":
+        print("✅ Pago confirmado por Stripe")
+
+    return "", 200
 @main.route("/stripe-success")
 def stripe_success():
     user = current_user()
