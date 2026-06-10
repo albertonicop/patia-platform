@@ -504,3 +504,18 @@ table {
     font-size:40px;
     margin:12px 0;
 }
+.subscribe-actions{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-top:18px;
+}
+
+.subscribe-actions form{
+    margin:0;
+}
+
+.subscribe-actions .btn{
+    width:auto;
+}
