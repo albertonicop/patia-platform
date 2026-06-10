@@ -632,6 +632,34 @@ def create_checkout_session():
 @main.route("/stripe-webhook", methods=["POST"])
 def stripe_webhook():
     payload = request.data
+    sig_header = request.headers.get("Stripe-Signature")
+    endpoint_secret = current_app.config["STRIPE_WEBHOOK_SECRET"]
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig_header,
+            endpoint_secret
+        )
+    except ValueError:
+        return "", 400
+    except stripe.error.SignatureVerificationError:
+        return "", 400
+
+    if event["type"] == "checkout.session.completed":
+        session_data = event["data"]["object"]
+        user_id = session_data.get("metadata", {}).get("user_id")
+
+        if user_id:
+            user = User.query.get(int(user_id))
+
+            if user:
+                user.plan = "pro"
+                db.session.commit()
+                print(f"✅ Usuario {user.email} activado como PRO por webhook")
+
+    return "", 200
+    payload = request.data
 
     try:
         event = stripe.Event.construct_from(
