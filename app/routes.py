@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from io import BytesIO
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file
+import stripe
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file, current_app
 from sqlalchemy import func
 from . import db
 from .models import Product, Sale, Supplier, User
@@ -593,6 +594,46 @@ def subscribe():
         return redirect(url_for("main.login"))
 
     return render_template("subscribe.html", user=user)
+@main.route("/create-checkout-session", methods=["POST"])
+def create_checkout_session():
+    user = current_user()
+
+    if not user:
+        return redirect(url_for("main.login"))
+
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+
+    checkout_session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        mode="subscription",
+        line_items=[
+            {
+                "price": current_app.config["STRIPE_PRICE_ID"],
+                "quantity": 1,
+            }
+        ],
+        success_url=url_for("main.stripe_success", _external=True),
+        cancel_url=url_for("main.subscribe", _external=True),
+        metadata={
+            "user_id": user.id
+        }
+    )
+
+    return redirect(checkout_session.url, code=303)
+
+
+@main.route("/stripe-success")
+def stripe_success():
+    user = current_user()
+
+    if not user:
+        return redirect(url_for("main.login"))
+
+    user.plan = "pro"
+    db.session.commit()
+
+    flash("Tu cuenta PATIA Pro ha sido activada.")
+    return redirect(url_for("main.dashboard"))
 @main.route("/admin")
 def admin():
     user = current_user()

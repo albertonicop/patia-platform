@@ -12,13 +12,17 @@
             <h3>$199 MXN/mes</h3>
             <p>Incluye 14 días gratis para nuevos usuarios.</p>
 
-            <button class="btn primary">
-                Pagar con tarjeta
-            </button>
+            <div class="buttons">
+    <form action="/create-checkout-session" method="POST">
+        <button class="btn primary" type="submit">
+            Pagar con tarjeta
+        </button>
+    </form>
 
-            <a href="/dashboard" class="btn secondary">
-                Volver al panel
-            </a>
+    <a href="/dashboard" class="btn secondary">
+        Volver al panel
+    </a>
+</div>
         </div>
     </div>
 </section>
