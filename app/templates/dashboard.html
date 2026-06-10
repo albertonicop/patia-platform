@@ -5,31 +5,16 @@
     {% if user.plan == "pro" %}
 <div class="plan-status pro">
     🟢 Plan actual: PRO
-    {% if user.subscription_end %}
-        · Próxima renovación: {{ user.subscription_end.strftime('%d/%m/%Y') }}
-    {% endif %}
 </div>
 {% else %}
 <div class="plan-status trial">
     🟡 Prueba gratuita · Te quedan {{ trial_days_left }} días
+    <a href="/subscribe" class="upgrade-link">Actualizar a PRO</a>
 </div>
 {% endif %}
     <p>Inventario, ventas, alertas y recomendaciones comerciales en un solo lugar.</p>
   </div>
   <div class="hero-badge">IA accionable<br><strong>para PyMEs</strong></div>
-</section>
-<section class="features">
-    <div class="card">
-        <h3>¿Qué incluye PATIA?</h3>
-
-        <div class="feature-list">
-            <div>✔ Inventario en tiempo real</div>
-            <div>✔ Punto de venta integrado</div>
-            <div>✔ Alertas automáticas de stock</div>
-            <div>✔ Reportes inteligentes con IA</div>
-            <div>✔ Gestión de proveedores</div>
-        </div>
-    </div>
 </section>
 <section class="grid metrics">
   <div class="card metric"><span>Ventas hoy</span><strong>{{ today_sales|money }}</strong></div>
