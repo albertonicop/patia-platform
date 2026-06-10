@@ -74,7 +74,15 @@ def register():
 
         session["user_id"] = user.id
         flash("Cuenta creada correctamente.", "success")
+
+        next_page = request.args.get("next")
+
+        if next_page == "subscribe":
+            return redirect(url_for("main.subscribe"))
+
         return redirect(url_for("main.dashboard"))
+
+    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register")
 
     return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register")
 
@@ -628,7 +636,6 @@ def stripe_success():
 
     if not user:
         return redirect(url_for("main.login"))
-
     user.plan = "pro"
     db.session.commit()
 
