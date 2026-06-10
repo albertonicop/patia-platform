@@ -33,7 +33,13 @@
     <a href="/">Dashboard</a>
     <a href="/products">Inventario</a>
     <a href="/sell">Punto de venta</a>
-    <a href="/reports">Reportes IA</a>
+    {% if user is defined and user.plan == "pro" %}
+<a href="/reports">Reportes IA</a>
+{% else %}
+<a href="/subscribe" style="opacity:.6;">
+    Reportes IA 🔒
+</a>
+{% endif %}
     <a href="/suppliers">Proveedores</a>
 
 <a href="https://wa.me/522381186483" target="_blank">
