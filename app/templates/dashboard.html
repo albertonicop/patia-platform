@@ -7,9 +7,19 @@
     🟢 Plan actual: PRO
 </div>
 {% else %}
-<div class="plan-status trial">
-    🟡 Prueba gratuita · Te quedan {{ trial_days_left }} días
-    <a href="/subscribe" class="upgrade-link">Actualizar a PRO</a>
+<div class="plan-status trial" style="display:inline-flex;align-items:center;gap:14px;width:auto;padding:6px 8px 6px 14px;">
+    <span>🟡 Prueba gratuita · Te quedan {{ trial_days_left }} días</span>
+
+    <a href="/subscribe"
+       style="background:linear-gradient(90deg,#7b61ff,#4d9cff);
+              color:white;
+              padding:10px 18px;
+              border-radius:999px;
+              text-decoration:none;
+              font-weight:900;
+              box-shadow:0 0 18px rgba(77,156,255,.35);">
+       🚀 Actualizar a PRO
+    </a>
 </div>
 {% endif %}
     <p>Inventario, ventas, alertas y recomendaciones comerciales en un solo lugar.</p>

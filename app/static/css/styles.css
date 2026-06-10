@@ -519,3 +519,22 @@ table {
 .subscribe-actions .btn{
     width:auto;
 }
+.pro-button{
+    background:red !important;
+    color:white !important;
+}
+    margin-left:14px;
+    padding:8px 14px;
+    border-radius:999px;
+    background:linear-gradient(90deg,#7b61ff,#4d9cff);
+    color:#fff;
+    text-decoration:none;
+    font-weight:900;
+    box-shadow:0 0 18px rgba(77,156,255,.35);
+    transition:.2s ease;
+}
+
+.pro-button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 0 26px rgba(77,156,255,.55);
+}
