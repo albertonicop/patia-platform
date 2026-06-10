@@ -37,8 +37,41 @@
     <h3>Productos más vendidos</h3><canvas id="topProducts"></canvas>
   </div>
   <div class="card">
-    <h3>Copiloto IA</h3>
-    <div class="ai-box">{% for r in recommendations %}<p>✦ {{ r }}</p>{% endfor %}</div>
+    <div class="ai-box">
+
+    <div style="display:flex;align-items:center;gap:15px;">
+
+        <div style="
+            width:55px;
+            height:55px;
+            border-radius:50%;
+            background:rgba(123,97,255,.25);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;">
+            🤖
+        </div>
+
+        <div>
+
+            <h4 style="
+                margin:0;
+                color:#7b61ff;
+                font-size:20px;
+                font-weight:800;">
+                Copiloto IA
+            </h4>
+
+            {% for r in recommendations %}
+                <p style="margin-top:8px;">{{ r }}</p>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
     {% if user.plan != "pro" %}
 <div class="card" style="margin-top:15px;border:1px solid rgba(123,97,255,.4);">
     <h3>🔒 Predicción de Inventario IA</h3>

@@ -549,3 +549,15 @@ table {
     margin:0 auto;
     padding:90px 24px;
 }
+.ai-box{
+    padding:18px;
+    border-radius:18px;
+    background:linear-gradient(135deg,rgba(123,97,255,.18),rgba(0,212,255,.08));
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.ai-box h4{
+    margin-bottom:12px;
+    font-size:18px;
+    color:#7b61ff;
+}
