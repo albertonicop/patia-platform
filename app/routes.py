@@ -719,3 +719,37 @@ def delete_supplier(supplier_id):
 
     flash("Proveedor eliminado correctamente.", "success")
     return redirect(url_for("main.suppliers"))
+@main.route("/admin/delete-user/<int:user_id>", methods=["POST"])
+def admin_delete_user(user_id):
+    admin_user = current_user()
+
+    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+        return redirect(url_for("main.dashboard"))
+
+    user = User.query.get_or_404(user_id)
+
+    if user.email == "albertonicopat@gmail.com":
+        flash("No puedes eliminar tu cuenta de administrador.")
+        return redirect(url_for("main.admin"))
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("Cliente eliminado correctamente.")
+    return redirect(url_for("main.admin"))
+
+
+@main.route("/admin/make-pro/<int:user_id>", methods=["POST"])
+def admin_make_pro(user_id):
+    admin_user = current_user()
+
+    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+        return redirect(url_for("main.dashboard"))
+
+    user = User.query.get_or_404(user_id)
+    user.plan = "pro"
+
+    db.session.commit()
+
+    flash("Cliente marcado como PRO.")
+    return redirect(url_for("main.admin"))
