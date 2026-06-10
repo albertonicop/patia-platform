@@ -21,6 +21,7 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["STRIPE_SECRET_KEY"] = os.environ.get("STRIPE_SECRET_KEY")
     app.config["STRIPE_PRICE_ID"] = os.environ.get("STRIPE_PRICE_ID")
+    app.config["STRIPE_WEBHOOK_SECRET"] = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
     db.init_app(app)
 
