@@ -1,130 +1,135 @@
-{% extends 'base.html' %}{% block title %}Panel ejecutivo{% endblock %}{% block content %}
+{% extends 'base.html' %}
+{% block title %}Panel ejecutivo{% endblock %}
+
+{% block content %}
+
 <section class="hero">
   <div>
     <h2>Controla la tienda como una cadena grande.</h2>
-    {% if user.plan == "pro" %}
-<div class="plan-status pro">
-    🟢 Plan actual: PRO
-</div>
-{% else %}
-<div class="plan-status trial" style="display:inline-flex;align-items:center;gap:14px;width:auto;padding:6px 8px 6px 14px;">
-    <span>🟡 Prueba gratuita · Te quedan {{ trial_days_left }} días</span>
 
-    <a href="/subscribe"
-       style="background:linear-gradient(90deg,#7b61ff,#4d9cff);
-              color:white;
-              padding:10px 18px;
-              border-radius:999px;
-              text-decoration:none;
-              font-weight:900;
-              box-shadow:0 0 18px rgba(77,156,255,.35);">
-       🚀 Actualizar a PRO
-    </a>
-</div>
-{% endif %}
+    {% if user.plan == "pro" %}
+      <div class="plan-status pro">
+        <i class="fa-solid fa-circle-check"></i>
+        Plan actual: PRO
+      </div>
+    {% else %}
+      <div class="plan-status trial">
+        <span>
+          <i class="fa-solid fa-clock"></i>
+          Prueba gratuita · Te quedan {{ trial_days_left }} días
+        </span>
+
+        <a href="/subscribe" class="btn upgrade-btn">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Actualizar a PRO
+        </a>
+      </div>
+    {% endif %}
+
     <p>Inventario, ventas, alertas y recomendaciones comerciales en un solo lugar.</p>
   </div>
-  <div class="hero-badge">IA accionable<br><strong>para PyMEs</strong></div>
+
+  <div class="hero-badge">
+    IA accionable<br>
+    <strong>para PyMEs</strong>
+  </div>
 </section>
+
 <section class="grid metrics">
-  <div class="card metric"><span>Ventas hoy</span><strong>{{ today_sales|money }}</strong></div>
-  <div class="card metric"><span>Ventas 7 días</span><strong>{{ week_sales|money }}</strong></div>
-  <div class="card metric"><span>Valor inventario</span><strong>{{ inventory_value|money }}</strong></div>
-  <div class="card metric"><span>Stock bajo</span><strong>{{ low_stock }}</strong></div>
+  <div class="card metric">
+    <span>Ventas hoy</span>
+    <strong>{{ today_sales|money }}</strong>
+  </div>
+
+  <div class="card metric">
+    <span>Ventas 7 días</span>
+    <strong>{{ week_sales|money }}</strong>
+  </div>
+
+  <div class="card metric">
+    <span>Valor inventario</span>
+    <strong>{{ inventory_value|money }}</strong>
+  </div>
+
+  <div class="card metric">
+    <span>Stock bajo</span>
+    <strong>{{ low_stock }}</strong>
+  </div>
 </section>
+
 <section class="grid two">
   <div class="card chart-card">
     <h3>Productos más vendidos</h3>
 
-<div class="chart-box">
-    <canvas id="topProducts"></canvas>
-</div>
+    <div class="chart-box">
+      <canvas id="topProducts"></canvas>
+    </div>
   </div>
+
   <div class="card ai-card">
     <div class="ai-box">
 
-    <div style="display:flex;align-items:center;gap:15px;">
+    <div class="ai-icon">
+        <i class="fa-solid fa-microchip"></i>
+    </div>
 
-        <div style="
-            width:55px;
-            height:55px;
-            border-radius:50%;
-            background:rgba(123,97,255,.25);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:28px;">
-            <i class="fa-solid fa-brain"></i>
-        </div>
+    <div class="ai-content">
 
-        <div>
+        <h4>Copiloto IA</h4>
 
-            <h4 style="
-                margin:0;
-                color:#7b61ff;
-                font-size:20px;
-                font-weight:800;">
-                Copiloto IA
-            </h4>
-
-            {% for r in recommendations %}
-                <p style="margin-top:8px;">{{ r }}</p>
-            {% endfor %}
-
-        </div>
-
-      </div>
+        {% for r in recommendations %}
+            <p>{{ r }}</p>
+        {% endfor %}
 
     </div>
-    {% if user.plan != "pro" %}
-<div class="card" style="margin-top:15px;border:1px solid rgba(123,97,255,.4);">
-    <h3><i class="fa-solid fa-chart-line"></i> Predicción de Inventario IA</h3>
 
-    <p style="opacity:.75;margin-top:10px;">
-        PATIA analizará tus ventas para predecir:
-    </p>
-
-    <ul style="margin-top:10px;opacity:.75;">
-        <li>• Qué productos comprar</li>
-        <li>• Cuándo reabastecer</li>
-        <li>• Qué productos podrían agotarse</li>
-    </ul>
-
-    <a href="/subscribe"
-       style="display:inline-block;
-              margin-top:15px;
-              padding:10px 16px;
-              border-radius:999px;
-              background:linear-gradient(90deg,#7b61ff,#4d9cff);
-              color:white;
-              text-decoration:none;
-              font-weight:800;">
-        Desbloquear PATIA Pro
-    </a>
 </div>
-{% endif %}
+
+    {% if user.plan != "pro" %}
+      <div class="pro-feature-card">
+        <h3>
+          <i class="fa-solid fa-chart-line"></i>
+          Predicción de Inventario IA
+        </h3>
+
+        <p>
+          PATIA analizará tus ventas para predecir qué productos comprar, cuándo reabastecer y qué productos podrían agotarse.
+        </p>
+
+        <a href="/subscribe" class="btn">
+          Desbloquear PATIA Pro
+        </a>
+      </div>
+    {% endif %}
   </div>
 </section>
+
 <section class="card">
   <h3>Alertas críticas</h3>
- {% if alerts %}
-<div class="alerts">
-    {% for a in alerts %}
-    <div class="alert {{a.type}}">
-        <b>{{a.title}}</b>
-        <span>{{a.text}}</span>
+
+  {% if alerts %}
+    <div class="alerts">
+      {% for a in alerts %}
+        <div class="alert {{ a.type }}">
+          <b>{{ a.title }}</b>
+          <span>{{ a.text }}</span>
+        </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-</div>
-{% else %}
-<div class="empty-state">
-    <h4>✅ Todo en orden</h4>
-    <p>No hay productos con stock crítico en este momento.</p>
-</div>
-{% endif %}
+  {% else %}
+    <div class="empty-state">
+      <h4>
+        <i class="fa-solid fa-circle-check"></i>
+        Todo en orden
+      </h4>
+      <p>No hay productos con stock crítico en este momento.</p>
+    </div>
+  {% endif %}
 </section>
+
 <script>
-  window.topLabels = {{ top_products | map(attribute = 'name') | list | tojson }};
-  window.topValues = {{ top_products | map(attribute = 'qty') | list | tojson }};
+  window.topLabels = {{ top_products | map(attribute='name') | list | tojson }};
+  window.topValues = {{ top_products | map(attribute='qty') | list | tojson }};
 </script>
+
 {% endblock %}
