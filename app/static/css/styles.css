@@ -1020,3 +1020,95 @@ table {
         min-height:auto !important;
     }
 }
+/* ===== FIX REPORTS RECOMMENDATIONS ===== */
+
+.recommendations,
+.recommendation-grid{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+}
+
+.recommendations .ai-recommendation,
+.recommendation-grid .ai-recommendation,
+.recommendations p,
+.recommendation-grid p{
+    width:100% !important;
+    max-width:100% !important;
+    display:block !important;
+    padding:14px 16px !important;
+    border-radius:16px !important;
+    background:rgba(255,255,255,.07) !important;
+    color:#dce5ff !important;
+    line-height:1.45 !important;
+    white-space:normal !important;
+    word-break:normal !important;
+}
+
+.recommendations .ai-recommendation span,
+.recommendation-grid .ai-recommendation span{
+    display:none !important;
+}
+/* ===== REPORTS IA FIX ===== */
+
+.reports-grid{
+    grid-template-columns:1fr 1fr !important;
+    gap:18px !important;
+    align-items:stretch !important;
+}
+
+.reports-chart-card,
+.reports-recommendations-card{
+    min-height:430px !important;
+}
+
+.reports-chart-box{
+    height:340px !important;
+    max-height:340px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+}
+
+#categoryChart{
+    max-height:330px !important;
+}
+
+.reports-recommendations{
+    display:grid !important;
+    gap:12px !important;
+    margin-top:18px !important;
+}
+
+.reports-recommendation{
+    display:grid !important;
+    grid-template-columns:42px 1fr !important;
+    gap:12px !important;
+    align-items:center !important;
+    padding:14px !important;
+    border-radius:16px !important;
+    background:rgba(255,255,255,.06) !important;
+}
+
+.reports-recommendation i{
+    width:36px !important;
+    height:36px !important;
+    border-radius:12px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    background:rgba(123,97,255,.20) !important;
+    color:#7b61ff !important;
+}
+
+.reports-recommendation p{
+    margin:0 !important;
+    color:#dce5ff !important;
+    line-height:1.4 !important;
+}
+
+@media(max-width:900px){
+    .reports-grid{
+        grid-template-columns:1fr !important;
+    }
+}
