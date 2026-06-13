@@ -33,8 +33,12 @@
   <div class="card metric"><span>Stock bajo</span><strong>{{ low_stock }}</strong></div>
 </section>
 <section class="grid two">
-  <div class="card">
-    <h3>Productos más vendidos</h3><canvas id="topProducts"></canvas>
+  <div class="card chart-card">
+    <h3>Productos más vendidos</h3>
+
+<div class="chart-box">
+    <canvas id="topProducts"></canvas>
+</div>
   </div>
   <div class="card">
     <div class="ai-box">
@@ -69,12 +73,12 @@
 
         </div>
 
-    </div>
+      </div>
 
-</div>
+    </div>
     {% if user.plan != "pro" %}
 <div class="card" style="margin-top:15px;border:1px solid rgba(123,97,255,.4);">
-    <h3>🔒 Predicción de Inventario IA</h3>
+    <h3>◆ Predicción de Inventario IA</h3>
 
     <p style="opacity:.75;margin-top:10px;">
         PATIA analizará tus ventas para predecir:
@@ -95,7 +99,7 @@
               color:white;
               text-decoration:none;
               font-weight:800;">
-        🚀 Desbloquear PATIA Pro
+        Desbloquear PATIA Pro
     </a>
 </div>
 {% endif %}
