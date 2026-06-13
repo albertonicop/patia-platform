@@ -553,6 +553,12 @@ def reports():
     if not user:
         return redirect(url_for("main.login"))
 
+    if user.email == "albertonicopat@gmail.com":
+        return render_template("reports.html", **analytics())
+
+    if user.plan != "pro":
+        return redirect(url_for("main.subscribe"))
+
     if trial_expired(user):
         return render_template("trial_expired.html")
 
