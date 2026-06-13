@@ -561,3 +561,29 @@ table {
     font-size:18px;
     color:#7b61ff;
 }
+#topProducts{
+    max-height:300px !important;
+}
+.chart-card{
+    min-height:auto !important;
+}
+
+.chart-box{
+    height:260px !important;
+    max-height:260px !important;
+    overflow:hidden;
+}
+
+#topProducts{
+    height:260px !important;
+    max-height:260px !important;
+}
+.grid.two > .card:first-child{
+    height:420px !important;
+    max-height:420px !important;
+}
+
+.grid.two > .card:first-child .chart-box{
+    height:280px !important;
+    max-height:280px !important;
+}
