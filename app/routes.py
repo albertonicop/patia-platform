@@ -59,6 +59,7 @@ def register():
         city = request.form.get("city", "").strip()
         state = request.form.get("state", "").strip()
         business_type = request.form.get("business_type", "").strip()
+        postal_code = request.form.get("postal_code", "").strip()
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
@@ -77,6 +78,7 @@ def register():
         user.city = city
         user.state = state
         user.business_type = business_type
+        user.postal_code = postal_code
 
         user.set_password(password)
 
