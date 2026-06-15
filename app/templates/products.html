@@ -57,6 +57,26 @@
         </form>
     </div>
 
+    <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <button class="btn ghost" id="btn-select-mode">
+            ☑️ Seleccionar productos
+        </button>
+        <form method="POST" action="/products/delete-all"
+              onsubmit="return confirm('¿Eliminar TODOS los productos? Esta acción no se puede deshacer.');">
+            <button class="btn ghost" type="submit" style="color:#ff8a8a; border-color:#ff8a8a;">
+                🗑️ Borrar todo el catálogo
+            </button>
+        </form>
+        <form method="POST" action="/products/delete-selected" id="form-delete-selected"
+              style="display:none;">
+            <input type="hidden" name="ids" id="selected-ids">
+            <button class="btn ghost" type="submit" style="color:#ff8a8a; border-color:#ff8a8a;"
+                    onsubmit="return confirm('¿Eliminar productos seleccionados?');">
+                🗑️ Eliminar seleccionados
+            </button>
+        </form>
+    </div>
+
     <div class="table-wrap">
         <table>
             <thead>
@@ -100,5 +120,43 @@
         </table>
     </div>
 </section>
+<script>
+let selectMode = false;
+const btnSelect = document.getElementById("btn-select-mode");
+const formSelected = document.getElementById("form-delete-selected");
+const selectedIds = document.getElementById("selected-ids");
 
+btnSelect.addEventListener("click", function() {
+    selectMode = !selectMode;
+    this.textContent = selectMode ? "✕ Cancelar selección" : "☑️ Seleccionar productos";
+    formSelected.style.display = selectMode ? "block" : "none";
+
+    document.querySelectorAll("tbody tr").forEach(row => {
+        if (selectMode) {
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.style.marginRight = "8px";
+            row.querySelector("td").prepend(cb);
+        } else {
+            const cb = row.querySelector("input[type=checkbox]");
+            if (cb) cb.remove();
+        }
+    });
+});
+
+document.getElementById("form-delete-selected").addEventListener("submit", function(e) {
+    const checked = [...document.querySelectorAll("tbody input[type=checkbox]:checked")];
+    if (checked.length === 0) {
+        e.preventDefault();
+        alert("Selecciona al menos un producto.");
+        return;
+    }
+    if (!confirm(`¿Eliminar ${checked.length} productos seleccionados?`)) {
+        e.preventDefault();
+        return;
+    }
+    const ids = checked.map(cb => cb.closest("tr").querySelector("form").action.match(/\/(\d+)\//)[1]);
+    selectedIds.value = ids.join(",");
+});
+</script>
 {% endblock %}
