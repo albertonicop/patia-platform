@@ -33,6 +33,17 @@ def login_required():
 
 def money(value):
     return f"${value:,.2f} MXN"
+def send_email(to, subject, html):
+    try:
+        resend.api_key = current_app.config["RESEND_API_KEY"]
+        resend.Emails.send({
+            "from": current_app.config["RESEND_FROM"],
+            "to": to,
+            "subject": subject,
+            "html": html
+        })
+    except Exception as e:
+        print(f"Error enviando correo: {e}")
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
@@ -79,6 +90,29 @@ def register():
             return redirect(url_for("main.subscribe"))
 
         flash("Cuenta creada correctamente. Tu prueba gratis de 14 días ha comenzado.", "success")
+
+        send_email(
+            to=user.email,
+            subject="¡Bienvenido a PATIA! 🎉",
+            html=f"""
+            <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
+                <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
+                <h1 style="color:#29d3a8;">¡Bienvenido a PATIA, {user.first_name or user.company_name}!</h1>
+                <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">
+                    Tu prueba gratuita de <strong style="color:#fff;">14 días</strong> ha comenzado. 
+                    Tienes acceso completo a inventario, punto de venta, proveedores y alertas inteligentes.
+                </p>
+                <a href="https://patiaapp.com" 
+                   style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">
+                    Entrar a PATIA →
+                </a>
+                <p style="margin-top:32px;color:#9aa8c7;font-size:13px;">
+                    Si tienes dudas responde este correo o escríbenos al WhatsApp.
+                </p>
+            </div>
+            """
+        )
+
         return redirect(url_for("main.dashboard"))
 
     return render_template(
@@ -771,6 +805,29 @@ def stripe_success():
     db.session.commit()
 
     flash("Tu cuenta PATIA Pro ha sido activada.")
+
+    send_email(
+        to=user.email,
+        subject="¡Tu cuenta PATIA Pro está activa! 🚀",
+        html=f"""
+        <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
+            <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
+            <h1 style="color:#29d3a8;">¡Ya eres PATIA Pro! 🎉</h1>
+            <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">
+                Tu suscripción ha sido activada correctamente. Ahora tienes acceso a 
+                <strong style="color:#fff;">Reportes IA</strong> y todas las funciones avanzadas.
+            </p>
+            <a href="https://patiaapp.com/reports" 
+               style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">
+                Ver mis Reportes IA →
+            </a>
+            <p style="margin-top:32px;color:#9aa8c7;font-size:13px;">
+                Tu suscripción se renueva automáticamente cada mes. Puedes cancelar cuando quieras desde Mi Suscripción.
+            </p>
+        </div>
+        """
+    )
+
     return redirect(url_for("main.dashboard"))
 
 
