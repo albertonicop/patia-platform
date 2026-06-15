@@ -284,7 +284,7 @@ def products():
             Product.sku.ilike(f"%{q}%")
         )
 
-    return render_template("products.html", products=query.order_by(Product.name).all(), q=q)
+    return render_template("products.html", products=query.order_by(Product.name).all(), q=q, user=user)
 @main.route("/download-template")
 def download_template():
     if not session.get("user_id"):
@@ -543,32 +543,26 @@ def sell():
         user_id=session["user_id"]
     ).order_by(Product.name).all()
 
-    return render_template("sell.html", products=products, sales=sales)
-
+    return render_template("sell.html", products=products, sales=sales, user=user)
 
 @main.route("/reports")
 def reports():
     user = current_user()
-
     if not user:
         return redirect(url_for("main.login"))
 
-    if user.email == "albertonicopat@gmail.com":
-        return render_template("reports.html", **analytics())
+    if user.email == "albertonicopat@gmail.com" or (user.plan or "").lower().strip() == "pro":
+        return render_template("reports.html", user=user, **analytics())
 
-    if user.plan != "pro":
-        return redirect(url_for("main.subscribe"))
-
-    if trial_expired(user):
-        return render_template("trial_expired.html")
-
-    return render_template("reports.html", **analytics())
+    return redirect(url_for("main.subscribe"))
 
 
 @main.route("/suppliers", methods=["GET", "POST"])
 def suppliers():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
+
+    user = current_user()
 
     if request.method == "POST":
         supplier_name = request.form["name"].strip()
@@ -600,7 +594,7 @@ def suppliers():
         user_id=session["user_id"]
     ).order_by(Supplier.name).all()
 
-    return render_template("suppliers.html", suppliers=suppliers)
+    return render_template("suppliers.html", suppliers=suppliers, user=user)
 @main.route("/subscribe")
 def subscribe():
     user = current_user()
@@ -643,38 +637,56 @@ def stripe_webhook():
     endpoint_secret = current_app.config["STRIPE_WEBHOOK_SECRET"]
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload,
-            sig_header,
-            endpoint_secret
-        )
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError:
         return "", 400
     except stripe.error.SignatureVerificationError:
         return "", 400
 
-    if event["type"] == "checkout.session.completed":
-        session_data = event["data"]["object"]
-        user_id = session_data.get("metadata", {}).get("user_id")
+    data = event["data"]["object"]
 
+    if event["type"] == "checkout.session.completed":
+        user_id = data.get("metadata", {}).get("user_id")
         if user_id:
             user = User.query.get(int(user_id))
-
             if user:
                 user.plan = "pro"
+                user.stripe_customer_id = data.get("customer")
+                user.stripe_subscription_id = data.get("subscription")
+                user.subscription_status = "active"
                 db.session.commit()
-                print(f"✅ Usuario {user.email} activado como PRO por webhook")
+
+    elif event["type"] == "invoice.payment_succeeded":
+        sub_id = data.get("subscription")
+        user = User.query.filter_by(stripe_subscription_id=sub_id).first()
+        if user:
+            import stripe as stripe_lib
+            stripe_lib.api_key = current_app.config["STRIPE_SECRET_KEY"]
+            sub = stripe_lib.Subscription.retrieve(sub_id)
+            user.subscription_status = "active"
+            user.plan = "pro"
+            user.current_period_end = datetime.utcfromtimestamp(sub["current_period_end"])
+            db.session.commit()
+
+    elif event["type"] == "invoice.payment_failed":
+        sub_id = data.get("subscription")
+        user = User.query.filter_by(stripe_subscription_id=sub_id).first()
+        if user:
+            user.subscription_status = "past_due"
+            db.session.commit()
+
+    elif event["type"] in ["customer.subscription.deleted", "customer.subscription.updated"]:
+        sub_id = data.get("id")
+        user = User.query.filter_by(stripe_subscription_id=sub_id).first()
+        if user:
+            status = data.get("status")
+            user.subscription_status = status
+            user.cancel_at_period_end = data.get("cancel_at_period_end", False)
+            if status in ["canceled", "unpaid"]:
+                user.plan = "trial"
+            db.session.commit()
 
     return "", 200
-    payload = request.data
-
-    try:
-        event = stripe.Event.construct_from(
-            request.get_json(),
-            stripe.api_key
-        )
-    except Exception:
-        return "", 400
 
     if event["type"] == "checkout.session.completed":
         print("✅ Pago confirmado por Stripe")
@@ -691,6 +703,89 @@ def stripe_success():
 
     flash("Tu cuenta PATIA Pro ha sido activada.")
     return redirect(url_for("main.dashboard"))
+@main.route("/subscription")
+def subscription():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+    subscription_info = None
+
+    if user.stripe_subscription_id:
+        try:
+            sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
+            user.current_period_end = datetime.utcfromtimestamp(sub["current_period_end"])
+            user.cancel_at_period_end = sub["cancel_at_period_end"]
+            db.session.commit()
+            subscription_info = sub
+        except Exception:
+            pass
+
+    return render_template("subscription.html", user=user, subscription_info=subscription_info)
+
+
+@main.route("/cancel-subscription", methods=["POST"])
+def cancel_subscription():
+    user = current_user()
+    if not user or not user.stripe_subscription_id:
+        return redirect(url_for("main.dashboard"))
+
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+
+    try:
+        stripe.Subscription.modify(
+            user.stripe_subscription_id,
+            cancel_at_period_end=True
+        )
+        user.cancel_at_period_end = True
+        db.session.commit()
+        flash("Tu suscripción se cancelará al final del periodo pagado.", "success")
+    except Exception as e:
+        flash(f"Error al cancelar: {e}", "danger")
+
+    return redirect(url_for("main.subscription"))
+
+
+@main.route("/reactivate-subscription", methods=["POST"])
+def reactivate_subscription():
+    user = current_user()
+    if not user or not user.stripe_subscription_id:
+        return redirect(url_for("main.dashboard"))
+
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+
+    try:
+        stripe.Subscription.modify(
+            user.stripe_subscription_id,
+            cancel_at_period_end=False
+        )
+        user.cancel_at_period_end = False
+        db.session.commit()
+        flash("Tu suscripción ha sido reactivada.", "success")
+    except Exception as e:
+        flash(f"Error al reactivar: {e}", "danger")
+
+    return redirect(url_for("main.subscription"))
+
+
+@main.route("/billing-portal", methods=["POST"])
+def billing_portal():
+    user = current_user()
+    if not user or not user.stripe_customer_id:
+        return redirect(url_for("main.subscribe"))
+
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+
+    try:
+        portal = stripe.billing_portal.Session.create(
+            customer=user.stripe_customer_id,
+            return_url=url_for("main.subscription", _external=True)
+        )
+        return redirect(portal.url)
+    except Exception as e:
+        flash(f"Error: {e}", "danger")
+        return redirect(url_for("main.subscription"))
 @main.route("/admin")
 def admin():
     user = current_user()
