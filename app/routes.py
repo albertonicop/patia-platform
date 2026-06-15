@@ -449,21 +449,49 @@ def import_products():
     "Stock mínimo": "min_stock"
 })
         for _, row in df.iterrows():
+            sku = str(row.get("sku", "")).strip()
+            raw_barcode = row.get("barcode", "")
+            try:
+                barcode = str(int(float(raw_barcode))) if raw_barcode and str(raw_barcode) != "nan" else ""
+            except:
+                barcode = str(raw_barcode).strip()
 
-            product = Product(
-                user_id=session["user_id"],
-                sku=str(row.get("sku", "")).strip(),
-                barcode=str(row.get("barcode", "")).strip(),
-                name=str(row.get("name", "")).strip(),
-                category=str(row.get("category", "General")).strip(),
-                supplier=str(row.get("supplier", "")).strip(),
-                cost_price=float(row.get("cost_price", 0) or 0),
-                sale_price=float(row.get("sale_price", 0) or 0),
-                stock=int(row.get("stock", 0) or 0),
-                min_stock=int(row.get("min_stock", 5) or 5)
-            )
+            existing = Product.query.filter_by(
+                user_id=session["user_id"], sku=sku
+            ).first()
 
-            db.session.add(product)
+            if existing:
+                existing.stock += int(row.get("stock", 0) or 0)
+                existing.sale_price = float(row.get("sale_price", 0) or 0)
+                existing.cost_price = float(row.get("cost_price", 0) or 0)
+                existing.min_stock = int(row.get("min_stock", 5) or 5)
+                existing.barcode = barcode
+                continue
+
+            if not existing and barcode:
+                existing = Product.query.filter_by(
+                    user_id=session["user_id"], barcode=barcode
+                ).first()
+
+            if existing:
+                existing.stock = int(row.get("stock", 0) or 0)
+                existing.sale_price = float(row.get("sale_price", 0) or 0)
+                existing.cost_price = float(row.get("cost_price", 0) or 0)
+                existing.min_stock = int(row.get("min_stock", 5) or 5)
+            else:
+                product = Product(
+                    user_id=session["user_id"],
+                    sku=sku,
+                    barcode=barcode,
+                    name=str(row.get("name", "")).strip(),
+                    category=str(row.get("category", "General")).strip(),
+                    supplier=str(row.get("supplier", "")).strip(),
+                    cost_price=float(row.get("cost_price", 0) or 0),
+                    sale_price=float(row.get("sale_price", 0) or 0),
+                    stock=int(row.get("stock", 0) or 0),
+                    min_stock=int(row.get("min_stock", 5) or 5)
+                )
+                db.session.add(product)
 
         db.session.commit()
 
@@ -544,6 +572,47 @@ def sell():
     ).order_by(Product.name).all()
 
     return render_template("sell.html", products=products, sales=sales, user=user)
+@main.route("/sell-cart", methods=["POST"])
+def sell_cart():
+    from flask import jsonify
+    user = current_user()
+    if not user:
+        return jsonify({"ok": False, "error": "No autenticado"})
+
+    data = request.get_json()
+    items = data.get("items", [])
+
+    try:
+        for item in items:
+            product = Product.query.filter_by(
+                id=int(item["product_id"]),
+                user_id=user.id
+            ).first()
+
+            if not product:
+                return jsonify({"ok": False, "error": f"Producto no encontrado"})
+
+            qty = int(item["quantity"])
+
+            if product.stock < qty:
+                return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"})
+
+            product.stock -= qty
+            sale = Sale(
+                user_id=user.id,
+                product_id=product.id,
+                quantity=qty,
+                unit_price=product.sale_price,
+                total=qty * product.sale_price
+            )
+            db.session.add(sale)
+
+        db.session.commit()
+        return jsonify({"ok": True})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": str(e)})
 
 @main.route("/reports")
 def reports():
@@ -703,6 +772,28 @@ def stripe_success():
 
     flash("Tu cuenta PATIA Pro ha sido activada.")
     return redirect(url_for("main.dashboard"))
+
+
+@main.route("/sales/<int:sale_id>/cancel", methods=["POST"])
+def cancel_sale(sale_id):
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
+    sale = Sale.query.filter_by(
+        id=sale_id,
+        user_id=user.id
+    ).first_or_404()
+
+    product = Product.query.get(sale.product_id)
+    if product:
+        product.stock += sale.quantity
+
+    db.session.delete(sale)
+    db.session.commit()
+
+    flash("Venta cancelada. Stock devuelto al inventario.", "success")
+    return redirect(url_for("main.sell"))
 @main.route("/subscription")
 def subscription():
     user = current_user()
@@ -896,7 +987,32 @@ def delete_product(product_id):
     db.session.commit()
 
     return redirect(url_for("main.products") + "#catalogo")
+@main.route("/products/delete-all", methods=["POST"])
+def delete_all_products():
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+    user_id = session["user_id"]
+    Sale.query.filter_by(user_id=user_id).delete()
+    Product.query.filter_by(user_id=user_id).delete()
+    db.session.commit()
+    flash("Catálogo eliminado completamente.", "success")
+    return redirect(url_for("main.products"))
 
+@main.route("/products/delete-selected", methods=["POST"])
+def delete_selected_products():
+    if not session.get("user_id"):
+        return redirect(url_for("main.login"))
+    user_id = session["user_id"]
+    ids_raw = request.form.get("ids", "")
+    ids = [int(i) for i in ids_raw.split(",") if i.strip().isdigit()]
+    for product_id in ids:
+        product = Product.query.filter_by(id=product_id, user_id=user_id).first()
+        if product:
+            Sale.query.filter_by(product_id=product.id, user_id=user_id).delete()
+            db.session.delete(product)
+    db.session.commit()
+    flash(f"{len(ids)} productos eliminados.", "success")
+    return redirect(url_for("main.products"))
 @main.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
 def delete_supplier(supplier_id):
     if not session.get("user_id"):

@@ -3,33 +3,64 @@
 {% block content %}
 
 <section class="grid two">
+
+  <!-- ESCÁNER + CARRITO -->
   <div class="card">
     <h3>Registrar venta</h3>
 
-    <form method="POST" class="stack">
-      <select name="product_id" required>
-        <option value="">Selecciona un producto</option>
-        {% for p in products %}
-          <option value="{{ p.id }}">{{ p.name }} — Stock: {{ p.stock }} — {{ p.sale_price|money }}</option>
-        {% endfor %}
-      </select>
+    <!-- Campo de escaneo -->
+    <div class="stack" style="margin-bottom:1rem;">
+      <label>Escanea o busca un producto</label>
+      <input
+        type="text"
+        id="barcode-input"
+        placeholder="Escanea el código de barras..."
+        autofocus
+        autocomplete="off"
+        style="font-size:1.1rem; padding: 0.75rem;"
+      >
+    </div>
 
-      <input type="number" name="quantity" min="1" value="1" placeholder="Cantidad" required>
+    <!-- Carrito -->
+    <table id="cart-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Cant.</th>
+          <th>Subtotal</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="cart-body">
+        <tr id="cart-empty">
+          <td colspan="5" style="text-align:center; opacity:0.5;">
+            El carrito está vacío
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-      <button class="btn" type="submit">Registrar venta</button>
-    </form>
+    <div style="margin-top:1rem; text-align:right;">
+      <h3>Total: <span id="cart-total">$0.00 MXN</span></h3>
+    </div>
+
+    <button class="btn" id="btn-cobrar" style="width:100%; margin-top:1rem;" disabled>
+      Cobrar
+    </button>
   </div>
 
+  <!-- VENTAS RECIENTES -->
   <div class="card">
     <h3>Ventas recientes</h3>
-
     <table>
       <thead>
         <tr>
           <th>Fecha</th>
           <th>Producto</th>
-          <th>Cantidad</th>
+          <th>Cant.</th>
           <th>Total</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -39,11 +70,148 @@
           <td>{{ s.product.name if s.product else '-' }}</td>
           <td>{{ s.quantity }}</td>
           <td>{{ s.total|money }}</td>
+          <td>
+            <form method="POST" action="/sales/{{s.id}}/cancel"
+                  onsubmit="return confirm('¿Cancelar esta venta? Se devolverá el stock.');">
+              <button class="btn ghost" type="submit">Cancelar</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
 </section>
+
+<!-- Datos de productos para JS -->
+<script>
+const PRODUCTS = [
+  {% for p in products %}
+  {
+    id: {{ p.id }},
+    name: {{ p.name | tojson }},
+    barcode: {{ (p.barcode or "") | tojson }},
+    sku: {{ (p.sku or "") | tojson }},
+    price: {{ p.sale_price }},
+    stock: {{ p.stock }}
+  },
+  {% endfor %}
+];
+
+let cart = [];
+
+const barcodeInput = document.getElementById("barcode-input");
+const cartBody = document.getElementById("cart-body");
+const cartTotal = document.getElementById("cart-total");
+const btnCobrar = document.getElementById("btn-cobrar");
+
+barcodeInput.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const query = this.value.trim().toLowerCase();
+    if (!query) return;
+
+    const product = PRODUCTS.find(p =>
+      p.barcode === query ||
+      p.sku.toLowerCase() === query ||
+      p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(query.normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    );
+
+    if (!product) {
+      alert("Producto no encontrado: " + query);
+    } else if (product.stock <= 0) {
+      alert("Sin stock: " + product.name);
+    } else {
+      addToCart(product);
+    }
+
+    this.value = "";
+    this.focus();
+  }
+});
+
+function addToCart(product) {
+  const existing = cart.find(i => i.id === product.id);
+  if (existing) {
+    if (existing.qty >= product.stock) {
+      alert("No hay suficiente stock.");
+      return;
+    }
+    existing.qty++;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  renderCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  renderCart();
+}
+
+function renderCart() {
+  if (cart.length === 0) {
+    cartBody.innerHTML = `<tr id="cart-empty"><td colspan="5" style="text-align:center;opacity:0.5;">El carrito está vacío</td></tr>`;
+    btnCobrar.disabled = true;
+    cartTotal.textContent = "$0.00 MXN";
+    return;
+  }
+
+  let total = 0;
+  cartBody.innerHTML = cart.map(item => {
+    const subtotal = item.price * item.qty;
+    total += subtotal;
+    return `
+      <tr>
+        <td>${item.name}</td>
+        <td>$${item.price.toFixed(2)}</td>
+        <td>
+          <input type="number" min="1" max="${item.stock}" value="${item.qty}"
+            onchange="updateQty(${item.id}, this.value)"
+            style="width:60px; text-align:center;">
+        </td>
+        <td>$${subtotal.toFixed(2)}</td>
+        <td><button onclick="removeFromCart(${item.id})" class="btn ghost">✕</button></td>
+      </tr>
+    `;
+  }).join("");
+
+  cartTotal.textContent = `$${total.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
+  btnCobrar.disabled = false;
+}
+
+function updateQty(id, val) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  const qty = parseInt(val);
+  if (qty < 1) { removeFromCart(id); return; }
+  if (qty > item.stock) { alert("Sin stock suficiente."); return; }
+  item.qty = qty;
+  renderCart();
+}
+
+btnCobrar.addEventListener("click", function() {
+  if (cart.length === 0) return;
+
+  const items = cart.map(i => ({ product_id: i.id, quantity: i.qty }));
+
+  fetch("/sell-cart", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      cart = [];
+      renderCart();
+      location.reload();
+    } else {
+      alert("Error: " + data.error);
+    }
+  });
+});
+</script>
 
 {% endblock %}

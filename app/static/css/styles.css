@@ -334,11 +334,10 @@ table {
     line-height: 1.08 !important;
   }
 
-  .topbar .btn,
-  .btn.ghost {
+  .topbar .btn {
     width: 100% !important;
     text-align: center !important;
-  }
+}
 
   .grid,
   .stats-grid,
