@@ -17,7 +17,10 @@ def create_app():
 
     Path(app.instance_path).mkdir(exist_ok=True)
     app.config["SECRET_KEY"] = "change-this-secret-key-before-production"
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///tiendaia.db")
+    database_url = os.environ.get("DATABASE_URL", "sqlite:///tiendaia.db")
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["STRIPE_SECRET_KEY"] = os.environ.get("STRIPE_SECRET_KEY")
     app.config["STRIPE_PRICE_ID"] = os.environ.get("STRIPE_PRICE_ID")
