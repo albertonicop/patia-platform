@@ -594,6 +594,7 @@ def sell():
 @main.route("/sell-cart", methods=["POST"])
 def sell_cart():
     from flask import jsonify
+    import uuid
     user = current_user()
     if not user:
         return jsonify({"ok": False, "error": "No autenticado"})
@@ -602,6 +603,7 @@ def sell_cart():
     items = data.get("items", [])
 
     try:
+        ticket_id = str(uuid.uuid4())
         for item in items:
             product = Product.query.filter_by(id=int(item["product_id"]), user_id=user.id).first()
             if not product:
@@ -610,10 +612,10 @@ def sell_cart():
             if product.stock < qty:
                 return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"})
             product.stock -= qty
-            sale = Sale(user_id=user.id, product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
+            sale = Sale(user_id=user.id, product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price, ticket_id=ticket_id)
             db.session.add(sale)
         db.session.commit()
-        return jsonify({"ok": True})
+        return jsonify({"ok": True, "ticket_id": ticket_id})
     except Exception as e:
         db.session.rollback()
         return jsonify({"ok": False, "error": str(e)})
