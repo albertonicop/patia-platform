@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Verificar correo{% endblock %}
+{% block content %}
+
+<div style="max-width:480px;margin:0 auto;padding-top:40px;">
+    <div class="card" style="text-align:center;padding:40px;">
+        <h2 style="color:#29d3a8;">Verifica tu correo</h2>
+        <p style="color:#9aa8c7;margin-bottom:24px;">
+            Te enviamos un código de 6 dígitos a <strong>{{ user.email }}</strong>. 
+            Ingrésalo aquí para activar tu cuenta.
+        </p>
+
+        <form method="POST" class="stack">
+            <input 
+                type="text" 
+                name="code" 
+                placeholder="000000" 
+                maxlength="6"
+                style="font-size:32px;text-align:center;letter-spacing:12px;font-weight:900;"
+                autofocus
+                required
+            >
+            <button class="btn" type="submit">Verificar</button>
+        </form>
+
+        <form method="POST" action="/resend-verification" style="margin-top:16px;">
+            <button class="btn ghost" type="submit">Reenviar código</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

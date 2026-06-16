@@ -1,4 +1,6 @@
-import resend
+﻿import resend
+import random
+import string
 from datetime import datetime, timedelta
 from io import BytesIO
 import stripe
@@ -34,6 +36,8 @@ def login_required():
 
 def money(value):
     return f"${value:,.2f} MXN"
+import random
+import string
 def send_email(to, subject, html):
     try:
         resend.api_key = current_app.config["RESEND_API_KEY"]
@@ -92,32 +96,27 @@ def register():
             flash("Cuenta creada correctamente. Activa PATIA Pro para continuar.", "success")
             return redirect(url_for("main.subscribe"))
 
-        flash("Cuenta creada correctamente. Tu prueba gratis de 14 días ha comenzado.", "success")
+        code = ''.join(random.choices(string.digits, k=6))
+        user.verification_code = code
+        user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
+        db.session.commit()
 
         send_email(
             to=user.email,
-            subject="¡Bienvenido a PATIA! 🎉",
+            subject="Verifica tu correo en PATIA",
             html=f"""
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                 <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
-                <h1 style="color:#29d3a8;">¡Bienvenido a PATIA, {user.first_name or user.company_name}!</h1>
-                <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">
-                    Tu prueba gratuita de <strong style="color:#fff;">14 días</strong> ha comenzado. 
-                    Tienes acceso completo a inventario, punto de venta, proveedores y alertas inteligentes.
-                </p>
-                <a href="https://patiaapp.com" 
-                   style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">
-                    Entrar a PATIA →
-                </a>
-                <p style="margin-top:32px;color:#9aa8c7;font-size:13px;">
-                    Si tienes dudas responde este correo o escríbenos al WhatsApp.
-                </p>
+                <h1 style="color:#29d3a8;">Verifica tu correo</h1>
+                <p style="color:#9aa8c7;font-size:16px;">Tu código de verificación es:</p>
+                <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
+                <p style="color:#9aa8c7;font-size:14px;">Este código expira en 30 minutos.</p>
             </div>
             """
         )
 
-        return redirect(url_for("main.dashboard"))
-
+    flash("Te enviamos un código de verificación a tu correo.", "success")
+    return redirect(url_for("main.verify_email"))
     return render_template(
     "auth.html",
     title="Crear cuenta",
@@ -125,6 +124,66 @@ def register():
     mode="register",
     plan=request.args.get("plan")
 )
+@main.route("/verify-email", methods=["GET", "POST"])
+def verify_email():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
+    if user.email_verified:
+        return redirect(url_for("main.dashboard"))
+
+    if request.method == "POST":
+        code = request.form.get("code", "").strip()
+
+        if not user.verification_code or not user.verification_code_expires:
+            flash("Código inválido.", "danger")
+            return redirect(url_for("main.verify_email"))
+
+        if datetime.utcnow() > user.verification_code_expires:
+            flash("El código expiró. Solicita uno nuevo.", "danger")
+            return redirect(url_for("main.verify_email"))
+
+        if code != user.verification_code:
+            flash("Código incorrecto.", "danger")
+            return redirect(url_for("main.verify_email"))
+
+        user.email_verified = True
+        user.verification_code = None
+        user.verification_code_expires = None
+        db.session.commit()
+
+        flash("¡Correo verificado! Bienvenido a PATIA.", "success")
+        return redirect(url_for("main.dashboard"))
+
+    return render_template("verify_email.html", user=user)
+
+
+@main.route("/resend-verification", methods=["POST"])
+def resend_verification():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
+    code = ''.join(random.choices(string.digits, k=6))
+    user.verification_code = code
+    user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
+    db.session.commit()
+
+    send_email(
+        to=user.email,
+        subject="Nuevo código de verificación PATIA",
+        html=f"""
+        <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
+            <h1 style="color:#29d3a8;">Tu nuevo código</h1>
+            <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
+            <p style="color:#9aa8c7;font-size:14px;">Este código expira en 30 minutos.</p>
+        </div>
+        """
+    )
+
+    flash("Te enviamos un nuevo código.", "success")
+    return redirect(url_for("main.verify_email"))
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -1122,3 +1181,4 @@ def admin_make_pro(user_id):
 
     flash("Cliente marcado como PRO.")
     return redirect(url_for("main.admin"))
+

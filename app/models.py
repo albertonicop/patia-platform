@@ -61,11 +61,18 @@ class User(db.Model):
     city = db.Column(db.String(80), nullable=True)
     state = db.Column(db.String(80), nullable=True)
     business_type = db.Column(db.String(80), nullable=True)
+    postal_code = db.Column(db.String(10), nullable=True)
+    email_verified = db.Column(db.Boolean, default=False)
+    verification_code = db.Column(db.String(6), nullable=True)
+    verification_code_expires = db.Column(db.DateTime, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     plan = db.Column(db.String(20), default="trial")
-    subscription_start = db.Column(db.DateTime, nullable=True)
-    subscription_end = db.Column(db.DateTime, nullable=True)
+    stripe_customer_id = db.Column(db.String(120), nullable=True)
+    stripe_subscription_id = db.Column(db.String(120), nullable=True)
+    subscription_status = db.Column(db.String(30), nullable=True)
+    current_period_end = db.Column(db.DateTime, nullable=True)
+    cancel_at_period_end = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
