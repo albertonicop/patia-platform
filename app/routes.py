@@ -120,7 +120,6 @@ def register():
             """
         )
 
-        flash("Te enviamos un codigo de verificacion a tu correo.", "success")
         return redirect(url_for("main.verify_email"))
 
     return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register", plan=request.args.get("plan"))
@@ -154,6 +153,18 @@ def verify_email():
         user.verification_code = None
         user.verification_code_expires = None
         db.session.commit()
+        send_email(
+            to=user.email,
+            subject="Bienvenido a PATIA!",
+            html=f"""
+            <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
+                <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
+                <h1 style="color:#29d3a8;">Bienvenido a PATIA, {user.first_name or user.company_name}!</h1>
+                <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Tu cuenta esta lista. Tienes <strong style="color:#fff;">14 dias gratis</strong> para explorar todo.</p>
+                <a href="https://patiaapp.com/products" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Ir a mi inventario</a>
+            </div>
+            """
+        )
 
         flash("¡Correo verificado! Bienvenido a PATIA.", "success")
         return redirect(url_for("main.dashboard"))
@@ -184,7 +195,6 @@ def resend_verification():
         """
     )
 
-    flash("Te enviamos un nuevo codigo.", "success")
     return redirect(url_for("main.verify_email"))
 
 
