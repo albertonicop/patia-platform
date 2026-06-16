@@ -1,4 +1,5 @@
 ﻿import resend
+from email_validator import validate_email, EmailNotValidError
 import random
 import string
 from datetime import datetime, timedelta
@@ -54,6 +55,11 @@ def send_email(to, subject, html):
 def register():
     if request.method == "POST":
         email = request.form["email"].strip().lower()
+        try:
+            validate_email(email, check_deliverability=True)
+        except EmailNotValidError:
+            flash("El correo no es vÃƒÂ¡lido o no existe.", "danger")
+            return redirect(url_for("main.register"))
         password = request.form["password"]
 
         first_name = request.form.get("first_name", "").strip()
@@ -68,7 +74,7 @@ def register():
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            flash("Ese correo ya está registrado.", "danger")
+            flash("Ese correo ya estÃƒÂ¡ registrado.", "danger")
             return redirect(url_for("main.register"))
 
         user = User(
@@ -108,15 +114,15 @@ def register():
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                 <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
                 <h1 style="color:#29d3a8;">Verifica tu correo</h1>
-                <p style="color:#9aa8c7;font-size:16px;">Tu código de verificación es:</p>
+                <p style="color:#9aa8c7;font-size:16px;">Tu cÃƒÂ³digo de verificaciÃƒÂ³n es:</p>
                 <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
-                <p style="color:#9aa8c7;font-size:14px;">Este código expira en 30 minutos.</p>
+                <p style="color:#9aa8c7;font-size:14px;">Este cÃƒÂ³digo expira en 30 minutos.</p>
             </div>
             """
         )
 
-    flash("Te enviamos un código de verificación a tu correo.", "success")
-    return redirect(url_for("main.verify_email"))
+        flash("Te enviamos un cÃƒÂ³digo de verificaciÃƒÂ³n a tu correo.", "success")
+        return redirect(url_for("main.verify_email"))
     return render_template(
     "auth.html",
     title="Crear cuenta",
@@ -137,15 +143,15 @@ def verify_email():
         code = request.form.get("code", "").strip()
 
         if not user.verification_code or not user.verification_code_expires:
-            flash("Código inválido.", "danger")
+            flash("CÃƒÂ³digo invÃƒÂ¡lido.", "danger")
             return redirect(url_for("main.verify_email"))
 
         if datetime.utcnow() > user.verification_code_expires:
-            flash("El código expiró. Solicita uno nuevo.", "danger")
+            flash("El cÃƒÂ³digo expirÃƒÂ³. Solicita uno nuevo.", "danger")
             return redirect(url_for("main.verify_email"))
 
         if code != user.verification_code:
-            flash("Código incorrecto.", "danger")
+            flash("CÃƒÂ³digo incorrecto.", "danger")
             return redirect(url_for("main.verify_email"))
 
         user.email_verified = True
@@ -153,7 +159,7 @@ def verify_email():
         user.verification_code_expires = None
         db.session.commit()
 
-        flash("¡Correo verificado! Bienvenido a PATIA.", "success")
+        flash("Ã‚Â¡Correo verificado! Bienvenido a PATIA.", "success")
         return redirect(url_for("main.dashboard"))
 
     return render_template("verify_email.html", user=user)
@@ -172,12 +178,12 @@ def resend_verification():
 
     send_email(
         to=user.email,
-        subject="Nuevo código de verificación PATIA",
+        subject="Nuevo cÃƒÂ³digo de verificaciÃƒÂ³n PATIA",
         html=f"""
         <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-            <h1 style="color:#29d3a8;">Tu nuevo código</h1>
+            <h1 style="color:#29d3a8;">Tu nuevo cÃƒÂ³digo</h1>
             <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
-            <p style="color:#9aa8c7;font-size:14px;">Este código expira en 30 minutos.</p>
+            <p style="color:#9aa8c7;font-size:14px;">Este cÃƒÂ³digo expira en 30 minutos.</p>
         </div>
         """
     )
@@ -192,20 +198,20 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            flash("Correo o contraseña incorrectos.", "danger")
+            flash("Correo o contraseÃƒÂ±a incorrectos.", "danger")
             return redirect(url_for("main.login"))
 
         session["user_id"] = user.id
-        flash("Sesión iniciada correctamente.", "success")
+        flash("SesiÃƒÂ³n iniciada correctamente.", "success")
         return redirect(url_for("main.dashboard"))
 
-    return render_template("auth.html", title="Iniciar sesión", button="Entrar", mode="login")
+    return render_template("auth.html", title="Iniciar sesiÃƒÂ³n", button="Entrar", mode="login")
 
 
 @main.route("/logout")
 def logout():
     session.clear()
-    flash("Sesión cerrada.", "success")
+    flash("SesiÃƒÂ³n cerrada.", "success")
     return redirect("/")
 @main.app_template_filter("money")
 def money_filter(value):
@@ -300,37 +306,37 @@ def analytics():
             alerts.append({
                 "type": "critical",
                 "title": f"Reordenar {p.name}",
-                "text": f"Stock actual: {p.stock}. Mínimo recomendado: {p.min_stock}."
+                "text": f"Stock actual: {p.stock}. MÃƒÂ­nimo recomendado: {p.min_stock}."
             })
 
         elif days_left is not None and days_left <= 3:
             alerts.append({
                 "type": "critical",
-                "title": f"{p.name} se agotará pronto",
-                "text": f"Con el ritmo actual de ventas, se acabará en aproximadamente {days_left} días."
+                "title": f"{p.name} se agotarÃƒÂ¡ pronto",
+                "text": f"Con el ritmo actual de ventas, se acabarÃƒÂ¡ en aproximadamente {days_left} dÃƒÂ­as."
             })
 
         elif days_left is not None and days_left <= 7:
             alerts.append({
                 "type": "warning",
                 "title": f"Vigilar {p.name}",
-                "text": f"Inventario estimado para {days_left} días."
+                "text": f"Inventario estimado para {days_left} dÃƒÂ­as."
             })
 
 
     recommendations = []
 
     if top_products:
-        recommendations.append(f"{top_products[0].name} es tu producto más vendido actualmente.")
+        recommendations.append(f"{top_products[0].name} es tu producto mÃƒÂ¡s vendido actualmente.")
 
     if week_sales > 0:
-        recommendations.append(f"Las ventas de los últimos 7 días suman ${week_sales:,.0f} MXN.")
+        recommendations.append(f"Las ventas de los ÃƒÂºltimos 7 dÃƒÂ­as suman ${week_sales:,.0f} MXN.")
 
     if profit > 0:
         recommendations.append(f"La utilidad estimada de la semana fue de ${profit:,.0f} MXN.")
 
     if low_stock:
-        recommendations.append(f"Tienes {low_stock} productos con inventario bajo. Reabastécelos pronto.")
+        recommendations.append(f"Tienes {low_stock} productos con inventario bajo. ReabastÃƒÂ©celos pronto.")
     alerts = alerts[:5]
     return dict(
         total_products=total_products,
@@ -390,14 +396,14 @@ def download_template():
 
     columns = [
         "SKU",
-        "Código de barras",
+        "CÃƒÂ³digo de barras",
         "Nombre del producto",
-        "Categoría",
+        "CategorÃƒÂ­a",
         "Proveedor",
         "Costo",
         "Precio de venta",
         "Stock inicial",
-        "Stock mínimo"
+        "Stock mÃƒÂ­nimo"
     ]
 
     df = pd.DataFrame(columns=columns)
@@ -410,7 +416,7 @@ def download_template():
         workbook = writer.book
         ws = writer.sheets["PRODUCTOS"]
 
-        # Título
+        # TÃƒÂ­tulo
         ws["A1"] = "PATIA - Plantilla oficial de productos"
         ws["A2"] = "Llena esta tabla con tus productos. No cambies los nombres de las columnas."
         ws.merge_cells("A1:I1")
@@ -441,7 +447,7 @@ def download_template():
             cell.alignment = center
             cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
-        # Crear filas vacías para que se vea como tabla
+        # Crear filas vacÃƒÂ­as para que se vea como tabla
         for row in range(5, 105):
             for col in range(1, 10):
                 ws.cell(row=row, column=col).border = Border(
@@ -474,18 +480,18 @@ def download_template():
         # Hoja instrucciones
         instrucciones = workbook.create_sheet("INSTRUCCIONES")
 
-        instrucciones["A1"] = "PATIA - Guía para llenar tu catálogo"
+        instrucciones["A1"] = "PATIA - GuÃƒÂ­a para llenar tu catÃƒÂ¡logo"
         instrucciones["A1"].font = Font(bold=True, size=18, color="FFFFFF")
         instrucciones["A1"].fill = title_fill
 
         instrucciones["A3"] = "1. No modifiques los nombres de las columnas."
         instrucciones["A4"] = "2. Cada fila debe representar un producto."
-        instrucciones["A5"] = "3. SKU es el código interno del producto."
-        instrucciones["A6"] = "4. Código de barras puede ser el código del empaque."
+        instrucciones["A5"] = "3. SKU es el cÃƒÂ³digo interno del producto."
+        instrucciones["A6"] = "4. CÃƒÂ³digo de barras puede ser el cÃƒÂ³digo del empaque."
         instrucciones["A7"] = "5. Costo es lo que te cuesta comprar el producto."
-        instrucciones["A8"] = "6. Precio de venta es el precio al público."
+        instrucciones["A8"] = "6. Precio de venta es el precio al pÃƒÂºblico."
         instrucciones["A9"] = "7. Stock inicial es la cantidad actual disponible."
-        instrucciones["A10"] = "8. Stock mínimo activa alertas de reabastecimiento."
+        instrucciones["A10"] = "8. Stock mÃƒÂ­nimo activa alertas de reabastecimiento."
 
         instrucciones.column_dimensions["A"].width = 90
 
@@ -496,14 +502,14 @@ def download_template():
         nota["A1"].font = Font(bold=True, size=20, color="FFFFFF")
         nota["A1"].fill = title_fill
 
-        nota["A3"] = "Para comenzar, llena la hoja PRODUCTOS con la información actual de tu negocio."
-        nota["A4"] = "Después sube este archivo en la sección Inventario dentro de PATIA."
-        nota["A6"] = "PATIA utilizará esta información para configurar:"
-        nota["A7"] = "• Inventario"
-        nota["A8"] = "• Alertas de stock"
-        nota["A9"] = "• Punto de venta"
-        nota["A10"] = "• Reportes"
-        nota["A11"] = "• Análisis inteligente de ventas"
+        nota["A3"] = "Para comenzar, llena la hoja PRODUCTOS con la informaciÃƒÂ³n actual de tu negocio."
+        nota["A4"] = "DespuÃƒÂ©s sube este archivo en la secciÃƒÂ³n Inventario dentro de PATIA."
+        nota["A6"] = "PATIA utilizarÃƒÂ¡ esta informaciÃƒÂ³n para configurar:"
+        nota["A7"] = "Ã¢â‚¬Â¢ Inventario"
+        nota["A8"] = "Ã¢â‚¬Â¢ Alertas de stock"
+        nota["A9"] = "Ã¢â‚¬Â¢ Punto de venta"
+        nota["A10"] = "Ã¢â‚¬Â¢ Reportes"
+        nota["A11"] = "Ã¢â‚¬Â¢ AnÃƒÂ¡lisis inteligente de ventas"
 
         nota.column_dimensions["A"].width = 90
 
@@ -535,14 +541,14 @@ def import_products():
             df = pd.read_excel(file, sheet_name="PRODUCTOS", header=3)
         df = df.rename(columns={
     "SKU": "sku",
-    "Código de barras": "barcode",
+    "CÃƒÂ³digo de barras": "barcode",
     "Nombre del producto": "name",
-    "Categoría": "category",
+    "CategorÃƒÂ­a": "category",
     "Proveedor": "supplier",
     "Costo": "cost_price",
     "Precio de venta": "sale_price",
     "Stock inicial": "stock",
-    "Stock mínimo": "min_stock"
+    "Stock mÃƒÂ­nimo": "min_stock"
 })
         for _, row in df.iterrows():
             sku = str(row.get("sku", "")).strip()
@@ -591,7 +597,7 @@ def import_products():
 
         db.session.commit()
 
-        flash("Catálogo importado correctamente.", "success")
+        flash("CatÃƒÂ¡logo importado correctamente.", "success")
 
     except Exception as e:
         db.session.rollback()
@@ -854,7 +860,7 @@ def stripe_webhook():
     return "", 200
 
     if event["type"] == "checkout.session.completed":
-        print("✅ Pago confirmado por Stripe")
+        print("Ã¢Å“â€¦ Pago confirmado por Stripe")
 
     return "", 200
 @main.route("/stripe-success")
@@ -870,21 +876,21 @@ def stripe_success():
 
     send_email(
         to=user.email,
-        subject="¡Tu cuenta PATIA Pro está activa! 🚀",
+        subject="Ã‚Â¡Tu cuenta PATIA Pro estÃƒÂ¡ activa! Ã°Å¸Å¡â‚¬",
         html=f"""
         <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
             <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
-            <h1 style="color:#29d3a8;">¡Ya eres PATIA Pro! 🎉</h1>
+            <h1 style="color:#29d3a8;">Ã‚Â¡Ya eres PATIA Pro! Ã°Å¸Å½â€°</h1>
             <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">
-                Tu suscripción ha sido activada correctamente. Ahora tienes acceso a 
+                Tu suscripciÃƒÂ³n ha sido activada correctamente. Ahora tienes acceso a 
                 <strong style="color:#fff;">Reportes IA</strong> y todas las funciones avanzadas.
             </p>
             <a href="https://patiaapp.com/reports" 
                style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">
-                Ver mis Reportes IA →
+                Ver mis Reportes IA Ã¢â€ â€™
             </a>
             <p style="margin-top:32px;color:#9aa8c7;font-size:13px;">
-                Tu suscripción se renueva automáticamente cada mes. Puedes cancelar cuando quieras desde Mi Suscripción.
+                Tu suscripciÃƒÂ³n se renueva automÃƒÂ¡ticamente cada mes. Puedes cancelar cuando quieras desde Mi SuscripciÃƒÂ³n.
             </p>
         </div>
         """
@@ -950,7 +956,7 @@ def cancel_subscription():
         )
         user.cancel_at_period_end = True
         db.session.commit()
-        flash("Tu suscripción se cancelará al final del periodo pagado.", "success")
+        flash("Tu suscripciÃƒÂ³n se cancelarÃƒÂ¡ al final del periodo pagado.", "success")
     except Exception as e:
         flash(f"Error al cancelar: {e}", "danger")
 
@@ -972,7 +978,7 @@ def reactivate_subscription():
         )
         user.cancel_at_period_end = False
         db.session.commit()
-        flash("Tu suscripción ha sido reactivada.", "success")
+        flash("Tu suscripciÃƒÂ³n ha sido reactivada.", "success")
     except Exception as e:
         flash(f"Error al reactivar: {e}", "danger")
 
@@ -1031,7 +1037,7 @@ def admin():
 
         if u.plan == "pro":
             status = "Pro"
-            trial_days_left = "∞"
+            trial_days_left = "Ã¢Ë†Å¾"
         elif trial_days_left > 0:
             status = "Prueba"
             trial_clients += 1
@@ -1039,7 +1045,7 @@ def admin():
             status = "Vencido"
             expired_clients += 1
 
-        if trial_days_left != "∞" and 0 < trial_days_left <= 7:
+        if trial_days_left != "Ã¢Ë†Å¾" and 0 < trial_days_left <= 7:
             expiring_soon += 1
 
         if days_in_patia <= 7:
@@ -1114,7 +1120,7 @@ def delete_all_products():
     Sale.query.filter_by(user_id=user_id).delete()
     Product.query.filter_by(user_id=user_id).delete()
     db.session.commit()
-    flash("Catálogo eliminado completamente.", "success")
+    flash("CatÃƒÂ¡logo eliminado completamente.", "success")
     return redirect(url_for("main.products"))
 
 @main.route("/products/delete-selected", methods=["POST"])
@@ -1181,4 +1187,3 @@ def admin_make_pro(user_id):
 
     flash("Cliente marcado como PRO.")
     return redirect(url_for("main.admin"))
-
