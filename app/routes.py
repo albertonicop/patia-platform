@@ -54,7 +54,7 @@ def register():
         try:
             validate_email(email, check_deliverability=True)
         except EmailNotValidError:
-            flash("El correo no es valido o no existe.", "danger")
+            flash("El correo no es válido o no existe.", "danger")
             return redirect(url_for("main.register"))
 
         password = request.form["password"]
@@ -70,7 +70,7 @@ def register():
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            flash("Ese correo ya esta registrado.", "danger")
+            flash("Ese correo ya está registrado.", "danger")
             return redirect(url_for("main.register"))
 
         user = User(email=email, company_name=company_name)
@@ -131,15 +131,15 @@ def verify_email():
         code = request.form.get("code", "").strip()
 
         if not user.verification_code or not user.verification_code_expires:
-            flash("Codigo invalido.", "danger")
+            flash("Código inválido.", "danger")
             return redirect(url_for("main.verify_email"))
 
         if datetime.utcnow() > user.verification_code_expires:
-            flash("El codigo expiro. Solicita uno nuevo.", "danger")
+            flash("El código expiró. Solicita uno nuevo.", "danger")
             return redirect(url_for("main.verify_email"))
 
         if code != user.verification_code:
-            flash("Codigo incorrecto.", "danger")
+            flash("Código incorrecto.", "danger")
             return redirect(url_for("main.verify_email"))
 
         user.email_verified = True
@@ -147,7 +147,7 @@ def verify_email():
         user.verification_code_expires = None
         db.session.commit()
 
-        flash("Correo verificado! Bienvenido a PATIA.", "success")
+        flash("¡Correo verificado! Bienvenido a PATIA.", "success")
         return redirect(url_for("main.dashboard"))
 
     return render_template("verify_email.html", user=user)
@@ -231,20 +231,20 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            flash("Correo o contrasena incorrectos.", "danger")
+            flash("Correo o contraseña incorrectos.", "danger")
             return redirect(url_for("main.login"))
 
         session["user_id"] = user.id
-        flash("Sesion iniciada correctamente.", "success")
+        flash("Sesión iniciada correctamente.", "success")
         return redirect(url_for("main.dashboard"))
 
-    return render_template("auth.html", title="Iniciar sesion", button="Entrar", mode="login")
+    return render_template("auth.html", title="Iniciar sesión", button="Entrar", mode="login")
 
 
 @main.route("/logout")
 def logout():
     session.clear()
-    flash("Sesion cerrada.", "success")
+    flash("Sesión cerrada.", "success")
     return redirect("/")
 
 

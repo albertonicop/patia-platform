@@ -1218,3 +1218,14 @@ table {
     line-height:1.4 !important;
     white-space:normal !important;
 }
+.auth-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #7c5cff, #29d3a8);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+}
