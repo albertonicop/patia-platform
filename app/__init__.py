@@ -23,7 +23,7 @@ def create_app():
     app.config["STRIPE_PRICE_ID"] = os.environ.get("STRIPE_PRICE_ID")
     app.config["STRIPE_WEBHOOK_SECRET"] = os.environ.get("STRIPE_WEBHOOK_SECRET")
     app.config["RESEND_API_KEY"] = os.environ.get("RESEND_API_KEY", "re_Xgm7h1DR_B7e1zkdPh2snGFD5AZz4gT3V")
-    app.config["RESEND_FROM"] = "PATIA <onboarding@resend.dev>"
+    app.config["RESEND_FROM"] = os.environ.get("RESEND_FROM")
 
     db.init_app(app)
 
