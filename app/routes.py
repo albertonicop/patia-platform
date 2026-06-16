@@ -995,7 +995,9 @@ def settings():
         flash("Configuración guardada.", "success")
         return redirect(url_for("main.settings"))
     return render_template("settings.html", user=user)
-    @main.route("/receipt/<int:sale_id>")
+
+
+@main.route("/receipt/<int:sale_id>")
 def receipt(sale_id):
     from reportlab.lib.pagesizes import letter
     from reportlab.pdfgen import canvas
