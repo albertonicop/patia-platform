@@ -7,3 +7,4 @@ openpyxl
 pandas
 email-validator
 psycopg2-binary
+reportlab
