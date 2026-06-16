@@ -76,6 +76,9 @@ class User(db.Model):
     subscription_status = db.Column(db.String(30), nullable=True)
     current_period_end = db.Column(db.DateTime, nullable=True)
     cancel_at_period_end = db.Column(db.Boolean, default=False)
+    trial_warning_sent = db.Column(db.Boolean, default=False)
+    rfc = db.Column(db.String(20), nullable=True)
+    tax_regime = db.Column(db.String(120), nullable=True)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
