@@ -48,5 +48,13 @@ def create_app():
                     conn.commit()
                 except:
                     pass
+            for col, coltype in [
+                ("ticket_id", "VARCHAR(36)"),
+            ]:
+                try:
+                    conn.execute(sa.text(f'ALTER TABLE "sale" ADD COLUMN {col} {coltype}'))
+                    conn.commit()
+                except:
+                    pass
 
     return app
