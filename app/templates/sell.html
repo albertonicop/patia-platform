@@ -71,10 +71,13 @@
           <td>{{ s.quantity }}</td>
           <td>{{ s.total|money }}</td>
           <td>
-            <form method="POST" action="/sales/{{s.id}}/cancel"
-                  onsubmit="return confirm('¿Cancelar esta venta? Se devolverá el stock.');">
-              <button class="btn ghost" type="submit">Cancelar</button>
-            </form>
+            <div style="display:flex;gap:8px;">
+              <a href="/receipt/{{s.id}}" class="btn ghost" target="_blank">🧾 Recibo</a>
+              <form method="POST" action="/sales/{{s.id}}/cancel"
+                    onsubmit="return confirm('¿Cancelar esta venta? Se devolverá el stock.');">
+                <button class="btn ghost" type="submit">Cancelar</button>
+              </form>
+            </div>
           </td>
         </tr>
         {% endfor %}
