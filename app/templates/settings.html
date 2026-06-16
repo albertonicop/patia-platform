@@ -1,5 +1,47 @@
 {% extends 'base.html' %}
-{% block title %}Configuración{% endblock %}
+{% block title %}Configuracion{% endblock %}
 {% block content %}
-<p>Hola {{ user.email }}</p>
+
+<div class="card" style="max-width:600px;">
+    <h2 style="margin-bottom:24px;">Configuracion del negocio</h2>
+
+    <form method="POST" action="/settings" class="stack">
+        <div class="stack">
+            <label style="color:var(--muted);font-size:13px;">Nombre del negocio</label>
+            <input type="text" name="company_name" value="{{ user.company_name or '' }}" placeholder="Mi Tienda SA de CV">
+        </div>
+        <div class="stack">
+            <label style="color:var(--muted);font-size:13px;">RFC</label>
+            <input type="text" name="rfc" value="{{ user.rfc or '' }}" placeholder="XAXX010101000" maxlength="13">
+        </div>
+        <div class="stack">
+            <label style="color:var(--muted);font-size:13px;">Regimen fiscal</label>
+            <input type="text" name="tax_regime" value="{{ user.tax_regime or '' }}" placeholder="Regimen Simplificado de Confianza">
+        </div>
+        <div class="stack">
+            <label style="color:var(--muted);font-size:13px;">Direccion</label>
+            <input type="text" name="address" value="{{ user.address or '' }}" placeholder="Calle, numero">
+        </div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="stack">
+                <label style="color:var(--muted);font-size:13px;">Ciudad</label>
+                <input type="text" name="city" value="{{ user.city or '' }}">
+            </div>
+            <div class="stack">
+                <label style="color:var(--muted);font-size:13px;">Estado</label>
+                <input type="text" name="state" value="{{ user.state or '' }}">
+            </div>
+        </div>
+        <div class="stack">
+            <label style="color:var(--muted);font-size:13px;">Codigo postal</label>
+            <input type="text" name="postal_code" value="{{ user.postal_code or '' }}" maxlength="5">
+        </div>
+        <div class="stack">
+            <label style="color:var(--muted);font-size:13px;">Telefono</label>
+            <input type="text" name="phone" value="{{ user.phone or '' }}">
+        </div>
+        <button class="btn" type="submit">Guardar cambios</button>
+    </form>
+</div>
+
 {% endblock %}
