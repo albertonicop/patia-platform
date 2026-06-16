@@ -612,7 +612,8 @@ def sell_cart():
             if product.stock < qty:
                 return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"})
             product.stock -= qty
-            sale = Sale(user_id=user.id, product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price, ticket_id=ticket_id)
+            sale = Sale(user_id=user.id, product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
+            sale.ticket_id = ticket_id
             db.session.add(sale)
         db.session.commit()
         return jsonify({"ok": True, "ticket_id": ticket_id})
