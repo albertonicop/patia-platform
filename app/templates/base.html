@@ -27,14 +27,15 @@
     <a href="/">Dashboard</a>
     <a href="/products">Inventario</a>
     <a href="/sell">Punto de venta</a>
-    {% if user is defined and ((user.plan or "")|lower|trim) == "pro" %}
+    {% if user is defined and user and ((user.plan or "")|lower|trim) == "pro" %}
 <a href="/reports">Reportes IA</a>
+{% elif user is defined and user %}
+<a href="/subscribe" style="opacity:.6;">Reportes IA PRO</a>
 {% else %}
-<a href="/subscribe" style="opacity:.6;">
-    Reportes IA PRO
-</a>
+<a href="/subscribe" style="opacity:.6;">Reportes IA PRO</a>
 {% endif %}
     <a href="/suppliers">Proveedores</a>
+    <a href="/settings">Configuración</a>
 
 
 <a href="/logout" style="margin-top:10px;color:#ff8a8a;">
