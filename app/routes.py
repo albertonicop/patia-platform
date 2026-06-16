@@ -976,3 +976,22 @@ def admin_make_pro(user_id):
     db.session.commit()
     flash("Cliente marcado como PRO.")
     return redirect(url_for("main.admin"))
+
+@main.route("/settings", methods=["GET", "POST"])
+def settings():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    if request.method == "POST":
+        user.company_name = request.form.get("company_name", "").strip()
+        user.rfc = request.form.get("rfc", "").strip().upper()
+        user.tax_regime = request.form.get("tax_regime", "").strip()
+        user.address = request.form.get("address", "").strip()
+        user.city = request.form.get("city", "").strip()
+        user.state = request.form.get("state", "").strip()
+        user.postal_code = request.form.get("postal_code", "").strip()
+        user.phone = request.form.get("phone", "").strip()
+        db.session.commit()
+        flash("Configuración guardada.", "success")
+        return redirect(url_for("main.settings"))
+    return render_template("settings.html", user=user)
