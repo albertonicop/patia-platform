@@ -1,44 +1,39 @@
-﻿import resend
+﻿# -*- coding: utf-8 -*-
+import resend
 from email_validator import validate_email, EmailNotValidError
 import random
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
 import stripe
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file
 from sqlalchemy import func
 from . import db
 from .models import Product, Sale, Supplier, User
+
 main = Blueprint("main", __name__)
+
 
 def current_user():
     user_id = session.get("user_id")
-
     if not user_id:
         return None
-
     return User.query.get(user_id)
 
 
 def trial_expired(user):
     if not user:
         return True
-
     if user.plan == "pro":
         return False
-
     days_used = (datetime.utcnow() - user.created_at).days
     return days_used >= 14
 
 
-def login_required():
-    if not session.get("user_id"):
-        return redirect(url_for("main.landing"))
-
 def money(value):
     return f"${value:,.2f} MXN"
-import random
-import string
+
+
 def send_email(to, subject, html):
     try:
         resend.api_key = current_app.config["RESEND_API_KEY"]
@@ -51,6 +46,7 @@ def send_email(to, subject, html):
     except Exception as e:
         print(f"Error enviando correo: {e}")
 
+
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -58,10 +54,10 @@ def register():
         try:
             validate_email(email, check_deliverability=True)
         except EmailNotValidError:
-            flash("El correo no es vÃƒÂ¡lido o no existe.", "danger")
+            flash("El correo no es valido o no existe.", "danger")
             return redirect(url_for("main.register"))
-        password = request.form["password"]
 
+        password = request.form["password"]
         first_name = request.form.get("first_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
         company_name = request.form.get("company_name", "").strip()
@@ -74,14 +70,10 @@ def register():
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            flash("Ese correo ya estÃƒÂ¡ registrado.", "danger")
+            flash("Ese correo ya esta registrado.", "danger")
             return redirect(url_for("main.register"))
 
-        user = User(
-            email=email,
-            company_name=company_name
-        )
-
+        user = User(email=email, company_name=company_name)
         user.first_name = first_name
         user.last_name = last_name
         user.phone = phone
@@ -90,7 +82,6 @@ def register():
         user.state = state
         user.business_type = business_type
         user.postal_code = postal_code
-
         user.set_password(password)
 
         db.session.add(user)
@@ -114,22 +105,19 @@ def register():
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                 <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
                 <h1 style="color:#29d3a8;">Verifica tu correo</h1>
-                <p style="color:#9aa8c7;font-size:16px;">Tu cÃƒÂ³digo de verificaciÃƒÂ³n es:</p>
+                <p style="color:#9aa8c7;font-size:16px;">Tu codigo de verificacion es:</p>
                 <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
-                <p style="color:#9aa8c7;font-size:14px;">Este cÃƒÂ³digo expira en 30 minutos.</p>
+                <p style="color:#9aa8c7;font-size:14px;">Este codigo expira en 30 minutos.</p>
             </div>
             """
         )
 
-        flash("Te enviamos un cÃƒÂ³digo de verificaciÃƒÂ³n a tu correo.", "success")
+        flash("Te enviamos un codigo de verificacion a tu correo.", "success")
         return redirect(url_for("main.verify_email"))
-    return render_template(
-    "auth.html",
-    title="Crear cuenta",
-    button="Crear cuenta",
-    mode="register",
-    plan=request.args.get("plan")
-)
+
+    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register", plan=request.args.get("plan"))
+
+
 @main.route("/verify-email", methods=["GET", "POST"])
 def verify_email():
     user = current_user()
@@ -143,15 +131,15 @@ def verify_email():
         code = request.form.get("code", "").strip()
 
         if not user.verification_code or not user.verification_code_expires:
-            flash("CÃƒÂ³digo invÃƒÂ¡lido.", "danger")
+            flash("Codigo invalido.", "danger")
             return redirect(url_for("main.verify_email"))
 
         if datetime.utcnow() > user.verification_code_expires:
-            flash("El cÃƒÂ³digo expirÃƒÂ³. Solicita uno nuevo.", "danger")
+            flash("El codigo expiro. Solicita uno nuevo.", "danger")
             return redirect(url_for("main.verify_email"))
 
         if code != user.verification_code:
-            flash("CÃƒÂ³digo incorrecto.", "danger")
+            flash("Codigo incorrecto.", "danger")
             return redirect(url_for("main.verify_email"))
 
         user.email_verified = True
@@ -159,7 +147,7 @@ def verify_email():
         user.verification_code_expires = None
         db.session.commit()
 
-        flash("Ã‚Â¡Correo verificado! Bienvenido a PATIA.", "success")
+        flash("Correo verificado! Bienvenido a PATIA.", "success")
         return redirect(url_for("main.dashboard"))
 
     return render_template("verify_email.html", user=user)
@@ -178,18 +166,63 @@ def resend_verification():
 
     send_email(
         to=user.email,
-        subject="Nuevo cÃƒÂ³digo de verificaciÃƒÂ³n PATIA",
+        subject="Nuevo codigo de verificacion PATIA",
         html=f"""
         <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-            <h1 style="color:#29d3a8;">Tu nuevo cÃƒÂ³digo</h1>
+            <h1 style="color:#29d3a8;">Tu nuevo codigo</h1>
             <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
-            <p style="color:#9aa8c7;font-size:14px;">Este cÃƒÂ³digo expira en 30 minutos.</p>
+            <p style="color:#9aa8c7;font-size:14px;">Este codigo expira en 30 minutos.</p>
         </div>
         """
     )
 
-    flash("Te enviamos un nuevo código.", "success")
+    flash("Te enviamos un nuevo codigo.", "success")
     return redirect(url_for("main.verify_email"))
+
+
+@main.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        user = User.query.filter_by(email=email).first()
+        if user:
+            token = ''.join(random.choices(string.ascii_letters + string.digits, k=48))
+            user.reset_token = token
+            user.reset_token_expires = datetime.utcnow() + timedelta(minutes=30)
+            db.session.commit()
+            send_email(
+                to=user.email,
+                subject="Recupera tu contrasena PATIA",
+                html=f"""
+                <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
+                    <h1 style="color:#29d3a8;">Recuperar contrasena</h1>
+                    <p style="color:#9aa8c7;">Haz clic en el boton para crear una nueva contrasena. Expira en 30 minutos.</p>
+                    <a href="https://patiaapp.com/reset-password/{token}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Crear nueva contrasena</a>
+                </div>
+                """
+            )
+        flash("Si ese correo existe, te enviamos un enlace.", "success")
+        return redirect(url_for("main.login"))
+    return render_template("forgot_password.html")
+
+
+@main.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+    if not user or user.reset_token_expires < datetime.utcnow():
+        flash("El enlace expiro o no es valido.", "danger")
+        return redirect(url_for("main.forgot_password"))
+    if request.method == "POST":
+        password = request.form["password"]
+        user.set_password(password)
+        user.reset_token = None
+        user.reset_token_expires = None
+        db.session.commit()
+        flash("Contrasena actualizada. Inicia sesion.", "success")
+        return redirect(url_for("main.login"))
+    return render_template("reset_password.html", token=token)
+
+
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -198,21 +231,23 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            flash("Correo o contraseÃƒÂ±a incorrectos.", "danger")
+            flash("Correo o contrasena incorrectos.", "danger")
             return redirect(url_for("main.login"))
 
         session["user_id"] = user.id
-        flash("SesiÃƒÂ³n iniciada correctamente.", "success")
+        flash("Sesion iniciada correctamente.", "success")
         return redirect(url_for("main.dashboard"))
 
-    return render_template("auth.html", title="Iniciar sesiÃƒÂ³n", button="Entrar", mode="login")
+    return render_template("auth.html", title="Iniciar sesion", button="Entrar", mode="login")
 
 
 @main.route("/logout")
 def logout():
     session.clear()
-    flash("SesiÃƒÂ³n cerrada.", "success")
+    flash("Sesion cerrada.", "success")
     return redirect("/")
+
+
 @main.app_template_filter("money")
 def money_filter(value):
     return money(value or 0)
@@ -241,20 +276,14 @@ def analytics():
     ).scalar() or 0
 
     profit = (
-        db.session.query(
-            func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity)
-        )
+        db.session.query(func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity))
         .join(Product)
         .filter(Product.user_id == user_id)
         .scalar() or 0
     )
 
     top_products = (
-        db.session.query(
-            Product.name,
-            func.sum(Sale.quantity).label("qty"),
-            func.sum(Sale.total).label("revenue")
-        )
+        db.session.query(Product.name, func.sum(Sale.quantity).label("qty"), func.sum(Sale.total).label("revenue"))
         .join(Sale)
         .filter(Product.user_id == user_id)
         .group_by(Product.id)
@@ -264,10 +293,7 @@ def analytics():
     )
 
     category_sales = (
-        db.session.query(
-            Product.category,
-            func.sum(Sale.total).label("revenue")
-        )
+        db.session.query(Product.category, func.sum(Sale.total).label("revenue"))
         .join(Sale)
         .filter(Product.user_id == user_id)
         .group_by(Product.category)
@@ -276,67 +302,34 @@ def analytics():
     )
 
     alerts = []
-
     for p in products:
         sold_7_days = (
             db.session.query(func.sum(Sale.quantity))
-            .filter(
-                Sale.user_id == user_id,
-                Sale.product_id == p.id,
-                Sale.created_at >= week_start
-            )
+            .filter(Sale.user_id == user_id, Sale.product_id == p.id, Sale.created_at >= week_start)
             .scalar() or 0
         )
-
         avg_daily_sales = sold_7_days / 7
-
-        if avg_daily_sales > 0:
-            days_left = round(p.stock / avg_daily_sales, 1)
-        else:
-            days_left = None
+        days_left = round(p.stock / avg_daily_sales, 1) if avg_daily_sales > 0 else None
 
         if p.stock <= 0:
-            alerts.append({
-                "type": "critical",
-                "title": f"{p.name} agotado",
-                "text": "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
-            })
-
+            alerts.append({"type": "critical", "title": f"{p.name} agotado", "text": "Stock actual: 0. Necesitas reabastecerlo inmediatamente."})
         elif p.stock <= p.min_stock:
-            alerts.append({
-                "type": "critical",
-                "title": f"Reordenar {p.name}",
-                "text": f"Stock actual: {p.stock}. MÃƒÂ­nimo recomendado: {p.min_stock}."
-            })
-
+            alerts.append({"type": "critical", "title": f"Reordenar {p.name}", "text": f"Stock actual: {p.stock}. Minimo recomendado: {p.min_stock}."})
         elif days_left is not None and days_left <= 3:
-            alerts.append({
-                "type": "critical",
-                "title": f"{p.name} se agotarÃƒÂ¡ pronto",
-                "text": f"Con el ritmo actual de ventas, se acabarÃƒÂ¡ en aproximadamente {days_left} dÃƒÂ­as."
-            })
-
+            alerts.append({"type": "critical", "title": f"{p.name} se agotara pronto", "text": f"Con el ritmo actual de ventas, se acabara en aproximadamente {days_left} dias."})
         elif days_left is not None and days_left <= 7:
-            alerts.append({
-                "type": "warning",
-                "title": f"Vigilar {p.name}",
-                "text": f"Inventario estimado para {days_left} dÃƒÂ­as."
-            })
-
+            alerts.append({"type": "warning", "title": f"Vigilar {p.name}", "text": f"Inventario estimado para {days_left} dias."})
 
     recommendations = []
-
     if top_products:
-        recommendations.append(f"{top_products[0].name} es tu producto mÃƒÂ¡s vendido actualmente.")
-
+        recommendations.append(f"{top_products[0].name} es tu producto mas vendido actualmente.")
     if week_sales > 0:
-        recommendations.append(f"Las ventas de los ÃƒÂºltimos 7 dÃƒÂ­as suman ${week_sales:,.0f} MXN.")
-
+        recommendations.append(f"Las ventas de los ultimos 7 dias suman ${week_sales:,.0f} MXN.")
     if profit > 0:
         recommendations.append(f"La utilidad estimada de la semana fue de ${profit:,.0f} MXN.")
-
     if low_stock:
-        recommendations.append(f"Tienes {low_stock} productos con inventario bajo. ReabastÃƒÂ©celos pronto.")
+        recommendations.append(f"Tienes {low_stock} productos con inventario bajo. Reabastecellos pronto.")
+
     alerts = alerts[:5]
     return dict(
         total_products=total_products,
@@ -350,43 +343,41 @@ def analytics():
         alerts=alerts,
         recommendations=recommendations,
     )
+
+
 @main.route("/")
 def dashboard():
     user = current_user()
-
     if not user:
         session.clear()
         return render_template("landing.html")
-
     return render_template(
         "dashboard.html",
         company_name=user.company_name,
         user=user,
-trial_days_left=max(0, 14 - (datetime.utcnow() - user.created_at).days) if user.created_at else 14,
+        trial_days_left=max(0, 14 - (datetime.utcnow() - user.created_at).days) if user.created_at else 14,
         **analytics()
     )
+
 
 @main.route("/products")
 def products():
     if not session.get("user_id"):
         return redirect(url_for("main.landing"))
-
     user = current_user()
-
     if trial_expired(user):
         return render_template("trial_expired.html")
-
     q = request.args.get("q", "").strip()
     query = Product.query.filter(Product.user_id == session["user_id"])
-
     if q:
         query = query.filter(
             Product.name.ilike(f"%{q}%") |
             Product.category.ilike(f"%{q}%") |
             Product.sku.ilike(f"%{q}%")
         )
-
     return render_template("products.html", products=query.order_by(Product.name).all(), q=q, user=user)
+
+
 @main.route("/download-template")
 def download_template():
     if not session.get("user_id"):
@@ -394,41 +385,25 @@ def download_template():
 
     import pandas as pd
 
-    columns = [
-        "SKU",
-        "CÃƒÂ³digo de barras",
-        "Nombre del producto",
-        "CategorÃƒÂ­a",
-        "Proveedor",
-        "Costo",
-        "Precio de venta",
-        "Stock inicial",
-        "Stock mÃƒÂ­nimo"
-    ]
-
+    columns = ["SKU", "Codigo de barras", "Nombre del producto", "Categoria", "Proveedor", "Costo", "Precio de venta", "Stock inicial", "Stock minimo"]
     df = pd.DataFrame(columns=columns)
-
     output = BytesIO()
 
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="PRODUCTOS", startrow=3)
-
         workbook = writer.book
         ws = writer.sheets["PRODUCTOS"]
 
-        # TÃƒÂ­tulo
         ws["A1"] = "PATIA - Plantilla oficial de productos"
         ws["A2"] = "Llena esta tabla con tus productos. No cambies los nombres de las columnas."
         ws.merge_cells("A1:I1")
         ws.merge_cells("A2:I2")
 
-        # Estilos
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         from openpyxl.worksheet.table import Table, TableStyleInfo
 
         title_fill = PatternFill("solid", fgColor="0B1020")
         header_fill = PatternFill("solid", fgColor="00D4FF")
-        white_font = Font(color="FFFFFF", bold=True)
         dark_font = Font(color="0B1020", bold=True)
         center = Alignment(horizontal="center", vertical="center")
         thin = Side(border_style="thin", color="D9E2F3")
@@ -436,100 +411,40 @@ def download_template():
         ws["A1"].fill = title_fill
         ws["A1"].font = Font(color="FFFFFF", bold=True, size=18)
         ws["A1"].alignment = center
-
         ws["A2"].font = Font(color="666666", italic=True)
         ws["A2"].alignment = center
 
-        # Encabezados
         for cell in ws[4]:
             cell.fill = header_fill
             cell.font = dark_font
             cell.alignment = center
             cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
-        # Crear filas vacÃƒÂ­as para que se vea como tabla
         for row in range(5, 105):
             for col in range(1, 10):
-                ws.cell(row=row, column=col).border = Border(
-                    top=thin, left=thin, right=thin, bottom=thin
-                )
+                ws.cell(row=row, column=col).border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
-        # Tabla
         table = Table(displayName="TablaProductosPATIA", ref="A4:I104")
-        style = TableStyleInfo(
-            name="TableStyleMedium2",
-            showFirstColumn=False,
-            showLastColumn=False,
-            showRowStripes=True,
-            showColumnStripes=False
-        )
+        style = TableStyleInfo(name="TableStyleMedium2", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         table.tableStyleInfo = style
         ws.add_table(table)
 
-        # Anchos
-        widths = {
-            "A": 18, "B": 22, "C": 32, "D": 20, "E": 24,
-            "F": 14, "G": 18, "H": 18, "I": 18
-        }
-
+        widths = {"A": 18, "B": 22, "C": 32, "D": 20, "E": 24, "F": 14, "G": 18, "H": 18, "I": 18}
         for col, width in widths.items():
             ws.column_dimensions[col].width = width
-
         ws.freeze_panes = "A5"
 
-        # Hoja instrucciones
-        instrucciones = workbook.create_sheet("INSTRUCCIONES")
-
-        instrucciones["A1"] = "PATIA - GuÃƒÂ­a para llenar tu catÃƒÂ¡logo"
-        instrucciones["A1"].font = Font(bold=True, size=18, color="FFFFFF")
-        instrucciones["A1"].fill = title_fill
-
-        instrucciones["A3"] = "1. No modifiques los nombres de las columnas."
-        instrucciones["A4"] = "2. Cada fila debe representar un producto."
-        instrucciones["A5"] = "3. SKU es el cÃƒÂ³digo interno del producto."
-        instrucciones["A6"] = "4. CÃƒÂ³digo de barras puede ser el cÃƒÂ³digo del empaque."
-        instrucciones["A7"] = "5. Costo es lo que te cuesta comprar el producto."
-        instrucciones["A8"] = "6. Precio de venta es el precio al pÃƒÂºblico."
-        instrucciones["A9"] = "7. Stock inicial es la cantidad actual disponible."
-        instrucciones["A10"] = "8. Stock mÃƒÂ­nimo activa alertas de reabastecimiento."
-
-        instrucciones.column_dimensions["A"].width = 90
-
-        # Hoja nota preliminar
-        nota = workbook.create_sheet("NOTA PRELIMINAR")
-
-        nota["A1"] = "Bienvenido a PATIA"
-        nota["A1"].font = Font(bold=True, size=20, color="FFFFFF")
-        nota["A1"].fill = title_fill
-
-        nota["A3"] = "Para comenzar, llena la hoja PRODUCTOS con la informaciÃƒÂ³n actual de tu negocio."
-        nota["A4"] = "DespuÃƒÂ©s sube este archivo en la secciÃƒÂ³n Inventario dentro de PATIA."
-        nota["A6"] = "PATIA utilizarÃƒÂ¡ esta informaciÃƒÂ³n para configurar:"
-        nota["A7"] = "Ã¢â‚¬Â¢ Inventario"
-        nota["A8"] = "Ã¢â‚¬Â¢ Alertas de stock"
-        nota["A9"] = "Ã¢â‚¬Â¢ Punto de venta"
-        nota["A10"] = "Ã¢â‚¬Â¢ Reportes"
-        nota["A11"] = "Ã¢â‚¬Â¢ AnÃƒÂ¡lisis inteligente de ventas"
-
-        nota.column_dimensions["A"].width = 90
-
     output.seek(0)
+    return send_file(output, as_attachment=True, download_name="plantilla_productos_PATIA.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-    return send_file(
-        output,
-        as_attachment=True,
-        download_name="plantilla_productos_PATIA.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+
 @main.route("/import-products", methods=["POST"])
 def import_products():
     import pandas as pd
-
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
 
     file = request.files.get("catalog_file")
-
     if not file:
         flash("Selecciona un archivo.", "danger")
         return redirect(url_for("main.products") + "#catalogo")
@@ -539,17 +454,13 @@ def import_products():
             df = pd.read_csv(file)
         else:
             df = pd.read_excel(file, sheet_name="PRODUCTOS", header=3)
+
         df = df.rename(columns={
-    "SKU": "sku",
-    "CÃƒÂ³digo de barras": "barcode",
-    "Nombre del producto": "name",
-    "CategorÃƒÂ­a": "category",
-    "Proveedor": "supplier",
-    "Costo": "cost_price",
-    "Precio de venta": "sale_price",
-    "Stock inicial": "stock",
-    "Stock mÃƒÂ­nimo": "min_stock"
-})
+            "SKU": "sku", "Codigo de barras": "barcode", "Nombre del producto": "name",
+            "Categoria": "category", "Proveedor": "supplier", "Costo": "cost_price",
+            "Precio de venta": "sale_price", "Stock inicial": "stock", "Stock minimo": "min_stock"
+        })
+
         for _, row in df.iterrows():
             sku = str(row.get("sku", "")).strip()
             raw_barcode = row.get("barcode", "")
@@ -558,10 +469,7 @@ def import_products():
             except:
                 barcode = str(raw_barcode).strip()
 
-            existing = Product.query.filter_by(
-                user_id=session["user_id"], sku=sku
-            ).first()
-
+            existing = Product.query.filter_by(user_id=session["user_id"], sku=sku).first()
             if existing:
                 existing.stock += int(row.get("stock", 0) or 0)
                 existing.sale_price = float(row.get("sale_price", 0) or 0)
@@ -571,9 +479,7 @@ def import_products():
                 continue
 
             if not existing and barcode:
-                existing = Product.query.filter_by(
-                    user_id=session["user_id"], barcode=barcode
-                ).first()
+                existing = Product.query.filter_by(user_id=session["user_id"], barcode=barcode).first()
 
             if existing:
                 existing.stock = int(row.get("stock", 0) or 0)
@@ -582,28 +488,23 @@ def import_products():
                 existing.min_stock = int(row.get("min_stock", 5) or 5)
             else:
                 product = Product(
-                    user_id=session["user_id"],
-                    sku=sku,
-                    barcode=barcode,
-                    name=str(row.get("name", "")).strip(),
-                    category=str(row.get("category", "General")).strip(),
-                    supplier=str(row.get("supplier", "")).strip(),
-                    cost_price=float(row.get("cost_price", 0) or 0),
-                    sale_price=float(row.get("sale_price", 0) or 0),
-                    stock=int(row.get("stock", 0) or 0),
+                    user_id=session["user_id"], sku=sku, barcode=barcode,
+                    name=str(row.get("name", "")).strip(), category=str(row.get("category", "General")).strip(),
+                    supplier=str(row.get("supplier", "")).strip(), cost_price=float(row.get("cost_price", 0) or 0),
+                    sale_price=float(row.get("sale_price", 0) or 0), stock=int(row.get("stock", 0) or 0),
                     min_stock=int(row.get("min_stock", 5) or 5)
                 )
                 db.session.add(product)
 
         db.session.commit()
-
-        flash("CatÃƒÂ¡logo importado correctamente.", "success")
+        flash("Catalogo importado correctamente.", "success")
 
     except Exception as e:
         db.session.rollback()
         flash(f"Error al importar: {e}", "danger")
 
     return redirect(url_for("main.products"))
+
 
 @main.route("/products/new", methods=["POST"])
 def add_product():
@@ -614,66 +515,45 @@ def add_product():
         name=request.form["name"],
         category=request.form.get("category") or "General",
         supplier=request.form.get("supplier"),
-       cost_price=float(request.form.get("cost_price") or 0),
-sale_price=float(request.form.get("sale_price") or 0),
-stock=int(request.form.get("stock") or 0),
-min_stock=int(request.form.get("min_stock") or 5),
+        cost_price=float(request.form.get("cost_price") or 0),
+        sale_price=float(request.form.get("sale_price") or 0),
+        stock=int(request.form.get("stock") or 0),
+        min_stock=int(request.form.get("min_stock") or 5),
     )
-
     db.session.add(p)
     db.session.commit()
-
     flash("Producto creado correctamente.", "success")
     return redirect(url_for("main.products"))
+
 
 @main.route("/sell", methods=["GET", "POST"])
 def sell():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-
     user = current_user()
-
     if trial_expired(user):
         return render_template("trial_expired.html")
 
     if request.method == "POST":
-        product = Product.query.filter_by(
-            id=int(request.form["product_id"]),
-            user_id=session["user_id"]
-        ).first_or_404()
-
+        product = Product.query.filter_by(id=int(request.form["product_id"]), user_id=session["user_id"]).first_or_404()
         qty = int(request.form.get("quantity") or 1)
-
         if qty <= 0:
             flash("La cantidad debe ser mayor a cero.", "danger")
-
         elif product.stock < qty:
             flash("No hay suficiente inventario.", "danger")
-
         else:
             product.stock -= qty
-            sale = Sale(
-                user_id=session["user_id"],
-                product_id=product.id,
-                quantity=qty,
-                unit_price=product.sale_price,
-                total=qty * product.sale_price
-            )
+            sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
             db.session.add(sale)
             db.session.commit()
             flash(f"Venta registrada: {product.name} x{qty}.", "success")
-
         return redirect(url_for("main.sell"))
 
-    sales = Sale.query.filter_by(
-        user_id=session["user_id"]
-    ).order_by(Sale.created_at.desc()).limit(12).all()
-
-    products = Product.query.filter_by(
-        user_id=session["user_id"]
-    ).order_by(Product.name).all()
-
+    sales = Sale.query.filter_by(user_id=session["user_id"]).order_by(Sale.created_at.desc()).limit(12).all()
+    products = Product.query.filter_by(user_id=session["user_id"]).order_by(Product.name).all()
     return render_template("sell.html", products=products, sales=sales, user=user)
+
+
 @main.route("/sell-cart", methods=["POST"])
 def sell_cart():
     from flask import jsonify
@@ -686,45 +566,29 @@ def sell_cart():
 
     try:
         for item in items:
-            product = Product.query.filter_by(
-                id=int(item["product_id"]),
-                user_id=user.id
-            ).first()
-
+            product = Product.query.filter_by(id=int(item["product_id"]), user_id=user.id).first()
             if not product:
-                return jsonify({"ok": False, "error": f"Producto no encontrado"})
-
+                return jsonify({"ok": False, "error": "Producto no encontrado"})
             qty = int(item["quantity"])
-
             if product.stock < qty:
                 return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"})
-
             product.stock -= qty
-            sale = Sale(
-                user_id=user.id,
-                product_id=product.id,
-                quantity=qty,
-                unit_price=product.sale_price,
-                total=qty * product.sale_price
-            )
+            sale = Sale(user_id=user.id, product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
             db.session.add(sale)
-
         db.session.commit()
         return jsonify({"ok": True})
-
     except Exception as e:
         db.session.rollback()
         return jsonify({"ok": False, "error": str(e)})
+
 
 @main.route("/reports")
 def reports():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
-
     if user.email == "albertonicopat@gmail.com" or (user.plan or "").lower().strip() == "pro":
         return render_template("reports.html", user=user, **analytics())
-
     return redirect(url_for("main.subscribe"))
 
 
@@ -732,74 +596,48 @@ def reports():
 def suppliers():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-
     user = current_user()
 
     if request.method == "POST":
         supplier_name = request.form["name"].strip()
-
-        existing_supplier = Supplier.query.filter_by(
-            user_id=session["user_id"],
-            name=supplier_name
-        ).first()
-
+        existing_supplier = Supplier.query.filter_by(user_id=session["user_id"], name=supplier_name).first()
         if existing_supplier:
             flash("Ese proveedor ya existe.", "danger")
             return redirect(url_for("main.suppliers"))
-
-        s = Supplier(
-            user_id=session["user_id"],
-            name=supplier_name,
-            contact=request.form.get("contact"),
-            phone=request.form.get("phone"),
-            notes=request.form.get("notes")
-        )
-
+        s = Supplier(user_id=session["user_id"], name=supplier_name, contact=request.form.get("contact"), phone=request.form.get("phone"), notes=request.form.get("notes"))
         db.session.add(s)
         db.session.commit()
-
         flash("Proveedor guardado.", "success")
         return redirect(url_for("main.suppliers"))
 
-    suppliers = Supplier.query.filter_by(
-        user_id=session["user_id"]
-    ).order_by(Supplier.name).all()
-
+    suppliers = Supplier.query.filter_by(user_id=session["user_id"]).order_by(Supplier.name).all()
     return render_template("suppliers.html", suppliers=suppliers, user=user)
+
+
 @main.route("/subscribe")
 def subscribe():
     user = current_user()
-
     if not user:
         return redirect(url_for("main.login"))
-
     return render_template("subscribe.html", user=user)
+
+
 @main.route("/create-checkout-session", methods=["POST"])
 def create_checkout_session():
     user = current_user()
-
     if not user:
         return redirect(url_for("main.login"))
-
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
-
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         mode="subscription",
-        line_items=[
-            {
-                "price": current_app.config["STRIPE_PRICE_ID"],
-                "quantity": 1,
-            }
-        ],
+        line_items=[{"price": current_app.config["STRIPE_PRICE_ID"], "quantity": 1}],
         success_url=url_for("main.stripe_success", _external=True),
         cancel_url=url_for("main.subscribe", _external=True),
-        metadata={
-            "user_id": user.id
-        }
+        metadata={"user_id": user.id}
     )
-
     return redirect(checkout_session.url, code=303)
+
 
 @main.route("/stripe-webhook", methods=["POST"])
 def stripe_webhook():
@@ -859,43 +697,28 @@ def stripe_webhook():
 
     return "", 200
 
-    if event["type"] == "checkout.session.completed":
-        print("Ã¢Å“â€¦ Pago confirmado por Stripe")
 
-    return "", 200
 @main.route("/stripe-success")
 def stripe_success():
     user = current_user()
-
     if not user:
         return redirect(url_for("main.login"))
     user.plan = "pro"
     db.session.commit()
-
     flash("Tu cuenta PATIA Pro ha sido activada.")
-
     send_email(
         to=user.email,
-        subject="Ã‚Â¡Tu cuenta PATIA Pro estÃƒÂ¡ activa! Ã°Å¸Å¡â‚¬",
+        subject="Tu cuenta PATIA Pro esta activa!",
         html=f"""
         <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
             <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
-            <h1 style="color:#29d3a8;">Ã‚Â¡Ya eres PATIA Pro! Ã°Å¸Å½â€°</h1>
-            <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">
-                Tu suscripciÃƒÂ³n ha sido activada correctamente. Ahora tienes acceso a 
-                <strong style="color:#fff;">Reportes IA</strong> y todas las funciones avanzadas.
-            </p>
-            <a href="https://patiaapp.com/reports" 
-               style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">
-                Ver mis Reportes IA Ã¢â€ â€™
-            </a>
-            <p style="margin-top:32px;color:#9aa8c7;font-size:13px;">
-                Tu suscripciÃƒÂ³n se renueva automÃƒÂ¡ticamente cada mes. Puedes cancelar cuando quieras desde Mi SuscripciÃƒÂ³n.
-            </p>
+            <h1 style="color:#29d3a8;">Ya eres PATIA Pro!</h1>
+            <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Tu suscripcion ha sido activada correctamente. Ahora tienes acceso a <strong style="color:#fff;">Reportes IA</strong> y todas las funciones avanzadas.</p>
+            <a href="https://patiaapp.com/reports" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Ver mis Reportes IA</a>
+            <p style="margin-top:32px;color:#9aa8c7;font-size:13px;">Tu suscripcion se renueva automaticamente cada mes. Puedes cancelar cuando quieras desde Mi Suscripcion.</p>
         </div>
         """
     )
-
     return redirect(url_for("main.dashboard"))
 
 
@@ -904,30 +727,23 @@ def cancel_sale(sale_id):
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
-
-    sale = Sale.query.filter_by(
-        id=sale_id,
-        user_id=user.id
-    ).first_or_404()
-
+    sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
     product = Product.query.get(sale.product_id)
     if product:
         product.stock += sale.quantity
-
     db.session.delete(sale)
     db.session.commit()
-
     flash("Venta cancelada. Stock devuelto al inventario.", "success")
     return redirect(url_for("main.sell"))
+
+
 @main.route("/subscription")
 def subscription():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
-
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     subscription_info = None
-
     if user.stripe_subscription_id:
         try:
             sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
@@ -937,7 +753,6 @@ def subscription():
             subscription_info = sub
         except Exception:
             pass
-
     return render_template("subscription.html", user=user, subscription_info=subscription_info)
 
 
@@ -946,20 +761,14 @@ def cancel_subscription():
     user = current_user()
     if not user or not user.stripe_subscription_id:
         return redirect(url_for("main.dashboard"))
-
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
-
     try:
-        stripe.Subscription.modify(
-            user.stripe_subscription_id,
-            cancel_at_period_end=True
-        )
+        stripe.Subscription.modify(user.stripe_subscription_id, cancel_at_period_end=True)
         user.cancel_at_period_end = True
         db.session.commit()
-        flash("Tu suscripciÃƒÂ³n se cancelarÃƒÂ¡ al final del periodo pagado.", "success")
+        flash("Tu suscripcion se cancelara al final del periodo pagado.", "success")
     except Exception as e:
         flash(f"Error al cancelar: {e}", "danger")
-
     return redirect(url_for("main.subscription"))
 
 
@@ -968,20 +777,14 @@ def reactivate_subscription():
     user = current_user()
     if not user or not user.stripe_subscription_id:
         return redirect(url_for("main.dashboard"))
-
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
-
     try:
-        stripe.Subscription.modify(
-            user.stripe_subscription_id,
-            cancel_at_period_end=False
-        )
+        stripe.Subscription.modify(user.stripe_subscription_id, cancel_at_period_end=False)
         user.cancel_at_period_end = False
         db.session.commit()
-        flash("Tu suscripciÃƒÂ³n ha sido reactivada.", "success")
+        flash("Tu suscripcion ha sido reactivada.", "success")
     except Exception as e:
         flash(f"Error al reactivar: {e}", "danger")
-
     return redirect(url_for("main.subscription"))
 
 
@@ -990,54 +793,40 @@ def billing_portal():
     user = current_user()
     if not user or not user.stripe_customer_id:
         return redirect(url_for("main.subscribe"))
-
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
-
     try:
-        portal = stripe.billing_portal.Session.create(
-            customer=user.stripe_customer_id,
-            return_url=url_for("main.subscription", _external=True)
-        )
+        portal = stripe.billing_portal.Session.create(customer=user.stripe_customer_id, return_url=url_for("main.subscription", _external=True))
         return redirect(portal.url)
     except Exception as e:
         flash(f"Error: {e}", "danger")
         return redirect(url_for("main.subscription"))
+
+
 @main.route("/admin")
 def admin():
     user = current_user()
-
     if not user:
         session.clear()
         return redirect(url_for("main.login"))
-
     if user.email != "albertonicopat@gmail.com":
         flash("No autorizado.", "danger")
         return redirect(url_for("main.dashboard"))
 
     users = User.query.order_by(User.created_at.desc()).all()
     today = datetime.utcnow()
-
     clients = []
-    total_products = 0
-    total_sales_count = 0
-    total_sales_money = 0
-    trial_clients = 0
-    expired_clients = 0
-    expiring_soon = 0
-    new_this_week = 0
-    new_this_month = 0
+    total_products = total_sales_count = total_sales_money = trial_clients = expired_clients = expiring_soon = new_this_week = new_this_month = 0
 
     for u in users:
         products_count = Product.query.filter_by(user_id=u.id).count()
         sales_count = Sale.query.filter_by(user_id=u.id).count()
         sales_money = db.session.query(func.sum(Sale.total)).filter_by(user_id=u.id).scalar() or 0
-
         days_in_patia = (today - u.created_at).days if u.created_at else 0
         trial_days_left = max(0, 14 - days_in_patia)
 
         if u.plan == "pro":
             status = "Pro"
-            trial_days_left = "Ã¢Ë†Å¾"
+            trial_days_left = "inf"
         elif trial_days_left > 0:
             status = "Prueba"
             trial_clients += 1
@@ -1045,47 +834,27 @@ def admin():
             status = "Vencido"
             expired_clients += 1
 
-        if trial_days_left != "Ã¢Ë†Å¾" and 0 < trial_days_left <= 7:
+        if trial_days_left != "inf" and 0 < trial_days_left <= 7:
             expiring_soon += 1
-
         if days_in_patia <= 7:
             new_this_week += 1
-
         if days_in_patia <= 30:
             new_this_month += 1
 
         total_products += products_count
         total_sales_count += sales_count
         total_sales_money += sales_money
-
-        clients.append({
-            "user": u,
-            "products_count": products_count,
-            "sales_count": sales_count,
-            "sales_money": sales_money,
-            "days_in_patia": days_in_patia,
-            "trial_days_left": trial_days_left,
-            "status": status
-        })
+        clients.append({"user": u, "products_count": products_count, "sales_count": sales_count, "sales_money": sales_money, "days_in_patia": days_in_patia, "trial_days_left": trial_days_left, "status": status})
 
     top_client = max(clients, key=lambda c: c["products_count"], default=None)
     latest_client = clients[0] if clients else None
 
-    return render_template(
-        "admin.html",
-        clients=clients,
-        total_clients=len(users),
-        total_products=total_products,
-        total_sales_count=total_sales_count,
-        total_sales_money=total_sales_money,
-        trial_clients=trial_clients,
-        expired_clients=expired_clients,
-        expiring_soon=expiring_soon,
-        new_this_week=new_this_week,
-        new_this_month=new_this_month,
-        top_client=top_client,
-        latest_client=latest_client
-    )
+    return render_template("admin.html", clients=clients, total_clients=len(users), total_products=total_products,
+        total_sales_count=total_sales_count, total_sales_money=total_sales_money, trial_clients=trial_clients,
+        expired_clients=expired_clients, expiring_soon=expiring_soon, new_this_week=new_this_week,
+        new_this_month=new_this_month, top_client=top_client, latest_client=latest_client)
+
+
 @main.route("/reset-demo")
 def reset_demo():
     from seed import seed_data
@@ -1093,25 +862,18 @@ def reset_demo():
     flash("Datos demo cargados.", "success")
     return redirect(url_for("main.dashboard"))
 
+
 @main.route("/products/<int:product_id>/delete", methods=["POST"])
 def delete_product(product_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-
-    product = Product.query.filter_by(
-        id=product_id,
-        user_id=session["user_id"]
-    ).first_or_404()
-
-    Sale.query.filter_by(
-        product_id=product.id,
-        user_id=session["user_id"]
-    ).delete()
-
+    product = Product.query.filter_by(id=product_id, user_id=session["user_id"]).first_or_404()
+    Sale.query.filter_by(product_id=product.id, user_id=session["user_id"]).delete()
     db.session.delete(product)
     db.session.commit()
-
     return redirect(url_for("main.products") + "#catalogo")
+
+
 @main.route("/products/delete-all", methods=["POST"])
 def delete_all_products():
     if not session.get("user_id"):
@@ -1120,8 +882,9 @@ def delete_all_products():
     Sale.query.filter_by(user_id=user_id).delete()
     Product.query.filter_by(user_id=user_id).delete()
     db.session.commit()
-    flash("CatÃƒÂ¡logo eliminado completamente.", "success")
+    flash("Catalogo eliminado completamente.", "success")
     return redirect(url_for("main.products"))
+
 
 @main.route("/products/delete-selected", methods=["POST"])
 def delete_selected_products():
@@ -1138,37 +901,30 @@ def delete_selected_products():
     db.session.commit()
     flash(f"{len(ids)} productos eliminados.", "success")
     return redirect(url_for("main.products"))
+
+
 @main.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
 def delete_supplier(supplier_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-
-    supplier = Supplier.query.filter_by(
-        id=supplier_id,
-        user_id=session["user_id"]
-    ).first_or_404()
-
+    supplier = Supplier.query.filter_by(id=supplier_id, user_id=session["user_id"]).first_or_404()
     db.session.delete(supplier)
     db.session.commit()
-
     flash("Proveedor eliminado correctamente.", "success")
     return redirect(url_for("main.suppliers"))
+
+
 @main.route("/admin/delete-user/<int:user_id>", methods=["POST"])
 def admin_delete_user(user_id):
     admin_user = current_user()
-
     if not admin_user or admin_user.email != "albertonicopat@gmail.com":
         return redirect(url_for("main.dashboard"))
-
     user = User.query.get_or_404(user_id)
-
     if user.email == "albertonicopat@gmail.com":
         flash("No puedes eliminar tu cuenta de administrador.")
         return redirect(url_for("main.admin"))
-
     db.session.delete(user)
     db.session.commit()
-
     flash("Cliente eliminado correctamente.")
     return redirect(url_for("main.admin"))
 
@@ -1176,14 +932,10 @@ def admin_delete_user(user_id):
 @main.route("/admin/make-pro/<int:user_id>", methods=["POST"])
 def admin_make_pro(user_id):
     admin_user = current_user()
-
     if not admin_user or admin_user.email != "albertonicopat@gmail.com":
         return redirect(url_for("main.dashboard"))
-
     user = User.query.get_or_404(user_id)
     user.plan = "pro"
-
     db.session.commit()
-
     flash("Cliente marcado como PRO.")
     return redirect(url_for("main.admin"))
