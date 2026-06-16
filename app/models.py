@@ -67,6 +67,7 @@ class User(db.Model):
     verification_code_expires = db.Column(db.DateTime, nullable=True)
     reset_token = db.Column(db.String(100), nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
+    session_token = db.Column(db.String(64), nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     plan = db.Column(db.String(20), default="trial")

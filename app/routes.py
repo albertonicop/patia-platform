@@ -6,6 +6,7 @@ import string
 from datetime import datetime, timedelta
 from io import BytesIO
 import stripe
+import secrets
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file
 from sqlalchemy import func
 from . import db
@@ -18,7 +19,14 @@ def current_user():
     user_id = session.get("user_id")
     if not user_id:
         return None
-    return User.query.get(user_id)
+    user = User.query.get(user_id)
+    if not user:
+        return None
+    if user.session_token and user.session_token != session.get("session_token"):
+        session.clear()
+        session["kicked_out"] = True
+        return None
+    return user
 
 
 def trial_expired(user):
@@ -233,7 +241,11 @@ def login():
             flash("Correo o contraseña incorrectos.", "danger")
             return redirect(url_for("main.login"))
 
+        token = secrets.token_hex(32)
+        user.session_token = token
+        db.session.commit()
         session["user_id"] = user.id
+        session["session_token"] = token
         flash("Sesión iniciada correctamente.", "success")
         return redirect(url_for("main.dashboard"))
 
