@@ -995,3 +995,78 @@ def settings():
         flash("Configuración guardada.", "success")
         return redirect(url_for("main.settings"))
     return render_template("settings.html", user=user)
+    @main.route("/receipt/<int:sale_id>")
+def receipt(sale_id):
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import cm
+    import io
+
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
+    sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
+    product = Product.query.get(sale.product_id)
+
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=(8*cm, 15*cm))
+    w, h = 8*cm, 15*cm
+
+    # Encabezado
+    c.setFont("Helvetica-Bold", 10)
+    c.drawCentredString(w/2, h - 1*cm, user.company_name or "Mi Negocio")
+    c.setFont("Helvetica", 7)
+    if user.rfc:
+        c.drawCentredString(w/2, h - 1.5*cm, f"RFC: {user.rfc}")
+    if user.address:
+        c.drawCentredString(w/2, h - 2*cm, user.address)
+    if user.city:
+        c.drawCentredString(w/2, h - 2.4*cm, f"{user.city}, {user.state or ''}")
+    if user.phone:
+        c.drawCentredString(w/2, h - 2.8*cm, f"Tel: {user.phone}")
+
+    c.line(0.3*cm, h - 3.2*cm, w - 0.3*cm, h - 3.2*cm)
+
+    # Folio y fecha
+    c.setFont("Helvetica", 7)
+    c.drawString(0.5*cm, h - 3.7*cm, f"Folio: #{sale.id:04d}")
+    c.drawString(0.5*cm, h - 4.1*cm, f"Fecha: {sale.created_at.strftime('%d/%m/%Y %H:%M')}")
+
+    c.line(0.3*cm, h - 4.5*cm, w - 0.3*cm, h - 4.5*cm)
+
+    # Productos
+    c.setFont("Helvetica-Bold", 7)
+    c.drawString(0.5*cm, h - 5*cm, "Producto")
+    c.drawRightString(w - 0.5*cm, h - 5*cm, "Total")
+
+    c.setFont("Helvetica", 7)
+    subtotal = sale.total / 1.16
+    iva = sale.total - subtotal
+
+    c.drawString(0.5*cm, h - 5.5*cm, f"{product.name} x{sale.quantity}")
+    c.drawString(0.5*cm, h - 5.9*cm, f"@ ${sale.unit_price:,.2f} c/u")
+    c.drawRightString(w - 0.5*cm, h - 5.5*cm, f"${sale.total:,.2f}")
+
+    c.line(0.3*cm, h - 6.3*cm, w - 0.3*cm, h - 6.3*cm)
+
+    # Totales
+    c.drawString(0.5*cm, h - 6.8*cm, "Subtotal:")
+    c.drawRightString(w - 0.5*cm, h - 6.8*cm, f"${subtotal:,.2f}")
+    c.drawString(0.5*cm, h - 7.2*cm, "IVA (16%):")
+    c.drawRightString(w - 0.5*cm, h - 7.2*cm, f"${iva:,.2f}")
+
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(0.5*cm, h - 7.7*cm, "TOTAL:")
+    c.drawRightString(w - 0.5*cm, h - 7.7*cm, f"${sale.total:,.2f}")
+
+    c.line(0.3*cm, h - 8.1*cm, w - 0.3*cm, h - 8.1*cm)
+
+    # Pie
+    c.setFont("Helvetica", 7)
+    c.drawCentredString(w/2, h - 8.6*cm, "¡Gracias por su compra!")
+    c.drawCentredString(w/2, h - 9*cm, "patiaapp.com")
+
+    c.save()
+    buffer.seek(0)
+    return send_file(buffer, mimetype="application/pdf", download_name=f"recibo_{sale.id}.pdf")
