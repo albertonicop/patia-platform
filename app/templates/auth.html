@@ -25,13 +25,19 @@
       </div>
 
       <form method="POST" class="auth-form">
+        {% if request.args.get("plan") == "pro" %}
+          <input type="hidden" name="plan" value="pro">
+        {% endif %}
+        {% if plan %}
+          <input type="hidden" name="plan" value="{{ plan }}">
+        {% endif %}
+
         {% if mode == "register" %}
           <div class="form-grid">
             <div class="form-group">
               <label>Nombre</label>
               <input name="first_name" placeholder="Tu nombre" required>
             </div>
-
             <div class="form-group">
               <label>Apellido</label>
               <input name="last_name" placeholder="Tu apellido" required>
@@ -45,36 +51,42 @@
 
           <div class="form-group">
             <label>Teléfono</label>
-            <input name="phone" placeholder="Número telefónico">
+            <input name="phone" placeholder="Número telefónico" required>
           </div>
 
           <div class="form-group">
             <label>Dirección</label>
-            <input name="address" placeholder="Calle, número, colonia">
+            <input name="address" placeholder="Calle, número, colonia" required>
           </div>
 
           <div class="form-grid">
             <div class="form-group">
               <label>Ciudad</label>
-              <input name="city" placeholder="Ciudad">
+              <input name="city" placeholder="Ciudad" required>
             </div>
-
             <div class="form-group">
               <label>Estado</label>
-              <input name="state" placeholder="Estado">
+              <input name="state" placeholder="Estado" required>
             </div>
           </div>
 
-          <div class="form-group">
-            <label>Giro del negocio</label>
-            <select name="business_type">
-              <option value="Minisúper">Minisúper</option>
-              <option value="Abarrotes">Abarrotes</option>
-              <option value="Ferretería">Ferretería</option>
-              <option value="Farmacia">Farmacia</option>
-              <option value="Distribuidora">Distribuidora</option>
-              <option value="Otro">Otro</option>
-            </select>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Código postal</label>
+              <input name="postal_code" placeholder="CP" required>
+            </div>
+            <div class="form-group">
+              <label>Giro del negocio</label>
+              <select name="business_type" required>
+                <option value="">Selecciona...</option>
+                <option value="Minisúper">Minisúper</option>
+                <option value="Abarrotes">Abarrotes</option>
+                <option value="Ferretería">Ferretería</option>
+                <option value="Farmacia">Farmacia</option>
+                <option value="Distribuidora">Distribuidora</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
           </div>
         {% endif %}
 
@@ -85,20 +97,10 @@
 
         <div class="form-group">
           <label>Contraseña</label>
-          <input type="password" name="password" placeholder="••••••••" required>
+          <input type="password" name="password" placeholder="••••••••" required minlength="8">
         </div>
 
-        <button type="submit" class="auth-button">{{ button }}</button>
-      </form>
-
-      <div class="auth-switch">
-        {% if mode == "login" %}
-          <p>¿Todavía no tienes cuenta? <a href="{{ url_for('main.register') }}">Crear cuenta</a></p>
-        {% else %}
-          <p>¿Ya tienes cuenta? <a href="{{ url_for('main.login') }}">Iniciar sesión</a></p>
-        {% endif %}
-      </div>
-    </section>
-  </main>
-</body>
-</html>
+ <button type="submit" class="auth-btn">{{ button }}</button>
+{% if mode == "login" %}
+<a href="/forgot-password" style="display:block;text-align:center;margin-top:16px;color:#29d3a8;font-size:14px;">¿Olvidaste tu contraseña?</a>
+{% endif %}
