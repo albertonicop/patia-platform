@@ -257,21 +257,21 @@ def login():
         session["user_id"] = user.id
         session["session_token"] = token
         days_used = (datetime.utcnow() - user.created_at).days
-if days_used >= 12 and not user.trial_warning_sent and user.plan != "pro":
-    send_email(
-        to=user.email,
-        subject="Tu prueba gratuita de PATIA termina en 2 días",
-        html=f"""
-        <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-            <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
-            <h1 style="color:#ff5c7a;">Tu prueba termina en 2 días</h1>
-            <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Hola {user.first_name or user.company_name}, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.</p>
-            <a href="https://patiaapp.com/subscribe" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Activar PATIA Pro</a>
-        </div>
-        """
-    )
-    user.trial_warning_sent = True
-    db.session.commit()
+        if days_used >= 12 and not user.trial_warning_sent and user.plan != "pro":
+            send_email(
+                to=user.email,
+                subject="Tu prueba gratuita de PATIA termina en 2 días",
+                html=f"""
+                <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
+                    <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
+                    <h1 style="color:#ff5c7a;">Tu prueba termina en 2 días</h1>
+                    <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Hola {user.first_name or user.company_name}, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.</p>
+                    <a href="https://patiaapp.com/subscribe" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Activar PATIA Pro</a>
+                </div>
+                """
+            )
+            user.trial_warning_sent = True
+            db.session.commit()
         flash("Sesión iniciada correctamente.", "success")
         return redirect(url_for("main.dashboard"))
 
