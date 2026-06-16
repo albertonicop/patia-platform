@@ -1,3 +1,4 @@
+import resend
 from datetime import datetime, timedelta
 from io import BytesIO
 import stripe
