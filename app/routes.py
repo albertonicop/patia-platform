@@ -192,7 +192,7 @@ def forgot_password():
             db.session.commit()
             send_email(
                 to=user.email,
-                subject="Recupera tu contrasena PATIA",
+                subject="Recupera tu contraseña PATIA",
                 html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                     <h1 style="color:#29d3a8;">Recuperar contrasena</h1>
