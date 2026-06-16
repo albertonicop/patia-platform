@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import resend
 from email_validator import validate_email, EmailNotValidError
 import random
@@ -195,9 +195,9 @@ def forgot_password():
                 subject="Recupera tu contraseña PATIA",
                 html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                    <h1 style="color:#29d3a8;">Recuperar contrasena</h1>
-                    <p style="color:#9aa8c7;">Haz clic en el boton para crear una nueva contrasena. Expira en 30 minutos.</p>
-                    <a href="https://patiaapp.com/reset-password/{token}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Crear nueva contrasena</a>
+                    <h1 style="color:#29d3a8;">Recuperar contraseña</h1>
+                    <p style="color:#9aa8c7;">Haz clic en el boton para crear una nueva contraseña. Expira en 30 minutos.</p>
+                    <a href="https://patiaapp.com/reset-password/{token}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Crear nueva contraseña</a>
                 </div>
                 """
             )
@@ -210,17 +210,16 @@ def forgot_password():
 def reset_password(token):
     user = User.query.filter_by(reset_token=token).first()
     if not user or user.reset_token_expires < datetime.utcnow():
-        flash("El enlace expiro o no es valido.", "danger")
-        return redirect(url_for("main.forgot_password"))
+        return render_template("reset_password.html", token=None, expired=True)
     if request.method == "POST":
         password = request.form["password"]
         user.set_password(password)
         user.reset_token = None
         user.reset_token_expires = None
         db.session.commit()
-        flash("Contrasena actualizada. Inicia sesion.", "success")
+        flash("Contraseña actualizada. Inicia sesión.", "success")
         return redirect(url_for("main.login"))
-    return render_template("reset_password.html", token=token)
+    return render_template("reset_password.html", token=token, expired=False)
 
 
 @main.route("/login", methods=["GET", "POST"])
