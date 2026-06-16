@@ -31,18 +31,7 @@ def create_app():
     app.register_blueprint(main)
 
     with app.app_context():
+        db.drop_all()
         db.create_all()
-        import sqlalchemy as sa
-        with db.engine.connect() as conn:
-            for col, coltype in [
-                ("trial_warning_sent", "BOOLEAN DEFAULT 0"),
-                ("rfc", "VARCHAR(13)"),
-                ("tax_regime", "VARCHAR(120)"),
-            ]:
-                try:
-                    conn.execute(sa.text(f"ALTER TABLE user ADD COLUMN {col} {coltype}"))
-                    conn.commit()
-                except:
-                    pass
 
     return app
