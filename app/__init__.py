@@ -157,7 +157,7 @@ def create_app():
                 "default-src 'self'",
                 "base-uri 'self'",
                 "frame-ancestors 'none'",
-                "form-action 'self'",
+                "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
                 "object-src 'none'",
                 "img-src 'self' data: https://patiaapp.com",
                 "font-src 'self' https://cdnjs.cloudflare.com data:",
