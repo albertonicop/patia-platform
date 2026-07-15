@@ -2,10 +2,11 @@ import os
 import secrets
 from pathlib import Path
 
-import sqlalchemy as sa
+import click
 from flask import Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -14,6 +15,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 db = SQLAlchemy()
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address, default_limits=[])
+migrate = Migrate()
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -21,49 +23,6 @@ def _env_flag(name: str, default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _add_missing_columns() -> None:
-    """
-    Migración temporal para instalaciones existentes.
-
-    No borra tablas ni datos. Solo agrega columnas antiguas que todavía
-    pudieran faltar. Más adelante lo reemplazaremos por Flask-Migrate.
-    """
-    inspector = sa.inspect(db.engine)
-    table_names = set(inspector.get_table_names())
-
-    missing_columns = {
-        "user": {
-            "trial_warning_sent": "BOOLEAN DEFAULT FALSE",
-            "rfc": "VARCHAR(20)",
-            "tax_regime": "VARCHAR(120)",
-        },
-        "sale": {
-            "ticket_id": "VARCHAR(36)",
-        },
-    }
-
-    with db.engine.begin() as connection:
-        for table_name, expected_columns in missing_columns.items():
-            if table_name not in table_names:
-                continue
-
-            existing_columns = {
-                column["name"]
-                for column in inspector.get_columns(table_name)
-            }
-
-            for column_name, column_type in expected_columns.items():
-                if column_name in existing_columns:
-                    continue
-
-                connection.execute(
-                    sa.text(
-                        f'ALTER TABLE "{table_name}" '
-                        f'ADD COLUMN "{column_name}" {column_type}'
-                    )
-                )
 
 
 def create_app():
@@ -88,6 +47,21 @@ def create_app():
         secret_key = secrets.token_hex(32)
 
     database_url = os.environ.get("DATABASE_URL", "sqlite:///tiendaia.db")
+    stripe_disabled = _env_flag("STRIPE_DISABLED", default=False)
+    public_base_url = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
+    stripe_config = {
+        "STRIPE_SECRET_KEY": os.environ.get("STRIPE_SECRET_KEY"),
+        "STRIPE_PRICE_ID": os.environ.get("STRIPE_PRICE_ID"),
+        "STRIPE_WEBHOOK_SECRET": os.environ.get("STRIPE_WEBHOOK_SECRET"),
+    }
+    if not stripe_disabled:
+        missing = [name for name, value in stripe_config.items() if not value]
+        if missing:
+            raise RuntimeError(
+                "Falta configurar Stripe: " + ", ".join(sorted(missing))
+            )
+        if not public_base_url:
+            raise RuntimeError("Falta configurar PUBLIC_BASE_URL para Stripe.")
 
     # Compatibilidad con URLs antiguas de PostgreSQL.
     if database_url.startswith("postgres://"):
@@ -101,9 +75,12 @@ def create_app():
         SECRET_KEY=secret_key,
         SQLALCHEMY_DATABASE_URI=database_url,
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY"),
-        STRIPE_PRICE_ID=os.environ.get("STRIPE_PRICE_ID"),
-        STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET"),
+        **stripe_config,
+        STRIPE_DISABLED=stripe_disabled,
+        PUBLIC_BASE_URL=public_base_url,
+        STRIPE_PAST_DUE_GRACE_DAYS=int(
+            os.environ.get("STRIPE_PAST_DUE_GRACE_DAYS", "3")
+        ),
         RESEND_API_KEY=os.environ.get("RESEND_API_KEY"),
         RESEND_FROM=os.environ.get("RESEND_FROM"),
         MAX_CONTENT_LENGTH=10 * 1024 * 1024,
@@ -133,12 +110,35 @@ def create_app():
             x_proto=trusted_proxy_hops,
         )
     db.init_app(app)
+    migrate.init_app(app, db)
     csrf.init_app(app)
     limiter.init_app(app)
 
-    from .routes import main
+    from .routes import current_user, has_pro_access, main
 
     app.register_blueprint(main)
+
+    @app.context_processor
+    def inject_pro_access():
+        user = current_user()
+        return {"has_pro_access": has_pro_access(user)}
+
+    @app.cli.command("audit-manual-pro-candidates")
+    def audit_manual_pro_candidates():
+        """Lista usuarios Pro históricos que requieren revisión manual."""
+        from .models import User
+
+        candidates = User.query.filter(
+            User.plan == "pro",
+            User.manual_pro_access.is_(False),
+            User.stripe_subscription_id.is_(None),
+        ).order_by(User.id).all()
+        click.echo("user_id,email,company_name")
+        for candidate in candidates:
+            click.echo(
+                f"{candidate.id},{candidate.email},{candidate.company_name}"
+            )
+        click.echo(f"total={len(candidates)}")
 
     @app.after_request
     def add_security_headers(response):
@@ -164,12 +164,6 @@ def create_app():
                 "max-age=31536000; includeSubDomains"
             )
         return response
-
-    with app.app_context():
-        # Crea únicamente las tablas que todavía no existen.
-        # NUNCA borra información.
-        db.create_all()
-        _add_missing_columns()
 
     return app
 

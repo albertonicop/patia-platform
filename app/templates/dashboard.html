@@ -10,7 +10,7 @@
     <h2>Decisiones claras para un negocio que crece.</h2>
     <p>Inventario, ventas y oportunidades comerciales en una vista ejecutiva.</p>
 
-    {% if user.plan == "pro" %}
+    {% if has_pro_access %}
       <div class="plan-status pro dashboard-v2__plan">
         <i class="fa-solid fa-circle-check"></i>
         Plan actual: PRO
@@ -127,7 +127,7 @@
       {% endif %}
     </div>
 
-    {% if user.plan != "pro" %}
+    {% if not has_pro_access %}
       <div class="pro-feature-card dashboard-v2__upgrade">
         <h4>
           <i class="fa-solid fa-chart-line"></i>

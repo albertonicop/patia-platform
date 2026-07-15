@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Suscripción{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h2>Suscripción PATIA</h2>
+
+  <dl>
+    <dt>Plan</dt>
+    <dd>
+      {% if user.manual_pro_access %}
+        PATIA Pro manual
+      {% elif has_paid_access %}
+        PATIA Pro
+      {% else %}
+        Prueba
+      {% endif %}
+    </dd>
+
+    <dt>Estado</dt>
+    <dd>{{ user.subscription_status or "Sin suscripción" }}</dd>
+
+    <dt>Próxima renovación o fin del periodo</dt>
+    <dd>
+      {% if user.current_period_end %}
+        {{ user.current_period_end.strftime("%d/%m/%Y") }}
+      {% else %}
+        No disponible
+      {% endif %}
+    </dd>
+
+    <dt>Cancelación programada</dt>
+    <dd>{{ "Sí" if user.cancel_at_period_end else "No" }}</dd>
+  </dl>
+
+  {% if user.subscription_status == "past_due" %}
+    <div class="flash danger" role="alert">
+      Tu último pago falló. Actualiza tu método de pago para mantener el acceso.
+      {% if user.next_payment_attempt %}
+        Próximo intento: {{ user.next_payment_attempt.strftime("%d/%m/%Y %H:%M") }} UTC.
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if user.stripe_customer_id %}
+    <form method="POST" action="{{ url_for('main.billing_portal') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn">Abrir portal de cliente</button>
+    </form>
+  {% endif %}
+
+  {% if user.stripe_subscription_id and not user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
+    <form method="POST" action="{{ url_for('main.cancel_subscription') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn">Cancelar al final del periodo</button>
+    </form>
+  {% elif user.stripe_subscription_id and user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
+    <form method="POST" action="{{ url_for('main.reactivate_subscription') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn">Reactivar suscripción</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

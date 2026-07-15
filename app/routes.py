@@ -8,8 +8,9 @@ import stripe
 import secrets
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from . import csrf, db, limiter
-from .models import Product, Sale, Supplier, User
+from .models import Product, Sale, StripeWebhookEvent, Supplier, User
 
 main = Blueprint("main", __name__)
 
@@ -25,13 +26,14 @@ def current_user():
         session.clear()
         session["kicked_out"] = True
         return None
+    sync_user_plan(user)
     return user
 
 
 def trial_expired(user):
     if not user:
         return True
-    if user.plan == "pro":
+    if has_pro_access(user):
         return False
     days_used = (datetime.utcnow() - user.created_at).days
     return days_used >= 14
@@ -39,6 +41,163 @@ def trial_expired(user):
 
 def money(value):
     return f"${value:,.2f} MXN"
+
+
+MANAGED_SUBSCRIPTION_STATUSES = {"active", "trialing", "past_due", "unpaid"}
+KNOWN_SUBSCRIPTION_STATUSES = {
+    "active", "trialing", "past_due", "unpaid", "canceled",
+    "incomplete", "incomplete_expired", "paused",
+}
+
+
+class StripeEventIgnored(Exception):
+    """Evento válido de Stripe que no pertenece a esta integración."""
+
+
+def _as_utc_datetime(value):
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value
+    return datetime.utcfromtimestamp(int(value))
+
+
+def has_pro_access(user, now=None):
+    if not user:
+        return False
+    if user.manual_pro_access:
+        return True
+
+    now = now or datetime.utcnow()
+    status = (user.subscription_status or "").lower()
+    period_end = user.current_period_end
+    if status in {"active", "trialing"}:
+        return bool(period_end and period_end >= now)
+    if status == "past_due" and period_end:
+        grace_days = current_app.config.get("STRIPE_PAST_DUE_GRACE_DAYS", 3)
+        return period_end + timedelta(days=grace_days) >= now
+    return False
+
+
+def sync_user_plan(user, now=None):
+    user.plan = "pro" if has_pro_access(user, now=now) else "trial"
+
+
+def _public_url(path):
+    return f"{current_app.config['PUBLIC_BASE_URL']}{path}"
+
+
+def _subscription_has_configured_price(subscription):
+    expected = current_app.config["STRIPE_PRICE_ID"]
+    items = (subscription.get("items") or {}).get("data") or []
+    return any((item.get("price") or {}).get("id") == expected for item in items)
+
+
+def _subscription_period_end(subscription):
+    value = subscription.get("current_period_end")
+    if value:
+        return _as_utc_datetime(value)
+    periods = [
+        item.get("current_period_end")
+        for item in ((subscription.get("items") or {}).get("data") or [])
+        if item.get("current_period_end")
+    ]
+    return _as_utc_datetime(max(periods)) if periods else None
+
+
+def _invoice_subscription_id(invoice):
+    subscription_id = invoice.get("subscription")
+    if subscription_id:
+        return subscription_id
+    details = (invoice.get("parent") or {}).get("subscription_details") or {}
+    return details.get("subscription")
+
+
+def _event_is_newer(user, stripe_created_at, event_family):
+    if event_family == "invoice":
+        watermark = user.stripe_invoice_updated_at
+    elif event_family == "subscription":
+        watermark = user.stripe_subscription_updated_at
+    else:
+        raise ValueError("Familia de evento Stripe no soportada.")
+    return not watermark or stripe_created_at >= watermark
+
+
+def _validate_subscription(subscription, user=None, customer_id=None):
+    if not _subscription_has_configured_price(subscription):
+        raise StripeEventIgnored("La suscripción no usa STRIPE_PRICE_ID.")
+    subscription_customer = subscription.get("customer")
+    if customer_id and subscription_customer != customer_id:
+        raise StripeEventIgnored("El cliente de Stripe no coincide.")
+    if user and user.stripe_customer_id and subscription_customer != user.stripe_customer_id:
+        raise StripeEventIgnored("La suscripción no pertenece al cliente guardado.")
+
+
+def _find_subscription_user(subscription):
+    subscription_id = subscription.get("id")
+    user = User.query.filter_by(stripe_subscription_id=subscription_id).first()
+    if user:
+        return user
+    user_id = (subscription.get("metadata") or {}).get("user_id")
+    if user_id and str(user_id).isdigit():
+        return db.session.get(User, int(user_id))
+    return None
+
+
+def _ensure_stripe_ids_available(user, customer_id, subscription_id):
+    customer_owner = User.query.filter(
+        User.stripe_customer_id == customer_id,
+        User.id != user.id,
+    ).first()
+    subscription_owner = User.query.filter(
+        User.stripe_subscription_id == subscription_id,
+        User.id != user.id,
+    ).first()
+    if customer_owner or subscription_owner:
+        raise StripeEventIgnored("Identificador Stripe ya vinculado a otro usuario.")
+
+
+def _sync_subscription_state(user, subscription, stripe_created_at, deleted=False):
+    if not _event_is_newer(user, stripe_created_at, "subscription"):
+        return False
+    status = "canceled" if deleted else (subscription.get("status") or "").lower()
+    if status not in KNOWN_SUBSCRIPTION_STATUSES:
+        raise StripeEventIgnored(f"Estado de suscripción no soportado: {status}")
+    user.stripe_customer_id = subscription.get("customer") or user.stripe_customer_id
+    user.stripe_subscription_id = subscription.get("id") or user.stripe_subscription_id
+    user.subscription_status = status
+    user.current_period_end = _subscription_period_end(subscription) or user.current_period_end
+    user.cancel_at_period_end = bool(subscription.get("cancel_at_period_end", False))
+    user.stripe_subscription_updated_at = stripe_created_at
+    if status != "past_due":
+        user.next_payment_attempt = None
+    sync_user_plan(user)
+    return True
+
+
+def _has_managed_stripe_subscription(user):
+    if not user.stripe_subscription_id:
+        return False
+    if user.subscription_status in MANAGED_SUBSCRIPTION_STATUSES:
+        return True
+    if current_app.config["STRIPE_DISABLED"]:
+        return True
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+    try:
+        subscription = stripe.Subscription.retrieve(user.stripe_subscription_id)
+        _validate_subscription(subscription, user=user)
+        _sync_subscription_state(user, subscription, datetime.utcnow())
+        db.session.commit()
+        return subscription.get("status") in MANAGED_SUBSCRIPTION_STATUSES
+    except StripeEventIgnored:
+        db.session.rollback()
+        return False
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "No se pudo comprobar la suscripción antes de eliminar al usuario"
+        )
+        return True
 
 
 def send_email(to, subject, html):
@@ -264,7 +423,7 @@ def login():
         session["user_id"] = user.id
         session["session_token"] = token
         days_used = (datetime.utcnow() - user.created_at).days
-        if days_used >= 12 and not user.trial_warning_sent and user.plan != "pro":
+        if days_used >= 12 and not user.trial_warning_sent and not has_pro_access(user):
             send_email(
                 to=user.email,
                 subject="Tu prueba gratuita de PATIA termina en 2 días",
@@ -674,7 +833,7 @@ def reports():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
-    if user.email == "albertonicopat@gmail.com" or (user.plan or "").lower().strip() == "pro":
+    if user.email == "albertonicopat@gmail.com" or has_pro_access(user):
         return render_template("reports.html", user=user, **analytics())
     return redirect(url_for("main.subscribe"))
 
@@ -706,6 +865,8 @@ def subscribe():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    if request.args.get("checkout") == "cancelled":
+        flash("El pago fue cancelado. No se realizó ningún cargo.", "info")
     return render_template("subscribe.html", user=user)
 
 
@@ -714,13 +875,47 @@ def create_checkout_session():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    if current_app.config["STRIPE_DISABLED"]:
+        flash("La facturación no está disponible en este entorno.", "danger")
+        return redirect(url_for("main.subscribe"))
+
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+    existing_subscription = None
+
+    if user.stripe_subscription_id and user.subscription_status in MANAGED_SUBSCRIPTION_STATUSES:
+        return _redirect_to_billing_portal(user)
+
+    if user.stripe_customer_id:
+        try:
+            subscriptions = stripe.Subscription.list(
+                customer=user.stripe_customer_id,
+                status="all",
+                limit=10,
+            )
+            for candidate in subscriptions.get("data", []):
+                if (
+                    candidate.get("status") in MANAGED_SUBSCRIPTION_STATUSES
+                    and _subscription_has_configured_price(candidate)
+                ):
+                    existing_subscription = candidate
+                    break
+        except Exception:
+            current_app.logger.exception("No se pudo comprobar suscripciones existentes")
+            flash("No pudimos validar tu suscripción. Intenta nuevamente.", "danger")
+            return redirect(url_for("main.subscribe"))
+
+    if existing_subscription:
+        user.stripe_subscription_id = existing_subscription.get("id")
+        _sync_subscription_state(user, existing_subscription, datetime.utcnow())
+        db.session.commit()
+        return _redirect_to_billing_portal(user)
+
     checkout_params = {
         "payment_method_types": ["card"],
         "mode": "subscription",
         "line_items": [{"price": current_app.config["STRIPE_PRICE_ID"], "quantity": 1}],
-        "success_url": url_for("main.stripe_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
-        "cancel_url": url_for("main.subscribe", _external=True),
+        "success_url": _public_url("/stripe-success") + "?session_id={CHECKOUT_SESSION_ID}",
+        "cancel_url": _public_url("/subscribe?checkout=cancelled"),
         "client_reference_id": str(user.id),
         "metadata": {"user_id": str(user.id)},
         "subscription_data": {"metadata": {"user_id": str(user.id)}},
@@ -730,8 +925,123 @@ def create_checkout_session():
     else:
         checkout_params["customer_email"] = user.email
 
-    checkout_session = stripe.checkout.Session.create(**checkout_params)
-    return redirect(checkout_session.url, code=303)
+    idempotency_window = int(datetime.utcnow().timestamp() // 1800)
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            **checkout_params,
+            idempotency_key=f"patia-checkout-{user.id}-{idempotency_window}",
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception:
+        current_app.logger.exception("No se pudo crear la sesión de Checkout")
+        flash("No pudimos iniciar el pago. Intenta nuevamente.", "danger")
+        return redirect(url_for("main.subscribe"))
+
+
+def _process_stripe_event(event):
+    event_type = event["type"]
+    data = event["data"]["object"]
+    stripe_created_at = _as_utc_datetime(event["created"])
+
+    if event_type == "checkout.session.completed":
+        if data.get("mode") != "subscription":
+            raise StripeEventIgnored("Checkout no es de suscripción.")
+        user_id = str(
+            data.get("client_reference_id")
+            or (data.get("metadata") or {}).get("user_id")
+            or ""
+        )
+        if not user_id.isdigit():
+            raise StripeEventIgnored("Checkout sin usuario válido.")
+        user = db.session.get(User, int(user_id))
+        if not user:
+            raise StripeEventIgnored("Usuario de Checkout inexistente.")
+        customer_id = data.get("customer")
+        subscription_id = data.get("subscription")
+        if not customer_id or not subscription_id:
+            raise StripeEventIgnored("Checkout sin cliente o suscripción.")
+        if user.stripe_customer_id and user.stripe_customer_id != customer_id:
+            raise StripeEventIgnored("Checkout pertenece a otro cliente.")
+        _ensure_stripe_ids_available(user, customer_id, subscription_id)
+        subscription = stripe.Subscription.retrieve(subscription_id)
+        _validate_subscription(subscription, user=user, customer_id=customer_id)
+        metadata_user_id = str((subscription.get("metadata") or {}).get("user_id") or "")
+        if metadata_user_id and metadata_user_id != str(user.id):
+            raise StripeEventIgnored("Metadatos de suscripción no coinciden.")
+        user.stripe_customer_id = customer_id
+        user.stripe_subscription_id = subscription_id
+        return
+
+    if event_type in {"invoice.paid", "invoice.payment_failed"}:
+        subscription_id = _invoice_subscription_id(data)
+        if not subscription_id:
+            raise StripeEventIgnored("Factura sin suscripción.")
+        subscription = stripe.Subscription.retrieve(subscription_id)
+        _validate_subscription(subscription, customer_id=data.get("customer"))
+        user = _find_subscription_user(subscription)
+        if not user:
+            raise StripeEventIgnored("Suscripción sin usuario local.")
+        _validate_subscription(subscription, user=user, customer_id=data.get("customer"))
+        if not _event_is_newer(user, stripe_created_at, "invoice"):
+            return
+        subscription_event_is_newer = bool(
+            user.stripe_subscription_updated_at
+            and stripe_created_at < user.stripe_subscription_updated_at
+        )
+        user.stripe_customer_id = subscription.get("customer")
+        user.stripe_subscription_id = subscription_id
+        user.current_period_end = _subscription_period_end(subscription)
+        user.cancel_at_period_end = bool(subscription.get("cancel_at_period_end", False))
+        user.stripe_invoice_updated_at = stripe_created_at
+        if event_type == "invoice.paid":
+            status = (subscription.get("status") or "").lower()
+            if status not in {"active", "trialing"}:
+                raise StripeEventIgnored("Factura pagada con suscripción no activa.")
+            if not subscription_event_is_newer:
+                user.subscription_status = status
+                user.next_payment_attempt = None
+        else:
+            if not subscription_event_is_newer:
+                user.subscription_status = "past_due"
+                user.next_payment_attempt = _as_utc_datetime(
+                    data.get("next_payment_attempt")
+                )
+        sync_user_plan(user)
+        return
+
+    if event_type in {"customer.subscription.updated", "customer.subscription.deleted"}:
+        _validate_subscription(data)
+        user = _find_subscription_user(data)
+        if not user:
+            raise StripeEventIgnored("Suscripción sin usuario local.")
+        _validate_subscription(data, user=user)
+        _sync_subscription_state(
+            user,
+            data,
+            stripe_created_at,
+            deleted=event_type == "customer.subscription.deleted",
+        )
+
+
+def _record_failed_webhook(event, error):
+    event_id = str(event.get("id") or "")
+    if not event_id:
+        return
+    record = StripeWebhookEvent.query.filter_by(stripe_event_id=event_id).first()
+    if not record:
+        data = (event.get("data") or {}).get("object") or {}
+        record = StripeWebhookEvent(
+            stripe_event_id=event_id,
+            event_type=str(event.get("type") or "unknown"),
+            object_id=data.get("id"),
+            stripe_created_at=_as_utc_datetime(event.get("created")) or datetime.utcnow(),
+        )
+        db.session.add(record)
+    record.status = "failed"
+    record.completed_at = None
+    record.failed_at = datetime.utcnow()
+    record.error_message = str(error)[:1000]
+    db.session.commit()
 
 
 @main.route("/stripe-webhook", methods=["POST"])
@@ -748,50 +1058,63 @@ def stripe_webhook():
     except stripe.error.SignatureVerificationError:
         return "", 400
 
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+    event_id = str(event.get("id") or "")
+    if not event_id:
+        return "", 400
+
+    existing = StripeWebhookEvent.query.filter_by(stripe_event_id=event_id).first()
+    if existing and existing.status in {"processed", "ignored"}:
+        return "", 200
+
     data = event["data"]["object"]
+    try:
+        if not existing:
+            existing = StripeWebhookEvent(
+                stripe_event_id=event_id,
+                event_type=event["type"],
+                object_id=data.get("id"),
+                stripe_created_at=_as_utc_datetime(event["created"]),
+                status="pending",
+            )
+            db.session.add(existing)
+            db.session.flush()
+        else:
+            existing.status = "pending"
+            existing.error_message = None
+            existing.completed_at = None
+            existing.failed_at = None
 
-    if event["type"] == "checkout.session.completed":
-        user_id = data.get("metadata", {}).get("user_id")
-        if user_id:
-            user = User.query.get(int(user_id))
-            if user and data.get("mode") == "subscription":
-                user.plan = "pro"
-                user.stripe_customer_id = data.get("customer")
-                user.stripe_subscription_id = data.get("subscription")
-                user.subscription_status = "active"
-                db.session.commit()
-
-    elif event["type"] == "invoice.payment_succeeded":
-        sub_id = data.get("subscription")
-        user = User.query.filter_by(stripe_subscription_id=sub_id).first()
-        if user:
-            import stripe as stripe_lib
-            stripe_lib.api_key = current_app.config["STRIPE_SECRET_KEY"]
-            sub = stripe_lib.Subscription.retrieve(sub_id)
-            user.subscription_status = "active"
-            user.plan = "pro"
-            user.current_period_end = datetime.utcfromtimestamp(sub["current_period_end"])
-            db.session.commit()
-
-    elif event["type"] == "invoice.payment_failed":
-        sub_id = data.get("subscription")
-        user = User.query.filter_by(stripe_subscription_id=sub_id).first()
-        if user:
-            user.subscription_status = "past_due"
-            db.session.commit()
-
-    elif event["type"] in ["customer.subscription.deleted", "customer.subscription.updated"]:
-        sub_id = data.get("id")
-        user = User.query.filter_by(stripe_subscription_id=sub_id).first()
-        if user:
-            status = data.get("status")
-            user.subscription_status = status
-            user.cancel_at_period_end = data.get("cancel_at_period_end", False)
-            if status in ["canceled", "unpaid"]:
-                user.plan = "trial"
-            db.session.commit()
-
-    return "", 200
+        _process_stripe_event(event)
+        existing.status = "processed"
+        existing.completed_at = datetime.utcnow()
+        existing.failed_at = None
+        db.session.commit()
+        return "", 200
+    except StripeEventIgnored as error:
+        existing.status = "ignored"
+        existing.error_message = str(error)[:1000]
+        existing.completed_at = datetime.utcnow()
+        existing.failed_at = None
+        db.session.commit()
+        current_app.logger.warning("Evento Stripe ignorado: %s", error)
+        return "", 200
+    except IntegrityError:
+        db.session.rollback()
+        duplicate = StripeWebhookEvent.query.filter_by(stripe_event_id=event_id).first()
+        if duplicate and duplicate.status in {"processed", "ignored"}:
+            return "", 200
+        current_app.logger.exception("Conflicto procesando webhook Stripe")
+        return "", 500
+    except Exception as error:
+        db.session.rollback()
+        current_app.logger.exception("Error procesando webhook Stripe %s", event_id)
+        try:
+            _record_failed_webhook(event, error)
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception("No se pudo registrar el fallo del webhook")
+        return "", 500
 
 
 @main.route("/stripe-success")
@@ -822,7 +1145,7 @@ def stripe_success():
         flash("La sesión de pago no pertenece a este usuario.", "danger")
         return redirect(url_for("main.subscription"))
 
-    if user.plan == "pro":
+    if has_pro_access(user):
         flash("Tu cuenta PATIA Pro está activa.", "success")
     else:
         flash("Pago recibido. Estamos confirmando tu suscripción con Stripe.", "success")
@@ -849,18 +1172,25 @@ def subscription():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
-    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     subscription_info = None
-    if user.stripe_subscription_id:
+    if user.stripe_subscription_id and not current_app.config["STRIPE_DISABLED"]:
+        stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
         try:
             sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
-            user.current_period_end = datetime.utcfromtimestamp(sub["current_period_end"])
-            user.cancel_at_period_end = sub["cancel_at_period_end"]
+            _validate_subscription(sub, user=user)
+            _sync_subscription_state(user, sub, datetime.utcnow())
             db.session.commit()
             subscription_info = sub
         except Exception:
-            pass
-    return render_template("subscription.html", user=user, subscription_info=subscription_info)
+            db.session.rollback()
+            current_app.logger.exception("No se pudo sincronizar la suscripción")
+            flash("No pudimos actualizar el estado de tu suscripción.", "danger")
+    return render_template(
+        "subscription.html",
+        user=user,
+        subscription_info=subscription_info,
+        has_paid_access=has_pro_access(user),
+    )
 
 
 @main.route("/cancel-subscription", methods=["POST"])
@@ -874,8 +1204,10 @@ def cancel_subscription():
         user.cancel_at_period_end = True
         db.session.commit()
         flash("Tu suscripcion se cancelara al final del periodo pagado.", "success")
-    except Exception as e:
-        flash(f"Error al cancelar: {e}", "danger")
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("No se pudo programar la cancelación")
+        flash("No pudimos cancelar la suscripción. Intenta nuevamente.", "danger")
     return redirect(url_for("main.subscription"))
 
 
@@ -890,8 +1222,10 @@ def reactivate_subscription():
         user.cancel_at_period_end = False
         db.session.commit()
         flash("Tu suscripcion ha sido reactivada.", "success")
-    except Exception as e:
-        flash(f"Error al reactivar: {e}", "danger")
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("No se pudo reactivar la suscripción")
+        flash("No pudimos reactivar la suscripción. Intenta nuevamente.", "danger")
     return redirect(url_for("main.subscription"))
 
 
@@ -900,12 +1234,23 @@ def billing_portal():
     user = current_user()
     if not user or not user.stripe_customer_id:
         return redirect(url_for("main.subscribe"))
+    return _redirect_to_billing_portal(user)
+
+
+def _redirect_to_billing_portal(user):
+    if current_app.config["STRIPE_DISABLED"]:
+        flash("La facturación no está disponible en este entorno.", "danger")
+        return redirect(url_for("main.subscription"))
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     try:
-        portal = stripe.billing_portal.Session.create(customer=user.stripe_customer_id, return_url=url_for("main.subscription", _external=True))
-        return redirect(portal.url)
-    except Exception as e:
-        flash(f"Error: {e}", "danger")
+        portal = stripe.billing_portal.Session.create(
+            customer=user.stripe_customer_id,
+            return_url=_public_url("/subscription"),
+        )
+        return redirect(portal.url, code=303)
+    except Exception:
+        current_app.logger.exception("No se pudo abrir el portal de facturación")
+        flash("No pudimos abrir el portal de facturación.", "danger")
         return redirect(url_for("main.subscription"))
 
 
@@ -931,7 +1276,7 @@ def admin():
         days_in_patia = (today - u.created_at).days if u.created_at else 0
         trial_days_left = max(0, 14 - days_in_patia)
 
-        if u.plan == "pro":
+        if has_pro_access(u):
             status = "Pro"
             trial_days_left = "inf"
         elif trial_days_left > 0:
@@ -1022,6 +1367,12 @@ def admin_delete_user(user_id):
     if user.email == "albertonicopat@gmail.com":
         flash("No puedes eliminar tu cuenta de administrador.")
         return redirect(url_for("main.admin"))
+    if _has_managed_stripe_subscription(user):
+        flash(
+            "No puedes eliminar este usuario mientras tenga una suscripción Stripe gestionable.",
+            "danger",
+        )
+        return redirect(url_for("main.admin"))
     db.session.delete(user)
     db.session.commit()
     flash("Cliente eliminado correctamente.")
@@ -1034,7 +1385,8 @@ def admin_make_pro(user_id):
     if not admin_user or admin_user.email != "albertonicopat@gmail.com":
         return redirect(url_for("main.dashboard"))
     user = User.query.get_or_404(user_id)
-    user.plan = "pro"
+    user.manual_pro_access = True
+    sync_user_plan(user)
     db.session.commit()
     flash("Cliente marcado como PRO.")
     return redirect(url_for("main.admin"))

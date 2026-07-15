@@ -250,6 +250,12 @@ class User(db.Model):
         default="trial",
     )
 
+    manual_pro_access = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+    )
+
     stripe_customer_id = db.Column(
         db.String(120),
         nullable=True,
@@ -265,6 +271,18 @@ class User(db.Model):
         nullable=True,
     )
     current_period_end = db.Column(
+        db.DateTime,
+        nullable=True,
+    )
+    next_payment_attempt = db.Column(
+        db.DateTime,
+        nullable=True,
+    )
+    stripe_subscription_updated_at = db.Column(
+        db.DateTime,
+        nullable=True,
+    )
+    stripe_invoice_updated_at = db.Column(
         db.DateTime,
         nullable=True,
     )
@@ -310,3 +328,22 @@ class User(db.Model):
             self.password,
             password,
         )
+
+
+class StripeWebhookEvent(db.Model):
+    __tablename__ = "stripe_webhook_event"
+
+    id = db.Column(db.Integer, primary_key=True)
+    stripe_event_id = db.Column(
+        db.String(255),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    event_type = db.Column(db.String(120), nullable=False)
+    object_id = db.Column(db.String(255), nullable=True, index=True)
+    stripe_created_at = db.Column(db.DateTime, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    failed_at = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(30), nullable=False, default="pending")
+    error_message = db.Column(db.Text, nullable=True)
