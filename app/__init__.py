@@ -1,5 +1,6 @@
 import os
 import secrets
+from datetime import datetime
 from pathlib import Path
 
 import click
@@ -121,7 +122,13 @@ def create_app():
     @app.context_processor
     def inject_pro_access():
         user = current_user()
-        return {"has_pro_access": has_pro_access(user)}
+        trial_days_left = None
+        if user and user.created_at:
+            trial_days_left = max(0, 14 - (datetime.utcnow() - user.created_at).days)
+        return {
+            "has_pro_access": has_pro_access(user),
+            "trial_days_left": trial_days_left,
+        }
 
     @app.cli.command("audit-manual-pro-candidates")
     def audit_manual_pro_candidates():

@@ -250,6 +250,338 @@
     .app-shell-v2 .inventory-v2__catalog-head form { width: 100%; }
 }
 
+/* Phase 6.1 E: suppliers, reports and mobile shell ---------------------- */
+
+.app-shell-v2 .sidebar-v2__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.app-shell-v2 .sidebar-v2__toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 88px;
+    min-height: 44px;
+    border: 1px solid var(--v2-line);
+    border-radius: 12px;
+    background: var(--v2-surface-soft);
+    color: #434a5e;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.app-shell-v2 .sidebar-v2__nav > a.is-active {
+    border-color: #ded9ff;
+    background: #f1efff !important;
+    color: var(--v2-violet) !important;
+}
+
+.app-shell-v2 .sidebar-v2__nav > a.is-active i {
+    color: var(--v2-violet);
+}
+
+.app-shell-v2 .sidebar-v2__footer > div {
+    min-width: 0;
+}
+
+.app-shell-v2 .sidebar-v2__footer--trial .sidebar-v2__status-dot {
+    background: #d18a35;
+    box-shadow: 0 0 0 5px rgba(209, 138, 53, .12);
+}
+
+.app-shell-v2 .sidebar-v2__footer a {
+    display: inline-block;
+    margin-top: 7px;
+    color: var(--v2-violet);
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.app-shell-v2 .suppliers-v2,
+.app-shell-v2 .reports-v2 {
+    width: min(100%, 1440px);
+    margin: 0 auto;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .suppliers-v2__intro {
+    max-width: 720px;
+    margin-bottom: 24px;
+}
+
+.app-shell-v2 .suppliers-v2__intro > span {
+    color: var(--v2-violet);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.app-shell-v2 .suppliers-v2__intro h2 {
+    margin: 8px 0;
+    color: var(--v2-ink);
+    font-size: clamp(28px, 3vw, 42px);
+    letter-spacing: -.035em;
+}
+
+.app-shell-v2 .suppliers-v2__intro p,
+.app-shell-v2 .reports-v2__empty p {
+    color: var(--v2-muted);
+    line-height: 1.6;
+}
+
+.app-shell-v2 .suppliers-v2__layout {
+    display: grid;
+    grid-template-columns: minmax(280px, .7fr) minmax(0, 1.3fr);
+    gap: 20px;
+}
+
+.app-shell-v2 .suppliers-v2 .card,
+.app-shell-v2 .reports-v2 .card {
+    border-color: var(--v2-line);
+    background: var(--v2-surface);
+    color: var(--v2-ink);
+    box-shadow: var(--v2-shadow);
+}
+
+.app-shell-v2 .suppliers-v2__form-card,
+.app-shell-v2 .suppliers-v2__list-card {
+    padding: 26px;
+}
+
+.app-shell-v2 .suppliers-v2__list-card {
+    min-width: 0;
+}
+
+.app-shell-v2 .suppliers-v2__list-card .table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.app-shell-v2 .suppliers-v2__form label {
+    margin-bottom: -7px;
+    color: #3d4356;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.app-shell-v2 .suppliers-v2__form label small {
+    color: var(--v2-muted);
+    font-weight: 600;
+}
+
+.app-shell-v2 .suppliers-v2__form input,
+.app-shell-v2 .suppliers-v2__form textarea {
+    min-height: 46px;
+    border-color: #dfe2ea;
+    background: #fff;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .suppliers-v2__form textarea {
+    min-height: 96px;
+}
+
+.app-shell-v2 .suppliers-v2__form :focus-visible,
+.app-shell-v2 .suppliers-v2 a:focus-visible,
+.app-shell-v2 .reports-v2 a:focus-visible,
+.app-shell-v2 .sidebar-v2__toggle:focus-visible {
+    outline: 3px solid rgba(105, 86, 232, .22);
+    outline-offset: 2px;
+}
+
+.app-shell-v2 .suppliers-v2__empty,
+.app-shell-v2 .reports-v2__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 280px;
+    padding: 32px;
+    border: 1px dashed #dfe2ea;
+    border-radius: 16px;
+    background: var(--v2-surface-soft);
+    text-align: center;
+}
+
+.app-shell-v2 .suppliers-v2__empty > i,
+.app-shell-v2 .reports-v2__empty > i {
+    color: var(--v2-violet);
+    font-size: 24px;
+}
+
+.app-shell-v2 .suppliers-v2__empty h4,
+.app-shell-v2 .reports-v2__empty h4 {
+    margin: 14px 0 0;
+    color: var(--v2-ink);
+    font-size: 18px;
+}
+
+.app-shell-v2 .suppliers-v2__empty p,
+.app-shell-v2 .reports-v2__empty p {
+    max-width: 460px;
+    margin: 8px 0 18px;
+    font-size: 13px;
+}
+
+.app-shell-v2 .suppliers-v2 .btn,
+.app-shell-v2 .reports-v2 .btn {
+    min-height: 44px;
+}
+
+.app-shell-v2 .suppliers-v2 .btn.ghost {
+    border-color: #d9dce5;
+    background: #fff;
+    color: #4d5366;
+}
+
+.app-shell-v2 .reports-v2__metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.app-shell-v2 .reports-v2 .reports-chart-box {
+    height: 320px;
+}
+
+.app-shell-v2 .reports-v2 .reports-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.app-shell-v2 .reports-v2 .reports-recommendation,
+.app-shell-v2 .reports-v2 .reports-text {
+    color: #4d5366;
+}
+
+.app-shell-v2 .reports-v2 .reports-recommendation {
+    background: #f8f9fc;
+}
+
+.app-shell-v2 .whatsapp-float-v2 {
+    bottom: 150px !important;
+}
+
+.app-shell-v2 .reports-v2__empty--compact {
+    min-height: 240px;
+}
+
+@media (max-width: 900px) {
+    .app-shell-v2 .sidebar-v2__head {
+        align-items: center;
+    }
+
+    .app-shell-v2 .sidebar-v2__brand {
+        margin-bottom: 0 !important;
+    }
+
+    .app-shell-v2 .sidebar-v2__toggle {
+        display: inline-flex;
+    }
+
+    .app-shell-v2 .sidebar-v2 .sidebar-v2__nav {
+        display: none !important;
+        margin-top: 14px;
+    }
+
+    .app-shell-v2 .sidebar-v2 .sidebar-v2__nav.is-open {
+        display: grid !important;
+    }
+
+    .app-shell-v2 .sidebar-v2__nav > a,
+    .app-shell-v2 .sidebar-v2__nav > form .btn {
+        min-height: 44px;
+    }
+
+    .app-shell-v2 .suppliers-v2__layout {
+        grid-template-columns: 1fr;
+    }
+
+    .app-shell-v2 .reports-v2__metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .app-shell-v2 .sidebar-v2__nav {
+        grid-template-columns: 1fr !important;
+        gap: 5px !important;
+    }
+
+    .app-shell-v2 .sidebar-v2__nav > a,
+    .app-shell-v2 .sidebar-v2__nav > form .btn {
+        font-size: 13px !important;
+    }
+
+    .app-shell-v2 .suppliers-v2__form-card,
+    .app-shell-v2 .suppliers-v2__list-card,
+    .app-shell-v2 .reports-v2 .card {
+        padding: 20px;
+    }
+
+    .app-shell-v2 .reports-v2__metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .app-shell-v2 .reports-v2 .reports-chart-box {
+        height: 260px;
+    }
+
+    .app-shell-v2 .reports-v2 .reports-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .app-shell-v2 .suppliers-v2__list-card table,
+    .app-shell-v2 .suppliers-v2__list-card tbody,
+    .app-shell-v2 .suppliers-v2__list-card tr,
+    .app-shell-v2 .suppliers-v2__list-card td {
+        display: block;
+        width: 100%;
+    }
+
+    .app-shell-v2 .suppliers-v2__list-card thead {
+        display: none;
+    }
+
+    .app-shell-v2 .suppliers-v2__list-card tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--v2-line);
+    }
+
+    .app-shell-v2 .suppliers-v2__list-card td {
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .app-shell-v2 .suppliers-v2__list-card td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 6px;
+        color: #777f93;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .app-shell-v2 .suppliers-v2__list-card td .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+    }
+}
+
 /* POS first-sale --------------------------------------------------------- */
 
 .app-shell-v2 .pos-v2 {

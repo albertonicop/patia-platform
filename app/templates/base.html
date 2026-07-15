@@ -20,24 +20,30 @@
 
 <body class="app-body app-shell-v2">
   <aside class="sidebar sidebar-v2">
-    <div class="brand sidebar-v2__brand">
-      <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
-      <span class="sidebar-v2__brand-copy">Gestión inteligente</span>
+    <div class="sidebar-v2__head">
+      <div class="brand sidebar-v2__brand">
+        <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
+        <span class="sidebar-v2__brand-copy">Gestión inteligente</span>
+      </div>
+      <button class="sidebar-v2__toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+        <span>Menú</span>
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
     </div>
 
-   <nav class="sidebar-nav sidebar-v2__nav" aria-label="Navegación principal">
-    <a href="/"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a>
-    <a href="/products"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>Inventario</span></a>
-    <a href="/sell"><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>Punto de venta</span></a>
+   <nav id="primary-navigation" class="sidebar-nav sidebar-v2__nav" aria-label="Navegación principal">
+    <a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a>
+    <a href="/products"{% if request.path.startswith('/products') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>Inventario</span></a>
+    <a href="/sell"{% if request.path.startswith('/sell') or request.path.startswith('/sales/') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>Punto de venta</span></a>
     {% if user is defined and user and has_pro_access %}
-<a href="/reports"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes IA</span></a>
+<a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes IA</span></a>
 {% elif user is defined and user %}
 <a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes IA <small>PRO</small></span></a>
 {% else %}
 <a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes IA <small>PRO</small></span></a>
 {% endif %}
-    <a href="/suppliers"><i class="fa-solid fa-truck" aria-hidden="true"></i><span>Proveedores</span></a>
-    <a href="/settings"><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>Configuración</span></a>
+    <a href="/suppliers"{% if request.path.startswith('/suppliers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-truck" aria-hidden="true"></i><span>Proveedores</span></a>
+    <a href="/settings"{% if request.path.startswith('/settings') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>Configuración</span></a>
 
 
 <form method="POST" action="{{ url_for('main.logout') }}" style="margin-top:10px;">
@@ -49,11 +55,17 @@
 
 </nav>
 
-    <div class="sidebar-card sidebar-v2__footer">
+    <div class="sidebar-card sidebar-v2__footer{% if not has_pro_access %} sidebar-v2__footer--trial{% endif %}">
       <span class="sidebar-v2__status-dot" aria-hidden="true"></span>
       <div>
-        <b>PATIA Pro</b>
-        <p>Operación inteligente</p>
+        {% if has_pro_access %}
+          <b>Plan actual: PATIA Pro</b>
+          <p>Suscripción activa · $199 MXN/mes</p>
+        {% else %}
+          <b>Plan actual: Prueba</b>
+          <p>{{ trial_days_left if trial_days_left is not none else 0 }} días restantes · $199 MXN/mes</p>
+          <a href="/subscribe">Activar PATIA Pro</a>
+        {% endif %}
       </div>
     </div>
   </aside>
