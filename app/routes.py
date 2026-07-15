@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import resend
 from email_validator import validate_email, EmailNotValidError
+import math
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
 import stripe
 import secrets
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file, jsonify
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from . import csrf, db, limiter
@@ -37,6 +38,21 @@ def trial_expired(user):
         return False
     days_used = (datetime.utcnow() - user.created_at).days
     return days_used >= 14
+
+
+def _trial_access_response(user, *, json_response=False):
+    if not trial_expired(user):
+        return None
+    if json_response:
+        return jsonify({
+            "ok": False,
+            "error": "Tu periodo de prueba terminó. Activa PATIA Pro para continuar.",
+        }), 403
+    flash(
+        "Tu periodo de prueba terminó. Activa PATIA Pro para continuar.",
+        "danger",
+    )
+    return render_template("trial_expired.html"), 403
 
 
 def money(value):
@@ -201,16 +217,23 @@ def _has_managed_stripe_subscription(user):
 
 
 def send_email(to, subject, html):
+    api_key = current_app.config.get("RESEND_API_KEY")
+    sender = current_app.config.get("RESEND_FROM")
+    if not api_key or not sender:
+        current_app.logger.error("Resend no está configurado; correo no enviado.")
+        return False
     try:
-        resend.api_key = current_app.config["RESEND_API_KEY"]
+        resend.api_key = api_key
         resend.Emails.send({
-            "from": current_app.config["RESEND_FROM"],
+            "from": sender,
             "to": to,
             "subject": subject,
             "html": html
         })
-    except Exception as e:
-        print(f"Error enviando correo: {e}")
+        return True
+    except Exception:
+        current_app.logger.exception("No se pudo enviar un correo con Resend.")
+        return False
 
 
 @main.route("/register", methods=["GET", "POST"])
@@ -225,6 +248,9 @@ def register():
             return redirect(url_for("main.register"))
 
         password = request.form["password"]
+        if len(password) < 8:
+            flash("La contraseña debe tener al menos 8 caracteres.", "danger")
+            return redirect(url_for("main.register", plan=request.form.get("plan")))
         first_name = request.form.get("first_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
         company_name = request.form.get("company_name", "").strip()
@@ -267,12 +293,12 @@ def register():
         user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
         db.session.commit()
 
-        send_email(
+        email_sent = send_email(
             to=user.email,
             subject="Verifica tu correo en PATIA",
             html=f"""
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
+                <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
                 <h1 style="color:#29d3a8;">Verifica tu correo</h1>
                 <p style="color:#9aa8c7;font-size:16px;">Tu codigo de verificacion es:</p>
                 <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
@@ -280,6 +306,11 @@ def register():
             </div>
             """
         )
+        if not email_sent:
+            flash(
+                "No pudimos enviar el código. Usa Reenviar código para intentarlo nuevamente.",
+                "danger",
+            )
 
         return redirect(url_for("main.verify_email"))
 
@@ -320,10 +351,10 @@ def verify_email():
             subject="Bienvenido a PATIA!",
             html=f"""
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
+                <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
                 <h1 style="color:#29d3a8;">Bienvenido a PATIA, {user.first_name or user.company_name}!</h1>
                 <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Tu cuenta esta lista. Tienes <strong style="color:#fff;">14 dias gratis</strong> para explorar todo.</p>
-                <a href="https://patiaapp.com/products" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Ir a mi inventario</a>
+                <a href="{_public_url('/products')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Ir a mi inventario</a>
             </div>
             """
         )
@@ -349,7 +380,7 @@ def resend_verification():
     user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
     db.session.commit()
 
-    send_email(
+    email_sent = send_email(
         to=user.email,
         subject="Nuevo codigo de verificacion PATIA",
         html=f"""
@@ -360,6 +391,10 @@ def resend_verification():
         </div>
         """
     )
+    if email_sent:
+        flash("Te enviamos un nuevo código de verificación.", "success")
+    else:
+        flash("No pudimos enviar el código. Inténtalo nuevamente en unos minutos.", "danger")
 
     return redirect(url_for("main.verify_email"))
 
@@ -375,17 +410,20 @@ def forgot_password():
             user.reset_token = token
             user.reset_token_expires = datetime.utcnow() + timedelta(minutes=30)
             db.session.commit()
-            send_email(
+            email_sent = send_email(
                 to=user.email,
                 subject="Recupera tu contraseña PATIA",
                 html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                     <h1 style="color:#29d3a8;">Recuperar contraseña</h1>
                     <p style="color:#9aa8c7;">Haz clic en el boton para crear una nueva contraseña. Expira en 30 minutos.</p>
-                    <a href="https://patiaapp.com/reset-password/{token}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Crear nueva contraseña</a>
+                    <a href="{_public_url(f'/reset-password/{token}')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Crear nueva contraseña</a>
                 </div>
                 """
             )
+            if not email_sent:
+                flash("No pudimos enviar el enlace. Inténtalo nuevamente en unos minutos.", "danger")
+                return redirect(url_for("main.forgot_password"))
         flash("Si ese correo existe, te enviamos un enlace.", "success")
         return redirect(url_for("main.login"))
     return render_template("forgot_password.html")
@@ -399,6 +437,9 @@ def reset_password(token):
         return render_template("reset_password.html", token=None, expired=True)
     if request.method == "POST":
         password = request.form["password"]
+        if len(password) < 8:
+            flash("La contraseña debe tener al menos 8 caracteres.", "danger")
+            return render_template("reset_password.html", token=token, expired=False)
         user.set_password(password)
         user.reset_token = None
         user.reset_token_expires = None
@@ -428,20 +469,21 @@ def login():
         session["session_token"] = token
         days_used = (datetime.utcnow() - user.created_at).days
         if days_used >= 12 and not user.trial_warning_sent and not has_pro_access(user):
-            send_email(
+            warning_sent = send_email(
                 to=user.email,
                 subject="Tu prueba gratuita de PATIA termina en 2 días",
                 html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                    <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
+                    <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
                     <h1 style="color:#ff5c7a;">Tu prueba termina en 2 días</h1>
                     <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Hola {user.first_name or user.company_name}, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.</p>
-                    <a href="https://patiaapp.com/subscribe" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Activar PATIA Pro</a>
+                    <a href="{_public_url('/subscribe')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Activar PATIA Pro</a>
                 </div>
                 """
             )
-            user.trial_warning_sent = True
-            db.session.commit()
+            if warning_sent:
+                user.trial_warning_sent = True
+                db.session.commit()
         flash("Sesión iniciada correctamente.", "success")
         return redirect(url_for("main.dashboard"))
 
@@ -699,6 +741,10 @@ def import_products():
     import pandas as pd
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
+    user = current_user()
+    access_block = _trial_access_response(user)
+    if access_block:
+        return access_block
 
     file = request.files.get("catalog_file")
     if not file:
@@ -851,18 +897,42 @@ def add_product():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    access_block = _trial_access_response(user)
+    if access_block:
+        return access_block
+
+    name = request.form.get("name", "").strip()
+    sku = request.form.get("sku", "").strip()
+    try:
+        cost_price = float(request.form.get("cost_price") or 0)
+        sale_price = float(request.form.get("sale_price") or 0)
+        stock = int(request.form.get("stock") or 0)
+        min_stock = int(request.form.get("min_stock") or 5)
+    except (TypeError, ValueError):
+        flash("Revisa precios y existencias e inténtalo nuevamente.", "danger")
+        return redirect(url_for("main.products"))
+    if not name or not sku:
+        flash("Nombre y SKU son obligatorios.", "danger")
+        return redirect(url_for("main.products"))
+    if (
+        not math.isfinite(cost_price)
+        or not math.isfinite(sale_price)
+        or min(cost_price, sale_price, stock, min_stock) < 0
+    ):
+        flash("Precios y existencias no pueden ser negativos.", "danger")
+        return redirect(url_for("main.products"))
 
     p = Product(
         user_id=user.id,
-        sku=request.form["sku"],
+        sku=sku,
         barcode=request.form.get("barcode") or None,
-        name=request.form["name"],
+        name=name,
         category=request.form.get("category") or "General",
         supplier=request.form.get("supplier"),
-        cost_price=float(request.form.get("cost_price") or 0),
-        sale_price=float(request.form.get("sale_price") or 0),
-        stock=int(request.form.get("stock") or 0),
-        min_stock=int(request.form.get("min_stock") or 5),
+        cost_price=cost_price,
+        sale_price=sale_price,
+        stock=stock,
+        min_stock=min_stock,
     )
     db.session.add(p)
     db.session.commit()
@@ -900,11 +970,13 @@ def sell():
 
 @main.route("/sell-cart", methods=["POST"])
 def sell_cart():
-    from flask import jsonify
     import uuid
     user = current_user()
     if not user:
-        return jsonify({"ok": False, "error": "No autenticado"})
+        return jsonify({"ok": False, "error": "No autenticado"}), 401
+    access_block = _trial_access_response(user, json_response=True)
+    if access_block:
+        return access_block
 
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
@@ -1009,6 +1081,9 @@ def suppliers():
     user = current_user()
 
     if request.method == "POST":
+        access_block = _trial_access_response(user)
+        if access_block:
+            return access_block
         supplier_name = request.form["name"].strip()
         existing_supplier = Supplier.query.filter_by(user_id=session["user_id"], name=supplier_name).first()
         if existing_supplier:
@@ -1329,6 +1404,9 @@ def cancel_sale(sale_id):
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    access_block = _trial_access_response(user)
+    if access_block:
+        return access_block
     sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
     product = Product.query.get(sale.product_id)
     if product:
@@ -1483,6 +1561,9 @@ def admin():
 def delete_product(product_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
+    access_block = _trial_access_response(current_user())
+    if access_block:
+        return access_block
     product = Product.query.filter_by(id=product_id, user_id=session["user_id"]).first_or_404()
     Sale.query.filter_by(product_id=product.id, user_id=session["user_id"]).delete()
     db.session.delete(product)
@@ -1494,6 +1575,9 @@ def delete_product(product_id):
 def delete_all_products():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
+    access_block = _trial_access_response(current_user())
+    if access_block:
+        return access_block
     user_id = session["user_id"]
     Sale.query.filter_by(user_id=user_id).delete()
     Product.query.filter_by(user_id=user_id).delete()
@@ -1506,6 +1590,9 @@ def delete_all_products():
 def delete_selected_products():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
+    access_block = _trial_access_response(current_user())
+    if access_block:
+        return access_block
     user_id = session["user_id"]
     ids_raw = request.form.get("ids", "")
     ids = [int(i) for i in ids_raw.split(",") if i.strip().isdigit()]
@@ -1523,6 +1610,9 @@ def delete_selected_products():
 def delete_supplier(supplier_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
+    access_block = _trial_access_response(current_user())
+    if access_block:
+        return access_block
     supplier = Supplier.query.filter_by(id=supplier_id, user_id=session["user_id"]).first_or_404()
     db.session.delete(supplier)
     db.session.commit()
@@ -1569,6 +1659,9 @@ def settings():
     if not user:
         return redirect(url_for("main.login"))
     if request.method == "POST":
+        access_block = _trial_access_response(user)
+        if access_block:
+            return access_block
         user.company_name = request.form.get("company_name", "").strip()
         user.rfc = request.form.get("rfc", "").strip().upper()
         user.tax_regime = request.form.get("tax_regime", "").strip()
@@ -1583,19 +1676,10 @@ def settings():
     return render_template("settings.html", user=user)
 
 
-@main.route("/receipt/<int:sale_id>")
-def receipt(sale_id):
-    from reportlab.lib.pagesizes import letter
+def _build_receipt_pdf(user, sale, product):
     from reportlab.pdfgen import canvas
     from reportlab.lib.units import cm
     import io
-
-    user = current_user()
-    if not user:
-        return redirect(url_for("main.login"))
-
-    sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
-    product = Product.query.get(sale.product_id)
 
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=(8*cm, 15*cm))
@@ -1657,4 +1741,32 @@ def receipt(sale_id):
 
     c.save()
     buffer.seek(0)
-    return send_file(buffer, mimetype="application/pdf", download_name=f"recibo_{sale.id}.pdf")
+    return buffer
+
+
+@main.route("/receipt/<int:sale_id>")
+def receipt(sale_id):
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
+    sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
+    product = Product.query.filter_by(id=sale.product_id, user_id=user.id).first()
+    if not product:
+        current_app.logger.error(
+            "No se pudo generar recibo: producto ausente para venta %s", sale.id
+        )
+        flash("No pudimos generar el recibo. Inténtalo nuevamente.", "danger")
+        return redirect(url_for("main.sell"))
+
+    try:
+        buffer = _build_receipt_pdf(user, sale, product)
+        return send_file(
+            buffer,
+            mimetype="application/pdf",
+            download_name=f"recibo_{sale.id}.pdf",
+        )
+    except Exception:
+        current_app.logger.exception("No se pudo generar el recibo %s", sale.id)
+        flash("No pudimos generar el recibo. Inténtalo nuevamente.", "danger")
+        return redirect(url_for("main.sell"))

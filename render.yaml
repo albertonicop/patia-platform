@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: patia
+    runtime: python
+    plan: starter
+    buildCommand: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+    preDeployCommand: python -m flask --app run.py db upgrade
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SESSION_COOKIE_SAMESITE
+        value: Lax
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
+      - key: STRIPE_PAST_DUE_GRACE_DAYS
+        value: "3"
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRICE_ID
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      - key: RATELIMIT_STORAGE_URI
+        sync: false

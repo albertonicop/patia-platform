@@ -1,0 +1,38 @@
+# Python bytecode and caches
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local databases and instance data
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Tests, coverage and generated artifacts
+tests/**/__pycache__/
+artifacts/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
