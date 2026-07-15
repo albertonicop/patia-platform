@@ -1,151 +1,47 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PATIA Pro</title>
+{% extends "base.html" %}
+{% block title %}PATIA Pro{% endblock %}
 
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+{% block content %}
+<div class="subscription-v2 subscription-v2--offer">
+  <header class="module-intro-v2 subscription-v2__intro">
+    <span>Haz crecer tu operación</span>
+    <h2>Más control para decidir con confianza</h2>
+    <p>PATIA Pro reúne inventario, ventas y recomendaciones comerciales en un solo plan mensual.</p>
+  </header>
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,sans-serif}
+  <section class="subscription-v2__offer-grid">
+    <article class="card module-card-v2 subscription-v2__offer-card">
+      <div class="subscription-v2__offer-head">
+        <div><span class="subscription-v2__eyebrow">PATIA Pro</span><h3>Todo lo necesario para operar</h3></div>
+        <div class="subscription-v2__price"><strong>$199</strong><span>MXN / mes</span></div>
+      </div>
+      <p class="subscription-v2__billing-copy">El cobro es mensual. Puedes cancelar cuando quieras y conservarás el acceso hasta finalizar el periodo pagado.</p>
+      <ul class="subscription-v2__features">
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Productos ilimitados</li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Punto de venta completo</li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Reportes y recomendaciones IA</li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Predicción de inventario</li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Importación de catálogo por Excel</li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Soporte prioritario</li>
+      </ul>
 
-body{
-    min-height:100vh;
-    background:radial-gradient(circle at 20% 20%,rgba(123,97,255,.28),transparent 30%),
-               radial-gradient(circle at 80% 10%,rgba(0,212,255,.16),transparent 30%),
-               #050b18;
-    color:white;
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-    padding:30px 20px;
-    overflow-y:auto;
-}
-
-.checkout-card{
-    width:100%;
-    max-width:620px;
-    background:linear-gradient(135deg,rgba(123,97,255,.18),rgba(0,212,255,.08));
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:28px;
-    padding:34px 42px;
-    text-align:center;
-    box-shadow:0 30px 80px rgba(0,0,0,.45);
-}
-
-.logo{
-    width:210px;
-    margin-bottom:26px;
-}
-
-.badge{
-    color:#38e8c6;
-    letter-spacing:4px;
-    font-size:13px;
-    font-weight:800;
-    margin-bottom:16px;
-}
-
-h1{
-    font-size:42px;
-    line-height:1.1;
-    margin-bottom:18px;
-}
-
-.price{
-    font-size:46px;
-    font-weight:900;
-    margin:18px 0;
-}
-
-p{
-    color:#aebad5;
-    font-size:17px;
-    line-height:1.6;
-}
-
-.features{
-    text-align:left;
-    margin:28px 0;
-    color:#dce7ff;
-    line-height:2;
-    font-size:17px;
-}
-
-.btn{
-    width:100%;
-    border:none;
-    display:block;
-    text-align:center;
-    padding:28px 42px;
-    border-radius:16px;
-    font-weight:900;
-    text-decoration:none;
-    cursor:pointer;
-    font-size:16px;
-}
-
-.primary{
-    background:linear-gradient(90deg,#7b61ff,#4d9cff);
-    color:white;
-}
-
-.secondary{
-    margin-top:12px;
-    background:transparent;
-    border:1px solid rgba(255,255,255,.2);
-    color:white;
-}
-
-.secure{
-    margin-top:18px;
-    font-size:14px;
-    color:#8f9bb8;
-}
-</style>
-</head>
-
-<body>
-
-<div class="checkout-card">
-    <img class="logo" src="{{ url_for('static', filename='img/logo-patia.png') }}">
-
-    <div class="badge">PATIA PRO</div>
-
-    <h1>Activa todo el poder de PATIA</h1>
-
-    <div class="price">$199 MXN/mes</div>
-
-    <p>
-        Desbloquea herramientas avanzadas para controlar inventario,
-        ventas y decisiones de tu negocio con más inteligencia.
-    </p>
-
-    <div class="features">
-        ✓ Productos ilimitados<br>
-        ✓ Punto de venta completo<br>
-        ✓ Reportes IA<br>
-        ✓ Predicción de inventario<br>
-        ✓ Importación por Excel<br>
-        ✓ Soporte prioritario
-    </div>
-
-    <form action="/create-checkout-session" method="POST">
+      <form action="/create-checkout-session" method="POST" class="subscription-v2__checkout-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn primary" type="submit">
-            Pagar con tarjeta
-        </button>
-    </form>
+        <button class="btn" type="submit">Continuar al pago seguro</button>
+      </form>
+      <p class="subscription-v2__secure"><i class="fa-solid fa-lock" aria-hidden="true"></i> Pago procesado de forma segura por Stripe.</p>
+    </article>
 
-    <a href="{{ url_for('main.dashboard') }}" class="btn secondary">
-        Volver al panel
-    </a>
-
-    <div class="secure">
-        Pago seguro procesado por Stripe.
-    </div>
+    <aside class="card module-card-v2 subscription-v2__guide">
+      <span class="subscription-v2__eyebrow">Antes de continuar</span>
+      <h3>Una suscripción fácil de administrar</h3>
+      <ul>
+        <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><span><strong>Renovación mensual</strong> El siguiente cobro ocurre un mes después de activar el plan.</span></li>
+        <li><i class="fa-solid fa-credit-card" aria-hidden="true"></i><span><strong>Portal de cliente</strong> Desde PATIA podrás actualizar tu método de pago.</span></li>
+        <li><i class="fa-solid fa-ban" aria-hidden="true"></i><span><strong>Cancelación clara</strong> No pierdes el periodo que ya pagaste.</span></li>
+      </ul>
+      <a href="{{ url_for('main.dashboard') }}" class="btn ghost subscription-v2__back">Volver al panel</a>
+    </aside>
+  </section>
 </div>
-
-</body>
-</html>
+{% endblock %}

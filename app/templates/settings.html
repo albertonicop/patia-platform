@@ -1,48 +1,93 @@
 {% extends 'base.html' %}
-{% block title %}Configuracion{% endblock %}
+{% block title %}Configuración{% endblock %}
 {% block content %}
 
-<div class="card" style="max-width:600px;">
-    <h2 style="margin-bottom:24px;">Configuracion del negocio</h2>
+<div class="settings-v2">
+  <header class="module-intro-v2">
+    <span>Perfil del negocio</span>
+    <h2>Configura la información de tu empresa</h2>
+    <p>Estos datos identifican tu negocio y pueden aparecer en los tickets de venta que entregues a tus clientes.</p>
+  </header>
 
-    <form method="POST" action="/settings" class="stack">
+  <form method="POST" action="/settings" class="settings-v2__form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="stack">
-            <label style="color:var(--muted);font-size:13px;">Nombre del negocio</label>
-            <input type="text" name="company_name" value="{{ user.company_name or '' }}" placeholder="Mi Tienda SA de CV">
+
+    <section class="card module-card-v2 settings-v2__section" aria-labelledby="business-info-title">
+      <header class="settings-v2__section-head">
+        <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-store"></i></span>
+        <div><h3 id="business-info-title">Información del negocio</h3><p>El nombre con el que reconoces tu operación.</p></div>
+      </header>
+      <div class="settings-v2__grid">
+        <div class="field-v2 settings-v2__wide">
+            <label for="company-name">Nombre del negocio</label>
+            <input id="company-name" type="text" name="company_name" value="{{ user.company_name or '' }}" placeholder="Mi tienda">
+            <small>Usa el nombre comercial que conocen tus clientes.</small>
         </div>
-        <div class="stack">
-            <label style="color:var(--muted);font-size:13px;">RFC</label>
-            <input type="text" name="rfc" value="{{ user.rfc or '' }}" placeholder="XAXX010101000" maxlength="13">
+      </div>
+    </section>
+
+    <section class="card module-card-v2 settings-v2__section" aria-labelledby="contact-info-title">
+      <header class="settings-v2__section-head">
+        <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
+        <div><h3 id="contact-info-title">Contacto</h3><p>Información para identificar y contactar a tu negocio.</p></div>
+      </header>
+      <div class="settings-v2__grid">
+        <div class="field-v2 settings-v2__wide">
+            <label for="business-phone">Teléfono</label>
+            <input id="business-phone" type="text" name="phone" value="{{ user.phone or '' }}" inputmode="tel" placeholder="Ej. 238 123 4567">
+            <small>Incluye lada para que el número sea fácil de reconocer.</small>
         </div>
-        <div class="stack">
-            <label style="color:var(--muted);font-size:13px;">Regimen fiscal</label>
-            <input type="text" name="tax_regime" value="{{ user.tax_regime or '' }}" placeholder="Regimen Simplificado de Confianza">
+      </div>
+    </section>
+
+    <section class="card module-card-v2 settings-v2__section" aria-labelledby="address-info-title">
+      <header class="settings-v2__section-head">
+        <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+        <div><h3 id="address-info-title">Dirección</h3><p>Ubicación principal desde la que opera tu negocio.</p></div>
+      </header>
+      <div class="settings-v2__grid">
+        <div class="field-v2 settings-v2__wide">
+            <label for="business-address">Calle y número</label>
+            <input id="business-address" type="text" name="address" value="{{ user.address or '' }}" placeholder="Calle, número exterior e interior">
         </div>
-        <div class="stack">
-            <label style="color:var(--muted);font-size:13px;">Direccion</label>
-            <input type="text" name="address" value="{{ user.address or '' }}" placeholder="Calle, numero">
+        <div class="field-v2">
+            <label for="business-city">Ciudad</label>
+            <input id="business-city" type="text" name="city" value="{{ user.city or '' }}">
         </div>
-        <div class="form-grid" style="grid-template-columns:1fr 1fr;">
-            <div class="stack">
-                <label style="color:var(--muted);font-size:13px;">Ciudad</label>
-                <input type="text" name="city" value="{{ user.city or '' }}">
-            </div>
-            <div class="stack">
-                <label style="color:var(--muted);font-size:13px;">Estado</label>
-                <input type="text" name="state" value="{{ user.state or '' }}">
-            </div>
+        <div class="field-v2">
+            <label for="business-state">Estado</label>
+            <input id="business-state" type="text" name="state" value="{{ user.state or '' }}">
         </div>
-        <div class="stack">
-            <label style="color:var(--muted);font-size:13px;">Codigo postal</label>
-            <input type="text" name="postal_code" value="{{ user.postal_code or '' }}" maxlength="5">
+        <div class="field-v2">
+            <label for="business-postal-code">Código postal</label>
+            <input id="business-postal-code" type="text" name="postal_code" value="{{ user.postal_code or '' }}" maxlength="5" inputmode="numeric">
         </div>
-        <div class="stack">
-            <label style="color:var(--muted);font-size:13px;">Telefono</label>
-            <input type="text" name="phone" value="{{ user.phone or '' }}">
+      </div>
+    </section>
+
+    <section class="card module-card-v2 settings-v2__section" aria-labelledby="tax-info-title">
+      <header class="settings-v2__section-head">
+        <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-file-invoice"></i></span>
+        <div><h3 id="tax-info-title">Información fiscal</h3><p>Completa estos datos solo si los necesitas en tus comprobantes.</p></div>
+      </header>
+      <div class="settings-v2__grid">
+        <div class="field-v2">
+            <label for="business-rfc">RFC</label>
+            <input id="business-rfc" type="text" name="rfc" value="{{ user.rfc or '' }}" placeholder="XAXX010101000" maxlength="13">
+            <small>Captúralo sin espacios ni guiones.</small>
         </div>
-        <button class="btn" type="submit">Guardar cambios</button>
-    </form>
+        <div class="field-v2">
+            <label for="business-tax-regime">Régimen fiscal</label>
+            <input id="business-tax-regime" type="text" name="tax_regime" value="{{ user.tax_regime or '' }}" placeholder="Régimen Simplificado de Confianza">
+        </div>
+      </div>
+    </section>
+
+    <div class="settings-v2__actions">
+      <p>Revisa que la información sea correcta antes de guardar.</p>
+      <button class="btn" type="submit">Guardar cambios</button>
+    </div>
+  </form>
 </div>
 
 {% endblock %}

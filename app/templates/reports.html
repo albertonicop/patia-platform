@@ -8,6 +8,7 @@
   <div class="card metric">
     <span>Utilidad estimada</span>
     <strong>{{ profit|money }}</strong>
+    <small>Ventas de los últimos 7 días menos el costo registrado de las unidades vendidas.</small>
   </div>
 
   <div class="card metric">
@@ -35,7 +36,7 @@
   <canvas id="categoryChart"></canvas>
 </div>
     {% else %}
-      <div class="reports-v2__empty">
+      <div class="reports-v2__empty module-empty-v2">
         <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
         <h4>Aún no hay ventas para analizar</h4>
         <p>Después de registrar ventas, aquí verás qué categorías generan más ingresos.</p>
@@ -61,7 +62,7 @@
   </div>
   {% endfor %}
   {% else %}
-    <div class="reports-v2__empty reports-v2__empty--compact">
+    <div class="reports-v2__empty reports-v2__empty--compact module-empty-v2">
       <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
       <h4>Todavía no hay recomendaciones</h4>
       <p>Registra ventas y movimientos de inventario para recibir sugerencias basadas en tu operación.</p>

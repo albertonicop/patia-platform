@@ -46,9 +46,9 @@
     <a href="/settings"{% if request.path.startswith('/settings') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>Configuración</span></a>
 
 
-<form method="POST" action="{{ url_for('main.logout') }}" style="margin-top:10px;">
+<form method="POST" action="{{ url_for('main.logout') }}" class="sidebar-v2__logout">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <button type="submit" class="btn ghost" style="width:100%;color:#ff8a8a;">
+  <button type="submit" class="btn ghost sidebar-v2__logout-button">
     Cerrar sesión
   </button>
 </form>

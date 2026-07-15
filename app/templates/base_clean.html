@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=99">
 </head>
-<body style="background:#0b1020;min-height:100vh;display:flex;align-items:center;justify-content:center;">
+<body class="clean-shell-v2">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div class="flash-wrap">

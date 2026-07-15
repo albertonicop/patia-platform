@@ -4351,3 +4351,379 @@ table {
     font-size: 11px;
     line-height: 1.45;
 }
+
+/* Sprint 1.2: sistema visual compartido ---------------------------------- */
+
+.app-shell-v2 {
+    --v2-radius: 18px;
+    --v2-card-padding: 26px;
+    --v2-section-gap: 20px;
+}
+
+.app-shell-v2 .module-card-v2,
+.app-shell-v2 .inventory-v2 .card,
+.app-shell-v2 .pos-v2 .card,
+.app-shell-v2 .suppliers-v2 .card,
+.app-shell-v2 .reports-v2 .card {
+    border: 1px solid var(--v2-line);
+    border-radius: var(--v2-radius);
+    background: var(--v2-surface);
+    box-shadow: var(--v2-shadow);
+}
+
+.app-shell-v2 .module-intro-v2 {
+    max-width: 760px;
+    margin-bottom: 28px;
+}
+
+.app-shell-v2 .module-intro-v2 > span,
+.app-shell-v2 .subscription-v2__eyebrow {
+    color: var(--v2-violet);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.app-shell-v2 .module-intro-v2 h2 {
+    margin: 8px 0;
+    color: var(--v2-ink);
+    font-size: clamp(28px, 3vw, 42px);
+    letter-spacing: -.035em;
+}
+
+.app-shell-v2 .module-intro-v2 p {
+    margin: 0;
+    color: var(--v2-muted);
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.app-shell-v2 .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border-radius: 12px;
+    background: var(--v2-ink);
+    box-shadow: none;
+    line-height: 1.2;
+}
+
+.app-shell-v2 .btn:hover { background: #34394b; }
+
+.app-shell-v2 .btn.ghost {
+    border: 1px solid #d9dce5;
+    background: #fff;
+    color: #4d5366;
+}
+
+.app-shell-v2 .btn.ghost:hover { background: #f7f8fb; }
+
+.app-shell-v2 .sidebar-v2__logout-button {
+    width: 100%;
+    color: #b33d51 !important;
+}
+
+.app-shell-v2 .field-v2 {
+    display: grid;
+    align-content: start;
+    gap: 7px;
+    min-width: 0;
+}
+
+.app-shell-v2 .field-v2 label {
+    color: #3d4356;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.app-shell-v2 .field-v2 small {
+    color: #656c7e;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.app-shell-v2 .field-v2 input {
+    min-height: 46px;
+    border-color: #dfe2ea;
+    background: #fff;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .field-v2 input:focus-visible,
+.app-shell-v2 .settings-v2 button:focus-visible,
+.app-shell-v2 .subscription-v2 a:focus-visible,
+.app-shell-v2 .subscription-v2 button:focus-visible {
+    border-color: var(--v2-violet);
+    outline: 3px solid rgba(105, 86, 232, .2);
+    outline-offset: 2px;
+}
+
+/* ConfiguraciÃ³n */
+
+.app-shell-v2 .settings-v2,
+.app-shell-v2 .subscription-v2 {
+    width: min(100%, 1120px);
+    margin: 0 auto;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .settings-v2__form {
+    display: grid;
+    gap: var(--v2-section-gap);
+}
+
+.app-shell-v2 .settings-v2__section {
+    padding: var(--v2-card-padding);
+}
+
+.app-shell-v2 .settings-v2__section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.app-shell-v2 .settings-v2__section-icon {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 12px;
+    background: #f1efff;
+    color: var(--v2-violet);
+}
+
+.app-shell-v2 .settings-v2__section-head h3,
+.app-shell-v2 .settings-v2__section-head p {
+    margin: 0;
+}
+
+.app-shell-v2 .settings-v2__section-head h3 {
+    color: var(--v2-ink);
+    font-size: 17px;
+}
+
+.app-shell-v2 .settings-v2__section-head p {
+    margin-top: 5px;
+    color: var(--v2-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.app-shell-v2 .settings-v2__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.app-shell-v2 .settings-v2__wide { grid-column: 1 / -1; }
+
+.app-shell-v2 .settings-v2__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 4px 0;
+}
+
+.app-shell-v2 .settings-v2__actions p {
+    margin: 0;
+    color: var(--v2-muted);
+    font-size: 11px;
+}
+
+.app-shell-v2 .settings-v2__actions .btn { min-width: 180px; }
+
+/* SuscripciÃ³n */
+
+.app-shell-v2 .subscription-v2__layout,
+.app-shell-v2 .subscription-v2__offer-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+    gap: var(--v2-section-gap);
+    align-items: start;
+}
+
+.app-shell-v2 .subscription-v2__status-card,
+.app-shell-v2 .subscription-v2__offer-card,
+.app-shell-v2 .subscription-v2__guide {
+    padding: var(--v2-card-padding);
+}
+
+.app-shell-v2 .subscription-v2__status-head,
+.app-shell-v2 .subscription-v2__offer-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--v2-line);
+}
+
+.app-shell-v2 .subscription-v2 h3 { color: var(--v2-ink); }
+.app-shell-v2 .subscription-v2__status-head h3,
+.app-shell-v2 .subscription-v2__offer-head h3 { margin: 7px 0 0; font-size: 23px; }
+
+.app-shell-v2 .subscription-v2__badge {
+    max-width: 180px;
+    padding: 7px 10px;
+    overflow-wrap: anywhere;
+    border-radius: 999px;
+    background: #f1f2f6;
+    color: #5b6275;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.app-shell-v2 .subscription-v2__badge--pro { background: #e9f7f1; color: #177653; }
+
+.app-shell-v2 .subscription-v2__details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    padding: 24px 0;
+}
+
+.app-shell-v2 .subscription-v2__details > div {
+    min-width: 0;
+    padding: 0 18px;
+    border-right: 1px solid var(--v2-line);
+}
+
+.app-shell-v2 .subscription-v2__details > div:first-child { padding-left: 0; }
+.app-shell-v2 .subscription-v2__details > div:last-child { padding-right: 0; border-right: 0; }
+.app-shell-v2 .subscription-v2__details dt { min-height: 32px; color: var(--v2-muted); font-size: 10px; line-height: 1.4; }
+.app-shell-v2 .subscription-v2__details dd { margin: 8px 0 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 800; }
+
+.app-shell-v2 .subscription-v2__payment-alert {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding: 15px;
+    border: 1px solid #edc4ca;
+    border-radius: 14px;
+    background: #fff5f6;
+    color: #923447;
+}
+
+.app-shell-v2 .subscription-v2__payment-alert p { margin: 4px 0 0; font-size: 11px; line-height: 1.5; }
+
+.app-shell-v2 .subscription-v2__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 22px;
+    border-top: 1px solid var(--v2-line);
+}
+
+.app-shell-v2 .subscription-v2__actions form { margin: 0; }
+
+.app-shell-v2 .subscription-v2__guide h3 { margin: 8px 0 20px; }
+.app-shell-v2 .subscription-v2__guide ul,
+.app-shell-v2 .subscription-v2__features { display: grid; gap: 17px; margin: 0; padding: 0; list-style: none; }
+.app-shell-v2 .subscription-v2__guide li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; color: #596075; font-size: 12px; line-height: 1.55; }
+.app-shell-v2 .subscription-v2__guide li i { margin-top: 3px; color: var(--v2-violet); }
+.app-shell-v2 .subscription-v2__guide li strong { display: block; color: var(--v2-ink); font-size: 12px; }
+
+.app-shell-v2 .subscription-v2__price { flex: 0 0 auto; text-align: right; }
+.app-shell-v2 .subscription-v2__price strong { display: block; font-size: clamp(32px, 4vw, 46px); letter-spacing: -.05em; }
+.app-shell-v2 .subscription-v2__price span { color: var(--v2-muted); font-size: 11px; }
+.app-shell-v2 .subscription-v2__billing-copy { margin: 22px 0; color: var(--v2-muted); font-size: 13px; line-height: 1.6; }
+.app-shell-v2 .subscription-v2__features { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; color: #4d5366; font-size: 12px; }
+.app-shell-v2 .subscription-v2__features i { margin-right: 7px; color: #16845d; }
+.app-shell-v2 .subscription-v2__checkout-form { margin-top: 26px; }
+.app-shell-v2 .subscription-v2__checkout-form .btn { width: 100%; min-height: 48px; }
+.app-shell-v2 .subscription-v2__secure { margin: 11px 0 0; color: #656c7e; font-size: 10px; text-align: center; }
+.app-shell-v2 .subscription-v2__secure i { margin-right: 5px; }
+.app-shell-v2 .subscription-v2__back { width: 100%; margin-top: 24px; }
+
+/* Dashboard: contenido flexible y recomendaciones explicables */
+
+.app-shell-v2 .dashboard-v2__metric strong {
+    overflow: visible;
+    font-size: clamp(20px, 2vw, 30px);
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.app-shell-v2 .dashboard-v2__recommendation > div { min-width: 0; }
+.app-shell-v2 .dashboard-v2__recommendation small { display: block; margin-top: 5px; color: #73798a; font-size: 9px; line-height: 1.45; }
+.app-shell-v2 .dashboard-v2__empty--compact h4 { margin: 0; color: var(--v2-ink); font-size: 14px; }
+
+/* VerificaciÃ³n de correo */
+
+.clean-shell-v2 {
+    display: grid;
+    min-height: 100vh;
+    margin: 0;
+    padding: 32px 20px;
+    place-items: center;
+    background: #f5f7fb;
+    color: #252938;
+}
+
+.clean-shell-v2 .flash-wrap { position: fixed; top: 18px; right: 18px; left: 18px; z-index: 10; max-width: 560px; margin: 0 auto; }
+.verify-v2 { width: min(100%, 500px); }
+.verify-v2__card { padding: 38px; border: 1px solid #e2e5ed; border-radius: 20px; background: #fff; box-shadow: 0 16px 46px rgba(31, 36, 56, .08); text-align: center; }
+.verify-v2__icon { display: grid; width: 54px; height: 54px; margin: 0 auto 18px; place-items: center; border-radius: 16px; background: #f1efff; color: #6956e8; font-size: 20px; }
+.verify-v2__eyebrow { color: #6956e8; font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+.verify-v2 h1 { margin: 8px 0 10px; color: #252938; font-size: 30px; letter-spacing: -.035em; }
+.verify-v2__intro { margin: 0 0 25px; color: #596075; font-size: 13px; line-height: 1.65; }
+.verify-v2__intro strong { color: #34394b; overflow-wrap: anywhere; }
+.verify-v2__form { display: grid; gap: 11px; text-align: left; }
+.verify-v2__form label { color: #3d4356; font-size: 12px; font-weight: 750; }
+.verify-v2__form input { min-height: 58px; border: 1px solid #dfe2ea; background: #fff; color: #252938; font-size: 25px; font-weight: 800; letter-spacing: .28em; text-align: center; }
+.verify-v2__form input:focus-visible { border-color: #6956e8; outline: 3px solid rgba(105, 86, 232, .2); }
+.verify-v2__form .btn { min-height: 46px; margin-top: 3px; background: #252938; box-shadow: none; }
+.verify-v2__resend { margin-top: 22px; padding-top: 20px; border-top: 1px solid #e8eaf0; }
+.verify-v2__resend p { margin: 0 0 10px; color: #656c7e; font-size: 11px; }
+.verify-v2__resend .btn { min-height: 44px; border-color: #d9dce5; background: #fff; color: #4d5366; box-shadow: none; }
+
+/* Responsive comÃºn: 1024, 768 y 390 */
+
+@media (max-width: 1024px) {
+    .app-shell-v2 .subscription-v2__layout,
+    .app-shell-v2 .subscription-v2__offer-grid { grid-template-columns: 1fr; }
+    .app-shell-v2 .subscription-v2__guide { order: 2; }
+    .app-shell-v2 .dashboard-v2__metric strong { font-size: clamp(22px, 3.4vw, 29px); }
+}
+
+@media (max-width: 768px) {
+    .app-shell-v2 { --v2-card-padding: 21px; }
+    .app-shell-v2 .table-wrap { width: 100%; max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+    .app-shell-v2 table { min-width: 680px; }
+    .app-shell-v2 .settings-v2__grid { grid-template-columns: 1fr; }
+    .app-shell-v2 .settings-v2__wide { grid-column: auto; }
+    .app-shell-v2 .subscription-v2__details { grid-template-columns: 1fr; gap: 16px; }
+    .app-shell-v2 .subscription-v2__details > div { padding: 0 0 16px; border-right: 0; border-bottom: 1px solid var(--v2-line); }
+    .app-shell-v2 .subscription-v2__details > div:last-child { padding-bottom: 0; border-bottom: 0; }
+    .app-shell-v2 .subscription-v2__details dt { min-height: 0; }
+}
+
+@media (max-width: 480px) {
+    .app-shell-v2 .module-intro-v2 { margin-bottom: 22px; }
+    .app-shell-v2 .module-intro-v2 h2 { font-size: 29px; }
+    .app-shell-v2 .settings-v2__section,
+    .app-shell-v2 .subscription-v2__status-card,
+    .app-shell-v2 .subscription-v2__offer-card,
+    .app-shell-v2 .subscription-v2__guide { padding: 19px; }
+    .app-shell-v2 .settings-v2__actions,
+    .app-shell-v2 .subscription-v2__status-head,
+    .app-shell-v2 .subscription-v2__offer-head { align-items: stretch; flex-direction: column; }
+    .app-shell-v2 .settings-v2__actions .btn,
+    .app-shell-v2 .subscription-v2__actions form,
+    .app-shell-v2 .subscription-v2__actions .btn { width: 100%; }
+    .app-shell-v2 .subscription-v2__price { text-align: left; }
+    .app-shell-v2 .subscription-v2__features { grid-template-columns: 1fr; }
+    .app-shell-v2 .dashboard-v2__metric strong { font-size: 25px; }
+    .verify-v2__card { padding: 27px 20px; }
+    .verify-v2 h1 { font-size: 27px; }
+    .verify-v2__form input { font-size: 22px; letter-spacing: .22em; }
+}
