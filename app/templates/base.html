@@ -18,25 +18,26 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="app-body">
-  <aside class="sidebar">
-    <div class="brand">
+<body class="app-body app-shell-v2">
+  <aside class="sidebar sidebar-v2">
+    <div class="brand sidebar-v2__brand">
       <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
+      <span class="sidebar-v2__brand-copy">Gestión inteligente</span>
     </div>
 
-   <nav class="sidebar-nav">
-    <a href="/">Dashboard</a>
-    <a href="/products">Inventario</a>
-    <a href="/sell">Punto de venta</a>
+   <nav class="sidebar-nav sidebar-v2__nav" aria-label="Navegación principal">
+    <a href="/"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a>
+    <a href="/products"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>Inventario</span></a>
+    <a href="/sell"><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>Punto de venta</span></a>
     {% if user is defined and user and ((user.plan or "")|lower|trim) == "pro" %}
-<a href="/reports">Reportes IA</a>
+<a href="/reports"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes IA</span></a>
 {% elif user is defined and user %}
-<a href="/subscribe" style="opacity:.6;">Reportes IA PRO</a>
+<a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes IA <small>PRO</small></span></a>
 {% else %}
-<a href="/subscribe" style="opacity:.6;">Reportes IA PRO</a>
+<a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes IA <small>PRO</small></span></a>
 {% endif %}
-    <a href="/suppliers">Proveedores</a>
-    <a href="/settings">Configuración</a>
+    <a href="/suppliers"><i class="fa-solid fa-truck" aria-hidden="true"></i><span>Proveedores</span></a>
+    <a href="/settings"><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>Configuración</span></a>
 
 
 <form method="POST" action="{{ url_for('main.logout') }}" style="margin-top:10px;">
@@ -48,16 +49,19 @@
 
 </nav>
 
-    <div class="sidebar-card">
-      <b>Plan Pro</b>
-      <p>Diseñado para abarrotes, minisúpers y tiendas familiares.</p>
+    <div class="sidebar-card sidebar-v2__footer">
+      <span class="sidebar-v2__status-dot" aria-hidden="true"></span>
+      <div>
+        <b>PATIA Pro</b>
+        <p>Operación inteligente</p>
+      </div>
     </div>
   </aside>
 
-  <main class="main">
-    <header class="topbar">
+  <main class="main app-main-v2">
+    <header class="topbar app-topbar-v2">
       <div>
-        <span class="eyebrow">Plataforma empresarial</span>
+        <span class="eyebrow">Centro de control</span>
         <h1>{% block title %}{% endblock %}</h1>
       </div>
 
@@ -79,10 +83,13 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <a
     href="https://wa.me/522381186483?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20PATIA"
-    class="whatsapp-float"
+    class="whatsapp-float whatsapp-float-v2"
     target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Contactar a PATIA por WhatsApp"
 >
-    💬 WhatsApp
+    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+    <span>Ayuda</span>
 </a>
 </body>
 </html>
