@@ -154,31 +154,56 @@ function removeFromCart(id) {
 }
 
 function renderCart() {
+  cartBody.replaceChildren();
+
   if (cart.length === 0) {
-    cartBody.innerHTML = `<tr id="cart-empty"><td colspan="5" style="text-align:center;opacity:0.5;">El carrito está vacío</td></tr>`;
+    const emptyRow = document.createElement("tr");
+    emptyRow.id = "cart-empty";
+    const emptyCell = document.createElement("td");
+    emptyCell.colSpan = 5;
+    emptyCell.style.textAlign = "center";
+    emptyCell.style.opacity = "0.5";
+    emptyCell.textContent = "El carrito está vacío";
+    emptyRow.appendChild(emptyCell);
+    cartBody.appendChild(emptyRow);
     btnCobrar.disabled = true;
     cartTotal.textContent = "$0.00 MXN";
     return;
   }
 
   let total = 0;
-  cartBody.innerHTML = cart.map(item => {
+  cart.forEach(item => {
     const subtotal = item.price * item.qty;
     total += subtotal;
-    return `
-      <tr>
-        <td>${item.name}</td>
-        <td>$${item.price.toFixed(2)}</td>
-        <td>
-          <input type="number" min="1" max="${item.stock}" value="${item.qty}"
-            onchange="updateQty(${item.id}, this.value)"
-            style="width:60px; text-align:center;">
-        </td>
-        <td>$${subtotal.toFixed(2)}</td>
-        <td><button onclick="removeFromCart(${item.id})" class="btn ghost">✕</button></td>
-      </tr>
-    `;
-  }).join("");
+
+    const row = document.createElement("tr");
+    const nameCell = document.createElement("td");
+    nameCell.textContent = item.name;
+    const priceCell = document.createElement("td");
+    priceCell.textContent = `$${item.price.toFixed(2)}`;
+    const quantityCell = document.createElement("td");
+    const quantityInput = document.createElement("input");
+    quantityInput.type = "number";
+    quantityInput.min = "1";
+    quantityInput.max = String(item.stock);
+    quantityInput.value = String(item.qty);
+    quantityInput.style.width = "60px";
+    quantityInput.style.textAlign = "center";
+    quantityInput.addEventListener("change", () => updateQty(item.id, quantityInput.value));
+    quantityCell.appendChild(quantityInput);
+    const subtotalCell = document.createElement("td");
+    subtotalCell.textContent = `$${subtotal.toFixed(2)}`;
+    const actionCell = document.createElement("td");
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "btn ghost";
+    removeButton.textContent = "✕";
+    removeButton.addEventListener("click", () => removeFromCart(item.id));
+    actionCell.appendChild(removeButton);
+
+    row.append(nameCell, priceCell, quantityCell, subtotalCell, actionCell);
+    cartBody.appendChild(row);
+  });
 
   cartTotal.textContent = `$${total.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
   btnCobrar.disabled = false;

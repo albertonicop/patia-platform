@@ -315,7 +315,11 @@ def analytics():
     profit = (
         db.session.query(func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity))
         .join(Product)
-        .filter(Product.user_id == user_id)
+        .filter(
+            Product.user_id == user_id,
+            Sale.user_id == user_id,
+            Sale.created_at >= week_start,
+        )
         .scalar() or 0
     )
 
@@ -400,7 +404,7 @@ def dashboard():
 @main.route("/products")
 def products():
     if not session.get("user_id"):
-        return redirect(url_for("main.landing"))
+        return redirect(url_for("main.login"))
     user = current_user()
     if trial_expired(user):
         return render_template("trial_expired.html")
@@ -545,8 +549,12 @@ def import_products():
 
 @main.route("/products/new", methods=["POST"])
 def add_product():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
     p = Product(
-        user_id=session["user_id"],
+        user_id=user.id,
         sku=request.form["sku"],
         barcode=request.form.get("barcode") or None,
         name=request.form["name"],
@@ -599,27 +607,60 @@ def sell_cart():
     if not user:
         return jsonify({"ok": False, "error": "No autenticado"})
 
-    data = request.get_json()
-    items = data.get("items", [])
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"ok": False, "error": "Solicitud inválida"}), 400
+
+    items = data.get("items")
+    if not isinstance(items, list) or not items:
+        return jsonify({"ok": False, "error": "El carrito está vacío"}), 400
 
     try:
-        ticket_id = str(uuid.uuid4())
+        requested_items = {}
         for item in items:
-            product = Product.query.filter_by(id=int(item["product_id"]), user_id=user.id).first()
-            if not product:
-                return jsonify({"ok": False, "error": "Producto no encontrado"})
-            qty = int(item["quantity"])
-            if product.stock < qty:
-                return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"})
-            product.stock -= qty
-            sale = Sale(user_id=user.id, product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
+            if not isinstance(item, dict):
+                return jsonify({"ok": False, "error": "Artículo inválido"}), 400
+
+            try:
+                product_id = int(item["product_id"])
+                quantity = int(item["quantity"])
+            except (KeyError, TypeError, ValueError):
+                return jsonify({"ok": False, "error": "Artículo inválido"}), 400
+
+            if quantity <= 0:
+                return jsonify({"ok": False, "error": "La cantidad debe ser mayor a cero"}), 400
+
+            requested_items[product_id] = requested_items.get(product_id, 0) + quantity
+
+        products = {
+            product.id: product
+            for product in Product.query.filter(
+                Product.user_id == user.id,
+                Product.id.in_(requested_items.keys()),
+            ).all()
+        }
+
+        if len(products) != len(requested_items):
+            return jsonify({"ok": False, "error": "Producto no encontrado"}), 404
+
+        for product_id, quantity in requested_items.items():
+            product = products[product_id]
+            if product.stock < quantity:
+                return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"}), 409
+
+        ticket_id = str(uuid.uuid4())
+        for product_id, quantity in requested_items.items():
+            product = products[product_id]
+            product.stock -= quantity
+            sale = Sale(user_id=user.id, product_id=product.id, quantity=quantity, unit_price=product.sale_price, total=quantity * product.sale_price)
             sale.ticket_id = ticket_id
             db.session.add(sale)
         db.session.commit()
         return jsonify({"ok": True, "ticket_id": ticket_id})
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify({"ok": False, "error": str(e)})
+        current_app.logger.exception("Error al procesar el carrito")
+        return jsonify({"ok": False, "error": "No se pudo procesar la venta"}), 500
 
 
 @main.route("/reports")
@@ -668,14 +709,22 @@ def create_checkout_session():
     if not user:
         return redirect(url_for("main.login"))
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="subscription",
-        line_items=[{"price": current_app.config["STRIPE_PRICE_ID"], "quantity": 1}],
-        success_url=url_for("main.stripe_success", _external=True),
-        cancel_url=url_for("main.subscribe", _external=True),
-        metadata={"user_id": user.id}
-    )
+    checkout_params = {
+        "payment_method_types": ["card"],
+        "mode": "subscription",
+        "line_items": [{"price": current_app.config["STRIPE_PRICE_ID"], "quantity": 1}],
+        "success_url": url_for("main.stripe_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
+        "cancel_url": url_for("main.subscribe", _external=True),
+        "client_reference_id": str(user.id),
+        "metadata": {"user_id": str(user.id)},
+        "subscription_data": {"metadata": {"user_id": str(user.id)}},
+    }
+    if user.stripe_customer_id:
+        checkout_params["customer"] = user.stripe_customer_id
+    else:
+        checkout_params["customer_email"] = user.email
+
+    checkout_session = stripe.checkout.Session.create(**checkout_params)
     return redirect(checkout_session.url, code=303)
 
 
@@ -698,7 +747,7 @@ def stripe_webhook():
         user_id = data.get("metadata", {}).get("user_id")
         if user_id:
             user = User.query.get(int(user_id))
-            if user:
+            if user and data.get("mode") == "subscription":
                 user.plan = "pro"
                 user.stripe_customer_id = data.get("customer")
                 user.stripe_subscription_id = data.get("subscription")
@@ -743,22 +792,33 @@ def stripe_success():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
-    user.plan = "pro"
-    db.session.commit()
-    flash("Tu cuenta PATIA Pro ha sido activada.")
-    send_email(
-        to=user.email,
-        subject="Tu cuenta PATIA Pro esta activa!",
-        html=f"""
-        <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-            <img src="https://patiaapp.com/static/img/logo-patia.png" style="width:160px;margin-bottom:24px;">
-            <h1 style="color:#29d3a8;">Ya eres PATIA Pro!</h1>
-            <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Tu suscripcion ha sido activada correctamente. Ahora tienes acceso a <strong style="color:#fff;">Reportes IA</strong> y todas las funciones avanzadas.</p>
-            <a href="https://patiaapp.com/reports" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Ver mis Reportes IA</a>
-            <p style="margin-top:32px;color:#9aa8c7;font-size:13px;">Tu suscripcion se renueva automaticamente cada mes. Puedes cancelar cuando quieras desde Mi Suscripcion.</p>
-        </div>
-        """
+
+    checkout_session_id = request.args.get("session_id", "").strip()
+    if not checkout_session_id:
+        flash("No se pudo validar la sesión de pago.", "danger")
+        return redirect(url_for("main.subscription"))
+
+    try:
+        stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+        checkout_session = stripe.checkout.Session.retrieve(checkout_session_id)
+    except Exception:
+        current_app.logger.exception("No se pudo consultar la sesión de Checkout")
+        flash("No se pudo validar la sesión de pago.", "danger")
+        return redirect(url_for("main.subscription"))
+
+    checkout_user_id = str(
+        checkout_session.get("client_reference_id")
+        or checkout_session.get("metadata", {}).get("user_id")
+        or ""
     )
+    if checkout_user_id != str(user.id):
+        flash("La sesión de pago no pertenece a este usuario.", "danger")
+        return redirect(url_for("main.subscription"))
+
+    if user.plan == "pro":
+        flash("Tu cuenta PATIA Pro está activa.", "success")
+    else:
+        flash("Pago recibido. Estamos confirmando tu suscripción con Stripe.", "success")
     return redirect(url_for("main.dashboard"))
 
 
@@ -893,14 +953,6 @@ def admin():
         total_sales_count=total_sales_count, total_sales_money=total_sales_money, trial_clients=trial_clients,
         expired_clients=expired_clients, expiring_soon=expiring_soon, new_this_week=new_this_week,
         new_this_month=new_this_month, top_client=top_client, latest_client=latest_client)
-
-
-@main.route("/reset-demo")
-def reset_demo():
-    from seed import seed_data
-    seed_data()
-    flash("Datos demo cargados.", "success")
-    return redirect(url_for("main.dashboard"))
 
 
 @main.route("/products/<int:product_id>/delete", methods=["POST"])
