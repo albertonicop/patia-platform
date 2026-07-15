@@ -914,6 +914,13 @@ def sell_cart():
     if not isinstance(items, list) or not items:
         return jsonify({"ok": False, "error": "El carrito está vacío"}), 400
 
+    request_id = data.get("request_id")
+    if request_id:
+        try:
+            request_id = str(uuid.UUID(str(request_id)))
+        except (TypeError, ValueError, AttributeError):
+            return jsonify({"ok": False, "error": "Solicitud inválida"}), 400
+
     try:
         requested_items = {}
         for item in items:
@@ -931,6 +938,22 @@ def sell_cart():
 
             requested_items[product_id] = requested_items.get(product_id, 0) + quantity
 
+        if request_id:
+            previous_sales = Sale.query.filter_by(
+                user_id=user.id,
+                ticket_id=request_id,
+            ).order_by(Sale.id).all()
+            if previous_sales:
+                return jsonify({
+                    "ok": True,
+                    "duplicate": True,
+                    "ticket_id": request_id,
+                    "total": sum(sale.total for sale in previous_sales),
+                    "single_sale_id": (
+                        previous_sales[0].id if len(previous_sales) == 1 else None
+                    ),
+                })
+
         products = {
             product.id: product
             for product in Product.query.filter(
@@ -947,15 +970,22 @@ def sell_cart():
             if product.stock < quantity:
                 return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"}), 409
 
-        ticket_id = str(uuid.uuid4())
+        ticket_id = request_id or str(uuid.uuid4())
+        sales = []
         for product_id, quantity in requested_items.items():
             product = products[product_id]
             product.stock -= quantity
             sale = Sale(user_id=user.id, product_id=product.id, quantity=quantity, unit_price=product.sale_price, total=quantity * product.sale_price)
             sale.ticket_id = ticket_id
             db.session.add(sale)
+            sales.append(sale)
         db.session.commit()
-        return jsonify({"ok": True, "ticket_id": ticket_id})
+        return jsonify({
+            "ok": True,
+            "ticket_id": ticket_id,
+            "total": sum(sale.total for sale in sales),
+            "single_sale_id": sales[0].id if len(sales) == 1 else None,
+        })
     except Exception:
         db.session.rollback()
         current_app.logger.exception("Error al procesar el carrito")

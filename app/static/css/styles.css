@@ -250,6 +250,264 @@
     .app-shell-v2 .inventory-v2__catalog-head form { width: 100%; }
 }
 
+/* POS first-sale --------------------------------------------------------- */
+
+.app-shell-v2 .pos-v2 {
+    display: grid;
+    gap: 20px;
+    width: min(100%, 1440px);
+    margin: 0 auto;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .pos-v2 [hidden] {
+    display: none !important;
+}
+
+.app-shell-v2 .pos-v2 .card {
+    border-color: var(--v2-line);
+    background: var(--v2-surface);
+    color: var(--v2-ink);
+    box-shadow: var(--v2-shadow);
+}
+
+.app-shell-v2 .pos-v2__empty,
+.app-shell-v2 .pos-v2__confirmation {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 20px;
+    padding: 28px;
+}
+
+.app-shell-v2 .pos-v2__empty-icon,
+.app-shell-v2 .pos-v2__confirmation-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    border-radius: 16px;
+    background: #eeebff;
+    color: var(--v2-violet);
+    font-size: 20px;
+}
+
+.app-shell-v2 .pos-v2__eyebrow {
+    color: var(--v2-violet);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.app-shell-v2 .pos-v2__empty h2,
+.app-shell-v2 .pos-v2__panel-head h2 {
+    margin: 7px 0;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .pos-v2__empty p,
+.app-shell-v2 .pos-v2__panel-head p {
+    margin: 0;
+    color: var(--v2-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.app-shell-v2 .pos-v2__empty .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 18px;
+}
+
+.app-shell-v2 .pos-v2__confirmation {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    border: 1px solid #bfe8d8;
+    border-radius: 18px;
+    background: #eefaf5;
+}
+
+.app-shell-v2 .pos-v2__confirmation-icon {
+    width: 48px;
+    height: 48px;
+    background: #d9f3e8;
+    color: #177653;
+}
+
+.app-shell-v2 .pos-v2__confirmation h3,
+.app-shell-v2 .pos-v2__confirmation p {
+    margin: 0 0 5px;
+}
+
+.app-shell-v2 .pos-v2__confirmation p { color: #4f665f; font-size: 12px; }
+.app-shell-v2 .pos-v2__confirmation code { color: #285f4c; }
+.app-shell-v2 .pos-v2__confirmation-actions,
+.app-shell-v2 .pos-v2__sale-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.app-shell-v2 .pos-v2__confirmation-actions .btn,
+.app-shell-v2 .pos-v2__sale-actions .btn { min-height: 44px; }
+.app-shell-v2 .pos-v2__confirmation-actions .btn.ghost,
+.app-shell-v2 .pos-v2__sale-actions .btn.ghost {
+    border-color: #d9dce5;
+    background: #fff;
+    color: #4d5366;
+}
+
+.app-shell-v2 .pos-v2__sale-panel,
+.app-shell-v2 .pos-v2__recent {
+    padding: 26px;
+}
+
+.app-shell-v2 .pos-v2__search {
+    position: relative;
+    max-width: 760px;
+    margin: 24px 0 30px;
+}
+
+.app-shell-v2 .pos-v2__search > label {
+    display: block;
+    margin-bottom: 8px;
+    color: #3d4356;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.app-shell-v2 .pos-v2__search-control { position: relative; }
+.app-shell-v2 .pos-v2__search-control i {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    color: var(--v2-muted);
+    transform: translateY(-50%);
+}
+
+.app-shell-v2 .pos-v2__search input,
+.app-shell-v2 .pos-v2__cart-table input {
+    border-color: #dfe2ea;
+    background: #fff;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .pos-v2__search input {
+    min-height: 52px;
+    padding-left: 44px;
+}
+
+.app-shell-v2 .pos-v2__results {
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 20;
+    margin-top: 6px;
+    overflow: hidden;
+    border: 1px solid #dfe2ea;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(31, 36, 56, .14);
+}
+
+.app-shell-v2 .pos-v2__result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: 100%;
+    min-height: 58px;
+    padding: 10px 14px;
+    border: 0;
+    border-bottom: 1px solid #eef0f4;
+    background: #fff;
+    color: var(--v2-ink);
+    text-align: left;
+    cursor: pointer;
+}
+
+.app-shell-v2 .pos-v2__result:last-child { border-bottom: 0; }
+.app-shell-v2 .pos-v2__result:hover,
+.app-shell-v2 .pos-v2__result.is-active { background: #f3f1ff; outline: none; }
+.app-shell-v2 .pos-v2__result:disabled { background: #f7f8fa; color: #747b8d; cursor: not-allowed; }
+.app-shell-v2 .pos-v2__result > span:last-child { text-align: right; }
+.app-shell-v2 .pos-v2__result strong,
+.app-shell-v2 .pos-v2__result small { display: block; }
+.app-shell-v2 .pos-v2__result small { margin-top: 3px; color: var(--v2-muted); font-size: 10px; }
+.app-shell-v2 .pos-v2__search-status { min-height: 18px; margin: 7px 0 0; color: var(--v2-muted); font-size: 11px; }
+
+.app-shell-v2 .pos-v2__cart-head,
+.app-shell-v2 .pos-v2__checkout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.app-shell-v2 .pos-v2__cart-head h3 { margin: 5px 0 0; }
+.app-shell-v2 .pos-v2__cart-count {
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #f1efff;
+    color: var(--v2-violet);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.app-shell-v2 .pos-v2__cart-empty,
+.app-shell-v2 .pos-v2__recent-empty {
+    display: grid;
+    min-height: 140px;
+    place-items: center;
+    margin-top: 16px;
+    padding: 24px;
+    border: 1px dashed #dfe2ea;
+    border-radius: 14px;
+    background: var(--v2-surface-soft);
+    color: var(--v2-muted);
+    text-align: center;
+}
+
+.app-shell-v2 .pos-v2__cart-empty p,
+.app-shell-v2 .pos-v2__recent-empty p { margin: 6px 0 0; font-size: 12px; }
+.app-shell-v2 .pos-v2__recent-empty h3 { margin: 8px 0 0; color: var(--v2-ink); }
+.app-shell-v2 .pos-v2__cart-table { margin-top: 16px; }
+.app-shell-v2 .pos-v2__cart-table input { width: 76px; min-height: 44px; }
+.app-shell-v2 .pos-v2__remove { min-height: 44px; color: #bd4f61 !important; }
+
+.app-shell-v2 .pos-v2__checkout {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--v2-line);
+}
+
+.app-shell-v2 .pos-v2__checkout span,
+.app-shell-v2 .pos-v2__checkout strong { display: block; }
+.app-shell-v2 .pos-v2__checkout span { color: var(--v2-muted); font-size: 11px; }
+.app-shell-v2 .pos-v2__checkout strong { margin-top: 4px; font-size: 26px; }
+.app-shell-v2 .pos-v2__checkout .btn { min-width: 210px; min-height: 48px; }
+.app-shell-v2 .pos-v2__checkout .btn:disabled {
+    background: #e4e6ec;
+    color: #747b8d;
+    cursor: not-allowed;
+}
+.app-shell-v2 .pos-v2__checkout-error { color: #b33d51; font-size: 12px; }
+.app-shell-v2 .pos-v2__recent .table-wrap { margin-top: 20px; }
+
+.app-shell-v2 .pos-v2 :focus-visible {
+    outline: 3px solid rgba(105, 86, 232, .22);
+    outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+    .app-shell-v2 .pos-v2__empty,
+    .app-shell-v2 .pos-v2__confirmation { grid-template-columns: 1fr; padding: 20px; }
+    .app-shell-v2 .pos-v2__confirmation-actions { width: 100%; }
+    .app-shell-v2 .pos-v2__confirmation-actions .btn { width: 100%; text-align: center; }
+    .app-shell-v2 .pos-v2__sale-panel,
+    .app-shell-v2 .pos-v2__recent { padding: 20px; }
+    .app-shell-v2 .pos-v2__cart-head,
+    .app-shell-v2 .pos-v2__checkout { align-items: stretch; flex-direction: column; }
+    .app-shell-v2 .pos-v2__checkout .btn { width: 100%; min-width: 0; }
+    .app-shell-v2 .pos-v2__result { align-items: flex-start; }
+}
+
 /* ==========================================================================
    PATIA COMMERCIAL LANDING + AUTH V2
    Scope: public landing and authentication screens only.
