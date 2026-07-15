@@ -1,6 +1,7 @@
 import os
 import unittest
 import uuid
+from pathlib import Path
 
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -155,6 +156,30 @@ class PosFirstSaleTests(unittest.TestCase):
         db.session.refresh(product)
         self.assertEqual(product.stock, 3)
         self.assertEqual(Sale.query.filter_by(user_id=self.user.id).count(), 1)
+
+    def test_inventory_is_locked_before_final_stock_and_idempotency_checks(self):
+        source = (Path(__file__).resolve().parents[1] / "app" / "routes.py").read_text(
+            encoding="utf-8"
+        )
+        sell_cart = source[source.index("def sell_cart():"):source.index("@main.route(\"/reports\")")]
+
+        lock_position = sell_cart.index(".with_for_update()")
+        final_idempotency_position = sell_cart.index(
+            "# Repetir la verificación tras bloquear inventario"
+        )
+        stock_check_position = sell_cart.index("if product.stock < quantity")
+        self.assertLess(lock_position, final_idempotency_position)
+        self.assertLess(final_idempotency_position, stock_check_position)
+
+    def test_legacy_single_sale_rejects_malformed_product_without_500(self):
+        response = self.client.post(
+            "/sell",
+            data={"product_id": "no-es-id", "quantity": "1"},
+            follow_redirects=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Selecciona un producto y una cantidad válida", response.get_data(as_text=True))
 
     def test_confirmation_uses_only_temporary_session_storage(self):
         self.add_product()

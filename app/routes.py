@@ -475,7 +475,11 @@ def forgot_password():
 @limiter.limit("5 per hour", methods=["POST"])
 def reset_password(token):
     user = User.query.filter_by(reset_token=token).first()
-    if not user or user.reset_token_expires < datetime.utcnow():
+    if (
+        not user
+        or not user.reset_token_expires
+        or user.reset_token_expires < datetime.utcnow()
+    ):
         return render_template("reset_password.html", token=None, expired=True)
     if request.method == "POST":
         password = request.form["password"]
@@ -1028,8 +1032,17 @@ def sell():
         return render_template("trial_expired.html")
 
     if request.method == "POST":
-        product = Product.query.filter_by(id=int(request.form["product_id"]), user_id=session["user_id"]).first_or_404()
-        qty = int(request.form.get("quantity") or 1)
+        try:
+            product_id = int(request.form.get("product_id", ""))
+            qty = int(request.form.get("quantity") or 1)
+        except (TypeError, ValueError):
+            flash("Selecciona un producto y una cantidad válida.", "danger")
+            return redirect(url_for("main.sell"))
+        product = (
+            Product.query.filter_by(id=product_id, user_id=session["user_id"])
+            .with_for_update()
+            .first_or_404()
+        )
         if qty <= 0:
             flash("La cantidad debe ser mayor a cero.", "danger")
         elif product.stock < qty:
@@ -1113,11 +1126,34 @@ def sell_cart():
             for product in Product.query.filter(
                 Product.user_id == user.id,
                 Product.id.in_(requested_items.keys()),
-            ).all()
+            )
+            .order_by(Product.id)
+            .with_for_update()
+            .all()
         }
 
         if len(products) != len(requested_items):
             return jsonify({"ok": False, "error": "Producto no encontrado"}), 404
+
+        # Repetir la verificación tras bloquear inventario evita que dos workers
+        # procesen simultáneamente el mismo request_id.
+        if request_id:
+            previous_sales = Sale.query.filter_by(
+                user_id=user.id,
+                ticket_id=request_id,
+            ).order_by(Sale.id).all()
+            if previous_sales:
+                return jsonify({
+                    "ok": True,
+                    "duplicate": True,
+                    "ticket_id": request_id,
+                    "folio": _short_sale_folio(previous_sales),
+                    "ticket_url": url_for("main.ticket", ticket_ref=request_id),
+                    "total": sum(sale.total for sale in previous_sales),
+                    "single_sale_id": (
+                        previous_sales[0].id if len(previous_sales) == 1 else None
+                    ),
+                })
 
         for product_id, quantity in requested_items.items():
             product = products[product_id]
