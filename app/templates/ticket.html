@@ -26,14 +26,14 @@
 
       <table class="ticket-print-v2__items">
         <caption class="sr-only">Productos incluidos en la operación</caption>
-        <thead><tr><th scope="col">Cant.</th><th scope="col">Producto</th><th scope="col">P. unitario</th><th scope="col">Importe</th></tr></thead>
+        <thead><tr><th scope="col">Cant.</th><th scope="col">Producto</th><th scope="col">P. unit.</th><th scope="col">Importe</th></tr></thead>
         <tbody>
           {% for sale in sales %}
           <tr>
             <td>{{ sale.quantity }}</td>
             <td>{{ sale.product.name if sale.product else "Producto no disponible" }}</td>
-            <td>{{ sale.unit_price|money }}</td>
-            <td>{{ sale.total|money }}</td>
+            <td>${{ "%.2f"|format(sale.unit_price) }}</td>
+            <td>${{ "%.2f"|format(sale.total) }}</td>
           </tr>
           {% endfor %}
         </tbody>

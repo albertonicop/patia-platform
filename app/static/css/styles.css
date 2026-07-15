@@ -4460,7 +4460,7 @@ table {
     outline-offset: 2px;
 }
 
-/* ConfiguraciÃ³n */
+/* Configuración */
 
 .app-shell-v2 .settings-v2,
 .app-shell-v2 .subscription-v2 {
@@ -4537,7 +4537,7 @@ table {
 
 .app-shell-v2 .settings-v2__actions .btn { min-width: 180px; }
 
-/* SuscripciÃ³n */
+/* Suscripción */
 
 .app-shell-v2 .subscription-v2__layout,
 .app-shell-v2 .subscription-v2__offer-grid {
@@ -4657,7 +4657,7 @@ table {
 .app-shell-v2 .dashboard-v2__recommendation small { display: block; margin-top: 5px; color: #73798a; font-size: 9px; line-height: 1.45; }
 .app-shell-v2 .dashboard-v2__empty--compact h4 { margin: 0; color: var(--v2-ink); font-size: 14px; }
 
-/* VerificaciÃ³n de correo */
+/* Verificación de correo */
 
 .clean-shell-v2 {
     display: grid;
@@ -4686,7 +4686,7 @@ table {
 .verify-v2__resend p { margin: 0 0 10px; color: #656c7e; font-size: 11px; }
 .verify-v2__resend .btn { min-height: 44px; border-color: #d9dce5; background: #fff; color: #4d5366; box-shadow: none; }
 
-/* Responsive comÃºn: 1024, 768 y 390 */
+/* Responsive común: 1024, 768 y 390 */
 
 @media (max-width: 1024px) {
     .app-shell-v2 .subscription-v2__layout,
@@ -4904,4 +4904,215 @@ table {
     .flash-wrap,
     .whatsapp-float-v2,
     .no-print-v2 { display: none !important; }
+}
+
+/* Sprint Final V1.0: pulido visual --------------------------------------- */
+
+.app-shell-v2 .app-main-v2 { overflow-x: hidden; }
+
+.app-shell-v2 .app-topbar-v2 h1,
+.app-shell-v2 .module-intro-v2 h2,
+.app-shell-v2 .inventory-v2 h2,
+.app-shell-v2 .inventory-v2 h3,
+.app-shell-v2 .pos-v2 h2,
+.app-shell-v2 .pos-v2 h3,
+.app-shell-v2 .suppliers-v2 h2,
+.app-shell-v2 .suppliers-v2 h3,
+.app-shell-v2 .reports-v2 h3,
+.app-shell-v2 .settings-v2 h3,
+.app-shell-v2 .subscription-v2 h3 {
+    overflow-wrap: break-word;
+    text-wrap: balance;
+}
+
+.app-shell-v2 .module-card-v2,
+.app-shell-v2 .dashboard-v2__panel,
+.app-shell-v2 .dashboard-v2__metric,
+.app-shell-v2 .dashboard-v2__onboarding,
+.app-shell-v2 .inventory-v2 .card,
+.app-shell-v2 .pos-v2 .card,
+.app-shell-v2 .suppliers-v2 .card,
+.app-shell-v2 .reports-v2 .card {
+    box-shadow: 0 10px 30px rgba(31, 36, 56, .045);
+}
+
+.app-shell-v2 .btn {
+    max-width: 100%;
+    padding: 11px 16px;
+    white-space: normal;
+    text-align: center;
+}
+
+.app-shell-v2 input,
+.app-shell-v2 select,
+.app-shell-v2 textarea { font-size: 14px; }
+
+.app-shell-v2 input:focus-visible,
+.app-shell-v2 select:focus-visible,
+.app-shell-v2 textarea:focus-visible,
+.app-shell-v2 button:focus-visible,
+.app-shell-v2 a:focus-visible {
+    outline: 3px solid rgba(105, 86, 232, .2);
+    outline-offset: 2px;
+}
+
+.app-shell-v2 .table-wrap {
+    border-radius: 13px;
+    scrollbar-width: thin;
+    scrollbar-color: #c7cbd6 transparent;
+}
+
+.app-shell-v2 table { line-height: 1.45; }
+.app-shell-v2 th { color: #656c7e; font-size: 11px; white-space: nowrap; }
+.app-shell-v2 td { vertical-align: top; color: #3d4356; }
+.app-shell-v2 td strong,
+.app-shell-v2 td b { color: var(--v2-ink); }
+.app-shell-v2 td small { color: #656c7e; line-height: 1.45; }
+
+.app-shell-v2 .module-empty-v2 {
+    min-width: 0;
+    border-style: dashed;
+    border-radius: 16px;
+}
+
+.app-shell-v2 .module-empty-v2 p {
+    max-width: 520px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.app-shell-v2 .flash {
+    color: #285f4c;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.app-shell-v2 .flash.danger { color: #923447; }
+
+.app-shell-v2 .pos-v2__modal .pos-v2__confirmation {
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+}
+
+/* Proporciones finales del ticket */
+
+.ticket-print-v2 {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+}
+
+.ticket-print-v2__business h1 {
+    max-width: 100%;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.ticket-print-v2__business p,
+.ticket-print-v2__meta { font-size: 9.5px; }
+
+.ticket-print-v2__items {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5px;
+}
+
+.ticket-print-v2__items th {
+    padding-top: 3mm;
+    padding-bottom: 2mm;
+    color: #111;
+    font-size: 7.5px;
+    font-weight: 800;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.ticket-print-v2__items td {
+    padding-top: 3mm;
+    padding-bottom: 3mm;
+    font-variant-numeric: tabular-nums;
+}
+
+.ticket-print-v2__items td:first-child,
+.ticket-print-v2__items td:nth-child(3),
+.ticket-print-v2__items td:nth-child(4) { white-space: nowrap; }
+
+.ticket-print-v2__items th:first-child,
+.ticket-print-v2__items td:first-child { width: 10%; }
+.ticket-print-v2__items th:nth-child(2),
+.ticket-print-v2__items td:nth-child(2) { width: 42%; padding-right: 2mm; }
+.ticket-print-v2__items th:nth-child(3),
+.ticket-print-v2__items td:nth-child(3) { width: 23%; }
+.ticket-print-v2__items th:nth-child(4),
+.ticket-print-v2__items td:nth-child(4) { width: 25%; }
+
+.ticket-print-v2__totals {
+    gap: 2.5mm;
+    padding: 5mm 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+}
+
+.ticket-print-v2__total {
+    align-items: baseline !important;
+    padding-top: 3mm;
+    font-size: 15px;
+    line-height: 1.2;
+}
+
+.ticket-print-v2__total dt {
+    font-size: 12px;
+    letter-spacing: .08em;
+}
+
+.ticket-print-v2__total dd { font-size: 15px; }
+
+.ticket-print-v2__payment { align-items: baseline; line-height: 1.35; }
+
+.ticket-print-v2--58 {
+    padding-right: 3.5mm;
+    padding-left: 3.5mm;
+}
+
+.ticket-print-v2--58 .ticket-print-v2__business h1 { font-size: 14px; }
+.ticket-print-v2--58 .ticket-print-v2__items { font-size: 7.5px; }
+.ticket-print-v2--58 .ticket-print-v2__items th { font-size: 6.8px; }
+.ticket-print-v2--58 .ticket-print-v2__items th,
+.ticket-print-v2--58 .ticket-print-v2__items td { padding-right: .5mm; padding-left: .5mm; }
+.ticket-print-v2--58 .ticket-print-v2__items th:nth-child(2),
+.ticket-print-v2--58 .ticket-print-v2__items td:nth-child(2) { width: 39%; }
+.ticket-print-v2--58 .ticket-print-v2__items th:nth-child(3),
+.ticket-print-v2--58 .ticket-print-v2__items td:nth-child(3) { width: 25%; }
+.ticket-print-v2--58 .ticket-print-v2__items th:nth-child(4),
+.ticket-print-v2--58 .ticket-print-v2__items td:nth-child(4) { width: 26%; }
+.ticket-print-v2--58 .ticket-print-v2__total,
+.ticket-print-v2--58 .ticket-print-v2__total dd { font-size: 13px; }
+
+@media (max-width: 768px) {
+    .app-shell-v2 .app-topbar-v2 h1 { font-size: clamp(26px, 7vw, 34px); }
+    .app-shell-v2 .section-head { align-items: stretch; flex-direction: column; }
+    .app-shell-v2 .inventory-v2__bulk-actions { align-items: stretch; }
+    .app-shell-v2 .inventory-v2__bulk-actions form,
+    .app-shell-v2 .inventory-v2__bulk-actions .btn { width: 100%; }
+    .app-shell-v2 .pos-v2__sale-actions { align-items: stretch; flex-direction: column; }
+    .app-shell-v2 .pos-v2__sale-actions .btn { width: 100%; }
+}
+
+@media (max-width: 480px) {
+    .app-shell-v2 .app-main-v2 { padding-right: 14px !important; padding-left: 14px !important; }
+    .app-shell-v2 .module-intro-v2 p,
+    .app-shell-v2 .inventory-v2__panel-head p,
+    .app-shell-v2 .pos-v2__panel-head p { font-size: 13px; }
+    .app-shell-v2 .settings-v2__section-head { gap: 11px; }
+    .app-shell-v2 .settings-v2__section-icon { width: 38px; height: 38px; }
+    .app-shell-v2 .ticket-page-v2__actions { width: 100%; }
+}
+
+@media print {
+    .ticket-print-v2__items th {
+        break-inside: avoid;
+        white-space: nowrap !important;
+    }
+    .ticket-print-v2__items tr,
+    .ticket-print-v2__totals,
+    .ticket-print-v2__payment,
+    .ticket-print-v2__footer { break-inside: avoid; }
 }
