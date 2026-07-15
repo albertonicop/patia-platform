@@ -5,104 +5,149 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <title>{{ title }} | PATIA</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=104">
 </head>
 
-<body class="auth-body">
-  <main class="auth-page">
-    <section class="auth-card">
-      <div class="auth-brand">
+<body class="auth-body auth-v2">
+  <main class="auth-v2__page">
+    <aside class="auth-v2__story">
+      <a href="/" class="auth-v2__brand" aria-label="Volver al inicio de PATIA">
         <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
-        <p>Control inteligente para empresas modernas</p>
-      </div>
-
-      <div class="auth-header">
-        <h1>{{ title }}</h1>
+      </a>
+      <div class="auth-v2__story-copy">
+        <span class="auth-v2__eyebrow">Control para negocios reales</span>
         {% if mode == "login" %}
-          <p>Entra a tu panel para controlar inventario, ventas y reportes.</p>
+          <h1>Tu negocio, listo para continuar.</h1>
+          <p>Consulta ventas, inventario y alertas desde un panel claro y conectado.</p>
         {% else %}
-          <p>Registra tu negocio y comienza a controlar inventario, ventas y reportes desde una sola plataforma.</p>
+          <h1>Empieza a operar con más claridad.</h1>
+          <p>Crea tu cuenta y prueba durante 14 días una forma más ordenada de controlar tu negocio.</p>
         {% endif %}
       </div>
+      <div class="auth-v2__proof">
+        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>Inventario y ventas conectados</span></div>
+        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>Alertas de productos por agotarse</span></div>
+        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>Acceso seguro desde cualquier dispositivo</span></div>
+      </div>
+      <p class="auth-v2__story-footer">PATIA · Gestión inteligente para PyMEs</p>
+    </aside>
 
-      <form method="POST" class="auth-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        {% if request.args.get("plan") == "pro" %}
-          <input type="hidden" name="plan" value="pro">
-        {% endif %}
-        {% if plan %}
-          <input type="hidden" name="plan" value="{{ plan }}">
-        {% endif %}
+    <section class="auth-v2__content">
+      <div class="auth-v2__card">
+        <header class="auth-v2__header">
+          <span class="auth-v2__mobile-brand"><img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA"></span>
+          <span class="auth-v2__eyebrow">{% if mode == "login" %}Bienvenido de nuevo{% else %}Prueba gratuita de 14 días{% endif %}</span>
+          <h2>{{ title }}</h2>
+          {% if mode == "login" %}
+            <p>Ingresa tus datos para acceder al panel de tu negocio.</p>
+          {% else %}
+            <p>Registra tu negocio. Todos los campos son necesarios para configurar tu cuenta.</p>
+          {% endif %}
+        </header>
 
-        {% if mode == "register" %}
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Nombre</label>
-              <input name="first_name" placeholder="Tu nombre" required>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="auth-v2__messages" role="status">
+              {% for category, message in messages %}
+                <div class="auth-v2__message auth-v2__message--{{ category }}">{{ message }}</div>
+              {% endfor %}
             </div>
-            <div class="form-group">
-              <label>Apellido</label>
-              <input name="last_name" placeholder="Tu apellido" required>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="auth-form auth-v2__form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% if request.args.get("plan") == "pro" %}
+            <input type="hidden" name="plan" value="pro">
+          {% endif %}
+          {% if plan %}
+            <input type="hidden" name="plan" value="{{ plan }}">
+          {% endif %}
+
+          {% if mode == "register" %}
+            <div class="auth-v2__grid">
+              <div class="form-group auth-v2__field">
+                <label for="first_name">Nombre</label>
+                <input id="first_name" name="first_name" placeholder="Tu nombre" autocomplete="given-name" required>
+              </div>
+              <div class="form-group auth-v2__field">
+                <label for="last_name">Apellido</label>
+                <input id="last_name" name="last_name" placeholder="Tu apellido" autocomplete="family-name" required>
+              </div>
             </div>
+
+            <div class="form-group auth-v2__field">
+              <label for="company_name">Nombre de la empresa</label>
+              <input id="company_name" name="company_name" placeholder="Nombre de tu empresa" autocomplete="organization" required>
+            </div>
+
+            <div class="form-group auth-v2__field">
+              <label for="phone">Teléfono</label>
+              <input id="phone" name="phone" placeholder="Número telefónico" autocomplete="tel" required>
+            </div>
+
+            <div class="form-group auth-v2__field">
+              <label for="address">Dirección</label>
+              <input id="address" name="address" placeholder="Calle, número, colonia" autocomplete="street-address" required>
+            </div>
+
+            <div class="auth-v2__grid">
+              <div class="form-group auth-v2__field">
+                <label for="city">Ciudad</label>
+                <input id="city" name="city" placeholder="Ciudad" autocomplete="address-level2" required>
+              </div>
+              <div class="form-group auth-v2__field">
+                <label for="state">Estado</label>
+                <input id="state" name="state" placeholder="Estado" autocomplete="address-level1" required>
+              </div>
+            </div>
+
+            <div class="auth-v2__grid">
+              <div class="form-group auth-v2__field">
+                <label for="postal_code">Código postal</label>
+                <input id="postal_code" name="postal_code" placeholder="CP" autocomplete="postal-code" required>
+              </div>
+              <div class="form-group auth-v2__field">
+                <label for="business_type">Giro del negocio</label>
+                <select id="business_type" name="business_type" required>
+                  <option value="">Selecciona...</option>
+                  <option value="Minisúper">Minisúper</option>
+                  <option value="Abarrotes">Abarrotes</option>
+                  <option value="Ferretería">Ferretería</option>
+                  <option value="Farmacia">Farmacia</option>
+                  <option value="Distribuidora">Distribuidora</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="form-group auth-v2__field">
+            <label for="email">Correo</label>
+            <input id="email" type="email" name="email" placeholder="correo@empresa.com" autocomplete="email" required>
           </div>
 
-          <div class="form-group">
-            <label>Nombre de la empresa</label>
-            <input name="company_name" placeholder="Nombre de tu empresa" required>
-          </div>
-
-          <div class="form-group">
-            <label>Teléfono</label>
-            <input name="phone" placeholder="Número telefónico" required>
-          </div>
-
-          <div class="form-group">
-            <label>Dirección</label>
-            <input name="address" placeholder="Calle, número, colonia" required>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Ciudad</label>
-              <input name="city" placeholder="Ciudad" required>
+          <div class="form-group auth-v2__field">
+            <div class="auth-v2__label-row">
+              <label for="password">Contraseña</label>
+              {% if mode == "login" %}<a href="/forgot-password">¿La olvidaste?</a>{% endif %}
             </div>
-            <div class="form-group">
-              <label>Estado</label>
-              <input name="state" placeholder="Estado" required>
-            </div>
+            <input id="password" type="password" name="password" placeholder="Mínimo 8 caracteres" autocomplete="{% if mode == 'login' %}current-password{% else %}new-password{% endif %}" required minlength="8">
           </div>
 
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Código postal</label>
-              <input name="postal_code" placeholder="CP" required>
-            </div>
-            <div class="form-group">
-              <label>Giro del negocio</label>
-              <select name="business_type" required>
-                <option value="">Selecciona...</option>
-                <option value="Minisúper">Minisúper</option>
-                <option value="Abarrotes">Abarrotes</option>
-                <option value="Ferretería">Ferretería</option>
-                <option value="Farmacia">Farmacia</option>
-                <option value="Distribuidora">Distribuidora</option>
-                <option value="Otro">Otro</option>
-              </select>
-            </div>
-          </div>
-        {% endif %}
+          <button type="submit" class="auth-btn auth-v2__submit">{{ button }}</button>
+        </form>
 
-        <div class="form-group">
-          <label>Correo</label>
-          <input type="email" name="email" placeholder="correo@empresa.com" required>
-        </div>
-
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" name="password" placeholder="••••••••" required minlength="8">
-        </div>
-
- <button type="submit" class="auth-btn">{{ button }}</button>
-{% if mode == "login" %}
-<a href="/forgot-password" style="display:block;text-align:center;margin-top:16px;color:#29d3a8;font-size:14px;">¿Olvidaste tu contraseña?</a>
-{% endif %}
+        <p class="auth-v2__switch">
+          {% if mode == "login" %}
+            ¿Aún no tienes cuenta? <a href="/register">Comienza tu prueba gratis</a>
+          {% else %}
+            ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+          {% endif %}
+        </p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
