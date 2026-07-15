@@ -9,7 +9,6 @@ import stripe
 import secrets
 import uuid
 import re
-from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file, jsonify, abort
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -1214,39 +1213,21 @@ def _safe_stripe_error(error):
 
 @main.route("/create-checkout-session", methods=["POST"])
 def create_checkout_session():
-    current_app.logger.warning("Checkout diagnostic: entered route")
     user = current_user()
     if not user:
-        current_app.logger.warning(
-            "Checkout diagnostic: redirect=/login reason=usuario_no_autenticado status=302"
-        )
         return redirect(url_for("main.login"))
-    current_app.logger.warning(
-        "Checkout diagnostic: authenticated user_id=%s email_verified=%s",
-        user.id,
-        bool(user.email_verified),
-    )
     if not user.email_verified:
         session["post_verify_destination"] = "subscribe"
         flash("Verifica tu correo antes de activar PATIA Pro.", "info")
-        current_app.logger.warning(
-            "Checkout diagnostic: redirect=/verify-email reason=correo_no_verificado status=302"
-        )
         return redirect(url_for("main.verify_email"))
     if current_app.config["STRIPE_DISABLED"]:
         flash("La facturación no está disponible en este entorno.", "danger")
-        current_app.logger.warning(
-            "Checkout diagnostic: redirect=/subscribe reason=stripe_deshabilitado status=302"
-        )
         return redirect(url_for("main.subscribe"))
 
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     existing_subscription = None
 
     if user.stripe_subscription_id and user.subscription_status in MANAGED_SUBSCRIPTION_STATUSES:
-        current_app.logger.warning(
-            "Checkout diagnostic: branch=customer_portal reason=suscripcion_local_gestionable"
-        )
         return _redirect_to_billing_portal(user)
 
     if user.stripe_customer_id:
@@ -1266,24 +1247,18 @@ def create_checkout_session():
         except Exception as error:
             error_type, error_code, error_message = _safe_stripe_error(error)
             current_app.logger.exception(
-                "Checkout diagnostic: stripe_exception stage=list_subscriptions type=%s code=%s message=%s",
+                "No se pudo comprobar suscripciones existentes: type=%s code=%s message=%s",
                 error_type,
                 error_code,
                 error_message,
             )
             flash("No pudimos validar tu suscripción. Intenta nuevamente.", "danger")
-            current_app.logger.warning(
-                "Checkout diagnostic: redirect=/subscribe reason=error_validando_suscripciones status=302"
-            )
             return redirect(url_for("main.subscribe"))
 
     if existing_subscription:
         user.stripe_subscription_id = existing_subscription.get("id")
         _sync_subscription_state(user, existing_subscription, datetime.utcnow())
         db.session.commit()
-        current_app.logger.warning(
-            "Checkout diagnostic: branch=customer_portal reason=suscripcion_remota_gestionable"
-        )
         return _redirect_to_billing_portal(user)
 
     checkout_params = {
@@ -1303,35 +1278,20 @@ def create_checkout_session():
 
     idempotency_window = int(datetime.utcnow().timestamp() // 1800)
     try:
-        current_app.logger.warning("Checkout diagnostic: branch=checkout")
         checkout_session = stripe.checkout.Session.create(
             **checkout_params,
             idempotency_key=f"patia-checkout-{user.id}-{idempotency_window}",
         )
-        checkout_url = checkout_session.url
-        checkout_domain = urlparse(checkout_url).hostname if checkout_url else None
-        current_app.logger.warning(
-            "Checkout diagnostic: Checkout Session creada correctamente url_exists=%s domain=%s",
-            bool(checkout_url),
-            checkout_domain or "none",
-        )
-        current_app.logger.warning(
-            "Checkout diagnostic: redirecting to %s status=303",
-            checkout_domain or "none",
-        )
-        return redirect(checkout_url, code=303)
+        return redirect(checkout_session.url, code=303)
     except Exception as error:
         error_type, error_code, error_message = _safe_stripe_error(error)
         current_app.logger.exception(
-            "Checkout diagnostic: stripe_exception stage=create_checkout type=%s code=%s message=%s",
+            "No se pudo crear la sesión de Checkout: type=%s code=%s message=%s",
             error_type,
             error_code,
             error_message,
         )
         flash("No pudimos iniciar el pago. Intenta nuevamente.", "danger")
-        current_app.logger.warning(
-            "Checkout diagnostic: redirect=/subscribe reason=error_creando_checkout status=302"
-        )
         return redirect(url_for("main.subscribe"))
 
 
@@ -1640,9 +1600,6 @@ def billing_portal():
 def _redirect_to_billing_portal(user):
     if current_app.config["STRIPE_DISABLED"]:
         flash("La facturación no está disponible en este entorno.", "danger")
-        current_app.logger.warning(
-            "Checkout diagnostic: redirect=/subscription reason=stripe_deshabilitado status=302"
-        )
         return redirect(url_for("main.subscription"))
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     try:
@@ -1650,24 +1607,16 @@ def _redirect_to_billing_portal(user):
             customer=user.stripe_customer_id,
             return_url=_public_url("/subscription"),
         )
-        portal_domain = urlparse(portal.url).hostname if portal.url else None
-        current_app.logger.warning(
-            "Checkout diagnostic: redirect=customer_portal domain=%s reason=suscripcion_gestionable status=303",
-            portal_domain or "none",
-        )
         return redirect(portal.url, code=303)
     except Exception as error:
         error_type, error_code, error_message = _safe_stripe_error(error)
         current_app.logger.exception(
-            "Checkout diagnostic: stripe_exception stage=create_portal type=%s code=%s message=%s",
+            "No se pudo abrir el portal de facturación: type=%s code=%s message=%s",
             error_type,
             error_code,
             error_message,
         )
         flash("No pudimos abrir el portal de facturación.", "danger")
-        current_app.logger.warning(
-            "Checkout diagnostic: redirect=/subscription reason=error_creando_portal status=302"
-        )
         return redirect(url_for("main.subscription"))
 
 
