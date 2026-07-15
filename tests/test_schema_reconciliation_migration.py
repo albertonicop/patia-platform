@@ -1,0 +1,365 @@
+import os
+from datetime import datetime
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import unittest
+
+import sqlalchemy as sa
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+CURRENT_USER_COLUMNS = {
+    "id",
+    "first_name",
+    "last_name",
+    "email",
+    "password",
+    "phone",
+    "company_name",
+    "address",
+    "city",
+    "state",
+    "business_type",
+    "postal_code",
+    "email_verified",
+    "verification_code",
+    "verification_code_expires",
+    "reset_token",
+    "reset_token_expires",
+    "session_token",
+    "created_at",
+    "plan",
+    "manual_pro_access",
+    "stripe_customer_id",
+    "stripe_subscription_id",
+    "subscription_status",
+    "current_period_end",
+    "next_payment_attempt",
+    "stripe_subscription_updated_at",
+    "stripe_invoice_updated_at",
+    "cancel_at_period_end",
+    "trial_warning_sent",
+    "rfc",
+    "tax_regime",
+}
+
+
+CURRENT_WEBHOOK_COLUMNS = {
+    "id",
+    "stripe_event_id",
+    "event_type",
+    "object_id",
+    "stripe_created_at",
+    "completed_at",
+    "failed_at",
+    "status",
+    "error_message",
+}
+
+
+class SchemaReconciliationMigrationTests(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory(prefix="patia-schema-")
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def database_path(self, name):
+        return Path(self.temp_dir.name, name)
+
+    def environment(self, database_path):
+        env = os.environ.copy()
+        env.update(
+            DATABASE_URL=f"sqlite:///{database_path.as_posix()}",
+            SECRET_KEY="schema-reconciliation-tests-only",
+            STRIPE_DISABLED="1",
+            PUBLIC_BASE_URL="http://127.0.0.1:5000",
+            FLASK_DEBUG="0",
+        )
+        return env
+
+    def run_upgrade(self, database_path, *, expect_success=True):
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "flask",
+                "--app",
+                "run.py",
+                "db",
+                "upgrade",
+            ],
+            cwd=ROOT,
+            env=self.environment(database_path),
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if expect_success:
+            self.assertEqual(
+                result.returncode,
+                0,
+                msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+            )
+        else:
+            self.assertNotEqual(result.returncode, 0)
+        return result
+
+    def create_legacy_database_marked_at_02(
+        self,
+        database_path,
+        *,
+        include_created_at=True,
+    ):
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        metadata = sa.MetaData()
+        user_columns = [
+            sa.Column("id", sa.Integer(), primary_key=True),
+            sa.Column("email", sa.String(120), nullable=False),
+            sa.Column("password", sa.String(255), nullable=False),
+            sa.Column("company_name", sa.String(120), nullable=False),
+        ]
+        if include_created_at:
+            user_columns.append(sa.Column("created_at", sa.DateTime(), nullable=False))
+        user = sa.Table("user", metadata, *user_columns)
+        product = sa.Table(
+            "product",
+            metadata,
+            sa.Column("id", sa.Integer(), primary_key=True),
+            sa.Column("user_id", sa.Integer(), nullable=True),
+            sa.Column("sku", sa.String(64), nullable=False),
+            sa.Column("name", sa.String(160), nullable=False),
+        )
+        sale = sa.Table(
+            "sale",
+            metadata,
+            sa.Column("id", sa.Integer(), primary_key=True),
+            sa.Column("user_id", sa.Integer(), nullable=True),
+            sa.Column("product_id", sa.Integer(), nullable=False),
+            sa.Column("quantity", sa.Integer(), nullable=False),
+            sa.Column("unit_price", sa.Float(), nullable=False),
+            sa.Column("total", sa.Float(), nullable=False),
+        )
+        supplier = sa.Table(
+            "supplier",
+            metadata,
+            sa.Column("id", sa.Integer(), primary_key=True),
+            sa.Column("user_id", sa.Integer(), nullable=True),
+            sa.Column("name", sa.String(120), nullable=False),
+        )
+        alembic_version = sa.Table(
+            "alembic_version",
+            metadata,
+            sa.Column("version_num", sa.String(32), nullable=False),
+        )
+        metadata.create_all(engine)
+        with engine.begin() as connection:
+            connection.execute(
+                user.insert(),
+                [
+                    {
+                        "id": 1,
+                        "email": "first@example.test",
+                        "password": "existing-hash-1",
+                        "company_name": "First Store",
+                        **(
+                            {"created_at": datetime(2026, 7, 1, 10, 0)}
+                            if include_created_at
+                            else {}
+                        ),
+                    },
+                    {
+                        "id": 2,
+                        "email": "second@example.test",
+                        "password": "existing-hash-2",
+                        "company_name": "Second Store",
+                        **(
+                            {"created_at": datetime(2026, 7, 2, 11, 0)}
+                            if include_created_at
+                            else {}
+                        ),
+                    },
+                ],
+            )
+            connection.execute(
+                product.insert(),
+                [{"id": 10, "user_id": 1, "sku": "LEGACY-1", "name": "Legacy"}],
+            )
+            connection.execute(
+                sale.insert(),
+                [
+                    {
+                        "id": 20,
+                        "user_id": 1,
+                        "product_id": 10,
+                        "quantity": 2,
+                        "unit_price": 15,
+                        "total": 30,
+                    }
+                ],
+            )
+            connection.execute(
+                supplier.insert(),
+                [{"id": 30, "user_id": 1, "name": "Legacy Supplier"}],
+            )
+            connection.execute(
+                alembic_version.insert(),
+                [{"version_num": "20260715_02"}],
+            )
+        engine.dispose()
+
+    def test_missing_created_at_stops_before_any_schema_or_data_change(self):
+        database_path = self.database_path("missing-created-at.db")
+        self.create_legacy_database_marked_at_02(
+            database_path,
+            include_created_at=False,
+        )
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        before_tables = set(sa.inspect(engine).get_table_names())
+        with engine.connect() as connection:
+            before_users = connection.execute(
+                sa.text('SELECT id, email, company_name FROM "user" ORDER BY id')
+            ).all()
+        engine.dispose()
+
+        result = self.run_upgrade(database_path, expect_success=False)
+
+        self.assertIn(
+            "missing essential columns: created_at",
+            result.stderr,
+        )
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        inspector = sa.inspect(engine)
+        self.assertEqual(set(inspector.get_table_names()), before_tables)
+        self.assertNotIn("manual_pro_access", self.columns(inspector, "user"))
+        self.assertNotIn("stripe_webhook_event", inspector.get_table_names())
+        with engine.connect() as connection:
+            self.assertEqual(
+                connection.execute(
+                    sa.text('SELECT id, email, company_name FROM "user" ORDER BY id')
+                ).all(),
+                before_users,
+            )
+            self.assertEqual(
+                connection.execute(
+                    sa.text("SELECT version_num FROM alembic_version")
+                ).scalar_one(),
+                "20260715_02",
+            )
+        engine.dispose()
+
+    @staticmethod
+    def columns(inspector, table_name):
+        return {column["name"] for column in inspector.get_columns(table_name)}
+
+    def test_reconciles_schema_marked_at_02_and_preserves_all_business_data(self):
+        database_path = self.database_path("legacy.db")
+        self.create_legacy_database_marked_at_02(database_path)
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+
+        before = {}
+        with engine.connect() as connection:
+            for table_name in ("user", "product", "sale", "supplier"):
+                before[table_name] = connection.execute(
+                    sa.text(f'SELECT COUNT(*) FROM "{table_name}"')
+                ).scalar_one()
+        inspector = sa.inspect(engine)
+        self.assertNotIn("manual_pro_access", self.columns(inspector, "user"))
+        self.assertNotIn("trial_warning_sent", self.columns(inspector, "user"))
+        self.assertNotIn("ticket_id", self.columns(inspector, "sale"))
+        self.assertNotIn("stripe_webhook_event", inspector.get_table_names())
+        engine.dispose()
+
+        self.run_upgrade(database_path)
+
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        inspector = sa.inspect(engine)
+        self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
+        self.assertIn("ticket_id", self.columns(inspector, "sale"))
+        self.assertEqual(
+            self.columns(inspector, "stripe_webhook_event"),
+            CURRENT_WEBHOOK_COLUMNS,
+        )
+        with engine.connect() as connection:
+            self.assertEqual(
+                connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
+                "20260715_03",
+            )
+            for table_name, expected_count in before.items():
+                self.assertEqual(
+                    connection.execute(
+                        sa.text(f'SELECT COUNT(*) FROM "{table_name}"')
+                    ).scalar_one(),
+                    expected_count,
+                )
+            users = connection.execute(
+                sa.text('SELECT id, email, company_name FROM "user" ORDER BY id')
+            ).all()
+            self.assertEqual(
+                users,
+                [
+                    (1, "first@example.test", "First Store"),
+                    (2, "second@example.test", "Second Store"),
+                ],
+            )
+        engine.dispose()
+
+        # A normal second deployment runs `db upgrade` again. Alembic performs
+        # no DDL because the database is already at head, and data remains intact.
+        self.run_upgrade(database_path)
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        with engine.connect() as connection:
+            for table_name, expected_count in before.items():
+                self.assertEqual(
+                    connection.execute(
+                        sa.text(f'SELECT COUNT(*) FROM "{table_name}"')
+                    ).scalar_one(),
+                    expected_count,
+                )
+            self.assertEqual(
+                connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
+                "ok",
+            )
+        engine.dispose()
+
+    def test_empty_database_upgrades_from_zero_to_reconciliation_head(self):
+        database_path = self.database_path("empty.db")
+
+        self.run_upgrade(database_path)
+
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        inspector = sa.inspect(engine)
+        self.assertTrue(
+            {
+                "alembic_version",
+                "user",
+                "product",
+                "sale",
+                "supplier",
+                "stripe_webhook_event",
+            }.issubset(inspector.get_table_names())
+        )
+        self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
+        self.assertIn("ticket_id", self.columns(inspector, "sale"))
+        self.assertEqual(
+            self.columns(inspector, "stripe_webhook_event"),
+            CURRENT_WEBHOOK_COLUMNS,
+        )
+        with engine.connect() as connection:
+            self.assertEqual(
+                connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
+                "20260715_03",
+            )
+            self.assertEqual(
+                connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
+                "ok",
+            )
+        engine.dispose()
+
+
+if __name__ == "__main__":
+    unittest.main()
