@@ -703,13 +703,34 @@ def import_products():
     file = request.files.get("catalog_file")
     if not file:
         flash("Selecciona un archivo.", "danger")
-        return redirect(url_for("main.products") + "#catalogo")
+        return redirect(url_for("main.products") + "#importar-catalogo")
 
     try:
-        if file.filename.endswith(".csv"):
+        filename = (file.filename or "").lower()
+        if filename.endswith(".csv"):
             df = pd.read_csv(file)
-        else:
+        elif filename.endswith(".xlsx"):
             df = pd.read_excel(file, sheet_name="PRODUCTOS", header=3)
+        else:
+            flash("Usa un archivo CSV o Excel .xlsx.", "danger")
+            return redirect(url_for("main.products") + "#importar-catalogo")
+
+        essential_columns = {
+            "SKU",
+            "Nombre del producto",
+            "Costo",
+            "Precio de venta",
+            "Stock inicial",
+        }
+        missing_columns = sorted(essential_columns - set(df.columns))
+        if missing_columns:
+            flash(
+                "El archivo no contiene las columnas obligatorias: "
+                + ", ".join(missing_columns)
+                + ". Descarga la plantilla PATIA e inténtalo de nuevo.",
+                "danger",
+            )
+            return redirect(url_for("main.products") + "#importar-catalogo")
 
         df = df.rename(columns={
             "SKU": "sku", "Codigo de barras": "barcode", "Nombre del producto": "name",
@@ -717,49 +738,112 @@ def import_products():
             "Precio de venta": "sale_price", "Stock inicial": "stock", "Stock minimo": "min_stock"
         })
 
-        for _, row in df.iterrows():
-            sku = str(row.get("sku", "")).strip()
-            raw_barcode = row.get("barcode", "")
-            try:
-                barcode = str(int(float(raw_barcode))) if raw_barcode and str(raw_barcode) != "nan" else ""
-            except:
-                barcode = str(raw_barcode).strip()
+        summary = {"created": 0, "updated": 0, "omitted": 0, "errors": 0}
 
-            existing = Product.query.filter_by(user_id=session["user_id"], sku=sku).first()
-            if existing:
-                existing.stock += int(row.get("stock", 0) or 0)
-                existing.sale_price = float(row.get("sale_price", 0) or 0)
-                existing.cost_price = float(row.get("cost_price", 0) or 0)
-                existing.min_stock = int(row.get("min_stock", 5) or 5)
-                existing.barcode = barcode
+        def text_value(value, default=""):
+            if pd.isna(value):
+                return default
+            return str(value).strip()
+
+        def number_value(value, default=0, integer=False):
+            if pd.isna(value) or str(value).strip() == "":
+                number = default
+            else:
+                number = float(value)
+            if number < 0:
+                raise ValueError("negative value")
+            return int(number) if integer else number
+
+        for row_index, row in df.iterrows():
+            if all(pd.isna(value) or str(value).strip() == "" for value in row.values):
+                summary["omitted"] += 1
                 continue
 
-            if not existing and barcode:
-                existing = Product.query.filter_by(user_id=session["user_id"], barcode=barcode).first()
+            try:
+                sku = text_value(row.get("sku"))
+                name = text_value(row.get("name"))
+                raw_barcode = row.get("barcode", "")
+                try:
+                    barcode = (
+                        str(int(float(raw_barcode)))
+                        if text_value(raw_barcode)
+                        else ""
+                    )
+                except (TypeError, ValueError):
+                    barcode = text_value(raw_barcode)
 
-            if existing:
-                existing.stock = int(row.get("stock", 0) or 0)
-                existing.sale_price = float(row.get("sale_price", 0) or 0)
-                existing.cost_price = float(row.get("cost_price", 0) or 0)
-                existing.min_stock = int(row.get("min_stock", 5) or 5)
-            else:
-                product = Product(
-                    user_id=session["user_id"], sku=sku, barcode=barcode,
-                    name=str(row.get("name", "")).strip(), category=str(row.get("category", "General")).strip(),
-                    supplier=str(row.get("supplier", "")).strip(), cost_price=float(row.get("cost_price", 0) or 0),
-                    sale_price=float(row.get("sale_price", 0) or 0), stock=int(row.get("stock", 0) or 0),
-                    min_stock=int(row.get("min_stock", 5) or 5)
+                stock = number_value(row.get("stock"), integer=True)
+                cost_price = number_value(row.get("cost_price"))
+                sale_price = number_value(row.get("sale_price"))
+                min_stock = number_value(row.get("min_stock"), default=5, integer=True)
+
+                existing = None
+                matched_by_sku = False
+                if sku:
+                    existing = Product.query.filter_by(
+                        user_id=session["user_id"], sku=sku
+                    ).first()
+                    matched_by_sku = existing is not None
+
+                if not existing and barcode:
+                    existing = Product.query.filter_by(
+                        user_id=session["user_id"], barcode=barcode
+                    ).first()
+
+                if existing:
+                    # Política existente: SKU suma stock; código lo reemplaza.
+                    existing.stock = existing.stock + stock if matched_by_sku else stock
+                    existing.sale_price = sale_price
+                    existing.cost_price = cost_price
+                    existing.min_stock = min_stock
+                    if matched_by_sku:
+                        existing.barcode = barcode
+                    summary["updated"] += 1
+                    continue
+
+                if not sku or not name:
+                    raise ValueError("missing product identity")
+
+                db.session.add(Product(
+                    user_id=session["user_id"],
+                    sku=sku,
+                    barcode=barcode or None,
+                    name=name,
+                    category=text_value(row.get("category"), "General") or "General",
+                    supplier=text_value(row.get("supplier")) or None,
+                    cost_price=cost_price,
+                    sale_price=sale_price,
+                    stock=stock,
+                    min_stock=min_stock,
+                ))
+                summary["created"] += 1
+            except (TypeError, ValueError, OverflowError):
+                summary["errors"] += 1
+                current_app.logger.warning(
+                    "Fila inválida en importación de catálogo (fila %s)",
+                    row_index + 2,
+                    exc_info=True,
                 )
-                db.session.add(product)
 
         db.session.commit()
-        flash("Catalogo importado correctamente.", "success")
+        flash(
+            "Importación terminada: "
+            f"{summary['created']} creados, "
+            f"{summary['updated']} actualizados, "
+            f"{summary['omitted']} omitidos y "
+            f"{summary['errors']} errores.",
+            "success",
+        )
 
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f"Error al importar: {e}", "danger")
+        current_app.logger.exception("No se pudo importar el catálogo")
+        flash(
+            "No pudimos procesar el archivo. Verifica que use la plantilla PATIA e inténtalo de nuevo.",
+            "danger",
+        )
 
-    return redirect(url_for("main.products"))
+    return redirect(url_for("main.products") + "#importar-catalogo")
 
 
 @main.route("/products/new", methods=["POST"])

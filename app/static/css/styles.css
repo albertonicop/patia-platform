@@ -8,6 +8,248 @@
     border:1px solid rgba(255,255,255,.08);
 }
 
+/* Inventory first-use ---------------------------------------------------- */
+
+.app-shell-v2 .inventory-v2 {
+    display: grid;
+    gap: 20px;
+    width: min(100%, 1440px);
+    margin: 0 auto;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .inventory-v2 .card {
+    border-color: var(--v2-line);
+    background: var(--v2-surface);
+    color: var(--v2-ink);
+    box-shadow: var(--v2-shadow);
+}
+
+.app-shell-v2 .inventory-v2 input {
+    border-color: #dfe2ea;
+    background: #fff;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .inventory-v2 .btn.ghost {
+    border-color: #dfe2ea;
+    background: #f8f9fc;
+    color: #454c61;
+}
+
+.app-shell-v2 .inventory-v2__empty {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 20px;
+    padding: 28px;
+}
+
+.app-shell-v2 .inventory-v2__empty-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    border-radius: 16px;
+    background: #eeebff;
+    color: var(--v2-violet);
+    font-size: 21px;
+}
+
+.app-shell-v2 .inventory-v2__eyebrow {
+    color: var(--v2-violet);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.app-shell-v2 .inventory-v2__empty h2,
+.app-shell-v2 .inventory-v2__panel-head h3 {
+    margin: 7px 0;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .inventory-v2__empty p,
+.app-shell-v2 .inventory-v2__panel-head p {
+    margin: 0;
+    color: var(--v2-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.app-shell-v2 .inventory-v2__empty-actions,
+.app-shell-v2 .inventory-v2__bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.app-shell-v2 .inventory-v2__empty-actions .btn,
+.app-shell-v2 .inventory-v2__template-link,
+.app-shell-v2 .inventory-v2__bulk-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+}
+
+.app-shell-v2 .inventory-v2__setup-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(340px, .9fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.app-shell-v2 .inventory-v2__panel {
+    padding: 25px;
+}
+
+.app-shell-v2 .inventory-v2__product-form,
+.app-shell-v2 .inventory-v2__advanced-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.app-shell-v2 .inventory-v2__field {
+    display: grid;
+    align-content: start;
+    gap: 7px;
+    min-width: 0;
+}
+
+.app-shell-v2 .inventory-v2__field--wide,
+.app-shell-v2 .inventory-v2__advanced,
+.app-shell-v2 .inventory-v2__submit {
+    grid-column: 1 / -1;
+}
+
+.app-shell-v2 .inventory-v2__field label,
+.app-shell-v2 .inventory-v2__import-form > label {
+    color: #3d4356;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.app-shell-v2 .inventory-v2__field label span,
+.app-shell-v2 .inventory-v2__import-form label span {
+    color: var(--v2-coral);
+}
+
+.app-shell-v2 .inventory-v2__field label em {
+    color: var(--v2-muted);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 600;
+}
+
+.app-shell-v2 .inventory-v2__field small {
+    color: var(--v2-muted);
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.app-shell-v2 .inventory-v2__advanced {
+    border: 1px solid var(--v2-line);
+    border-radius: 14px;
+    background: var(--v2-surface-soft);
+}
+
+.app-shell-v2 .inventory-v2__advanced summary {
+    min-height: 48px;
+    padding: 15px;
+    color: #3d4356;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.app-shell-v2 .inventory-v2__advanced summary span {
+    margin-left: 7px;
+    color: var(--v2-muted);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.app-shell-v2 .inventory-v2__advanced-grid {
+    margin: 0;
+    padding: 0 15px 17px;
+}
+
+.app-shell-v2 .inventory-v2__submit {
+    min-height: 46px;
+}
+
+.app-shell-v2 .inventory-v2__import-guide {
+    margin: 20px 0;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--v2-surface-soft);
+}
+
+.app-shell-v2 .inventory-v2__import-guide h4 {
+    margin: 0 0 9px;
+    font-size: 13px;
+}
+
+.app-shell-v2 .inventory-v2__import-guide ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--v2-muted);
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.app-shell-v2 .inventory-v2__template-link {
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.app-shell-v2 .inventory-v2__import-form {
+    display: grid;
+    gap: 10px;
+}
+
+.app-shell-v2 .inventory-v2__import-form button {
+    min-height: 46px;
+}
+
+.app-shell-v2 .inventory-v2__import-status {
+    margin: 0;
+    color: var(--v2-violet);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.app-shell-v2 .inventory-v2__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+}
+
+.app-shell-v2 .inventory-v2__summary span { color: var(--v2-muted); font-size: 12px; }
+.app-shell-v2 .inventory-v2__summary strong { font-size: 24px; }
+.app-shell-v2 .inventory-v2__catalog { padding: 24px; }
+.app-shell-v2 .inventory-v2__catalog-head form { width: min(100%, 320px); }
+.app-shell-v2 .inventory-v2__danger-action { color: #bd4f61 !important; border-color: #e7b8c0 !important; }
+.app-shell-v2 .inventory-v2__row-check { width: 18px; margin-right: 8px; }
+
+@media (max-width: 900px) {
+    .app-shell-v2 .inventory-v2__setup-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+    .app-shell-v2 .inventory-v2__empty { grid-template-columns: 1fr; padding: 20px; }
+    .app-shell-v2 .inventory-v2__empty-actions .btn { width: 100%; justify-content: center; }
+    .app-shell-v2 .inventory-v2__panel { padding: 20px; }
+    .app-shell-v2 .inventory-v2__product-form,
+    .app-shell-v2 .inventory-v2__advanced-grid { grid-template-columns: 1fr; }
+    .app-shell-v2 .inventory-v2__catalog-head { align-items: stretch; flex-direction: column; }
+    .app-shell-v2 .inventory-v2__catalog-head form { width: 100%; }
+}
+
 /* ==========================================================================
    PATIA COMMERCIAL LANDING + AUTH V2
    Scope: public landing and authentication screens only.
