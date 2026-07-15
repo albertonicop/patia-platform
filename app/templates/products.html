@@ -11,6 +11,7 @@
     </a>
 
     <form method="POST" action="/import-products" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="file" name="catalog_file" accept=".csv,.xlsx" required>
         <button class="btn" type="submit">Importar archivo</button>
     </form>
@@ -24,6 +25,7 @@
     <h3>Agregar producto</h3>
 
     <form class="form-grid" method="post" action="/products/new#catalogo">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input name="sku" placeholder="SKU" required>
         <input name="barcode" placeholder="Código de barras">
         <input name="name" placeholder="Nombre" required>
@@ -63,12 +65,14 @@
         </button>
         <form method="POST" action="/products/delete-all"
               onsubmit="return confirm('¿Eliminar TODOS los productos? Esta acción no se puede deshacer.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn ghost" type="submit" style="color:#ff8a8a; border-color:#ff8a8a;">
                 🗑️ Borrar todo el catálogo
             </button>
         </form>
         <form method="POST" action="/products/delete-selected" id="form-delete-selected"
               style="display:none;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="ids" id="selected-ids">
             <button class="btn ghost" type="submit" style="color:#ff8a8a; border-color:#ff8a8a;"
                     onsubmit="return confirm('¿Eliminar productos seleccionados?');">
@@ -111,6 +115,7 @@
                               
                         
                               onsubmit="return confirm('¿Eliminar este producto?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button class="btn ghost" type="submit">Eliminar</button>
                         </form>
                     </td>

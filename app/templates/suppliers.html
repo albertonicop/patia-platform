@@ -6,6 +6,7 @@
   <div class="card">
     <h3>Agregar proveedor</h3>
     <form method="POST" class="stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input name="name" required placeholder="Nombre del proveedor">
       <input name="contact" placeholder="Contacto">
       <input name="phone" placeholder="WhatsApp / Teléfono">
@@ -46,6 +47,7 @@
 <form class="keep-scroll" method="POST"
       action="/suppliers/{{s.id}}/delete"
       onsubmit="return confirm('¿Eliminar este proveedor?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
 <button class="btn ghost" type="submit">
 Eliminar

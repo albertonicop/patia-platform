@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import resend
 from email_validator import validate_email, EmailNotValidError
-import random
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -9,7 +8,7 @@ import stripe
 import secrets
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file
 from sqlalchemy import func
-from . import db
+from . import csrf, db, limiter
 from .models import Product, Sale, Supplier, User
 
 main = Blueprint("main", __name__)
@@ -56,6 +55,7 @@ def send_email(to, subject, html):
 
 
 @main.route("/register", methods=["GET", "POST"])
+@limiter.limit("3 per hour", methods=["POST"])
 def register():
     if request.method == "POST":
         email = request.form["email"].strip().lower()
@@ -95,13 +95,14 @@ def register():
         db.session.add(user)
         db.session.commit()
 
+        session.clear()
         session["user_id"] = user.id
 
         if request.args.get("plan") == "pro" or request.form.get("plan") == "pro":
             flash("Cuenta creada correctamente. Activa PATIA Pro para continuar.", "success")
             return redirect(url_for("main.subscribe"))
 
-        code = ''.join(random.choices(string.digits, k=6))
+        code = "".join(secrets.choice(string.digits) for _ in range(6))
         user.verification_code = code
         user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
         db.session.commit()
@@ -126,6 +127,7 @@ def register():
 
 
 @main.route("/verify-email", methods=["GET", "POST"])
+@limiter.limit("10 per 10 minutes", methods=["POST"])
 def verify_email():
     user = current_user()
     if not user:
@@ -173,12 +175,13 @@ def verify_email():
 
 
 @main.route("/resend-verification", methods=["POST"])
+@limiter.limit("3 per 15 minutes")
 def resend_verification():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
 
-    code = ''.join(random.choices(string.digits, k=6))
+    code = "".join(secrets.choice(string.digits) for _ in range(6))
     user.verification_code = code
     user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
     db.session.commit()
@@ -199,12 +202,13 @@ def resend_verification():
 
 
 @main.route("/forgot-password", methods=["GET", "POST"])
+@limiter.limit("5 per hour", methods=["POST"])
 def forgot_password():
     if request.method == "POST":
         email = request.form["email"].strip().lower()
         user = User.query.filter_by(email=email).first()
         if user:
-            token = ''.join(random.choices(string.ascii_letters + string.digits, k=48))
+            token = secrets.token_urlsafe(36)
             user.reset_token = token
             user.reset_token_expires = datetime.utcnow() + timedelta(minutes=30)
             db.session.commit()
@@ -225,6 +229,7 @@ def forgot_password():
 
 
 @main.route("/reset-password/<token>", methods=["GET", "POST"])
+@limiter.limit("5 per hour", methods=["POST"])
 def reset_password(token):
     user = User.query.filter_by(reset_token=token).first()
     if not user or user.reset_token_expires < datetime.utcnow():
@@ -241,6 +246,7 @@ def reset_password(token):
 
 
 @main.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def login():
     if request.method == "POST":
         email = request.form["email"].strip().lower()
@@ -254,6 +260,7 @@ def login():
         token = secrets.token_hex(32)
         user.session_token = token
         db.session.commit()
+        session.clear()
         session["user_id"] = user.id
         session["session_token"] = token
         days_used = (datetime.utcnow() - user.created_at).days
@@ -278,11 +285,10 @@ def login():
     return render_template("auth.html", title="Iniciar sesión", button="Entrar", mode="login")
 
 
-@main.route("/logout")
+@main.route("/logout", methods=["POST"])
 def logout():
     session.clear()
-    flash("Sesión cerrada.", "success")
-    return redirect("/")
+    return redirect(url_for("main.dashboard"))
 
 
 @main.app_template_filter("money")
@@ -729,6 +735,7 @@ def create_checkout_session():
 
 
 @main.route("/stripe-webhook", methods=["POST"])
+@csrf.exempt
 def stripe_webhook():
     payload = request.data
     sig_header = request.headers.get("Stripe-Signature")

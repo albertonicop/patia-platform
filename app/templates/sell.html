@@ -75,6 +75,7 @@
               <a href="/receipt/{{s.id}}" class="btn ghost" target="_blank">🧾 Recibo</a>
               <form method="POST" action="/sales/{{s.id}}/cancel"
                     onsubmit="return confirm('¿Cancelar esta venta? Se devolverá el stock.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn ghost" type="submit">Cancelar</button>
               </form>
             </div>
@@ -226,7 +227,10 @@ btnCobrar.addEventListener("click", function() {
 
   fetch("/sell-cart", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
+    },
     body: JSON.stringify({ items })
   })
   .then(r => r.json())

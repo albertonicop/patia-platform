@@ -10,6 +10,7 @@
     </p>
 
     <form method="POST" class="stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input 
             type="text" 
             name="code" 
@@ -23,6 +24,7 @@
     </form>
 
     <form method="POST" action="/resend-verification" style="margin-top:16px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn ghost" type="submit">Reenviar código</button>
     </form>
 </div>

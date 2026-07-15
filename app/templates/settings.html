@@ -6,6 +6,7 @@
     <h2 style="margin-bottom:24px;">Configuracion del negocio</h2>
 
     <form method="POST" action="/settings" class="stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="stack">
             <label style="color:var(--muted);font-size:13px;">Nombre del negocio</label>
             <input type="text" name="company_name" value="{{ user.company_name or '' }}" placeholder="Mi Tienda SA de CV">

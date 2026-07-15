@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <link rel="icon"
         type="image/png"
@@ -38,9 +39,12 @@
     <a href="/settings">Configuración</a>
 
 
-<a href="/logout" style="margin-top:10px;color:#ff8a8a;">
+<form method="POST" action="{{ url_for('main.logout') }}" style="margin-top:10px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="btn ghost" style="width:100%;color:#ff8a8a;">
     Cerrar sesión
-</a>
+  </button>
+</form>
 
 </nav>
 
