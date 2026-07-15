@@ -37,6 +37,52 @@
   </div>
 </section>
 
+{% if show_onboarding %}
+<section class="dashboard-v2__onboarding" aria-labelledby="onboarding-title" data-onboarding-progress="{{ onboarding_progress }}">
+  <header class="dashboard-v2__onboarding-head">
+    <div>
+      <span class="dashboard-v2__kicker">Primeros pasos</span>
+      <h3 id="onboarding-title">Pon PATIA en marcha</h3>
+      <p>Completa esta ruta para registrar tu primera venta y comenzar a ver resultados.</p>
+    </div>
+    <div class="dashboard-v2__onboarding-progress" aria-label="Progreso: {{ onboarding_progress }}%">
+      <strong>{{ onboarding_progress }}%</strong>
+      <span>{{ onboarding_steps | selectattr('completed') | list | length }} de {{ onboarding_steps | length }} pasos</span>
+    </div>
+  </header>
+
+  <progress class="dashboard-v2__progress-track" value="{{ onboarding_progress }}" max="100">
+    {{ onboarding_progress }}%
+  </progress>
+
+  <ol class="dashboard-v2__steps">
+    {% for step in onboarding_steps %}
+      <li class="dashboard-v2__step{% if step.completed %} dashboard-v2__step--completed{% endif %}">
+        <span class="dashboard-v2__step-status" aria-hidden="true">
+          {% if step.completed %}<i class="fa-solid fa-check"></i>{% else %}{{ loop.index }}{% endif %}
+        </span>
+        <div class="dashboard-v2__step-copy">
+          <h4>{{ step.title }}</h4>
+          <p>{{ step.text }}</p>
+        </div>
+        {% if not step.completed and step.action_url %}
+          <a class="btn dashboard-v2__step-action" href="{{ step.action_url }}">{{ step.action_label }}</a>
+        {% else %}
+          <span class="dashboard-v2__step-label">{{ "Completado" if step.completed else "Disponible después" }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+
+  {% if total_products == 0 %}
+    <div class="dashboard-v2__onboarding-alternative">
+      <span>¿Ya tienes un catálogo?</span>
+      <a href="{{ url_for('main.products') }}#importar-catalogo">Importar catálogo</a>
+    </div>
+  {% endif %}
+</section>
+{% endif %}
+
 <section class="dashboard-v2__metrics" aria-label="Indicadores principales">
   <article class="dashboard-v2__metric dashboard-v2__metric--violet">
     <div class="dashboard-v2__metric-head">

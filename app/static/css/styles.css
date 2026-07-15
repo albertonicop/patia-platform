@@ -2820,6 +2820,200 @@ table {
     font-weight: 600;
 }
 
+/* Dashboard onboarding --------------------------------------------------- */
+
+.app-shell-v2 .dashboard-v2__onboarding {
+    margin-bottom: 24px;
+    padding: 24px;
+    border: 1px solid var(--v2-line);
+    border-radius: 18px;
+    background: var(--v2-surface);
+    box-shadow: 0 8px 24px rgba(31, 36, 56, .035);
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-head h3 {
+    margin: 0;
+    color: var(--v2-ink);
+    font-size: 22px;
+    letter-spacing: -.025em;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-head p {
+    margin: 8px 0 0;
+    color: var(--v2-muted);
+    font-size: 13px;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-progress {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-progress strong,
+.app-shell-v2 .dashboard-v2__onboarding-progress span {
+    display: block;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-progress strong {
+    color: var(--v2-violet);
+    font-size: 22px;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-progress span {
+    margin-top: 3px;
+    color: var(--v2-muted);
+    font-size: 11px;
+}
+
+.app-shell-v2 .dashboard-v2__progress-track {
+    display: block;
+    width: 100%;
+    height: 6px;
+    margin: 20px 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    background: #eceef4;
+    appearance: none;
+}
+
+.app-shell-v2 .dashboard-v2__progress-track::-webkit-progress-bar {
+    border-radius: inherit;
+    background: #eceef4;
+}
+
+.app-shell-v2 .dashboard-v2__progress-track::-webkit-progress-value {
+    border-radius: inherit;
+    background: var(--v2-violet);
+}
+
+.app-shell-v2 .dashboard-v2__progress-track::-moz-progress-bar {
+    border-radius: inherit;
+    background: var(--v2-violet);
+}
+
+.app-shell-v2 .dashboard-v2__steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-shell-v2 .dashboard-v2__step {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    align-content: start;
+    gap: 10px;
+    min-width: 0;
+    padding: 15px;
+    border-radius: 14px;
+    background: var(--v2-surface-soft);
+}
+
+.app-shell-v2 .dashboard-v2__step-status {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 50%;
+    background: #ece9ff;
+    color: var(--v2-violet);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.app-shell-v2 .dashboard-v2__step--completed .dashboard-v2__step-status {
+    background: #e8f7f1;
+    color: #177653;
+}
+
+.app-shell-v2 .dashboard-v2__step-copy h4 {
+    margin: 1px 0 5px;
+    color: var(--v2-ink);
+    font-size: 13px;
+}
+
+.app-shell-v2 .dashboard-v2__step-copy p {
+    margin: 0;
+    color: var(--v2-muted);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.app-shell-v2 .dashboard-v2__step-action,
+.app-shell-v2 .dashboard-v2__step-label {
+    grid-column: 2;
+    width: fit-content;
+    margin-top: 4px;
+    font-size: 10px;
+}
+
+.app-shell-v2 .dashboard-v2__step-action {
+    min-height: 36px;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    background: var(--v2-ink) !important;
+    box-shadow: none !important;
+}
+
+.app-shell-v2 .dashboard-v2__step-label {
+    color: #656c80;
+    font-weight: 700;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-alternative {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 14px;
+    color: var(--v2-muted);
+    font-size: 11px;
+}
+
+.app-shell-v2 .dashboard-v2__onboarding-alternative a {
+    color: var(--v2-violet);
+    font-weight: 750;
+}
+
+@media (max-width: 900px) {
+    .app-shell-v2 .dashboard-v2__steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .app-shell-v2 .dashboard-v2__onboarding {
+        padding: 18px;
+    }
+
+    .app-shell-v2 .dashboard-v2__onboarding-head {
+        display: block;
+    }
+
+    .app-shell-v2 .dashboard-v2__onboarding-progress {
+        margin-top: 14px;
+        text-align: left;
+    }
+
+    .app-shell-v2 .dashboard-v2__steps {
+        grid-template-columns: 1fr;
+    }
+
+    .app-shell-v2 .dashboard-v2__onboarding-alternative {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
 .app-shell-v2 .dashboard-v2__workspace {
     display: grid;
     grid-template-columns: minmax(0, 1.65fr) minmax(300px, .75fr);

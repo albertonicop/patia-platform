@@ -468,6 +468,7 @@ def analytics():
     products = Product.query.filter_by(user_id=user_id).all()
 
     total_products = len(products)
+    total_sales = Sale.query.filter_by(user_id=user_id).count()
     inventory_value = sum(p.inventory_value for p in products)
     low_stock = sum(1 for p in products if p.stock <= p.min_stock)
 
@@ -543,6 +544,7 @@ def analytics():
     alerts = alerts[:5]
     return dict(
         total_products=total_products,
+        total_sales=total_sales,
         inventory_value=inventory_value,
         low_stock=low_stock,
         today_sales=today_sales,
@@ -561,12 +563,56 @@ def dashboard():
     if not user:
         session.clear()
         return render_template("landing.html")
+    dashboard_data = analytics()
+    has_basic_data = all(
+        (user.company_name, user.phone, user.city, user.state)
+    )
+    has_products = dashboard_data["total_products"] > 0
+    has_sales = dashboard_data["total_sales"] > 0
+    onboarding_steps = [
+        {
+            "title": "Completa los datos básicos",
+            "text": "Confirma la información principal de tu negocio.",
+            "completed": has_basic_data,
+            "action_label": "Completar datos",
+            "action_url": url_for("main.settings"),
+        },
+        {
+            "title": "Agrega tu primer producto",
+            "text": "Captura un producto o importa tu catálogo desde Excel.",
+            "completed": has_products,
+            "action_label": "Agregar primer producto",
+            "action_url": url_for("main.products"),
+        },
+        {
+            "title": "Registra tu primera venta",
+            "text": "Prueba el punto de venta con un producto de tu catálogo.",
+            "completed": has_sales,
+            "action_label": "Registrar primera venta" if has_products else None,
+            "action_url": url_for("main.sell") if has_products else None,
+        },
+        {
+            "title": "Revisa tus resultados",
+            "text": "Consulta ventas, inventario y alertas en este panel.",
+            "completed": has_sales,
+            "action_label": None,
+            "action_url": None,
+        },
+    ]
+    completed_steps = sum(step["completed"] for step in onboarding_steps)
+    onboarding_progress = round(completed_steps / len(onboarding_steps) * 100)
+    onboarding_completed = completed_steps == len(onboarding_steps)
+
     return render_template(
         "dashboard.html",
         company_name=user.company_name,
         user=user,
         trial_days_left=max(0, 14 - (datetime.utcnow() - user.created_at).days) if user.created_at else 14,
-        **analytics()
+        onboarding_steps=onboarding_steps,
+        onboarding_completed=onboarding_completed,
+        onboarding_progress=onboarding_progress,
+        show_onboarding=not has_products or not has_sales,
+        **dashboard_data,
     )
 
 
