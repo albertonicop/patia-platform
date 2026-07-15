@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from io import BytesIO
 import stripe
 import secrets
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file, jsonify
+import uuid
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file, jsonify, abort
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from . import csrf, db, limiter
@@ -57,6 +58,46 @@ def _trial_access_response(user, *, json_response=False):
 
 def money(value):
     return f"${value:,.2f} MXN"
+
+
+def _sale_ticket_key(sale):
+    """Identificador interno estable, incluso para ventas históricas sin UUID."""
+    return sale.ticket_id or f"sale-{sale.id}"
+
+
+def _short_sale_folio(sales):
+    """Folio legible y estable sin reemplazar el identificador interno."""
+    ticket_id = sales[0].ticket_id
+    if ticket_id:
+        try:
+            folio_number = uuid.UUID(ticket_id).int % 1_000_000
+            return f"V-{folio_number:06d}"
+        except (ValueError, TypeError, AttributeError):
+            pass
+    return f"V-{min(sale.id for sale in sales):06d}"
+
+
+def _group_sales_by_ticket(sales, *, limit=None):
+    grouped = {}
+    for sale in sales:
+        key = _sale_ticket_key(sale)
+        group = grouped.setdefault(key, {
+            "ticket_id": key,
+            "sales": [],
+            "created_at": sale.created_at,
+            "total": 0,
+            "item_count": 0,
+        })
+        group["sales"].append(sale)
+        group["total"] += sale.total
+        group["item_count"] += sale.quantity
+        if sale.created_at < group["created_at"]:
+            group["created_at"] = sale.created_at
+    result = list(grouped.values())
+    for group in result:
+        group["folio"] = _short_sale_folio(group["sales"])
+    result.sort(key=lambda group: group["created_at"], reverse=True)
+    return result[:limit] if limit else result
 
 
 MANAGED_SUBSCRIPTION_STATUSES = {"active", "trialing", "past_due", "unpaid"}
@@ -994,20 +1035,20 @@ def sell():
             flash("No hay suficiente inventario.", "danger")
         else:
             product.stock -= qty
-            sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price)
+            sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price, ticket_id=str(uuid.uuid4()))
             db.session.add(sale)
             db.session.commit()
             flash(f"Venta registrada: {product.name} x{qty}.", "success")
         return redirect(url_for("main.sell"))
 
-    sales = Sale.query.filter_by(user_id=session["user_id"]).order_by(Sale.created_at.desc()).limit(12).all()
+    sales = Sale.query.filter_by(user_id=session["user_id"]).order_by(Sale.created_at.desc(), Sale.id.desc()).all()
+    sale_groups = _group_sales_by_ticket(sales, limit=12)
     products = Product.query.filter_by(user_id=session["user_id"]).order_by(Product.name).all()
-    return render_template("sell.html", products=products, sales=sales, user=user)
+    return render_template("sell.html", products=products, sales=sales, sale_groups=sale_groups, user=user)
 
 
 @main.route("/sell-cart", methods=["POST"])
 def sell_cart():
-    import uuid
     user = current_user()
     if not user:
         return jsonify({"ok": False, "error": "No autenticado"}), 401
@@ -1053,10 +1094,13 @@ def sell_cart():
                 ticket_id=request_id,
             ).order_by(Sale.id).all()
             if previous_sales:
+                folio = _short_sale_folio(previous_sales)
                 return jsonify({
                     "ok": True,
                     "duplicate": True,
                     "ticket_id": request_id,
+                    "folio": folio,
+                    "ticket_url": url_for("main.ticket", ticket_ref=request_id),
                     "total": sum(sale.total for sale in previous_sales),
                     "single_sale_id": (
                         previous_sales[0].id if len(previous_sales) == 1 else None
@@ -1089,9 +1133,12 @@ def sell_cart():
             db.session.add(sale)
             sales.append(sale)
         db.session.commit()
+        folio = _short_sale_folio(sales)
         return jsonify({
             "ok": True,
             "ticket_id": ticket_id,
+            "folio": folio,
+            "ticket_url": url_for("main.ticket", ticket_ref=ticket_id),
             "total": sum(sale.total for sale in sales),
             "single_sale_id": sales[0].id if len(sales) == 1 else None,
         })
@@ -1743,74 +1790,6 @@ def settings():
     return render_template("settings.html", user=user)
 
 
-def _build_receipt_pdf(user, sale, product):
-    from reportlab.pdfgen import canvas
-    from reportlab.lib.units import cm
-    import io
-
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=(8*cm, 15*cm))
-    w, h = 8*cm, 15*cm
-
-    # Encabezado
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(w/2, h - 1*cm, user.company_name or "Mi Negocio")
-    c.setFont("Helvetica", 7)
-    if user.rfc:
-        c.drawCentredString(w/2, h - 1.5*cm, f"RFC: {user.rfc}")
-    if user.address:
-        c.drawCentredString(w/2, h - 2*cm, user.address)
-    if user.city:
-        c.drawCentredString(w/2, h - 2.4*cm, f"{user.city}, {user.state or ''}")
-    if user.phone:
-        c.drawCentredString(w/2, h - 2.8*cm, f"Tel: {user.phone}")
-
-    c.line(0.3*cm, h - 3.2*cm, w - 0.3*cm, h - 3.2*cm)
-
-    # Folio y fecha
-    c.setFont("Helvetica", 7)
-    c.drawString(0.5*cm, h - 3.7*cm, f"Folio: #{sale.id:04d}")
-    c.drawString(0.5*cm, h - 4.1*cm, f"Fecha: {sale.created_at.strftime('%d/%m/%Y %H:%M')}")
-
-    c.line(0.3*cm, h - 4.5*cm, w - 0.3*cm, h - 4.5*cm)
-
-    # Productos
-    c.setFont("Helvetica-Bold", 7)
-    c.drawString(0.5*cm, h - 5*cm, "Producto")
-    c.drawRightString(w - 0.5*cm, h - 5*cm, "Total")
-
-    c.setFont("Helvetica", 7)
-    subtotal = sale.total / 1.16
-    iva = sale.total - subtotal
-
-    c.drawString(0.5*cm, h - 5.5*cm, f"{product.name} x{sale.quantity}")
-    c.drawString(0.5*cm, h - 5.9*cm, f"@ ${sale.unit_price:,.2f} c/u")
-    c.drawRightString(w - 0.5*cm, h - 5.5*cm, f"${sale.total:,.2f}")
-
-    c.line(0.3*cm, h - 6.3*cm, w - 0.3*cm, h - 6.3*cm)
-
-    # Totales
-    c.drawString(0.5*cm, h - 6.8*cm, "Subtotal:")
-    c.drawRightString(w - 0.5*cm, h - 6.8*cm, f"${subtotal:,.2f}")
-    c.drawString(0.5*cm, h - 7.2*cm, "IVA (16%):")
-    c.drawRightString(w - 0.5*cm, h - 7.2*cm, f"${iva:,.2f}")
-
-    c.setFont("Helvetica-Bold", 8)
-    c.drawString(0.5*cm, h - 7.7*cm, "TOTAL:")
-    c.drawRightString(w - 0.5*cm, h - 7.7*cm, f"${sale.total:,.2f}")
-
-    c.line(0.3*cm, h - 8.1*cm, w - 0.3*cm, h - 8.1*cm)
-
-    # Pie
-    c.setFont("Helvetica", 7)
-    c.drawCentredString(w/2, h - 8.6*cm, "¡Gracias por su compra!")
-    c.drawCentredString(w/2, h - 9*cm, "patiaapp.com")
-
-    c.save()
-    buffer.seek(0)
-    return buffer
-
-
 @main.route("/receipt/<int:sale_id>")
 def receipt(sale_id):
     user = current_user()
@@ -1818,22 +1797,42 @@ def receipt(sale_id):
         return redirect(url_for("main.login"))
 
     sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
-    product = Product.query.filter_by(id=sale.product_id, user_id=user.id).first()
-    if not product:
-        current_app.logger.error(
-            "No se pudo generar recibo: producto ausente para venta %s", sale.id
-        )
-        flash("No pudimos generar el recibo. Inténtalo nuevamente.", "danger")
-        return redirect(url_for("main.sell"))
+    return redirect(url_for("main.ticket", ticket_ref=_sale_ticket_key(sale)))
 
-    try:
-        buffer = _build_receipt_pdf(user, sale, product)
-        return send_file(
-            buffer,
-            mimetype="application/pdf",
-            download_name=f"recibo_{sale.id}.pdf",
-        )
-    except Exception:
-        current_app.logger.exception("No se pudo generar el recibo %s", sale.id)
-        flash("No pudimos generar el recibo. Inténtalo nuevamente.", "danger")
-        return redirect(url_for("main.sell"))
+
+@main.route("/ticket/<ticket_ref>")
+def ticket(ticket_ref):
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+
+    if ticket_ref.startswith("sale-") and ticket_ref[5:].isdigit():
+        sale = Sale.query.filter_by(id=int(ticket_ref[5:]), user_id=user.id).first_or_404()
+        sales = [sale]
+    else:
+        sales = Sale.query.filter_by(
+            ticket_id=ticket_ref,
+            user_id=user.id,
+        ).order_by(Sale.id).all()
+        if not sales:
+            abort(404)
+
+    address_parts = [part for part in (
+        user.address,
+        user.city,
+        user.state,
+        user.postal_code,
+    ) if part]
+    return render_template(
+        "ticket.html",
+        user=user,
+        sales=sales,
+        ticket_id=_sale_ticket_key(sales[0]),
+        folio=_short_sale_folio(sales),
+        ticket_total=sum(sale.total for sale in sales),
+        ticket_subtotal=sum(sale.total for sale in sales),
+        item_count=sum(sale.quantity for sale in sales),
+        ticket_created_at=min(sale.created_at for sale in sales),
+        business_address=", ".join(address_parts),
+        auto_print=request.args.get("print") == "1",
+    )

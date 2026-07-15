@@ -84,16 +84,15 @@ class ReleaseBlockerTests(unittest.TestCase):
         db.session.commit()
         return sale
 
-    def test_own_receipt_is_valid_pdf(self):
+    def test_legacy_receipt_redirects_to_professional_ticket(self):
         owner = self.user()
         sale = self.sale(owner)
         self.login(owner)
 
         response = self.client.get(f"/receipt/{sale.id}")
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.mimetype, "application/pdf")
-        self.assertTrue(response.data.startswith(b"%PDF"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith(f"/ticket/sale-{sale.id}"))
 
     def test_cross_company_receipt_is_not_found(self):
         owner = self.user()
@@ -106,17 +105,6 @@ class ReleaseBlockerTests(unittest.TestCase):
     def test_missing_receipt_is_not_found(self):
         self.login(self.user())
         self.assertEqual(self.client.get("/receipt/999999").status_code, 404)
-
-    def test_receipt_failure_is_generic_and_logged(self):
-        owner = self.user()
-        sale = self.sale(owner)
-        self.login(owner)
-        with patch("app.routes._build_receipt_pdf", side_effect=RuntimeError("private detail")):
-            response = self.client.get(f"/receipt/{sale.id}", follow_redirects=True)
-        text = response.get_data(as_text=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("No pudimos generar el recibo", text)
-        self.assertNotIn("private detail", text)
 
     def test_expired_trial_blocks_sensitive_post_endpoints(self):
         user = self.user(expired=True)

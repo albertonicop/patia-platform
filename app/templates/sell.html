@@ -14,18 +14,23 @@
       </div>
     </section>
   {% else %}
-    <section id="sale-confirmation" class="pos-v2__confirmation" role="status" aria-live="polite" hidden>
-      <span class="pos-v2__confirmation-icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
-      <div>
-        <h3>Venta registrada correctamente</h3>
-        <p>Total: <strong id="confirmation-total"></strong></p>
-        <p>Ticket: <code id="confirmation-ticket"></code></p>
-      </div>
-      <div class="pos-v2__confirmation-actions">
-        <a id="confirmation-receipt" class="btn ghost" target="_blank" rel="noopener" hidden>Ver recibo</a>
-        <button id="confirmation-new-sale" class="btn" type="button">Registrar otra venta</button>
-      </div>
-    </section>
+    <div id="sale-confirmation" class="pos-v2__modal" role="dialog" aria-modal="true" aria-labelledby="sale-confirmation-title" hidden>
+      <div class="pos-v2__modal-backdrop" data-close-confirmation></div>
+      <section class="pos-v2__confirmation" role="document">
+        <button id="confirmation-close" class="pos-v2__modal-close" type="button" aria-label="Cerrar confirmación"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <span class="pos-v2__confirmation-icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+        <div class="pos-v2__confirmation-copy">
+          <span class="pos-v2__eyebrow">Operación completada</span>
+          <h3 id="sale-confirmation-title">Venta registrada correctamente</h3>
+          <dl><div><dt>Folio</dt><dd id="confirmation-folio"></dd></div><div><dt>Total</dt><dd id="confirmation-total"></dd></div></dl>
+        </div>
+        <div class="pos-v2__confirmation-actions">
+          <a id="confirmation-ticket" class="btn ghost" target="_blank" rel="noopener">Ver ticket</a>
+          <a id="confirmation-print" class="btn ghost" target="_blank" rel="noopener">Imprimir ticket</a>
+          <button id="confirmation-new-sale" class="btn" type="button">Nueva venta</button>
+        </div>
+      </section>
+    </div>
 
     <section class="card pos-v2__sale-panel" aria-labelledby="sale-panel-title">
       <header class="pos-v2__panel-head">
@@ -76,28 +81,36 @@
     <header class="pos-v2__panel-head">
       <span class="pos-v2__eyebrow">Historial inmediato</span>
       <h2 id="recent-sales-title">Ventas recientes</h2>
-      {% if sales %}<p>Cancelar una venta devuelve automáticamente sus unidades al inventario.</p>{% endif %}
+      {% if sale_groups %}<p>Cada operación aparece en un solo ticket. La cancelación se mantiene por producto y devuelve sus unidades al inventario.</p>{% endif %}
     </header>
 
-    {% if sales %}
+    {% if sale_groups %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Folio</th><th>Fecha y hora</th><th>Artículos</th><th>Total</th><th>Acciones</th></tr></thead>
           <tbody>
-            {% for sale in sales %}
+            {% for ticket in sale_groups %}
               <tr>
-                <td>{{ sale.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ sale.product.name if sale.product else '-' }}</td>
-                <td>{{ sale.quantity }}</td>
-                <td>{{ sale.total|money }}</td>
+                <td><strong>{{ ticket.folio }}</strong></td>
+                <td>{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ ticket.item_count }} {{ "artículo" if ticket.item_count == 1 else "artículos" }}<small>{{ ticket.sales|length }} {{ "producto" if ticket.sales|length == 1 else "productos" }}</small></td>
+                <td>{{ ticket.total|money }}</td>
                 <td>
                   <div class="pos-v2__sale-actions">
-                    <a href="/receipt/{{ sale.id }}" class="btn ghost" target="_blank" rel="noopener">Recibo</a>
-                    <form method="POST" action="/sales/{{ sale.id }}/cancel" onsubmit="return confirm('¿Cancelar esta venta? Las unidades regresarán al inventario.');">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                      <button class="btn ghost" type="submit">Cancelar venta</button>
-                    </form>
+                    <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id) }}" class="btn ghost" target="_blank" rel="noopener">Ver ticket</a>
+                    <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id, print=1) }}" class="btn ghost" target="_blank" rel="noopener">Reimprimir</a>
                   </div>
+                  <details class="pos-v2__cancel-lines">
+                    <summary>Cancelar un producto</summary>
+                    <p>La cancelación se aplica solo a la línea seleccionada, no al ticket completo.</p>
+                    {% for sale in ticket.sales %}
+                    <form method="POST" action="/sales/{{ sale.id }}/cancel" onsubmit="return confirm('¿Cancelar esta línea? Sus unidades regresarán al inventario.');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <span>{{ sale.product.name if sale.product else 'Producto' }} × {{ sale.quantity }}</span>
+                      <button class="btn ghost" type="submit">Cancelar línea</button>
+                    </form>
+                    {% endfor %}
+                  </details>
                 </td>
               </tr>
             {% endfor %}
@@ -105,7 +118,7 @@
         </table>
       </div>
     {% else %}
-      <div class="pos-v2__recent-empty">
+      <div class="pos-v2__recent-empty module-empty-v2">
         <i class="fa-solid fa-receipt" aria-hidden="true"></i>
         <h3>Aún no hay ventas registradas</h3>
         <p>Tu primera venta aparecerá aquí con su recibo y opciones de cancelación.</p>
@@ -357,9 +370,9 @@ checkoutButton.addEventListener("click", async () => {
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || "No se pudo registrar la venta.");
     sessionStorage.setItem("patia_sale_confirmation", JSON.stringify({
-      ticket_id: data.ticket_id,
+      folio: data.folio,
       total: data.total,
-      single_sale_id: data.single_sale_id
+      ticket_url: data.ticket_url
     }));
     window.location.reload();
   } catch (error) {
@@ -376,23 +389,37 @@ if (storedConfirmation) {
   sessionStorage.removeItem("patia_sale_confirmation");
   try {
     const confirmation = JSON.parse(storedConfirmation);
+    const confirmationModal = document.getElementById("sale-confirmation");
     document.getElementById("confirmation-total").textContent = Number(confirmation.total).toLocaleString("es-MX", {style: "currency", currency: "MXN"}) + " MXN";
-    document.getElementById("confirmation-ticket").textContent = confirmation.ticket_id;
-    const receipt = document.getElementById("confirmation-receipt");
-    const saleId = Number(confirmation.single_sale_id);
-    if (Number.isInteger(saleId) && saleId > 0) {
-      receipt.href = `/receipt/${saleId}`;
-      receipt.hidden = false;
-    }
-    document.getElementById("sale-confirmation").hidden = false;
+    document.getElementById("confirmation-folio").textContent = confirmation.folio;
+    document.getElementById("confirmation-ticket").href = confirmation.ticket_url;
+    document.getElementById("confirmation-print").href = `${confirmation.ticket_url}?print=1`;
+    confirmationModal.hidden = false;
+    document.body.classList.add("has-open-modal");
+    document.getElementById("confirmation-close").focus();
   } catch (error) {
     console.warn("No se pudo mostrar la confirmación temporal de venta.");
   }
 }
 
-document.getElementById("confirmation-new-sale").addEventListener("click", () => {
-  document.getElementById("sale-confirmation").hidden = true;
+const confirmationModal = document.getElementById("sale-confirmation");
+function closeSaleConfirmation() {
+  confirmationModal.hidden = true;
+  document.body.classList.remove("has-open-modal");
   searchInput.focus();
+}
+
+document.getElementById("confirmation-new-sale").addEventListener("click", closeSaleConfirmation);
+document.getElementById("confirmation-close").addEventListener("click", closeSaleConfirmation);
+document.querySelector("[data-close-confirmation]").addEventListener("click", closeSaleConfirmation);
+confirmationModal.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeSaleConfirmation();
+  if (event.key !== "Tab") return;
+  const focusable = [...confirmationModal.querySelectorAll('a[href], button:not([disabled])')];
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 });
 
 renderCart();

@@ -4727,3 +4727,181 @@ table {
     .verify-v2 h1 { font-size: 27px; }
     .verify-v2__form input { font-size: 22px; letter-spacing: .22em; }
 }
+
+/* Sprint 1.3: tickets y recibos ------------------------------------------ */
+
+.app-shell-v2 .ticket-page-v2 {
+    width: min(100%, 1040px);
+    margin: 0 auto;
+    color: var(--v2-ink);
+}
+
+.app-shell-v2 .ticket-page-v2__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 24px;
+    align-items: start;
+}
+
+.ticket-print-v2 {
+    width: min(100%, 80mm);
+    min-width: 0;
+    margin: 0 auto;
+    padding: 9mm 7mm;
+    border: 1px solid #dfe2e8;
+    border-radius: 4px;
+    background: #fff;
+    color: #111;
+    font-family: "Courier New", Courier, monospace;
+    box-shadow: 0 14px 40px rgba(31, 36, 56, .08);
+}
+
+.ticket-print-v2--58 { width: min(100%, 58mm); padding: 6mm 4mm; page: ticket58; }
+.ticket-print-v2--80 { page: ticket80; }
+.ticket-print-v2 p { margin: 0; }
+
+.ticket-print-v2__business {
+    padding-bottom: 5mm;
+    border-bottom: 1px dashed #111;
+    text-align: center;
+}
+
+.ticket-print-v2__business h1 {
+    margin: 0 0 2mm;
+    overflow-wrap: anywhere;
+    color: #111;
+    font: 700 15px/1.25 Arial, sans-serif;
+}
+
+.ticket-print-v2__business p { margin-top: 1mm; overflow-wrap: anywhere; font-size: 10px; line-height: 1.35; }
+
+.ticket-print-v2__meta {
+    display: grid;
+    gap: 1.5mm;
+    padding: 4mm 0;
+    border-bottom: 1px dashed #111;
+    font-size: 10px;
+}
+
+.ticket-print-v2__meta p,
+.ticket-print-v2__payment,
+.ticket-print-v2__totals > div {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4mm;
+}
+
+.ticket-print-v2__meta strong { text-align: right; }
+
+.ticket-print-v2__items {
+    width: 100%;
+    min-width: 0 !important;
+    table-layout: fixed;
+    color: #111;
+    font-size: 9px;
+}
+
+.ticket-print-v2__items th,
+.ticket-print-v2__items td {
+    padding: 2.5mm 1mm;
+    overflow-wrap: anywhere;
+    border-bottom: 1px dotted #777;
+    color: #111;
+    line-height: 1.3;
+    text-align: right;
+    text-transform: none;
+}
+
+.ticket-print-v2__items th:first-child,
+.ticket-print-v2__items td:first-child { width: 11%; text-align: left; }
+.ticket-print-v2__items th:nth-child(2),
+.ticket-print-v2__items td:nth-child(2) { width: 39%; text-align: left; }
+.ticket-print-v2__items th:nth-child(3),
+.ticket-print-v2__items td:nth-child(3) { width: 25%; }
+.ticket-print-v2__items th:nth-child(4),
+.ticket-print-v2__items td:nth-child(4) { width: 25%; }
+
+.ticket-print-v2__totals { display: grid; gap: 2mm; margin: 0; padding: 4mm 0; border-bottom: 1px dashed #111; font-size: 10px; }
+.ticket-print-v2__totals dt,
+.ticket-print-v2__totals dd { margin: 0; }
+.ticket-print-v2__totals dd { text-align: right; white-space: nowrap; }
+.ticket-print-v2__total { padding-top: 2mm; border-top: 1px solid #111; font-size: 13px; font-weight: 800; }
+.ticket-print-v2__payment { padding: 4mm 0; border-bottom: 1px dashed #111; font-size: 9px; }
+.ticket-print-v2__payment strong { text-align: right; }
+.ticket-print-v2__footer { display: grid; gap: 2mm; padding-top: 6mm; text-align: center; }
+.ticket-print-v2__footer strong { font-size: 11px; }
+.ticket-print-v2__footer small { color: #333; font-size: 8px; }
+
+.app-shell-v2 .ticket-page-v2__actions { display: grid; gap: 12px; padding: 24px; }
+.app-shell-v2 .ticket-page-v2__actions h3,
+.app-shell-v2 .ticket-page-v2__actions p { margin: 0; }
+.app-shell-v2 .ticket-page-v2__actions > p { color: var(--v2-muted); font-size: 12px; line-height: 1.5; }
+.app-shell-v2 .ticket-page-v2__actions .btn { width: 100%; gap: 8px; }
+.app-shell-v2 .ticket-page-v2__widths { display: flex; gap: 16px; margin: 4px 0; padding: 14px; border: 1px solid var(--v2-line); border-radius: 12px; }
+.app-shell-v2 .ticket-page-v2__widths legend { padding: 0 5px; color: #3d4356; font-size: 11px; font-weight: 750; }
+.app-shell-v2 .ticket-page-v2__widths label { display: flex; align-items: center; gap: 7px; min-height: 32px; font-size: 12px; }
+.app-shell-v2 .ticket-page-v2__widths input { width: 18px; }
+.app-shell-v2 .ticket-page-v2__help { padding: 11px; border-radius: 10px; background: #f6f5ff; color: #5a527f !important; font-size: 10px !important; }
+
+.app-shell-v2 .pos-v2__modal[hidden] { display: none !important; }
+.app-shell-v2 .pos-v2__modal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 20px; }
+.app-shell-v2 .pos-v2__modal-backdrop { position: absolute; inset: 0; background: rgba(24, 27, 39, .52); backdrop-filter: blur(3px); }
+.app-shell-v2 .pos-v2__modal .pos-v2__confirmation { position: relative; z-index: 1; display: grid; grid-template-columns: 58px minmax(0, 1fr); width: min(100%, 620px); padding: 28px; border-color: #bfe8d8; background: #fff; box-shadow: 0 28px 80px rgba(25, 29, 42, .22); }
+.app-shell-v2 .pos-v2__modal-close { position: absolute; top: 14px; right: 14px; display: grid; width: 44px; height: 44px; place-items: center; border: 0; border-radius: 12px; background: #f3f4f7; color: #444a5d; cursor: pointer; }
+.app-shell-v2 .pos-v2__confirmation-copy { padding-right: 36px; }
+.app-shell-v2 .pos-v2__confirmation-copy h3 { margin: 6px 0 18px; color: var(--v2-ink); font-size: 21px; }
+.app-shell-v2 .pos-v2__confirmation-copy dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.app-shell-v2 .pos-v2__confirmation-copy dl div { padding: 12px; border-radius: 12px; background: #f7f8fa; }
+.app-shell-v2 .pos-v2__confirmation-copy dt { color: var(--v2-muted); font-size: 10px; }
+.app-shell-v2 .pos-v2__confirmation-copy dd { margin: 4px 0 0; overflow-wrap: anywhere; color: var(--v2-ink); font-size: 14px; font-weight: 800; }
+.app-shell-v2 .pos-v2__modal .pos-v2__confirmation-actions { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 22px; }
+.has-open-modal { overflow: hidden; }
+
+.app-shell-v2 .pos-v2__cancel-lines { margin-top: 10px; font-size: 11px; }
+.app-shell-v2 .pos-v2__cancel-lines summary { min-height: 44px; padding: 13px 0; color: #9d3c4e; font-weight: 750; cursor: pointer; }
+.app-shell-v2 .pos-v2__cancel-lines > p { max-width: 360px; color: var(--v2-muted); line-height: 1.45; }
+.app-shell-v2 .pos-v2__cancel-lines form { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--v2-line); }
+.app-shell-v2 .pos-v2__cancel-lines .btn { min-height: 40px; color: #a53f52; }
+
+@media (max-width: 900px) {
+    .app-shell-v2 .ticket-page-v2__layout { grid-template-columns: 1fr; }
+    .app-shell-v2 .ticket-page-v2__actions { width: min(100%, 80mm); margin: 0 auto; }
+}
+
+@media (max-width: 480px) {
+    .ticket-print-v2 { padding: 6mm 4mm; }
+    .app-shell-v2 .pos-v2__modal .pos-v2__confirmation { grid-template-columns: 1fr; padding: 22px 18px; }
+    .app-shell-v2 .pos-v2__confirmation-copy { padding-right: 0; }
+    .app-shell-v2 .pos-v2__confirmation-copy dl,
+    .app-shell-v2 .pos-v2__modal .pos-v2__confirmation-actions { grid-template-columns: 1fr; }
+    .app-shell-v2 .pos-v2__modal .pos-v2__confirmation-actions .btn { width: 100%; }
+    .app-shell-v2 .pos-v2__cancel-lines form { align-items: stretch; flex-direction: column; }
+}
+
+@page ticket58 { size: 58mm auto; margin: 0; }
+@page ticket80 { size: 80mm auto; margin: 0; }
+
+@media print {
+    html, body { width: auto !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+    body * { visibility: hidden !important; }
+    .ticket-print-v2,
+    .ticket-print-v2 * { visibility: visible !important; }
+    .ticket-print-v2 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        max-width: none;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+    .ticket-print-v2--58 { width: 58mm !important; }
+    .ticket-print-v2--80 { width: 80mm !important; }
+    .sidebar-v2,
+    .app-topbar-v2,
+    .flash-wrap,
+    .whatsapp-float-v2,
+    .no-print-v2 { display: none !important; }
+}

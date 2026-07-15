@@ -164,7 +164,8 @@ class PosFirstSaleTests(unittest.TestCase):
         self.assertIn('sessionStorage.setItem("patia_sale_confirmation"', html)
         self.assertIn('sessionStorage.removeItem("patia_sale_confirmation"', html)
         self.assertIn("data.total", html)
-        self.assertIn("data.ticket_id", html)
+        self.assertIn("data.folio", html)
+        self.assertIn("data.ticket_url", html)
 
     def test_recent_sales_empty_and_populated_states(self):
         product = self.add_product()
@@ -181,9 +182,9 @@ class PosFirstSaleTests(unittest.TestCase):
         ))
         db.session.commit()
         populated_html = self.pos_html()
-        self.assertIn("Cancelar una venta devuelve automáticamente", populated_html)
+        self.assertIn("La cancelación se mantiene por producto", populated_html)
         self.assertIn("Café Premium", populated_html)
-        self.assertIn("Cancelar venta", populated_html)
+        self.assertIn("Cancelar línea", populated_html)
 
     def test_product_names_are_never_written_with_inner_html(self):
         self.add_product(name="<img src=x onerror=alert(1)>")
