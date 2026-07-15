@@ -1,0 +1,126 @@
+import os
+import unittest
+from unittest.mock import patch
+
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+os.environ.setdefault("SECRET_KEY", "registration-tests-secret")
+os.environ.setdefault("STRIPE_SECRET_KEY", "sk_test_patia")
+os.environ.setdefault("STRIPE_PRICE_ID", "price_patia_pro")
+os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_patia")
+os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
+
+from app import create_app, db
+from app.models import User
+
+
+class RegistrationVerificationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = create_app()
+        cls.app.config.update(
+            TESTING=True,
+            WTF_CSRF_ENABLED=False,
+            RATELIMIT_ENABLED=False,
+        )
+        cls.context = cls.app.app_context()
+        cls.context.push()
+        db.create_all()
+
+    @classmethod
+    def tearDownClass(cls):
+        db.session.remove()
+        db.engine.dispose()
+        cls.context.pop()
+
+    def setUp(self):
+        db.session.rollback()
+        User.query.delete()
+        db.session.commit()
+        self.client = self.app.test_client()
+
+    def register(self, email, plan=None):
+        query = "?plan=pro" if plan == "pro" else ""
+        data = {
+            "email": email,
+            "password": "Password123",
+            "first_name": "Ana",
+            "last_name": "Pérez",
+            "company_name": "Tienda Ana",
+            "phone": "5555555555",
+            "address": "Calle 1",
+            "city": "Puebla",
+            "state": "Puebla",
+            "business_type": "Abarrotes",
+            "postal_code": "72000",
+        }
+        if plan:
+            data["plan"] = plan
+        with (
+            patch("app.routes.validate_email"),
+            patch("app.routes.send_email") as send_email,
+        ):
+            response = self.client.post(f"/register{query}", data=data)
+        return response, send_email
+
+    def verification_code_for(self, email):
+        return User.query.filter_by(email=email).one().verification_code
+
+    def test_pro_registration_requires_email_verification(self):
+        email = "pro@patia.test"
+        response, send_email = self.register(email, plan="pro")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/verify-email"))
+        self.assertIsNotNone(self.verification_code_for(email))
+        send_email.assert_called_once()
+        with self.client.session_transaction() as session:
+            self.assertEqual(session["post_verify_destination"], "subscribe")
+
+    def test_verified_pro_registration_redirects_to_subscription(self):
+        email = "verified-pro@patia.test"
+        self.register(email, plan="pro")
+        code = self.verification_code_for(email)
+
+        with patch("app.routes.send_email"):
+            response = self.client.post("/verify-email", data={"code": code})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/subscribe"))
+        self.assertTrue(User.query.filter_by(email=email).one().email_verified)
+        with self.client.session_transaction() as session:
+            self.assertNotIn("post_verify_destination", session)
+
+    def test_verified_trial_registration_redirects_to_dashboard(self):
+        email = "trial@patia.test"
+        response, _ = self.register(email)
+        self.assertTrue(response.location.endswith("/verify-email"))
+        code = self.verification_code_for(email)
+
+        with patch("app.routes.send_email"):
+            response = self.client.post("/verify-email", data={"code": code})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/"))
+        self.assertTrue(User.query.filter_by(email=email).one().email_verified)
+
+    def test_unverified_user_cannot_start_checkout(self):
+        user = User(email="unverified@patia.test", company_name="Tienda")
+        user.set_password("Password123")
+        db.session.add(user)
+        db.session.commit()
+        with self.client.session_transaction() as session:
+            session["user_id"] = user.id
+
+        with patch("app.routes.stripe.checkout.Session.create") as checkout:
+            response = self.client.post("/create-checkout-session")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/verify-email"))
+        checkout.assert_not_called()
+        with self.client.session_transaction() as session:
+            self.assertEqual(session["post_verify_destination"], "subscribe")
+
+
+if __name__ == "__main__":
+    unittest.main()

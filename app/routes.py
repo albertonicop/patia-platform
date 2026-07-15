@@ -256,10 +256,11 @@ def register():
 
         session.clear()
         session["user_id"] = user.id
-
-        if request.args.get("plan") == "pro" or request.form.get("plan") == "pro":
-            flash("Cuenta creada correctamente. Activa PATIA Pro para continuar.", "success")
-            return redirect(url_for("main.subscribe"))
+        session["post_verify_destination"] = (
+            "subscribe"
+            if request.args.get("plan") == "pro" or request.form.get("plan") == "pro"
+            else "dashboard"
+        )
 
         code = "".join(secrets.choice(string.digits) for _ in range(6))
         user.verification_code = code
@@ -327,7 +328,10 @@ def verify_email():
             """
         )
 
+        destination = session.pop("post_verify_destination", "dashboard")
         flash("¡Correo verificado! Bienvenido a PATIA.", "success")
+        if destination == "subscribe":
+            return redirect(url_for("main.subscribe"))
         return redirect(url_for("main.dashboard"))
 
     return render_template("verify_email.html", user=user)
@@ -865,6 +869,10 @@ def subscribe():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    if not user.email_verified:
+        session["post_verify_destination"] = "subscribe"
+        flash("Verifica tu correo antes de activar PATIA Pro.", "info")
+        return redirect(url_for("main.verify_email"))
     if request.args.get("checkout") == "cancelled":
         flash("El pago fue cancelado. No se realizó ningún cargo.", "info")
     return render_template("subscribe.html", user=user)
@@ -875,6 +883,10 @@ def create_checkout_session():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    if not user.email_verified:
+        session["post_verify_destination"] = "subscribe"
+        flash("Verifica tu correo antes de activar PATIA Pro.", "info")
+        return redirect(url_for("main.verify_email"))
     if current_app.config["STRIPE_DISABLED"]:
         flash("La facturación no está disponible en este entorno.", "danger")
         return redirect(url_for("main.subscribe"))

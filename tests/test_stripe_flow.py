@@ -265,7 +265,7 @@ class StripeFlowTests(unittest.TestCase):
         self.assertEqual(user.subscription_status, "active")
 
     def test_double_click_uses_same_checkout_idempotency_key(self):
-        user = self.make_user()
+        user = self.make_user(email_verified=True)
         self.login(user)
         checkout = SimpleNamespace(url="https://checkout.stripe.test/session")
         with patch("app.routes.stripe.checkout.Session.create", return_value=checkout) as create:
@@ -400,6 +400,7 @@ class StripeFlowTests(unittest.TestCase):
             subscription_status="active",
             current_period_end=datetime.utcnow() + timedelta(days=20),
             plan="pro",
+            email_verified=True,
         )
         self.login(user)
         portal = SimpleNamespace(url="https://billing.stripe.test/portal")
