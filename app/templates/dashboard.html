@@ -7,8 +7,8 @@
 <section class="dashboard-v2__intro">
   <div class="dashboard-v2__intro-copy">
     <span class="dashboard-v2__kicker">Resumen del negocio</span>
-    <h2>Decisiones claras para un negocio que crece.</h2>
-    <p>Inventario, ventas y oportunidades comerciales en una vista ejecutiva.</p>
+    <h2>Lo importante de tu negocio, en una sola vista.</h2>
+    <p>Revisa ventas, inventario y acciones que necesitan tu atención.</p>
 
     {% if has_pro_access %}
       <div class="plan-status pro dashboard-v2__plan">
@@ -43,7 +43,7 @@
     <div>
       <span class="dashboard-v2__kicker">Primeros pasos</span>
       <h3 id="onboarding-title">Pon PATIA en marcha</h3>
-      <p>Completa esta ruta para registrar tu primera venta y comenzar a ver resultados.</p>
+      <p>Sigue el siguiente paso disponible. PATIA actualizará el progreso automáticamente con tu actividad.</p>
     </div>
     <div class="dashboard-v2__onboarding-progress" aria-label="Progreso: {{ onboarding_progress }}%">
       <strong>{{ onboarding_progress }}%</strong>
@@ -135,7 +135,7 @@
       {% if top_products %}
         <canvas id="topProducts"></canvas>
       {% else %}
-        <div class="dashboard-v2__chart-empty">
+        <div class="dashboard-v2__chart-empty module-empty-v2">
           <span class="dashboard-v2__chart-empty-icon" aria-hidden="true">
             <i class="fa-solid fa-chart-column"></i>
           </span>
@@ -162,16 +162,22 @@
         {% for r in recommendations %}
           <div class="dashboard-v2__recommendation">
             <span aria-hidden="true"></span>
-            <p>{{ r }}</p>
+            <div><p>{{ r }}</p><small>Basado en tus ventas e inventario registrados en PATIA.</small></div>
           </div>
         {% endfor %}
       {% else %}
-        <div class="dashboard-v2__empty dashboard-v2__empty--compact">
+        <div class="dashboard-v2__empty dashboard-v2__empty--compact module-empty-v2">
           <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
-          <p>Registra actividad para recibir recomendaciones comerciales.</p>
+          <div><h4>Necesitamos conocer un poco más tu negocio</h4><p>Agrega productos y registra ventas. Con esos datos PATIA podrá darte recomendaciones útiles y explicables.</p></div>
         </div>
       {% endif %}
     </div>
+
+    {% if profit > 0 %}
+      <p class="dashboard-v2__method-note">
+        La utilidad estimada corresponde a las ventas de los últimos 7 días menos el costo registrado de las unidades vendidas.
+      </p>
+    {% endif %}
 
     {% if not has_pro_access %}
       <div class="pro-feature-card dashboard-v2__upgrade">
@@ -214,7 +220,7 @@
       {% endfor %}
     </div>
   {% else %}
-    <div class="empty-state dashboard-v2__empty">
+    <div class="empty-state dashboard-v2__empty module-empty-v2">
       <h4>
         <i class="fa-solid fa-circle-check"></i>
         Todo bajo control

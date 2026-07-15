@@ -2,41 +2,41 @@
 {% block title %}Verificar correo{% endblock %}
 {% block content %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flash-wrap" role="status" aria-live="polite">
-      {% for category, message in messages %}
-        <div class="flash {{ category }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-
-<div class="card" style="text-align:center;padding:40px;width:100%;max-width:480px;">
-    <h2 style="color:#29d3a8;">Verifica tu correo</h2>
-    <p style="color:#9aa8c7;margin-bottom:24px;">
+<main class="verify-v2">
+  <div class="card verify-v2__card">
+    <span class="verify-v2__icon" aria-hidden="true"><i class="fa-regular fa-envelope"></i></span>
+    <span class="verify-v2__eyebrow">Un último paso</span>
+    <h1>Verifica tu correo</h1>
+    <p class="verify-v2__intro">
         Te enviamos un código de 6 dígitos a <strong>{{ user.email }}</strong>. 
         Ingrésalo aquí para activar tu cuenta.
     </p>
 
-    <form method="POST" class="stack">
+    <form method="POST" class="verify-v2__form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="verification-code">Código de verificación</label>
         <input 
+            id="verification-code"
             type="text" 
             name="code" 
             placeholder="000000" 
             maxlength="6"
-            style="font-size:32px;text-align:center;letter-spacing:12px;font-weight:900;"
+            inputmode="numeric"
+            autocomplete="one-time-code"
             autofocus
             required
         >
-        <button class="btn" type="submit">Verificar</button>
+        <button class="btn" type="submit">Verificar correo</button>
     </form>
 
-    <form method="POST" action="/resend-verification" style="margin-top:16px;">
+    <div class="verify-v2__resend">
+      <p>¿No recibiste el código? Revisa spam o solicita uno nuevo.</p>
+      <form method="POST" action="/resend-verification">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn ghost" type="submit">Reenviar código</button>
-    </form>
-</div>
+      </form>
+    </div>
+  </div>
+</main>
 
 {% endblock %}

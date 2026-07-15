@@ -121,6 +121,26 @@ class RegistrationVerificationTests(unittest.TestCase):
         with self.client.session_transaction() as session:
             self.assertEqual(session["post_verify_destination"], "subscribe")
 
+    def test_verification_flash_is_rendered_only_once(self):
+        user = User(email="flash@patia.test", company_name="Tienda")
+        user.set_password("Password123")
+        db.session.add(user)
+        db.session.commit()
+        message = "Mensaje de verificación recuperable"
+        with self.client.session_transaction() as session:
+            session["user_id"] = user.id
+            session["_flashes"] = [("danger", message)]
+
+        html = self.client.get("/verify-email").get_data(as_text=True)
+
+        self.assertEqual(html.count(message), 1)
+
+    def test_business_type_options_have_explicit_readable_colors(self):
+        with open("app/static/css/styles.css", encoding="utf-8") as stylesheet:
+            css = stylesheet.read()
+        self.assertIn(".auth-v2 .auth-v2__field select option", css)
+        self.assertIn("color: #272b3a", css)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -511,7 +511,12 @@ def analytics():
 
     total_products = len(products)
     total_sales = Sale.query.filter_by(user_id=user_id).count()
-    inventory_value = sum(p.inventory_value for p in products)
+    inventory_value = (
+        db.session.query(func.sum(Product.stock * Product.cost_price))
+        .filter(Product.user_id == user_id)
+        .scalar()
+        or 0
+    )
     low_stock = sum(1 for p in products if p.stock <= p.min_stock)
 
     today_sales = db.session.query(func.sum(Sale.total)).filter(
@@ -575,13 +580,25 @@ def analytics():
 
     recommendations = []
     if top_products:
-        recommendations.append(f"{top_products[0].name} es tu producto mas vendido actualmente.")
+        recommendations.append(
+            f"{top_products[0].name} es el producto con más movimiento. "
+            "Conviene revisar sus existencias antes de tu próxima compra."
+        )
     if week_sales > 0:
-        recommendations.append(f"Las ventas de los ultimos 7 dias suman ${week_sales:,.0f} MXN.")
+        recommendations.append(
+            f"En los últimos 7 días registraste ${week_sales:,.0f} MXN en ventas."
+        )
     if profit > 0:
-        recommendations.append(f"La utilidad estimada de la semana fue de ${profit:,.0f} MXN.")
+        recommendations.append(
+            f"Tu utilidad estimada de los últimos 7 días es ${profit:,.0f} MXN, "
+            "considerando el costo registrado de los productos vendidos."
+        )
     if low_stock:
-        recommendations.append(f"Tienes {low_stock} productos con inventario bajo. Reabastecellos pronto.")
+        noun = "producto" if low_stock == 1 else "productos"
+        recommendations.append(
+            f"Tienes {low_stock} {noun} con inventario bajo. "
+            "Revísalo antes de que afecte una venta."
+        )
 
     alerts = alerts[:5]
     return dict(
@@ -666,14 +683,22 @@ def products():
     if trial_expired(user):
         return render_template("trial_expired.html")
     q = request.args.get("q", "").strip()
-    query = Product.query.filter(Product.user_id == session["user_id"])
+    catalog_query = Product.query.filter(Product.user_id == session["user_id"])
+    catalog_count = catalog_query.count()
+    query = catalog_query
     if q:
         query = query.filter(
             Product.name.ilike(f"%{q}%") |
             Product.category.ilike(f"%{q}%") |
             Product.sku.ilike(f"%{q}%")
         )
-    return render_template("products.html", products=query.order_by(Product.name).all(), q=q, user=user)
+    return render_template(
+        "products.html",
+        products=query.order_by(Product.name).all(),
+        catalog_count=catalog_count,
+        q=q,
+        user=user,
+    )
 
 
 @main.route("/download-template")
@@ -914,6 +939,9 @@ def add_product():
     if not name or not sku:
         flash("Nombre y SKU son obligatorios.", "danger")
         return redirect(url_for("main.products"))
+    if Product.query.filter_by(user_id=user.id, sku=sku).first():
+        flash("Ya existe un producto con ese SKU. Usa un SKU diferente.", "danger")
+        return redirect(url_for("main.products") + "#agregar-producto")
     if (
         not math.isfinite(cost_price)
         or not math.isfinite(sale_price)
@@ -935,7 +963,16 @@ def add_product():
         min_stock=min_stock,
     )
     db.session.add(p)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        current_app.logger.info(
+            "Alta de producto rechazada por identificador duplicado para user_id=%s",
+            user.id,
+        )
+        flash("No pudimos guardar el producto porque el SKU ya está en uso.", "danger")
+        return redirect(url_for("main.products") + "#agregar-producto")
     flash("Producto creado correctamente.", "success")
     return redirect(url_for("main.products"))
 
@@ -1565,9 +1602,15 @@ def delete_product(product_id):
     if access_block:
         return access_block
     product = Product.query.filter_by(id=product_id, user_id=session["user_id"]).first_or_404()
-    Sale.query.filter_by(product_id=product.id, user_id=session["user_id"]).delete()
+    if Sale.query.filter_by(product_id=product.id, user_id=session["user_id"]).first():
+        flash(
+            "No puedes eliminar un producto con ventas registradas porque forma parte de tu historial.",
+            "danger",
+        )
+        return redirect(url_for("main.products") + "#catalogo")
     db.session.delete(product)
     db.session.commit()
+    flash("Producto eliminado correctamente.", "success")
     return redirect(url_for("main.products") + "#catalogo")
 
 
@@ -1579,10 +1622,23 @@ def delete_all_products():
     if access_block:
         return access_block
     user_id = session["user_id"]
-    Sale.query.filter_by(user_id=user_id).delete()
-    Product.query.filter_by(user_id=user_id).delete()
+    products = Product.query.filter_by(user_id=user_id).all()
+    deleted = 0
+    protected = 0
+    for product in products:
+        if Sale.query.filter_by(user_id=user_id, product_id=product.id).first():
+            protected += 1
+            continue
+        db.session.delete(product)
+        deleted += 1
     db.session.commit()
-    flash("Catalogo eliminado completamente.", "success")
+    if protected:
+        flash(
+            f"Eliminamos {deleted} productos sin ventas. Conservamos {protected} porque forman parte de tu historial.",
+            "info",
+        )
+    else:
+        flash(f"Eliminamos {deleted} productos del catálogo.", "success")
     return redirect(url_for("main.products"))
 
 
@@ -1596,13 +1652,24 @@ def delete_selected_products():
     user_id = session["user_id"]
     ids_raw = request.form.get("ids", "")
     ids = [int(i) for i in ids_raw.split(",") if i.strip().isdigit()]
+    deleted = 0
+    protected = 0
     for product_id in ids:
         product = Product.query.filter_by(id=product_id, user_id=user_id).first()
         if product:
-            Sale.query.filter_by(product_id=product.id, user_id=user_id).delete()
+            if Sale.query.filter_by(product_id=product.id, user_id=user_id).first():
+                protected += 1
+                continue
             db.session.delete(product)
+            deleted += 1
     db.session.commit()
-    flash(f"{len(ids)} productos eliminados.", "success")
+    if protected:
+        flash(
+            f"Eliminamos {deleted} seleccionados. Conservamos {protected} con historial de ventas.",
+            "info",
+        )
+    else:
+        flash(f"{deleted} productos eliminados.", "success")
     return redirect(url_for("main.products"))
 
 

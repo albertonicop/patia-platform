@@ -4285,3 +4285,69 @@ table {
         display: inline;
     }
 }
+
+/* Sprint 1.1: ajustes comerciales compartidos ---------------------------- */
+
+.auth-v2 .auth-v2__field select option {
+    background: #fff;
+    color: #272b3a;
+}
+
+.app-shell-v2 .module-empty-v2 {
+    border-color: #dfe2ea;
+    background: #f8f9fc;
+    color: var(--v2-ink, #252938);
+    text-align: center;
+}
+
+.app-shell-v2 .module-empty-v2 h3,
+.app-shell-v2 .module-empty-v2 h4 {
+    color: var(--v2-ink, #252938);
+}
+
+.app-shell-v2 .module-empty-v2 p {
+    color: #596075;
+    line-height: 1.6;
+}
+
+.app-shell-v2 .inventory-v2__search-empty {
+    display: grid;
+    min-height: 260px;
+    place-items: center;
+    align-content: center;
+    gap: 10px;
+    padding: 32px;
+    border: 1px dashed #d8dce7;
+    border-radius: 16px;
+}
+
+.app-shell-v2 .inventory-v2__search-empty > i {
+    color: var(--v2-violet, #6956e8);
+    font-size: 24px;
+}
+
+.app-shell-v2 .inventory-v2__search-empty h4,
+.app-shell-v2 .inventory-v2__search-empty p {
+    margin: 0;
+}
+
+.app-shell-v2 .inventory-v2__search-empty .btn {
+    margin-top: 8px;
+}
+
+.app-shell-v2 .dashboard-v2__method-note {
+    margin: 16px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid #eceef3;
+    color: #656c7e;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.app-shell-v2 .reports-v2__metrics .metric small {
+    display: block;
+    margin-top: 8px;
+    color: #656c7e;
+    font-size: 11px;
+    line-height: 1.45;
+}

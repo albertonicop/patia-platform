@@ -1,6 +1,8 @@
 function chart(id, labels, values, type='bar'){
     const el = document.getElementById(id);
     if(!el) return;
+    const isBar = type === 'bar';
+    const isSingleBar = isBar && values.length === 1;
 
     new Chart(el, {
         type,
@@ -10,13 +12,21 @@ function chart(id, labels, values, type='bar'){
                 label: 'Ventas',
                 data: values,
                 borderWidth: 2,
-                barPercentage: 0.35,
-                categoryPercentage: 0.45
+                barPercentage: isSingleBar ? 0.55 : 0.7,
+                categoryPercentage: isSingleBar ? 0.5 : 0.72,
+                maxBarThickness: isSingleBar ? 72 : 48
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {display: !isBar}
+            },
+            scales: isBar ? {
+                x: {grid: {display: false}},
+                y: {beginAtZero: true, ticks: {precision: 0}}
+            } : undefined
         }
     });
 }

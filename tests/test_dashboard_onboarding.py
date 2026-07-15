@@ -116,6 +116,35 @@ class DashboardOnboardingTests(unittest.TestCase):
         self.assertNotIn("Pon PATIA en marcha", html)
         self.assertIn("Productos más vendidos", html)
 
+    def test_inventory_value_uses_current_stock_at_recorded_cost(self):
+        user = self.make_user()
+        self.add_product(user)
+
+        html = self.dashboard_html()
+
+        self.assertIn("$50.00 MXN", html)
+
+    def test_single_product_chart_and_profit_explanation_are_rendered(self):
+        user = self.make_user()
+        product = self.add_product(user)
+        db.session.add(Sale(
+            user_id=user.id,
+            product_id=product.id,
+            quantity=2,
+            unit_price=20,
+            total=40,
+        ))
+        db.session.commit()
+
+        html = self.dashboard_html()
+
+        self.assertIn("producto con más movimiento", html)
+        self.assertIn("menos el costo registrado", html)
+        with open("app/static/js/app.js", encoding="utf-8") as script:
+            chart_source = script.read()
+        self.assertIn("isSingleBar", chart_source)
+        self.assertIn("maxBarThickness", chart_source)
+
 
 if __name__ == "__main__":
     unittest.main()

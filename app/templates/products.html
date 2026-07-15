@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="inventory-v2">
-  {% if not products %}
-    <section class="card inventory-v2__empty" aria-labelledby="inventory-empty-title">
+  {% if catalog_count == 0 %}
+    <section class="card inventory-v2__empty module-empty-v2" aria-labelledby="inventory-empty-title">
       <span class="inventory-v2__empty-icon" aria-hidden="true"><i class="fa-solid fa-box-open"></i></span>
       <div>
         <span class="inventory-v2__eyebrow">Tu catálogo empieza aquí</span>
@@ -22,7 +22,7 @@
     <section id="agregar-producto" class="card inventory-v2__panel">
       <header class="inventory-v2__panel-head">
         <span class="inventory-v2__eyebrow">Alta manual</span>
-        <h3>{{ "Agrega tu primer producto" if not products else "Agregar producto" }}</h3>
+        <h3>{{ "Agrega tu primer producto" if catalog_count == 0 else "Agregar producto" }}</h3>
         <p>Los campos marcados con <b>*</b> son obligatorios.</p>
       </header>
 
@@ -32,6 +32,11 @@
         <div class="inventory-v2__field inventory-v2__field--wide">
           <label for="product-name">Nombre del producto <span>*</span></label>
           <input id="product-name" name="name" required autocomplete="off" placeholder="Ej. Café molido 500 g">
+        </div>
+        <div class="inventory-v2__field inventory-v2__field--wide">
+          <label for="product-sku">SKU <span>*</span></label>
+          <input id="product-sku" name="sku" required autocomplete="off" placeholder="Ej. CAFE-500">
+          <small>Identificador único interno. Usa uno distinto para cada producto.</small>
         </div>
         <div class="inventory-v2__field">
           <label for="product-cost">Precio de compra</label>
@@ -50,13 +55,8 @@
         </div>
 
         <details class="inventory-v2__advanced">
-          <summary>Opciones avanzadas <span>SKU, código, categoría y proveedor</span></summary>
+          <summary>Opciones avanzadas <span>Código, categoría, proveedor y stock mínimo</span></summary>
           <div class="inventory-v2__advanced-grid">
-            <div class="inventory-v2__field">
-              <label for="product-sku">SKU <span>*</span></label>
-              <input id="product-sku" name="sku" required autocomplete="off" placeholder="Ej. CAFE-500">
-              <small>Identificador único interno. PATIA no lo genera automáticamente.</small>
-            </div>
             <div class="inventory-v2__field">
               <label for="product-barcode">Código de barras <em>Opcional</em></label>
               <input id="product-barcode" name="barcode" autocomplete="off" placeholder="7500000000000">
@@ -112,10 +112,10 @@
     </section>
   </div>
 
-  {% if products %}
+  {% if catalog_count > 0 %}
     <section class="card inventory-v2__summary" aria-label="Resumen de inventario">
       <span>Productos en catálogo</span>
-      <strong>{{ products|length }}</strong>
+      <strong>{{ catalog_count }}</strong>
     </section>
 
     <section id="catalogo" class="card inventory-v2__catalog">
@@ -123,13 +123,14 @@
         <h3>Catálogo</h3>
         <form method="GET" action="{{ url_for('main.products') }}#catalogo" role="search">
           <label class="sr-only" for="catalog-search">Buscar producto</label>
-          <input id="catalog-search" name="q" value="{{ q }}" placeholder="Buscar producto…">
+          <input id="catalog-search" name="q" value="{{ q }}" placeholder="Buscar producto…" aria-describedby="catalog-search-help">
+          <small id="catalog-search-help">Busca por nombre, SKU o categoría.</small>
         </form>
       </div>
 
       <div class="inventory-v2__bulk-actions">
         <button class="btn ghost" id="btn-select-mode" type="button">Seleccionar productos</button>
-        <form method="POST" action="/products/delete-all" onsubmit="return confirm('¿Eliminar TODOS los productos? Esta acción no se puede deshacer.');">
+        <form method="POST" action="/products/delete-all" onsubmit="return confirm('¿Eliminar los productos sin ventas? Los productos que forman parte del historial se conservarán.');">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button class="btn ghost inventory-v2__danger-action" type="submit">Borrar todo el catálogo</button>
         </form>
@@ -140,6 +141,7 @@
         </form>
       </div>
 
+      {% if products %}
       <div class="table-wrap">
         <table>
           <thead><tr><th>Producto</th><th>Categoría</th><th>Proveedor</th><th>Stock</th><th>Precio</th><th>Margen</th><th>Valor</th><th>Acciones</th></tr></thead>
@@ -150,7 +152,7 @@
                 <td>{{ p.category }}</td><td>{{ p.supplier or '-' }}</td><td>{{ p.stock }} / min {{ p.min_stock }}</td>
                 <td>{{ p.sale_price|money }}</td><td>{{ p.margin }}%</td><td>{{ p.inventory_value|money }}</td>
                 <td>
-                  <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm('¿Eliminar este producto?');">
+                  <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm('¿Eliminar este producto? Si tiene ventas registradas, PATIA lo conservará para proteger tu historial.');">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn ghost" type="submit">Eliminar</button>
                   </form>
@@ -160,6 +162,14 @@
           </tbody>
         </table>
       </div>
+      {% else %}
+        <div class="inventory-v2__search-empty module-empty-v2" role="status">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <h4>No encontramos productos para “{{ q }}”</h4>
+          <p>Prueba con otro nombre, SKU o categoría.</p>
+          <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">Limpiar búsqueda</a>
+        </div>
+      {% endif %}
     </section>
   {% endif %}
 </div>
@@ -182,7 +192,7 @@ importForm.addEventListener("submit", function(event) {
   importForm.setAttribute("aria-busy", "true");
 });
 
-{% if products %}
+{% if catalog_count > 0 %}
 let selectMode = false;
 const btnSelect = document.getElementById("btn-select-mode");
 const formSelected = document.getElementById("form-delete-selected");

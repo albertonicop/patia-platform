@@ -112,6 +112,82 @@ class InventoryImportTests(unittest.TestCase):
         self.assertIn("Producto existente", html)
         self.assertIn("<table>", html)
 
+    def test_search_without_results_keeps_real_catalog_context(self):
+        self.add_product()
+
+        html = self.client.get("/products?q=no-existe").get_data(as_text=True)
+
+        self.assertIn("No encontramos productos", html)
+        self.assertIn("Limpiar búsqueda", html)
+        self.assertIn("Productos en catálogo", html)
+        self.assertNotIn("Tu catálogo empieza aquí", html)
+
+    def test_required_sku_is_visible_before_advanced_options(self):
+        html = self.inventory_html()
+
+        sku_position = html.index('name="sku"')
+        advanced_position = html.index('class="inventory-v2__advanced"')
+        self.assertLess(sku_position, advanced_position)
+
+    def test_duplicate_manual_sku_is_rejected_without_server_error(self):
+        self.add_product(sku="DUPLICADO")
+
+        response = self.client.post(
+            "/products/new",
+            data={
+                "sku": "DUPLICADO",
+                "name": "Segundo producto",
+                "cost_price": "5",
+                "sale_price": "10",
+                "stock": "2",
+                "min_stock": "1",
+            },
+            follow_redirects=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Ya existe un producto con ese SKU", response.get_data(as_text=True))
+        self.assertEqual(Product.query.filter_by(user_id=self.user.id).count(), 1)
+
+    def test_product_with_sales_cannot_be_deleted(self):
+        product = self.add_product()
+        sale = Sale(
+            user_id=self.user.id,
+            product_id=product.id,
+            quantity=1,
+            unit_price=20,
+            total=20,
+        )
+        db.session.add(sale)
+        db.session.commit()
+
+        response = self.client.post(
+            f"/products/{product.id}/delete", follow_redirects=True
+        )
+
+        self.assertIn("forma parte de tu historial", response.get_data(as_text=True))
+        self.assertIsNotNone(db.session.get(Product, product.id))
+        self.assertIsNotNone(db.session.get(Sale, sale.id))
+
+    def test_delete_all_preserves_products_with_sales(self):
+        protected = self.add_product(sku="CON-VENTA")
+        removable = self.add_product(sku="SIN-VENTA", barcode="7502")
+        db.session.add(Sale(
+            user_id=self.user.id,
+            product_id=protected.id,
+            quantity=1,
+            unit_price=20,
+            total=20,
+        ))
+        db.session.commit()
+
+        response = self.client.post("/products/delete-all", follow_redirects=True)
+
+        self.assertIn("Conservamos 1", response.get_data(as_text=True))
+        self.assertIsNotNone(db.session.get(Product, protected.id))
+        self.assertIsNone(db.session.get(Product, removable.id))
+        self.assertEqual(Sale.query.filter_by(user_id=self.user.id).count(), 1)
+
     def test_manual_form_keeps_names_and_numeric_validation(self):
         html = self.inventory_html()
         for name in (
