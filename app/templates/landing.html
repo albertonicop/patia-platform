@@ -1,225 +1,215 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<link rel="icon"
-      type="image/png"
-      href="{{ url_for('static', filename='img/favicon.png') }}">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PATIA | Control inteligente para empresas</title>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,sans-serif}
-body{background:#050b18;color:white;overflow-x:hidden}
-section{padding:90px 8%}
-.hero{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    background:radial-gradient(circle at 20% 20%,rgba(123,97,255,.25),transparent 30%),
-               radial-gradient(circle at 80% 10%,rgba(0,212,255,.18),transparent 30%),
-               #050b18;
-}
-.top-login{
-    position:absolute;
-    top:28px;
-    right:8%;
-    z-index:10;
-}
-.container{width:100%;max-width:1300px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
-.logo{width:220px;margin-bottom:35px}
-.badge{color:#38e8c6;letter-spacing:4px;text-transform:uppercase;font-size:13px;margin-bottom:20px}
-h1{font-size:72px;line-height:1;margin-bottom:25px}
-h2{font-size:46px;line-height:1.1;margin-bottom:20px}
-.gradient{background:linear-gradient(90deg,#7b61ff,#00d4ff);-webkit-background-clip:text;color:transparent}
-p{color:#aebad5;font-size:18px;line-height:1.7}
-.subtitle{font-size:20px;margin-bottom:35px}
-.buttons{
-    display:flex;
-    gap:15px;
-    margin-top:28px;
-    flex-wrap:wrap;
-}
-.btn{padding:16px 28px;border-radius:15px;text-decoration:none;font-weight:800;display:inline-block}
-.primary{background:linear-gradient(90deg,#7b61ff,#4d9cff);color:white}
-.secondary{border:1px solid rgba(255,255,255,.2);color:white}
-.mockup{margin-top:60px;background:#0c1226;border:1px solid rgba(255,255,255,.08);border-radius:25px;padding:25px;box-shadow:0 25px 60px rgba(0,0,0,.45);animation:float 4s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
-.metric-grid,.cards-3,.target-grid,.before-after{display:grid;gap:18px}
-.metric-grid{grid-template-columns:1fr 1fr}
-.metric,.card,.target,.compare{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:26px}
-.metric span{display:block;color:#9fb0d2;margin-bottom:8px}
-.metric strong{font-size:26px}
-.ai{margin-top:18px;padding:18px;border-radius:18px;background:linear-gradient(135deg,rgba(123,97,255,.2),rgba(0,212,255,.08));color:#dce7ff}
-.section-header{max-width:850px;margin-bottom:45px}
-.cards-3{grid-template-columns:repeat(3,1fr)}
-.target-grid{grid-template-columns:repeat(6,1fr)}
-.target{text-align:center;font-weight:800}
-.dark{background:linear-gradient(135deg,#080f22,#061827)}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
-.before-after{grid-template-columns:1fr 1fr}
-.compare h3,.card h3{font-size:24px;margin-bottom:16px}
-.compare ul{list-style:none}
-.compare li{color:#aebad5;margin:13px 0;font-size:17px}
-.final-cta{
-    text-align:center;
-    padding:120px 8%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-.final-cta p{margin:15px 0 35px;max-width:720px}
-.footer{padding:35px 8%;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:20px;color:#8f9bb8;font-size:14px}
-@media(max-width:1000px){
-    .container,.split,.before-after{grid-template-columns:1fr}
-    .cards-3,.target-grid{grid-template-columns:1fr}
-    h1{font-size:48px}
-    h2{font-size:34px}
-    .footer{flex-direction:column}
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <title>PATIA | Control de inventario y ventas para PyMEs</title>
+  <meta name="description" content="Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=104">
 </head>
 
-<body>
-
-<a href="/login" class="btn secondary top-login">Iniciar sesión</a>
-
-<section class="hero">
-<div class="container">
-    <div>
-        <img class="logo" src="{{ url_for('static', filename='img/logo-patia.png') }}">
-        <div class="badge">Plataforma empresarial con IA</div>
-
-        <h1>Controla tu negocio como una <span class="gradient">empresa grande.</span></h1>
-
-        <p class="subtitle">
-            Inventario, ventas, proveedores, análisis y recomendaciones inteligentes en una sola plataforma.
-        </p>
-
-        <div class="buttons">
-            <a href="/register" class="btn primary">Iniciar prueba gratis</a>
-            <a href="{{ url_for('main.register') }}?plan=pro" class="btn secondary">Pagar PATIA Pro · $199/mes</a>
-        </div>
-    </div>
-
-    <div class="mockup">
-        <div class="metric-grid">
-            <div class="metric"><span>Ventas hoy</span><strong>$4,820</strong></div>
-            <div class="metric"><span>Stock bajo</span><strong>3</strong></div>
-            <div class="metric"><span>Inventario</span><strong>$82,400</strong></div>
-            <div class="metric"><span>Margen</span><strong>31%</strong></div>
-        </div>
-
-        <div class="ai">
-        ✦ Copiloto IA: Coca Cola 600ml presenta alta rotación. Se recomienda reabastecer antes del fin de semana.
-        </div>
-    </div>
-</div>
-</section>
-
-<section>
-<div class="section-header">
-<div class="badge">¿Qué es PATIA?</div>
-<h2>Un copiloto inteligente para operar mejor tu negocio.</h2>
-<p>PATIA ayuda a tiendas, abarrotes, minisúpers y PyMEs a controlar inventario, ventas, proveedores y decisiones comerciales desde un solo lugar.</p>
-</div>
-
-<div class="cards-3">
-<div class="card"><h3>Inventario centralizado</h3><p>Controla productos, costos, precios, stock mínimo y valor total de inventario.</p></div>
-<div class="card"><h3>Ventas conectadas</h3><p>Cada venta actualiza el inventario y alimenta reportes de rendimiento.</p></div>
-<div class="card"><h3>Alertas inteligentes</h3><p>Detecta productos en riesgo de agotarse y reduce ventas perdidas.</p></div>
-</div>
-</section>
-
-<section class="dark">
-<div class="split">
-<div>
-<div class="badge">Impacto real</div>
-<h2>Decisiones con datos, no con intuición.</h2>
-<p>Muchos negocios operan con libretas, Excel o memoria. PATIA convierte esa operación diaria en información útil para saber qué comprar, qué vender más y qué productos dejan mejor margen.</p>
-</div>
-<div class="mockup">
-<div class="metric-grid">
-<div class="metric"><span>Ventas 7 días</span><strong>$18,430</strong></div>
-<div class="metric"><span>Producto estrella</span><strong>Coca Cola</strong></div>
-<div class="metric"><span>Proveedor clave</span><strong>FEMSA</strong></div>
-<div class="metric"><span>Stock crítico</span><strong>2</strong></div>
-</div>
-</div>
-</div>
-</section>
-
-<section>
-<div class="section-header">
-<div class="badge">¿Para quién es?</div>
-<h2>Diseñado para negocios que quieren crecer con más control.</h2>
-</div>
-<div class="target">◫ Minisúpers</div>
-<div class="target">▣ Abarrotes</div>
-<div class="target">⚒ Ferreterías</div>
-<div class="target">✚ Farmacias</div>
-<div class="target">◧ Distribuidoras</div>
-<div class="target">▥ PyMEs</div>
-</div>
-</section>
-
-<section class="dark">
-<div class="section-header">
-<div class="badge">Antes vs Después</div>
-<h2>De operación desordenada a inteligencia comercial.</h2>
-</div>
-
-<div class="before-after">
-<div class="compare">
-<h3>Antes</h3>
-<ul>
-<li>Inventario en libretas o Excel.</li>
-<li>No saber qué producto se vende más.</li>
-<li>Faltantes de stock inesperados.</li>
-<li>Pedidos a proveedores sin datos claros.</li>
-</ul>
-</div>
-<div class="compare">
-<h3>Después con PATIA</h3>
-<ul>
-<li>Inventario centralizado.</li>
-<li>Ventas y reportes en tiempo real.</li>
-<li>Alertas de stock bajo.</li>
-<li>Recomendaciones inteligentes para decidir mejor.</li>
-</ul>
-</div>
-</div>
-</section>
-
-<section>
-<div class="cards-3">
-<div class="card"><h3>Misión</h3><p>Dar a las PyMEs herramientas inteligentes y accesibles para operar con el nivel de control de una gran cadena.</p></div>
-<div class="card"><h3>Visión</h3><p>Convertir a PATIA en la plataforma de inteligencia operativa para negocios modernos en México y Latinoamérica.</p></div>
-<div class="card"><h3>Propósito</h3><p>Ayudar a los negocios familiares y empresas en crecimiento a vender más, perder menos y tomar mejores decisiones.</p></div>
-</div>
-</section>
-
-<section class="final-cta">
-    <h2>¿Listo para modernizar tu negocio?</h2>
-
-    <p>
-        Si tienes dudas sobre PATIA, necesitas ayuda para importar tus productos
-        o quieres una demostración personalizada, contáctanos directamente.
-    </p>
-
-    <a href="https://wa.me/522381186483" class="btn primary" target="_blank">
-        WhatsApp: +52 238 118 6483
+<body class="landing-v2">
+  <header class="landing-v2__header">
+    <a href="/" class="landing-v2__brand" aria-label="PATIA, inicio">
+      <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
     </a>
+    <nav class="landing-v2__nav" aria-label="Navegación principal">
+      <a href="#beneficios">Beneficios</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#precio">Precio</a>
+      <a href="/login" class="landing-v2__login">Iniciar sesión</a>
+    </nav>
+  </header>
 
-    <p style="margin-top:15px;">
-        Atención directa para empresas, abarrotes, minisúpers y tiendas.
-    </p>
-</section>
+  <main>
+    <section class="landing-v2__hero">
+      <div class="landing-v2__hero-copy">
+        <span class="landing-v2__eyebrow">Control operativo para PyMEs</span>
+        <h1>Tu inventario y tus ventas, finalmente bajo control.</h1>
+        <p class="landing-v2__lead">
+          PATIA reúne productos, ventas, proveedores y alertas en un solo lugar para que tomes decisiones con datos, no con suposiciones.
+        </p>
+        <div class="landing-v2__actions">
+          <a href="/register" class="landing-v2__button landing-v2__button--primary">
+            Empezar prueba de 14 días
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
+          <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__button landing-v2__button--secondary">
+            Contratar por $199 al mes
+          </a>
+        </div>
+        <div class="landing-v2__assurances" aria-label="Condiciones de la prueba">
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> Sin instalación</span>
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> Configuración sencilla</span>
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> Soporte directo</span>
+        </div>
+      </div>
 
-<footer class="footer">
-<div>PATIA © 2026</div>
-<div>Built by NP Ventures · Founded by Alberto Nicolás Patjane</div>
-</footer>
+      <div class="landing-v2__preview" aria-label="Vista previa del panel PATIA">
+        <div class="landing-v2__preview-top">
+          <div>
+            <span>Resumen semanal</span>
+            <strong>Negocio en orden</strong>
+          </div>
+          <span class="landing-v2__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> Actualizado</span>
+        </div>
+        <div class="landing-v2__preview-metrics">
+          <article><span>Ventas 7 días</span><strong>$18,430</strong><small>Actividad registrada</small></article>
+          <article><span>Inventario</span><strong>$82,400</strong><small>Valor estimado</small></article>
+          <article><span>Stock bajo</span><strong>3</strong><small>Productos por atender</small></article>
+        </div>
+        <div class="landing-v2__preview-chart">
+          <div class="landing-v2__preview-chart-head"><span>Productos con mayor movimiento</span><small>Últimos 7 días</small></div>
+          <div class="landing-v2__bars" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="landing-v2__preview-alert">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <div><strong>2 productos requieren atención</strong><span>Revisa existencias antes de tu próximo pedido.</span></div>
+        </div>
+      </div>
+    </section>
 
+    <section class="landing-v2__trust" aria-label="Sectores objetivo">
+      <span>Hecho para negocios como el tuyo</span>
+      <div>
+        <span><i class="fa-solid fa-store" aria-hidden="true"></i> Abarrotes</span>
+        <span><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> Minisúpers</span>
+        <span><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> Ferreterías</span>
+        <span><i class="fa-solid fa-capsules" aria-hidden="true"></i> Farmacias</span>
+        <span><i class="fa-solid fa-truck" aria-hidden="true"></i> Distribuidoras</span>
+      </div>
+    </section>
+
+    <section class="landing-v2__section" id="beneficios">
+      <header class="landing-v2__section-head">
+        <span class="landing-v2__eyebrow">Lo que resuelve PATIA</span>
+        <h2>Menos incertidumbre. Más control diario.</h2>
+        <p>Información práctica para operar mejor, reducir faltantes y conocer el desempeño real de tu negocio.</p>
+      </header>
+      <div class="landing-v2__benefits">
+        <article>
+          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></span>
+          <h3>Inventario confiable</h3>
+          <p>Consulta existencias, costos, precios y valor de inventario sin depender de libretas dispersas.</p>
+        </article>
+        <article>
+          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-cash-register" aria-hidden="true"></i></span>
+          <h3>Ventas conectadas</h3>
+          <p>Cada venta descuenta stock y alimenta tus indicadores para que la información permanezca actualizada.</p>
+        </article>
+        <article>
+          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-bell" aria-hidden="true"></i></span>
+          <h3>Alertas oportunas</h3>
+          <p>Identifica productos agotados o con pocas unidades antes de perder ventas por falta de mercancía.</p>
+        </article>
+        <article>
+          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
+          <h3>Rentabilidad visible</h3>
+          <p>Conoce productos con mayor movimiento, ventas semanales y utilidad estimada desde el panel ejecutivo.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="landing-v2__section landing-v2__steps" id="como-funciona">
+      <header class="landing-v2__section-head">
+        <span class="landing-v2__eyebrow">Cómo funciona</span>
+        <h2>Empieza a tener control en tres pasos.</h2>
+      </header>
+      <ol class="landing-v2__step-list">
+        <li><span>01</span><div><h3>Carga tus productos</h3><p>Regístralos manualmente o utiliza la plantilla de importación de PATIA.</p></div></li>
+        <li><span>02</span><div><h3>Registra tus ventas</h3><p>Usa el punto de venta para descontar existencias y mantener datos actualizados.</p></div></li>
+        <li><span>03</span><div><h3>Actúa con información</h3><p>Consulta alertas, productos destacados, ventas y necesidades de reabastecimiento.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="landing-v2__section landing-v2__comparison">
+      <header class="landing-v2__section-head">
+        <span class="landing-v2__eyebrow">Antes y después</span>
+        <h2>De administrar por memoria a operar con claridad.</h2>
+      </header>
+      <div class="landing-v2__comparison-grid">
+        <article class="landing-v2__comparison-card landing-v2__comparison-card--before">
+          <span>Antes</span>
+          <h3>Información dispersa</h3>
+          <ul>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Inventario en libretas o archivos separados</li>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Faltantes descubiertos demasiado tarde</li>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Compras basadas únicamente en intuición</li>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Sin visión clara de ventas y márgenes</li>
+          </ul>
+        </article>
+        <article class="landing-v2__comparison-card landing-v2__comparison-card--after">
+          <span>Con PATIA</span>
+          <h3>Una operación conectada</h3>
+          <ul>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Productos, ventas y proveedores centralizados</li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Alertas visibles antes de quedarte sin stock</li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Indicadores para preparar tus compras</li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Panel ejecutivo disponible en cualquier momento</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="landing-v2__section landing-v2__pricing" id="precio">
+      <div class="landing-v2__pricing-copy">
+        <span class="landing-v2__eyebrow">Precio simple</span>
+        <h2>Todo lo necesario para controlar mejor tu negocio.</h2>
+        <p>Sin paquetes confusos ni costos ocultos. Prueba PATIA durante 14 días y decide con calma.</p>
+      </div>
+      <article class="landing-v2__price-card">
+        <span class="landing-v2__price-label">PATIA Pro</span>
+        <div class="landing-v2__price"><strong>$199</strong><span>MXN<br>al mes</span></div>
+        <p>Incluye inventario, ventas, proveedores, alertas y reportes.</p>
+        <ul>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> 14 días de prueba gratuita</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Acceso desde computadora o celular</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Sin costo de instalación</li>
+        </ul>
+        <a href="/register" class="landing-v2__button landing-v2__button--primary">Comenzar prueba gratis</a>
+        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">Contratar PATIA Pro directamente</a>
+      </article>
+    </section>
+
+    <section class="landing-v2__section landing-v2__faq">
+      <header class="landing-v2__section-head">
+        <span class="landing-v2__eyebrow">Preguntas frecuentes</span>
+        <h2>Lo esencial antes de comenzar.</h2>
+      </header>
+      <div class="landing-v2__faq-list">
+        <details><summary>¿Necesito instalar algún programa?</summary><p>No. PATIA funciona desde el navegador y puedes acceder desde computadora o celular.</p></details>
+        <details><summary>¿Puedo importar mis productos?</summary><p>Sí. PATIA incluye una plantilla para importar tu catálogo desde un archivo Excel o CSV.</p></details>
+        <details><summary>¿Qué pasa al terminar los 14 días?</summary><p>Tus datos permanecen en tu cuenta y puedes activar PATIA Pro por $199 MXN al mes.</p></details>
+        <details><summary>¿PATIA sirve para más de un tipo de negocio?</summary><p>Sí. Está diseñado para comercios y PyMEs que manejan productos, inventario y ventas.</p></details>
+      </div>
+    </section>
+
+    <section class="landing-v2__final">
+      <span class="landing-v2__eyebrow">Empieza hoy</span>
+      <h2>Tu negocio puede operar con más orden desde esta semana.</h2>
+      <p>Prueba PATIA durante 14 días y reúne tu operación en un solo lugar.</p>
+      <div class="landing-v2__actions">
+        <a href="/register" class="landing-v2__button landing-v2__button--primary">Crear mi cuenta</a>
+        <a href="https://wa.me/522381186483" class="landing-v2__button landing-v2__button--secondary" target="_blank" rel="noopener noreferrer">Hablar con PATIA</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-v2__footer">
+    <div>
+      <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
+      <p>Control operativo para PyMEs que quieren crecer con claridad.</p>
+    </div>
+    <div class="landing-v2__footer-links">
+      <a href="#beneficios">Beneficios</a>
+      <a href="#precio">Precio</a>
+      <a href="/login">Iniciar sesión</a>
+    </div>
+    <p class="landing-v2__copyright">PATIA © 2026 · NP Ventures</p>
+  </footer>
 </body>
 </html>

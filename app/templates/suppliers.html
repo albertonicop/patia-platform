@@ -2,20 +2,34 @@
 {% block title %}Proveedores{% endblock %}
 {% block content %}
 
-<section class="grid two">
-  <div class="card">
-    <h3>Agregar proveedor</h3>
-    <form method="POST" class="stack">
-      <input name="name" required placeholder="Nombre del proveedor">
-      <input name="contact" placeholder="Contacto">
-      <input name="phone" placeholder="WhatsApp / Teléfono">
-      <textarea name="notes" placeholder="Notas"></textarea>
+<div class="suppliers-v2">
+<section class="suppliers-v2__intro">
+  <span>Compras y abastecimiento</span>
+  <h2>Mantén a tus proveedores a la mano</h2>
+  <p>Guarda sus datos de contacto y abre WhatsApp directamente cuando necesites preparar un pedido.</p>
+</section>
+
+<section class="suppliers-v2__layout">
+  <div class="card suppliers-v2__form-card" id="agregar-proveedor">
+    <h3>{% if suppliers %}Agregar proveedor{% else %}Agrega tu primer proveedor{% endif %}</h3>
+    <form method="POST" class="stack suppliers-v2__form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="supplier-name">Proveedor</label>
+      <input id="supplier-name" name="name" required placeholder="Nombre del proveedor">
+      <label for="supplier-contact">Persona de contacto <small>Opcional</small></label>
+      <input id="supplier-contact" name="contact" placeholder="Nombre del contacto">
+      <label for="supplier-phone">WhatsApp o teléfono <small>Opcional</small></label>
+      <input id="supplier-phone" name="phone" inputmode="tel" placeholder="Ej. 238 123 4567">
+      <label for="supplier-notes">Notas <small>Opcional</small></label>
+      <textarea id="supplier-notes" name="notes" placeholder="Productos, horarios o condiciones de compra"></textarea>
       <button class="btn" type="submit">Guardar proveedor</button>
     </form>
   </div>
 
-  <div class="card">
-    <h3>Lista</h3>
+  <div class="card suppliers-v2__list-card">
+    <h3>Directorio de proveedores</h3>
+    {% if suppliers %}
+    <div class="table-wrap">
     <table>
       <thead>
         <tr>
@@ -29,10 +43,10 @@
       <tbody>
         {% for s in suppliers %}
         <tr>
-          <td>{{ s.name }}</td>
-          <td>{{ s.contact or '-' }}</td>
-          <td>{{ s.phone or '-' }}</td>
-          <td>
+          <td data-label="Proveedor">{{ s.name }}</td>
+          <td data-label="Contacto">{{ s.contact or '-' }}</td>
+          <td data-label="Teléfono">{{ s.phone or '-' }}</td>
+          <td data-label="WhatsApp">
             {% if s.phone %}
               <a class="btn ghost" target="_blank"
                  href="https://wa.me/{{ s.phone|replace(' ', '')|replace('-', '') }}?text=Hola%20{{ s.name }},%20necesito%20hacer%20un%20pedido%20para%20mi%20tienda.">
@@ -42,10 +56,11 @@
               -
             {% endif %}
           </td>
-          <td>
+          <td data-label="Acciones">
 <form class="keep-scroll" method="POST"
       action="/suppliers/{{s.id}}/delete"
       onsubmit="return confirm('¿Eliminar este proveedor?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
 <button class="btn ghost" type="submit">
 Eliminar
@@ -57,7 +72,17 @@ Eliminar
         {% endfor %}
       </tbody>
     </table>
+    </div>
+    {% else %}
+      <div class="suppliers-v2__empty module-empty-v2">
+        <i class="fa-solid fa-truck-ramp-box" aria-hidden="true"></i>
+        <h4>Aún no tienes proveedores</h4>
+        <p>Registra el primero para consultar sus datos y contactarlo sin buscar en otras aplicaciones.</p>
+        <a class="btn" href="#agregar-proveedor">Agregar primer proveedor</a>
+      </div>
+    {% endif %}
   </div>
 </section>
+</div>
 
 {% endblock %}

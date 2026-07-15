@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import Product, Sale, Supplier
+from app.models import Product, Sale, Supplier, User
 from datetime import datetime, timedelta
 import random
 
@@ -7,7 +7,16 @@ import random
 def seed_data():
     app = create_app()
     with app.app_context():
-        db.drop_all(); db.create_all()
+        existing_records = any(
+            model.query.first() is not None
+            for model in (User, Product, Sale, Supplier)
+        )
+        if existing_records:
+            raise RuntimeError(
+                "Carga demo cancelada: la base ya contiene usuarios, inventario, ventas o proveedores."
+            )
+
+        db.create_all()
         suppliers = [
             Supplier(name="Coca-Cola FEMSA", contact="Ventas ruta", phone="222-000-1000"),
             Supplier(name="PepsiCo / Sabritas", contact="Ejecutivo zona", phone="222-000-2000"),

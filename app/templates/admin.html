@@ -157,6 +157,7 @@
   <form method="POST"
       action="/admin/delete-user/{{c.user.id}}#clientes"
       onsubmit="return confirm('¿Eliminar este cliente?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button class="btn ghost" type="submit">
         Eliminar
     </button>
@@ -165,6 +166,7 @@
 <form method="POST"
       action="/admin/make-pro/{{c.user.id}}"
       style="margin-top:8px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button class="btn ghost" type="submit">
         Marcar Pro
     </button>

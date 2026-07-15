@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Suscripción{% endblock %}
+
+{% block content %}
+<div class="subscription-v2">
+  <header class="module-intro-v2 subscription-v2__intro">
+    <span>Cuenta y facturación</span>
+    <h2>Administra tu suscripción PATIA</h2>
+    <p>Consulta tu plan, la fecha de renovación y las opciones disponibles para administrar el servicio.</p>
+  </header>
+
+  <section class="subscription-v2__layout">
+    <article class="card module-card-v2 subscription-v2__status-card">
+      <header class="subscription-v2__status-head">
+        <div>
+          <span class="subscription-v2__eyebrow">Plan actual</span>
+          <h3>
+            {% if user.manual_pro_access %}PATIA Pro manual
+            {% elif has_paid_access %}PATIA Pro
+            {% else %}Prueba gratuita{% endif %}
+          </h3>
+        </div>
+        <span class="subscription-v2__badge{% if has_paid_access or user.manual_pro_access %} subscription-v2__badge--pro{% endif %}">
+          {{ user.subscription_status or "Sin suscripción" }}
+        </span>
+      </header>
+
+      <dl class="subscription-v2__details">
+        <div>
+          <dt>Próxima renovación o fin del periodo</dt>
+          <dd>{% if user.current_period_end %}{{ user.current_period_end.strftime("%d/%m/%Y") }}{% else %}No disponible{% endif %}</dd>
+        </div>
+        <div>
+          <dt>Cancelación programada</dt>
+          <dd>{{ "Sí, al terminar el periodo" if user.cancel_at_period_end else "No" }}</dd>
+        </div>
+        <div>
+          <dt>Precio de PATIA Pro</dt>
+          <dd>$199 MXN al mes</dd>
+        </div>
+      </dl>
+
+      {% if user.subscription_status == "past_due" %}
+        <div class="subscription-v2__payment-alert" role="alert">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <div>
+            <strong>No pudimos procesar tu último pago</strong>
+            <p>Actualiza tu método de pago para mantener el acceso.
+            {% if user.next_payment_attempt %} Próximo intento: {{ user.next_payment_attempt.strftime("%d/%m/%Y %H:%M") }} UTC.{% endif %}</p>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="subscription-v2__actions">
+        {% if user.stripe_customer_id %}
+          <form method="POST" action="{{ url_for('main.billing_portal') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn">Administrar pagos</button>
+          </form>
+        {% endif %}
+
+        {% if user.stripe_subscription_id and not user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
+          <form method="POST" action="{{ url_for('main.cancel_subscription') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn ghost">Cancelar al final del periodo</button>
+          </form>
+        {% elif user.stripe_subscription_id and user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
+          <form method="POST" action="{{ url_for('main.reactivate_subscription') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn">Reactivar suscripción</button>
+          </form>
+        {% endif %}
+
+        {% if not user.stripe_subscription_id and not user.manual_pro_access %}
+          <a class="btn" href="{{ url_for('main.subscribe') }}">Conocer PATIA Pro</a>
+        {% endif %}
+      </div>
+    </article>
+
+    <aside class="card module-card-v2 subscription-v2__guide">
+      <span class="subscription-v2__eyebrow">Tu servicio, sin sorpresas</span>
+      <h3>Cómo funciona PATIA Pro</h3>
+      <ul>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Qué incluye</strong> Productos ilimitados, reportes IA, predicción de inventario e importación de catálogo.</span></li>
+        <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><span><strong>Cuándo se cobra</strong> El cargo mensual se procesa en la fecha de renovación indicada en tu cuenta.</span></li>
+        <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><span><strong>Si cancelas</strong> Conservas el acceso hasta terminar el periodo que ya pagaste.</span></li>
+        <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span><strong>Cómo administrarla</strong> El portal seguro te permite actualizar tu tarjeta y consultar la facturación.</span></li>
+      </ul>
+    </aside>
+  </section>
+</div>
+{% endblock %}

@@ -3,10 +3,12 @@
 
 {% block content %}
 
-<section class="grid metrics">
+<div class="reports-v2">
+<section class="grid metrics reports-v2__metrics">
   <div class="card metric">
     <span>Utilidad estimada</span>
     <strong>{{ profit|money }}</strong>
+    <small>Ventas de los últimos 7 días menos el costo registrado de las unidades vendidas.</small>
   </div>
 
   <div class="card metric">
@@ -29,21 +31,25 @@
 
   <div class="card reports-chart-card">
     <h3>Ventas por categoría</h3>
-
-```
+    {% if category_sales %}
 <div class="reports-chart-box">
   <canvas id="categoryChart"></canvas>
 </div>
-```
-
+    {% else %}
+      <div class="reports-v2__empty module-empty-v2">
+        <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
+        <h4>Aún no hay ventas para analizar</h4>
+        <p>Después de registrar ventas, aquí verás qué categorías generan más ingresos.</p>
+        <a class="btn" href="{{ url_for('main.sell') }}">Registrar una venta</a>
+      </div>
+    {% endif %}
   </div>
 
   <div class="card reports-recommendations-card">
     <h3>Recomendaciones para vender más</h3>
 
-```
 <div class="reports-recommendations">
-
+  {% if recommendations %}
   {% for r in recommendations %}
   <div class="reports-recommendation">
     <div class="reports-icon">
@@ -55,17 +61,24 @@
     </div>
   </div>
   {% endfor %}
-
+  {% else %}
+    <div class="reports-v2__empty reports-v2__empty--compact module-empty-v2">
+      <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+      <h4>Todavía no hay recomendaciones</h4>
+      <p>Registra ventas y movimientos de inventario para recibir sugerencias basadas en tu operación.</p>
+    </div>
+  {% endif %}
 </div>
-```
-
   </div>
 
 </section>
+</div>
 
+{% if category_sales %}
 <script>
 window.catLabels = {{ category_sales | map(attribute='category') | list | tojson }};
 window.catValues = {{ category_sales | map(attribute='revenue') | list | tojson }};
 </script>
+{% endif %}
 
 {% endblock %}
