@@ -109,6 +109,18 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
         return result
 
+    def run_downgrade(self, database_path, revision):
+        result = subprocess.run(
+            [sys.executable, "-m", "flask", "--app", "run.py", "db", "downgrade", revision],
+            cwd=ROOT,
+            env=self.environment(database_path),
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        self.assertEqual(result.returncode, 0, msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}")
+        return result
+
     def create_legacy_database_marked_at_02(
         self,
         database_path,
@@ -280,6 +292,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         inspector = sa.inspect(engine)
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
         self.assertIn("ticket_id", self.columns(inspector, "sale"))
+        self.assertIn("payment_method", self.columns(inspector, "sale"))
         self.assertEqual(
             self.columns(inspector, "stripe_webhook_event"),
             CURRENT_WEBHOOK_COLUMNS,
@@ -287,7 +300,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260715_03",
+                "20260715_04",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -345,6 +358,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         )
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
         self.assertIn("ticket_id", self.columns(inspector, "sale"))
+        self.assertIn("payment_method", self.columns(inspector, "sale"))
         self.assertEqual(
             self.columns(inspector, "stripe_webhook_event"),
             CURRENT_WEBHOOK_COLUMNS,
@@ -352,12 +366,40 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260715_03",
+                "20260715_04",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
                 "ok",
             )
+        engine.dispose()
+
+    def test_payment_method_revision_downgrades_without_losing_sales(self):
+        database_path = self.database_path("payment-downgrade.db")
+        self.run_upgrade(database_path)
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        with engine.begin() as connection:
+            connection.execute(sa.text(
+                'INSERT INTO "user" (id, email, password, company_name, created_at) '
+                "VALUES (1, 'owner@example.test', 'hash', 'Store', '2026-07-15 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                'INSERT INTO product (id, user_id, sku, name, category, cost_price, sale_price, stock, min_stock, created_at) '
+                "VALUES (1, 1, 'SKU', 'Product', 'General', 1, 2, 1, 1, '2026-07-15 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO sale (id, user_id, product_id, quantity, unit_price, total, created_at, payment_method) "
+                "VALUES (1, 1, 1, 1, 2, 2, '2026-07-15 00:00:00', 'cash')"
+            ))
+        engine.dispose()
+
+        self.run_downgrade(database_path, "20260715_03")
+
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        inspector = sa.inspect(engine)
+        self.assertNotIn("payment_method", self.columns(inspector, "sale"))
+        with engine.connect() as connection:
+            self.assertEqual(connection.execute(sa.text("SELECT COUNT(*) FROM sale")).scalar_one(), 1)
         engine.dispose()
 
 

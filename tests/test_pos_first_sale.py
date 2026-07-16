@@ -130,7 +130,7 @@ class PosFirstSaleTests(unittest.TestCase):
 
         response = self.client.post(
             "/sell-cart",
-            json={"request_id": request_id, "items": [{"product_id": product.id, "quantity": 2}]},
+            json={"request_id": request_id, "payment_method": "transfer", "items": [{"product_id": product.id, "quantity": 2}]},
         )
 
         self.assertEqual(response.status_code, 200)
@@ -138,9 +138,50 @@ class PosFirstSaleTests(unittest.TestCase):
         self.assertTrue(data["ok"])
         self.assertEqual(data["ticket_id"], request_id)
         self.assertEqual(data["total"], 50)
+        self.assertEqual(data["payment_method"], "Transferencia")
         self.assertIsInstance(data["single_sale_id"], int)
         db.session.refresh(product)
         self.assertEqual(product.stock, 3)
+        self.assertEqual(Sale.query.one().payment_method, "transfer")
+
+    def test_sale_rejects_unknown_payment_method(self):
+        product = self.add_product()
+        response = self.client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "stripe",
+                "items": [{"product_id": product.id, "quantity": 1}],
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Sale.query.count(), 0)
+
+    def test_every_line_in_grouped_ticket_uses_same_payment_method(self):
+        first = self.add_product(sku="UNO", barcode="111")
+        second = self.add_product(sku="DOS", barcode="222")
+        response = self.client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "card",
+                "items": [
+                    {"product_id": first.id, "quantity": 1},
+                    {"product_id": second.id, "quantity": 2},
+                ],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual({sale.payment_method for sale in Sale.query.all()}, {"card"})
+
+    def test_pos_explains_payment_methods_without_processing_cards(self):
+        self.add_product()
+        html = self.pos_html()
+        for value, label in (("cash", "Efectivo"), ("card", "Tarjeta"), ("transfer", "Transferencia"), ("other", "Otro")):
+            self.assertIn(f'value="{value}"', html)
+            self.assertIn(label, html)
+        self.assertIn("PATIA no procesa pagos con tarjeta", html)
+        self.assertIn("payment_method: paymentMethod.value", html)
 
     def test_repeated_request_id_does_not_charge_twice(self):
         product = self.add_product(stock=5)

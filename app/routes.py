@@ -78,6 +78,18 @@ def _short_sale_folio(sales):
     return f"V-{min(sale.id for sale in sales):06d}"
 
 
+PAYMENT_METHOD_LABELS = {
+    "cash": "Efectivo",
+    "card": "Tarjeta",
+    "transfer": "Transferencia",
+    "other": "Otro",
+}
+
+
+def _payment_method_label(value):
+    return PAYMENT_METHOD_LABELS.get(value, "No especificado")
+
+
 def _group_sales_by_ticket(sales, *, limit=None):
     grouped = {}
     for sale in sales:
@@ -88,6 +100,7 @@ def _group_sales_by_ticket(sales, *, limit=None):
             "created_at": sale.created_at,
             "total": 0,
             "item_count": 0,
+            "payment_method": sale.payment_method,
         })
         group["sales"].append(sale)
         group["total"] += sale.total
@@ -1202,8 +1215,12 @@ def sell():
         elif product.stock < qty:
             flash("No hay suficiente inventario.", "danger")
         else:
+            payment_method = request.form.get("payment_method", "cash")
+            if payment_method not in PAYMENT_METHOD_LABELS:
+                flash("Selecciona un método de pago válido.", "danger")
+                return redirect(url_for("main.sell"))
             product.stock -= qty
-            sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price, ticket_id=str(uuid.uuid4()))
+            sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price, ticket_id=str(uuid.uuid4()), payment_method=payment_method)
             db.session.add(sale)
             db.session.commit()
             flash(f"Venta registrada: {product.name} x{qty}.", "success")
@@ -1212,7 +1229,7 @@ def sell():
     sales = Sale.query.filter_by(user_id=session["user_id"]).order_by(Sale.created_at.desc(), Sale.id.desc()).all()
     sale_groups = _group_sales_by_ticket(sales, limit=12)
     products = Product.query.filter_by(user_id=session["user_id"]).order_by(Product.name).all()
-    return render_template("sell.html", products=products, sales=sales, sale_groups=sale_groups, user=user)
+    return render_template("sell.html", products=products, sales=sales, sale_groups=sale_groups, user=user, payment_method_labels=PAYMENT_METHOD_LABELS)
 
 
 @main.route("/sell-cart", methods=["POST"])
@@ -1231,6 +1248,10 @@ def sell_cart():
     items = data.get("items")
     if not isinstance(items, list) or not items:
         return jsonify({"ok": False, "error": "El carrito está vacío"}), 400
+
+    payment_method = data.get("payment_method", "cash")
+    if payment_method not in PAYMENT_METHOD_LABELS:
+        return jsonify({"ok": False, "error": "Selecciona un método de pago válido"}), 400
 
     request_id = data.get("request_id")
     if request_id:
@@ -1270,6 +1291,7 @@ def sell_cart():
                     "folio": folio,
                     "ticket_url": url_for("main.ticket", ticket_ref=request_id),
                     "total": sum(sale.total for sale in previous_sales),
+                    "payment_method": _payment_method_label(previous_sales[0].payment_method),
                     "single_sale_id": (
                         previous_sales[0].id if len(previous_sales) == 1 else None
                     ),
@@ -1304,6 +1326,7 @@ def sell_cart():
                     "folio": _short_sale_folio(previous_sales),
                     "ticket_url": url_for("main.ticket", ticket_ref=request_id),
                     "total": sum(sale.total for sale in previous_sales),
+                    "payment_method": _payment_method_label(previous_sales[0].payment_method),
                     "single_sale_id": (
                         previous_sales[0].id if len(previous_sales) == 1 else None
                     ),
@@ -1319,7 +1342,7 @@ def sell_cart():
         for product_id, quantity in requested_items.items():
             product = products[product_id]
             product.stock -= quantity
-            sale = Sale(user_id=user.id, product_id=product.id, quantity=quantity, unit_price=product.sale_price, total=quantity * product.sale_price)
+            sale = Sale(user_id=user.id, product_id=product.id, quantity=quantity, unit_price=product.sale_price, total=quantity * product.sale_price, payment_method=payment_method)
             sale.ticket_id = ticket_id
             db.session.add(sale)
             sales.append(sale)
@@ -1332,6 +1355,7 @@ def sell_cart():
             "ticket_url": url_for("main.ticket", ticket_ref=ticket_id),
             "total": sum(sale.total for sale in sales),
             "single_sale_id": sales[0].id if len(sales) == 1 else None,
+            "payment_method": _payment_method_label(payment_method),
         })
     except Exception:
         db.session.rollback()
@@ -2067,6 +2091,7 @@ def ticket(ticket_ref):
         ticket_subtotal=sum(sale.total for sale in sales),
         item_count=sum(sale.quantity for sale in sales),
         ticket_created_at=min(sale.created_at for sale in sales),
+        payment_method=_payment_method_label(sales[0].payment_method),
         business_address=", ".join(address_parts),
         auto_print=request.args.get("print") == "1",
     )

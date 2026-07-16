@@ -22,7 +22,7 @@
         <div class="pos-v2__confirmation-copy">
           <span class="pos-v2__eyebrow">Operación completada</span>
           <h3 id="sale-confirmation-title">Venta registrada correctamente</h3>
-          <dl><div><dt>Folio</dt><dd id="confirmation-folio"></dd></div><div><dt>Total</dt><dd id="confirmation-total"></dd></div></dl>
+          <dl><div><dt>Folio</dt><dd id="confirmation-folio"></dd></div><div><dt>Total</dt><dd id="confirmation-total"></dd></div><div><dt>Método de pago</dt><dd id="confirmation-payment"></dd></div></dl>
         </div>
         <div class="pos-v2__confirmation-actions">
           <a id="confirmation-ticket" class="btn ghost" target="_blank" rel="noopener">Ver ticket</a>
@@ -70,6 +70,16 @@
       </div>
 
       <footer class="pos-v2__checkout">
+        <div class="pos-v2__payment-method">
+          <label for="payment-method">Método de pago</label>
+          <select id="payment-method">
+            <option value="cash" selected>Efectivo</option>
+            <option value="card">Tarjeta</option>
+            <option value="transfer">Transferencia</option>
+            <option value="other">Otro</option>
+          </select>
+          <small>Solo registra cómo pagó el cliente; PATIA no procesa pagos con tarjeta.</small>
+        </div>
         <div><span>Total de la venta</span><strong id="cart-total">$0.00 MXN</strong></div>
         <button class="btn" id="checkout-button" type="button" disabled>Registrar venta</button>
       </footer>
@@ -87,13 +97,14 @@
     {% if sale_groups %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Folio</th><th>Fecha y hora</th><th>Artículos</th><th>Total</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Folio</th><th>Fecha y hora</th><th>Artículos</th><th>Método</th><th>Total</th><th>Acciones</th></tr></thead>
           <tbody>
             {% for ticket in sale_groups %}
               <tr>
                 <td><strong>{{ ticket.folio }}</strong></td>
                 <td>{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
                 <td>{{ ticket.item_count }} {{ "artículo" if ticket.item_count == 1 else "artículos" }}<small>{{ ticket.sales|length }} {{ "producto" if ticket.sales|length == 1 else "productos" }}</small></td>
+                <td>{{ payment_method_labels.get(ticket.payment_method, "No especificado") }}</td>
                 <td>{{ ticket.total|money }}</td>
                 <td>
                   <div class="pos-v2__sale-actions">
@@ -151,6 +162,7 @@ const cartTableWrap = document.getElementById("cart-table-wrap");
 const cartCount = document.getElementById("cart-count");
 const cartTotal = document.getElementById("cart-total");
 const checkoutButton = document.getElementById("checkout-button");
+const paymentMethod = document.getElementById("payment-method");
 const checkoutError = document.getElementById("checkout-error");
 let cart = [];
 let visibleResults = [];
@@ -365,13 +377,14 @@ checkoutButton.addEventListener("click", async () => {
         "Content-Type": "application/json",
         "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
       },
-      body: JSON.stringify({items, request_id: requestId})
+      body: JSON.stringify({items, request_id: requestId, payment_method: paymentMethod.value})
     });
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || "No se pudo registrar la venta.");
     sessionStorage.setItem("patia_sale_confirmation", JSON.stringify({
       folio: data.folio,
       total: data.total,
+      payment_method: data.payment_method,
       ticket_url: data.ticket_url
     }));
     window.location.reload();
@@ -392,6 +405,7 @@ if (storedConfirmation) {
     const confirmationModal = document.getElementById("sale-confirmation");
     document.getElementById("confirmation-total").textContent = Number(confirmation.total).toLocaleString("es-MX", {style: "currency", currency: "MXN"}) + " MXN";
     document.getElementById("confirmation-folio").textContent = confirmation.folio;
+    document.getElementById("confirmation-payment").textContent = confirmation.payment_method || "No especificado";
     document.getElementById("confirmation-ticket").href = confirmation.ticket_url;
     document.getElementById("confirmation-print").href = `${confirmation.ticket_url}?print=1`;
     confirmationModal.hidden = false;

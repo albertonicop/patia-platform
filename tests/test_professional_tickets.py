@@ -68,8 +68,8 @@ class ProfessionalTicketTests(unittest.TestCase):
         second = self.product(owner, f"B-{owner.id}", "Pan artesanal largo", 15)
         ticket_id = str(uuid.uuid4())
         lines = [
-            Sale(user_id=owner.id, product_id=first.id, quantity=2, unit_price=25, total=50, ticket_id=ticket_id),
-            Sale(user_id=owner.id, product_id=second.id, quantity=3, unit_price=15, total=45, ticket_id=ticket_id),
+            Sale(user_id=owner.id, product_id=first.id, quantity=2, unit_price=25, total=50, ticket_id=ticket_id, payment_method="card"),
+            Sale(user_id=owner.id, product_id=second.id, quantity=3, unit_price=15, total=45, ticket_id=ticket_id, payment_method="card"),
         ]
         db.session.add_all(lines)
         db.session.commit()
@@ -161,14 +161,22 @@ class ProfessionalTicketTests(unittest.TestCase):
         self.assertIn("Nueva venta", html)
         self.assertIn('event.key === "Escape"', html)
 
-    def test_payment_method_is_honestly_unspecified_and_no_tax_is_invented(self):
+    def test_payment_method_is_shown_and_no_tax_is_invented(self):
         ticket_id, _ = self.grouped_sale()
         html = self.client.get(f"/ticket/{ticket_id}").get_data(as_text=True)
 
         self.assertIn("Método de pago", html)
-        self.assertIn("No especificado", html)
+        self.assertIn("Tarjeta", html)
         self.assertNotIn("IVA (16%)", html)
         self.assertNotIn("Descuento", html)
+
+    def test_historical_sale_without_payment_method_remains_compatible(self):
+        product = self.product(self.owner, "HIST", "Histórico", 10)
+        sale = Sale(user_id=self.owner.id, product_id=product.id, quantity=1, unit_price=10, total=10)
+        db.session.add(sale)
+        db.session.commit()
+        html = self.client.get(f"/receipt/{sale.id}", follow_redirects=True).get_data(as_text=True)
+        self.assertIn("No especificado", html)
 
     def test_line_cancellation_still_restores_only_selected_product(self):
         ticket_id, lines = self.grouped_sale()

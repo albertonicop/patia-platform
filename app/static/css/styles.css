@@ -5242,6 +5242,28 @@ table {
   padding-top: 8px;
 }
 
+.app-shell-v2 .pos-v2__payment-method {
+  display: grid;
+  gap: 5px;
+  min-width: min(100%, 230px);
+}
+
+.app-shell-v2 .pos-v2__payment-method label {
+  color: var(--v2-ink);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.app-shell-v2 .pos-v2__payment-method select {
+  min-height: 44px;
+}
+
+.app-shell-v2 .pos-v2__payment-method small {
+  max-width: 36ch;
+  color: #656c7e;
+  line-height: 1.4;
+}
+
 @media (max-width: 480px) {
   .app-shell-v2 .product-edit-v1__actions .btn {
     width: 100%;

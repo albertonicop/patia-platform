@@ -140,6 +140,7 @@ class Sale(db.Model):
     )
 
     ticket_id = db.Column(db.String(36), nullable=True)
+    payment_method = db.Column(db.String(20), nullable=True)
 
     product = db.relationship(
         "Product",
