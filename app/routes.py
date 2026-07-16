@@ -282,17 +282,59 @@ def send_email(to, subject, html):
 @limiter.limit("3 per hour", methods=["POST"])
 def register():
     if request.method == "POST":
-        email = request.form["email"].strip().lower()
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        required_fields = {
+            "first_name": "nombre",
+            "last_name": "apellido",
+            "company_name": "nombre de la empresa",
+            "phone": "teléfono",
+            "address": "dirección",
+            "city": "ciudad",
+            "state": "estado",
+            "business_type": "giro del negocio",
+            "postal_code": "código postal",
+            "email": "correo",
+            "password": "contraseña",
+        }
+        missing = [
+            label
+            for field, label in required_fields.items()
+            if not request.form.get(field, "").strip()
+        ]
+        if missing:
+            flash("Completa todos los campos obligatorios.", "danger")
+            return render_template(
+                "auth.html",
+                title="Crear cuenta",
+                button="Crear cuenta",
+                mode="register",
+                plan=request.form.get("plan"),
+                form_data=request.form,
+            ), 400
         try:
             validate_email(email, check_deliverability=True)
         except EmailNotValidError:
             flash("El correo no es válido o no existe.", "danger")
-            return redirect(url_for("main.register"))
+            return render_template(
+                "auth.html",
+                title="Crear cuenta",
+                button="Crear cuenta",
+                mode="register",
+                plan=request.form.get("plan"),
+                form_data=request.form,
+            ), 400
 
-        password = request.form["password"]
         if len(password) < 8:
             flash("La contraseña debe tener al menos 8 caracteres.", "danger")
-            return redirect(url_for("main.register", plan=request.form.get("plan")))
+            return render_template(
+                "auth.html",
+                title="Crear cuenta",
+                button="Crear cuenta",
+                mode="register",
+                plan=request.form.get("plan"),
+                form_data=request.form,
+            ), 400
         first_name = request.form.get("first_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
         company_name = request.form.get("company_name", "").strip()
@@ -306,7 +348,14 @@ def register():
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             flash("Ese correo ya está registrado.", "danger")
-            return redirect(url_for("main.register"))
+            return render_template(
+                "auth.html",
+                title="Crear cuenta",
+                button="Crear cuenta",
+                mode="register",
+                plan=request.form.get("plan"),
+                form_data=request.form,
+            ), 409
 
         user = User(email=email, company_name=company_name)
         user.first_name = first_name
@@ -320,7 +369,19 @@ def register():
         user.set_password(password)
 
         db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Ese correo ya está registrado.", "danger")
+            return render_template(
+                "auth.html",
+                title="Crear cuenta",
+                button="Crear cuenta",
+                mode="register",
+                plan=request.form.get("plan"),
+                form_data=request.form,
+            ), 409
 
         session.clear()
         session["user_id"] = user.id
@@ -356,7 +417,7 @@ def register():
 
         return redirect(url_for("main.verify_email"))
 
-    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register", plan=request.args.get("plan"))
+    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register", plan=request.args.get("plan"), form_data={})
 
 
 @main.route("/verify-email", methods=["GET", "POST"])
@@ -445,7 +506,7 @@ def resend_verification():
 @limiter.limit("5 per hour", methods=["POST"])
 def forgot_password():
     if request.method == "POST":
-        email = request.form["email"].strip().lower()
+        email = request.form.get("email", "").strip().lower()
         user = User.query.filter_by(email=email).first()
         if user:
             token = secrets.token_urlsafe(36)
@@ -482,7 +543,7 @@ def reset_password(token):
     ):
         return render_template("reset_password.html", token=None, expired=True)
     if request.method == "POST":
-        password = request.form["password"]
+        password = request.form.get("password", "")
         if len(password) < 8:
             flash("La contraseña debe tener al menos 8 caracteres.", "danger")
             return render_template("reset_password.html", token=token, expired=False)
@@ -499,8 +560,8 @@ def reset_password(token):
 @limiter.limit("5 per minute", methods=["POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"].strip().lower()
-        password = request.form["password"]
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
@@ -605,13 +666,19 @@ def analytics():
         .all()
     )
 
+    sold_by_product = dict(
+        db.session.query(Sale.product_id, func.sum(Sale.quantity))
+        .filter(
+            Sale.user_id == user_id,
+            Sale.created_at >= week_start,
+        )
+        .group_by(Sale.product_id)
+        .all()
+    )
+
     alerts = []
     for p in products:
-        sold_7_days = (
-            db.session.query(func.sum(Sale.quantity))
-            .filter(Sale.user_id == user_id, Sale.product_id == p.id, Sale.created_at >= week_start)
-            .scalar() or 0
-        )
+        sold_7_days = sold_by_product.get(p.id, 0) or 0
         avg_daily_sales = sold_7_days / 7
         days_left = round(p.stock / avg_daily_sales, 1) if avg_daily_sales > 0 else None
 
@@ -826,8 +893,10 @@ def import_products():
         filename = (file.filename or "").lower()
         if filename.endswith(".csv"):
             df = pd.read_csv(file)
+            first_data_row = 2
         elif filename.endswith(".xlsx"):
             df = pd.read_excel(file, sheet_name="PRODUCTOS", header=3)
+            first_data_row = 5
         else:
             flash("Usa un archivo CSV o Excel .xlsx.", "danger")
             return redirect(url_for("main.products") + "#importar-catalogo")
@@ -867,8 +936,10 @@ def import_products():
                 number = default
             else:
                 number = float(value)
-            if number < 0:
+            if not math.isfinite(number) or number < 0:
                 raise ValueError("negative value")
+            if integer and not number.is_integer():
+                raise ValueError("fractional integer value")
             return int(number) if integer else number
 
         for row_index, row in df.iterrows():
@@ -938,7 +1009,7 @@ def import_products():
                 summary["errors"] += 1
                 current_app.logger.warning(
                     "Fila inválida en importación de catálogo (fila %s)",
-                    row_index + 2,
+                    row_index + first_data_row,
                     exc_info=True,
                 )
 
@@ -1205,14 +1276,22 @@ def suppliers():
         access_block = _trial_access_response(user)
         if access_block:
             return access_block
-        supplier_name = request.form["name"].strip()
+        supplier_name = request.form.get("name", "").strip()
+        if not supplier_name:
+            flash("Escribe el nombre del proveedor.", "danger")
+            return redirect(url_for("main.suppliers"))
         existing_supplier = Supplier.query.filter_by(user_id=session["user_id"], name=supplier_name).first()
         if existing_supplier:
             flash("Ese proveedor ya existe.", "danger")
             return redirect(url_for("main.suppliers"))
         s = Supplier(user_id=session["user_id"], name=supplier_name, contact=request.form.get("contact"), phone=request.form.get("phone"), notes=request.form.get("notes"))
         db.session.add(s)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Ese proveedor ya existe.", "danger")
+            return redirect(url_for("main.suppliers"))
         flash("Proveedor guardado.", "success")
         return redirect(url_for("main.suppliers"))
 
@@ -1844,7 +1923,11 @@ def settings():
         access_block = _trial_access_response(user)
         if access_block:
             return access_block
-        user.company_name = request.form.get("company_name", "").strip()
+        company_name = request.form.get("company_name", "").strip()
+        if not company_name:
+            flash("El nombre del negocio es obligatorio.", "danger")
+            return redirect(url_for("main.settings"))
+        user.company_name = company_name
         user.rfc = request.form.get("rfc", "").strip().upper()
         user.tax_regime = request.form.get("tax_regime", "").strip()
         user.address = request.form.get("address", "").strip()

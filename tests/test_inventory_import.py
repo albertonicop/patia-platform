@@ -241,6 +241,24 @@ class InventoryImportTests(unittest.TestCase):
         self.assertNotIn("could not convert", html)
         self.assertEqual(Product.query.filter_by(user_id=self.user.id).count(), 0)
 
+    def test_fractional_or_non_finite_inventory_values_are_rejected(self):
+        response = self.import_csv(
+            "FRACCION,7505,Producto,General,,10,20,1.5,1\n"
+            "INFINITO,7506,Producto,General,,inf,20,2,1\n"
+        )
+
+        self.assertIn("0 creados, 0 actualizados, 0 omitidos y 2 errores", response.get_data(as_text=True))
+        self.assertEqual(Product.query.filter_by(user_id=self.user.id).count(), 0)
+
+    def test_csv_error_log_reports_the_actual_file_row(self):
+        with self.assertLogs("app", level="WARNING") as captured:
+            self.import_csv(
+                "VALIDO,7507,Producto,General,,10,20,2,1\n"
+                "MALO,7508,Producto,General,,texto,20,2,1\n"
+            )
+
+        self.assertTrue(any("fila 3" in message for message in captured.output))
+
     def test_missing_essential_columns_rejects_file(self):
         response = self.client.post(
             "/import-products",

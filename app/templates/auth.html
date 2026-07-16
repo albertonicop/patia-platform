@@ -60,8 +60,7 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           {% if request.args.get("plan") == "pro" %}
             <input type="hidden" name="plan" value="pro">
-          {% endif %}
-          {% if plan %}
+          {% elif plan %}
             <input type="hidden" name="plan" value="{{ plan }}">
           {% endif %}
 
@@ -69,55 +68,56 @@
             <div class="auth-v2__grid">
               <div class="form-group auth-v2__field">
                 <label for="first_name">Nombre</label>
-                <input id="first_name" name="first_name" placeholder="Tu nombre" autocomplete="given-name" required>
+                <input id="first_name" name="first_name" value="{{ form_data.get('first_name', '') if form_data is defined else '' }}" placeholder="Tu nombre" autocomplete="given-name" required>
               </div>
               <div class="form-group auth-v2__field">
                 <label for="last_name">Apellido</label>
-                <input id="last_name" name="last_name" placeholder="Tu apellido" autocomplete="family-name" required>
+                <input id="last_name" name="last_name" value="{{ form_data.get('last_name', '') if form_data is defined else '' }}" placeholder="Tu apellido" autocomplete="family-name" required>
               </div>
             </div>
 
             <div class="form-group auth-v2__field">
               <label for="company_name">Nombre de la empresa</label>
-              <input id="company_name" name="company_name" placeholder="Nombre de tu empresa" autocomplete="organization" required>
+              <input id="company_name" name="company_name" value="{{ form_data.get('company_name', '') if form_data is defined else '' }}" placeholder="Nombre de tu empresa" autocomplete="organization" required>
             </div>
 
             <div class="form-group auth-v2__field">
               <label for="phone">Teléfono</label>
-              <input id="phone" name="phone" placeholder="Número telefónico" autocomplete="tel" required>
+              <input id="phone" name="phone" value="{{ form_data.get('phone', '') if form_data is defined else '' }}" placeholder="Número telefónico" autocomplete="tel" required>
             </div>
 
             <div class="form-group auth-v2__field">
               <label for="address">Dirección</label>
-              <input id="address" name="address" placeholder="Calle, número, colonia" autocomplete="street-address" required>
+              <input id="address" name="address" value="{{ form_data.get('address', '') if form_data is defined else '' }}" placeholder="Calle, número, colonia" autocomplete="street-address" required>
             </div>
 
             <div class="auth-v2__grid">
               <div class="form-group auth-v2__field">
                 <label for="city">Ciudad</label>
-                <input id="city" name="city" placeholder="Ciudad" autocomplete="address-level2" required>
+                <input id="city" name="city" value="{{ form_data.get('city', '') if form_data is defined else '' }}" placeholder="Ciudad" autocomplete="address-level2" required>
               </div>
               <div class="form-group auth-v2__field">
                 <label for="state">Estado</label>
-                <input id="state" name="state" placeholder="Estado" autocomplete="address-level1" required>
+                <input id="state" name="state" value="{{ form_data.get('state', '') if form_data is defined else '' }}" placeholder="Estado" autocomplete="address-level1" required>
               </div>
             </div>
 
             <div class="auth-v2__grid">
               <div class="form-group auth-v2__field">
                 <label for="postal_code">Código postal</label>
-                <input id="postal_code" name="postal_code" placeholder="CP" autocomplete="postal-code" required>
+                <input id="postal_code" name="postal_code" value="{{ form_data.get('postal_code', '') if form_data is defined else '' }}" placeholder="CP" autocomplete="postal-code" required>
               </div>
               <div class="form-group auth-v2__field">
                 <label for="business_type">Giro del negocio</label>
                 <select id="business_type" name="business_type" required>
                   <option value="">Selecciona...</option>
-                  <option value="Minisúper">Minisúper</option>
-                  <option value="Abarrotes">Abarrotes</option>
-                  <option value="Ferretería">Ferretería</option>
-                  <option value="Farmacia">Farmacia</option>
-                  <option value="Distribuidora">Distribuidora</option>
-                  <option value="Otro">Otro</option>
+                  {% set selected_business = form_data.get('business_type', '') if form_data is defined else '' %}
+                  <option value="Minisúper"{% if selected_business == 'Minisúper' %} selected{% endif %}>Minisúper</option>
+                  <option value="Abarrotes"{% if selected_business == 'Abarrotes' %} selected{% endif %}>Abarrotes</option>
+                  <option value="Ferretería"{% if selected_business == 'Ferretería' %} selected{% endif %}>Ferretería</option>
+                  <option value="Farmacia"{% if selected_business == 'Farmacia' %} selected{% endif %}>Farmacia</option>
+                  <option value="Distribuidora"{% if selected_business == 'Distribuidora' %} selected{% endif %}>Distribuidora</option>
+                  <option value="Otro"{% if selected_business == 'Otro' %} selected{% endif %}>Otro</option>
                 </select>
               </div>
             </div>
@@ -125,7 +125,7 @@
 
           <div class="form-group auth-v2__field">
             <label for="email">Correo</label>
-            <input id="email" type="email" name="email" placeholder="correo@empresa.com" autocomplete="email" required>
+            <input id="email" type="email" name="email" value="{{ form_data.get('email', '') if form_data is defined else '' }}" placeholder="correo@empresa.com" autocomplete="email" required>
           </div>
 
           <div class="form-group auth-v2__field">

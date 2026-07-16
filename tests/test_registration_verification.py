@@ -10,7 +10,7 @@ os.environ.setdefault("STRIPE_PRICE_ID", "price_patia_pro")
 os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_patia")
 os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
-from app import create_app, db
+from app import create_app, db, limiter
 from app.models import User
 
 
@@ -34,6 +34,7 @@ class RegistrationVerificationTests(unittest.TestCase):
         cls.context.pop()
 
     def setUp(self):
+        limiter.reset()
         db.session.rollback()
         User.query.delete()
         db.session.commit()
@@ -140,6 +141,43 @@ class RegistrationVerificationTests(unittest.TestCase):
             css = stylesheet.read()
         self.assertIn(".auth-v2 .auth-v2__field select option", css)
         self.assertIn("color: #272b3a", css)
+
+    def test_registration_error_preserves_non_sensitive_fields_only(self):
+        response, _ = self.register("repeat@patia.test")
+        self.assertEqual(response.status_code, 302)
+
+        data = {
+            "email": "repeat@patia.test",
+            "password": "Password123",
+            "first_name": "Ana",
+            "last_name": "Pérez",
+            "company_name": "Tienda Ana",
+            "phone": "5555555555",
+            "address": "Calle 1",
+            "city": "Puebla",
+            "state": "Puebla",
+            "business_type": "Abarrotes",
+            "postal_code": "72000",
+        }
+        with patch("app.routes.validate_email"):
+            duplicate = self.client.post("/register", data=data)
+
+        html = duplicate.get_data(as_text=True)
+        self.assertEqual(duplicate.status_code, 409)
+        self.assertIn('value="Tienda Ana"', html)
+        self.assertIn('value="repeat@patia.test"', html)
+        self.assertIn('value="Abarrotes" selected', html)
+        self.assertNotIn('value="Password123"', html)
+
+    def test_incomplete_registration_returns_validation_instead_of_500(self):
+        response = self.client.post(
+            "/register",
+            data={"email": "owner@patia.test", "password": "Password123"},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Completa todos los campos obligatorios", response.get_data(as_text=True))
+        self.assertEqual(User.query.count(), 0)
 
 
 if __name__ == "__main__":
