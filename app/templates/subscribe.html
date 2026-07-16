@@ -2,46 +2,90 @@
 {% block title %}PATIA Pro{% endblock %}
 
 {% block content %}
-<div class="subscription-v2 subscription-v2--offer">
-  <header class="module-intro-v2 subscription-v2__intro">
-    <span>Haz crecer tu operación</span>
-    <h2>Más control para decidir con confianza</h2>
-    <p>PATIA Pro reúne inventario, ventas y recomendaciones comerciales en un solo plan mensual.</p>
+<div class="subscription-v2 subscription-premium-v1">
+  <header class="subscription-premium-v1__hero">
+    <div class="subscription-premium-v1__hero-copy">
+      <span class="subscription-v2__eyebrow">PATIA Pro para negocios en operación</span>
+      <h2>Convierte la actividad diaria de tu negocio en decisiones más claras.</h2>
+      <p>Mantén inventario, ventas, tickets y seguimiento comercial en un solo sistema, sin perder acceso al terminar tu prueba.</p>
+      <div class="subscription-premium-v1__hero-assurances" aria-label="Condiciones de PATIA Pro">
+        <span><i class="fa-solid fa-check" aria-hidden="true"></i> Sin plazo forzoso</span>
+        <span><i class="fa-solid fa-check" aria-hidden="true"></i> Cancela desde tu cuenta</span>
+        <span><i class="fa-solid fa-lock" aria-hidden="true"></i> Pago seguro con Stripe</span>
+      </div>
+    </div>
+    <div class="subscription-premium-v1__hero-price" aria-label="$199 MXN al mes">
+      <span>Plan mensual</span>
+      <strong>$199</strong>
+      <small>MXN al mes</small>
+    </div>
   </header>
 
+  <section class="subscription-premium-v1__outcomes" aria-label="Beneficios principales de PATIA Pro">
+    <article><i class="fa-solid fa-chart-line" aria-hidden="true"></i><div><strong>Entiende qué está pasando</strong><span>Consulta ventas, utilidad estimada y productos con mayor movimiento.</span></div></article>
+    <article><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><div><strong>Anticipa faltantes</strong><span>Detecta existencias bajas antes de perder una venta o hacer tu siguiente compra.</span></div></article>
+    <article><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><div><strong>Recibe contexto útil</strong><span>Obtén recomendaciones explicadas a partir de tus ventas e inventario registrados.</span></div></article>
+  </section>
+
   <section class="subscription-v2__offer-grid">
-    <article class="card module-card-v2 subscription-v2__offer-card">
+    <article class="card module-card-v2 subscription-v2__offer-card subscription-premium-v1__plan">
       <div class="subscription-v2__offer-head">
-        <div><span class="subscription-v2__eyebrow">PATIA Pro</span><h3>Todo lo necesario para operar</h3></div>
-        <div class="subscription-v2__price"><strong>$199</strong><span>MXN / mes</span></div>
+        <div>
+          <span class="subscription-v2__eyebrow">Todo PATIA, todos los días</span>
+          <h3>Una operación conectada de principio a fin</h3>
+        </div>
+        <span class="subscription-premium-v1__recommended">Plan completo</span>
       </div>
-      <p class="subscription-v2__billing-copy">El cobro es mensual. Puedes cancelar cuando quieras y conservarás el acceso hasta finalizar el periodo pagado.</p>
-      <ul class="subscription-v2__features">
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Productos ilimitados</li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Punto de venta completo</li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Reportes y recomendaciones IA</li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Predicción de inventario</li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Importación de catálogo por Excel</li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i> Soporte prioritario</li>
+      <p class="subscription-v2__billing-copy">PATIA Pro conserva la continuidad de tu operación y desbloquea la lectura inteligente de los datos que ya generas al vender.</p>
+      <ul class="subscription-v2__features subscription-premium-v1__features">
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Dashboard ejecutivo completo</strong> Ventas, valor del inventario, alertas y rendimiento en una sola vista.</span></li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Reportes y recomendaciones IA</strong> Hallazgos comerciales basados en la información real de tu cuenta.</span></li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Inventario profesional</strong> Productos, costos, precios, existencias, alertas e importación por Excel.</span></li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Punto de venta y tickets</strong> Ventas conectadas al stock, métodos de pago e impresión profesional.</span></li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Historial operativo</strong> Consulta ventas y reimprime tickets cuando lo necesites.</span></li>
+        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Proveedores y datos del negocio</strong> Información organizada para operar y emitir tickets consistentes.</span></li>
       </ul>
 
       <form action="/create-checkout-session" method="POST" class="subscription-v2__checkout-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn" type="submit">Continuar al pago seguro</button>
+        <button class="btn subscription-premium-v1__cta" type="submit">Activar PATIA Pro por $199 al mes</button>
       </form>
-      <p class="subscription-v2__secure"><i class="fa-solid fa-lock" aria-hidden="true"></i> Pago procesado de forma segura por Stripe.</p>
+      <p class="subscription-v2__secure"><i class="fa-solid fa-lock" aria-hidden="true"></i> Stripe procesa el pago. PATIA no almacena los datos de tu tarjeta.</p>
     </article>
 
-    <aside class="card module-card-v2 subscription-v2__guide">
-      <span class="subscription-v2__eyebrow">Antes de continuar</span>
-      <h3>Una suscripción fácil de administrar</h3>
+    <aside class="card module-card-v2 subscription-v2__guide subscription-premium-v1__guide">
+      <span class="subscription-v2__eyebrow">Control de tu suscripción</span>
+      <h3>Sin sorpresas ni procesos ocultos</h3>
       <ul>
-        <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><span><strong>Renovación mensual</strong> El siguiente cobro ocurre un mes después de activar el plan.</span></li>
-        <li><i class="fa-solid fa-credit-card" aria-hidden="true"></i><span><strong>Portal de cliente</strong> Desde PATIA podrás actualizar tu método de pago.</span></li>
-        <li><i class="fa-solid fa-ban" aria-hidden="true"></i><span><strong>Cancelación clara</strong> No pierdes el periodo que ya pagaste.</span></li>
+        <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><span><strong>Cobro mensual claro</strong> Tu siguiente cobro ocurre un mes después de activar el plan.</span></li>
+        <li><i class="fa-solid fa-credit-card" aria-hidden="true"></i><span><strong>Portal de cliente</strong> Actualiza tu método de pago desde una sesión segura de Stripe.</span></li>
+        <li><i class="fa-solid fa-ban" aria-hidden="true"></i><span><strong>Cancelación administrable</strong> Puedes cancelar y conservar el acceso hasta terminar el periodo pagado.</span></li>
+        <li><i class="fa-solid fa-headset" aria-hidden="true"></i><span><strong>Soporte PATIA</strong> Si necesitas ayuda para continuar, puedes contactar al equipo desde la aplicación.</span></li>
       </ul>
       <a href="{{ url_for('main.dashboard') }}" class="btn ghost subscription-v2__back">Volver al panel</a>
     </aside>
+  </section>
+
+  <section class="subscription-premium-v1__comparison" aria-labelledby="plan-comparison-title">
+    <header>
+      <span class="subscription-v2__eyebrow">Comparación transparente</span>
+      <h3 id="plan-comparison-title">Tu prueba te permite comenzar. Pro mantiene tu negocio avanzando.</h3>
+      <p>No pierdes lo aprendido durante la prueba: conservas tu operación y añades análisis para tomar mejores decisiones.</p>
+    </header>
+    <div class="subscription-premium-v1__table-wrap">
+      <table>
+        <thead><tr><th>Capacidad</th><th>Prueba de 14 días</th><th>PATIA Pro</th></tr></thead>
+        <tbody>
+          <tr><td data-label="Capacidad">Inventario, ventas y proveedores</td><td data-label="Prueba"><i class="fa-solid fa-check" aria-hidden="true"></i> Incluido</td><td data-label="PATIA Pro"><i class="fa-solid fa-check" aria-hidden="true"></i> Sin límite de tiempo</td></tr>
+          <tr><td data-label="Capacidad">Punto de venta y tickets profesionales</td><td data-label="Prueba"><i class="fa-solid fa-check" aria-hidden="true"></i> Incluido</td><td data-label="PATIA Pro"><i class="fa-solid fa-check" aria-hidden="true"></i> Incluido</td></tr>
+          <tr><td data-label="Capacidad">Dashboard operativo</td><td data-label="Prueba"><i class="fa-solid fa-check" aria-hidden="true"></i> Indicadores esenciales</td><td data-label="PATIA Pro"><i class="fa-solid fa-check" aria-hidden="true"></i> Seguimiento continuo</td></tr>
+          <tr><td data-label="Capacidad">Reportes y recomendaciones IA</td><td data-label="Prueba"><span class="subscription-premium-v1__limited">Disponible en Pro</span></td><td data-label="PATIA Pro"><i class="fa-solid fa-check" aria-hidden="true"></i> Incluido</td></tr>
+          <tr><td data-label="Capacidad">Predicción y recomendaciones de inventario</td><td data-label="Prueba"><span class="subscription-premium-v1__limited">Disponible en Pro</span></td><td data-label="PATIA Pro"><i class="fa-solid fa-check" aria-hidden="true"></i> Incluido</td></tr>
+          <tr><td data-label="Capacidad">Duración del acceso</td><td data-label="Prueba">14 días</td><td data-label="PATIA Pro"><strong>Mientras tu suscripción esté activa</strong></td></tr>
+          <tr><td data-label="Capacidad">Precio</td><td data-label="Prueba">$0 durante la prueba</td><td data-label="PATIA Pro"><strong>$199 MXN al mes</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 </div>
 {% endblock %}

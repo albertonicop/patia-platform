@@ -7,10 +7,10 @@
   <title>PATIA | Control de inventario y ventas para PyMEs</title>
   <meta name="description" content="Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=104">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=106">
 </head>
 
-<body class="landing-v2">
+<body class="landing-v2 landing-premium-v1">
   <header class="landing-v2__header">
     <a href="/" class="landing-v2__brand" aria-label="PATIA, inicio">
       <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
@@ -26,10 +26,10 @@
   <main>
     <section class="landing-v2__hero">
       <div class="landing-v2__hero-copy">
-        <span class="landing-v2__eyebrow">Control operativo para PyMEs</span>
-        <h1>Tu inventario y tus ventas, finalmente bajo control.</h1>
+        <span class="landing-v2__eyebrow">Control operativo para PyMEs en México</span>
+        <h1>Vende, controla tu inventario y entiende tu negocio.</h1>
         <p class="landing-v2__lead">
-          PATIA reúne productos, ventas, proveedores y alertas en un solo lugar para que tomes decisiones con datos, no con suposiciones.
+          PATIA conecta cada venta con tus existencias y convierte la operación diaria en indicadores claros para comprar mejor, evitar faltantes y conocer qué productos impulsan tu negocio.
         </p>
         <div class="landing-v2__actions">
           <a href="/register" class="landing-v2__button landing-v2__button--primary">
@@ -82,6 +82,12 @@
         <span><i class="fa-solid fa-capsules" aria-hidden="true"></i> Farmacias</span>
         <span><i class="fa-solid fa-truck" aria-hidden="true"></i> Distribuidoras</span>
       </div>
+    </section>
+
+    <section class="landing-premium-v1__proof" aria-label="Resultados operativos con PATIA">
+      <article><strong>Una sola fuente de información</strong><span>Ventas, inventario, proveedores y tickets permanecen conectados.</span></article>
+      <article><strong>Menos decisiones a ciegas</strong><span>Consulta indicadores y alertas antes de comprar o reabastecer.</span></article>
+      <article><strong>Listo para operar desde el navegador</strong><span>Sin instalaciones, desde computadora o celular.</span></article>
     </section>
 
     <section class="landing-v2__section" id="beneficios">
@@ -155,6 +161,21 @@
       </div>
     </section>
 
+    <section class="landing-v2__section landing-premium-v1__pro-value">
+      <div class="landing-premium-v1__pro-copy">
+        <span class="landing-v2__eyebrow">El valor de PATIA Pro</span>
+        <h2>No es solo registrar datos. Es saber qué hacer con ellos.</h2>
+        <p>Tu operación genera información todos los días. PATIA Pro la organiza y la convierte en seguimiento comercial útil para decidir con mayor confianza.</p>
+        <a href="#precio" class="landing-v2__button landing-v2__button--secondary">Ver precio y condiciones</a>
+      </div>
+      <div class="landing-premium-v1__pro-grid">
+        <article><i class="fa-solid fa-chart-line" aria-hidden="true"></i><div><strong>Reportes completos</strong><span>Ventas, utilidad estimada, categorías y desempeño del inventario.</span></div></article>
+        <article><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><div><strong>Recomendaciones explicadas</strong><span>Sugerencias basadas en la actividad registrada en tu propia cuenta.</span></div></article>
+        <article><i class="fa-solid fa-box-open" aria-hidden="true"></i><div><strong>Seguimiento de existencias</strong><span>Alertas y contexto para anticipar productos que necesitan atención.</span></div></article>
+        <article><i class="fa-solid fa-receipt" aria-hidden="true"></i><div><strong>Operación profesional</strong><span>POS, historial y tickets listos para consultar o imprimir.</span></div></article>
+      </div>
+    </section>
+
     <section class="landing-v2__section landing-v2__pricing" id="precio">
       <div class="landing-v2__pricing-copy">
         <span class="landing-v2__eyebrow">Precio simple</span>
@@ -164,11 +185,12 @@
       <article class="landing-v2__price-card">
         <span class="landing-v2__price-label">PATIA Pro</span>
         <div class="landing-v2__price"><strong>$199</strong><span>MXN<br>al mes</span></div>
-        <p>Incluye inventario, ventas, proveedores, alertas y reportes.</p>
+        <p>Continúa operando sin límite de tiempo y desbloquea el análisis completo de tu negocio.</p>
         <ul>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> 14 días de prueba gratuita</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Inventario, ventas, proveedores y tickets</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Dashboard, reportes y recomendaciones IA</li>
           <li><i class="fa-solid fa-check" aria-hidden="true"></i> Acceso desde computadora o celular</li>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Sin costo de instalación</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Suscripción mensual administrable</li>
         </ul>
         <a href="/register" class="landing-v2__button landing-v2__button--primary">Comenzar prueba gratis</a>
         <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">Contratar PATIA Pro directamente</a>

@@ -2,11 +2,11 @@
 {% block title %}Suscripción{% endblock %}
 
 {% block content %}
-<div class="subscription-v2">
+<div class="subscription-v2 subscription-account-v1">
   <header class="module-intro-v2 subscription-v2__intro">
     <span>Cuenta y facturación</span>
-    <h2>Administra tu suscripción PATIA</h2>
-    <p>Consulta tu plan, la fecha de renovación y las opciones disponibles para administrar el servicio.</p>
+    <h2>Tu plan, tus cobros y el control de tu suscripción</h2>
+    <p>Consulta el estado de PATIA Pro, la siguiente fecha relevante y las opciones disponibles sin salir de tu cuenta.</p>
   </header>
 
   <section class="subscription-v2__layout">
@@ -15,13 +15,13 @@
         <div>
           <span class="subscription-v2__eyebrow">Plan actual</span>
           <h3>
-            {% if user.manual_pro_access %}PATIA Pro manual
+            {% if user.manual_pro_access %}PATIA Pro
             {% elif has_paid_access %}PATIA Pro
             {% else %}Prueba gratuita{% endif %}
           </h3>
         </div>
         <span class="subscription-v2__badge{% if has_paid_access or user.manual_pro_access %} subscription-v2__badge--pro{% endif %}">
-          {{ user.subscription_status or "Sin suscripción" }}
+          {% if user.manual_pro_access %}Acceso activo{% else %}{{ user.subscription_status or "Sin suscripción" }}{% endif %}
         </span>
       </header>
 
@@ -78,10 +78,11 @@
     </article>
 
     <aside class="card module-card-v2 subscription-v2__guide">
-      <span class="subscription-v2__eyebrow">Tu servicio, sin sorpresas</span>
-      <h3>Cómo funciona PATIA Pro</h3>
+      <span class="subscription-v2__eyebrow">Valor y condiciones claras</span>
+      <h3>Lo que mantienes activo con PATIA Pro</h3>
       <ul>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>Qué incluye</strong> Productos ilimitados, reportes IA, predicción de inventario e importación de catálogo.</span></li>
+        <li><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span><strong>Seguimiento completo</strong> Dashboard, reportes IA y recomendaciones basadas en tus datos.</span></li>
+        <li><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span><strong>Operación conectada</strong> Inventario, ventas, proveedores, historial y tickets en una sola cuenta.</span></li>
         <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><span><strong>Cuándo se cobra</strong> El cargo mensual se procesa en la fecha de renovación indicada en tu cuenta.</span></li>
         <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><span><strong>Si cancelas</strong> Conservas el acceso hasta terminar el periodo que ya pagaste.</span></li>
         <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span><strong>Cómo administrarla</strong> El portal seguro te permite actualizar tu tarjeta y consultar la facturación.</span></li>
