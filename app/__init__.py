@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-from flask import Flask
+from flask import Flask, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
@@ -171,6 +171,34 @@ def create_app():
                 "max-age=31536000; includeSubDomains"
             )
         return response
+
+    error_messages = {
+        400: ("No pudimos procesar la solicitud", "Revisa la información e inténtalo nuevamente."),
+        403: ("Acceso no permitido", "Tu cuenta no tiene permiso para abrir esta página."),
+        404: ("Página no encontrada", "La dirección puede haber cambiado o ya no estar disponible."),
+        429: ("Demasiados intentos", "Espera unos minutos antes de volver a intentarlo."),
+        500: ("PATIA no pudo completar la operación", "Tus datos siguen protegidos. Inténtalo nuevamente en unos minutos."),
+    }
+
+    def render_error(status_code):
+        title, message = error_messages[status_code]
+        return render_template(
+            "error.html",
+            status_code=status_code,
+            error_title=title,
+            error_message=message,
+        ), status_code
+
+    for status_code in (400, 403, 404, 429):
+        app.register_error_handler(
+            status_code,
+            lambda error, code=status_code: render_error(code),
+        )
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        db.session.rollback()
+        return render_error(500)
 
     return app
 

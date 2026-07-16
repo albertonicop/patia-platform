@@ -1,0 +1,13 @@
+{% extends "base_clean.html" %}
+
+{% block content %}
+<main class="error-state-v1" role="main" aria-labelledby="error-title">
+  <a href="/" class="error-state-v1__brand" aria-label="Ir al inicio de PATIA">
+    <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
+  </a>
+  <p class="error-state-v1__code">Error {{ status_code }}</p>
+  <h1 id="error-title">{{ error_title }}</h1>
+  <p>{{ error_message }}</p>
+  <a class="btn" href="/">Volver a PATIA</a>
+</main>
+{% endblock %}

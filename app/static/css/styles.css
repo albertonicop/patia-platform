@@ -5116,3 +5116,111 @@ table {
     .ticket-print-v2__payment,
     .ticket-print-v2__footer { break-inside: avoid; }
 }
+/* PATIA V1: estados HTTP compartidos */
+.error-state-v1 {
+  width: min(100% - 32px, 560px);
+  padding: clamp(28px, 6vw, 52px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background: #151b2e;
+  color: #f5f7ff;
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.error-state-v1__brand img {
+  width: min(170px, 60%);
+  height: auto;
+}
+
+.error-state-v1__code {
+  margin: 28px 0 8px;
+  color: #9ca8c4;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.error-state-v1 h1 {
+  margin: 0;
+  font-size: clamp(1.65rem, 5vw, 2.35rem);
+  line-height: 1.15;
+}
+
+.error-state-v1 > p:not(.error-state-v1__code) {
+  margin: 16px auto 28px;
+  max-width: 42ch;
+  color: #c2cada;
+  line-height: 1.6;
+}
+
+.error-state-v1 .btn {
+  min-height: 46px;
+}
+
+/* Auditoría V1: contención responsive comprobada en navegador */
+.app-shell-v2 .inventory-v2 > *,
+.app-shell-v2 .pos-v2 > * {
+  min-width: 0;
+}
+
+@media (min-width: 761px) and (max-width: 800px) {
+  .auth-v2__page {
+    display: block;
+  }
+
+  .auth-v2__story {
+    display: none;
+  }
+
+  .auth-v2__content {
+    min-height: 100vh;
+    padding: 32px 20px 48px;
+  }
+
+  .auth-v2__mobile-brand {
+    display: block;
+    margin-bottom: 38px;
+  }
+
+  .auth-v2__mobile-brand img {
+    width: 112px;
+  }
+}
+
+.auth-recovery-v1__page {
+  display: grid;
+  min-height: 100vh;
+  padding: 32px 20px;
+  place-items: center;
+}
+
+.auth-recovery-v1__card {
+  width: min(100%, 520px);
+}
+
+.auth-recovery-v1__brand {
+  display: inline-block;
+  margin-bottom: 42px;
+}
+
+.auth-recovery-v1__brand img {
+  display: block;
+  width: 126px;
+  height: auto;
+}
+
+.auth-recovery-v1 .auth-v2__header h1 {
+  margin-top: 9px;
+  font-size: clamp(1.9rem, 7vw, 2.6rem);
+}
+
+.auth-recovery-v1__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 24px;
+  text-decoration: none;
+}

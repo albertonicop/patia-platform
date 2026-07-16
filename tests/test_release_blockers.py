@@ -178,7 +178,7 @@ class ReleaseBlockerTests(unittest.TestCase):
         response = self.client.get("/reset-password/legacy-token-without-expiration")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Enlace expirado", response.get_data(as_text=True))
+        self.assertIn("Solicita un enlace nuevo", response.get_data(as_text=True))
 
     def test_resend_failure_is_visible_and_can_be_retried(self):
         user = self.user()
