@@ -220,7 +220,7 @@ class InventoryImportTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-    def test_product_with_sales_cannot_be_deleted(self):
+    def test_product_with_sales_is_archived_and_history_is_preserved(self):
         product = self.add_product()
         sale = Sale(
             user_id=self.user.id,
@@ -236,8 +236,64 @@ class InventoryImportTests(unittest.TestCase):
             f"/products/{product.id}/delete", follow_redirects=True
         )
 
-        self.assertIn("forma parte de tu historial", response.get_data(as_text=True))
+        html = response.get_data(as_text=True)
+        self.assertIn("retirado del catálogo", html)
+        self.assertNotIn("Producto existente", html)
         self.assertIsNotNone(db.session.get(Product, product.id))
+        self.assertFalse(db.session.get(Product, product.id).is_active)
+        self.assertIsNotNone(db.session.get(Sale, sale.id))
+
+    def test_unsold_product_is_physically_deleted_and_empty_state_updates(self):
+        product = self.add_product()
+        response = self.client.post(
+            f"/products/{product.id}/delete",
+            follow_redirects=True,
+        )
+        html = response.get_data(as_text=True)
+        self.assertIsNone(db.session.get(Product, product.id))
+        self.assertIn("Agrega tu primer producto", html)
+        self.assertNotIn("Buscar producto…", html)
+
+    def test_archived_product_disappears_from_search_pos_and_dashboard_metrics(self):
+        product = self.add_product(stock=5)
+        db.session.add(Sale(
+            user_id=self.user.id,
+            product_id=product.id,
+            quantity=1,
+            unit_price=20,
+            total=20,
+        ))
+        db.session.commit()
+        self.client.post(f"/products/{product.id}/delete")
+
+        self.assertNotIn("Producto existente", self.client.get("/products?q=Producto").get_data(as_text=True))
+        pos_html = self.client.get("/sell").get_data(as_text=True)
+        self.assertIn("Agrega inventario antes de vender", pos_html)
+        self.assertIn("Producto existente", pos_html)  # El historial de ventas permanece legible.
+        dashboard = self.client.get("/").get_data(as_text=True)
+        self.assertIn("Agrega tu primer producto", dashboard)
+        self.assertEqual(Sale.query.filter_by(user_id=self.user.id).count(), 1)
+
+    def test_adding_archived_sku_reactivates_record_without_losing_sales(self):
+        product = self.add_product(sku="ARCHIVO", barcode="700", stock=5)
+        sale = Sale(user_id=self.user.id, product_id=product.id, quantity=1, unit_price=20, total=20)
+        db.session.add(sale)
+        db.session.commit()
+        self.client.post(f"/products/{product.id}/delete")
+
+        response = self.client.post(
+            "/products/new",
+            data={
+                "sku": "ARCHIVO", "barcode": "700", "name": "Producto reactivado",
+                "cost_price": "8", "sale_price": "16", "stock": "4", "min_stock": "1",
+            },
+            follow_redirects=True,
+        )
+
+        db.session.refresh(product)
+        self.assertTrue(product.is_active)
+        self.assertEqual(product.name, "Producto reactivado")
+        self.assertIn("Producto reactivado", response.get_data(as_text=True))
         self.assertIsNotNone(db.session.get(Sale, sale.id))
 
     def test_delete_all_preserves_products_with_sales(self):
@@ -254,8 +310,9 @@ class InventoryImportTests(unittest.TestCase):
 
         response = self.client.post("/products/delete-all", follow_redirects=True)
 
-        self.assertIn("Conservamos 1", response.get_data(as_text=True))
+        self.assertIn("retiramos 1", response.get_data(as_text=True))
         self.assertIsNotNone(db.session.get(Product, protected.id))
+        self.assertFalse(db.session.get(Product, protected.id).is_active)
         self.assertIsNone(db.session.get(Product, removable.id))
         self.assertEqual(Sale.query.filter_by(user_id=self.user.id).count(), 1)
 

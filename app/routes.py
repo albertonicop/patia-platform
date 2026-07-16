@@ -627,13 +627,13 @@ def analytics():
     week_start = datetime.utcnow() - timedelta(days=7)
     user_id = session.get("user_id")
 
-    products = Product.query.filter_by(user_id=user_id).all()
+    products = Product.query.filter_by(user_id=user_id, is_active=True).all()
 
     total_products = len(products)
     total_sales = Sale.query.filter_by(user_id=user_id).count()
     inventory_value = (
         db.session.query(func.sum(Product.stock * Product.cost_price))
-        .filter(Product.user_id == user_id)
+        .filter(Product.user_id == user_id, Product.is_active.is_(True))
         .scalar()
         or 0
     )
@@ -809,7 +809,10 @@ def products():
     if trial_expired(user):
         return render_template("trial_expired.html")
     q = request.args.get("q", "").strip()
-    catalog_query = Product.query.filter(Product.user_id == session["user_id"])
+    catalog_query = Product.query.filter(
+        Product.user_id == session["user_id"],
+        Product.is_active.is_(True),
+    )
     catalog_count = catalog_query.count()
     query = catalog_query
     if q:
@@ -992,6 +995,7 @@ def import_products():
                     ).first()
 
                 if existing:
+                    existing.is_active = True
                     # Política existente: SKU suma stock; código lo reemplaza.
                     existing.stock = existing.stock + stock if matched_by_sku else stock
                     existing.sale_price = sale_price
@@ -1069,12 +1073,23 @@ def add_product():
     if not name or not sku:
         flash("Nombre y SKU son obligatorios.", "danger")
         return redirect(url_for("main.products"))
-    if Product.query.filter_by(user_id=user.id, sku=sku).first():
+    existing_sku = Product.query.filter_by(user_id=user.id, sku=sku).first()
+    if existing_sku and existing_sku.is_active:
         flash("Ya existe un producto con ese SKU. Usa un SKU diferente.", "danger")
         return redirect(url_for("main.products") + "#agregar-producto")
     barcode = request.form.get("barcode", "").strip() or None
-    if barcode and Product.query.filter_by(user_id=user.id, barcode=barcode).first():
+    existing_barcode = (
+        Product.query.filter_by(user_id=user.id, barcode=barcode).first()
+        if barcode else None
+    )
+    if existing_barcode and existing_barcode.is_active:
         flash("Ya existe un producto con ese código de barras.", "danger")
+        return redirect(url_for("main.products") + "#agregar-producto")
+    if existing_sku and existing_barcode and existing_sku.id != existing_barcode.id:
+        flash(
+            "El SKU y el código de barras pertenecen a productos históricos diferentes.",
+            "danger",
+        )
         return redirect(url_for("main.products") + "#agregar-producto")
     if (
         not math.isfinite(cost_price)
@@ -1084,19 +1099,32 @@ def add_product():
         flash("Precios y existencias no pueden ser negativos.", "danger")
         return redirect(url_for("main.products"))
 
-    p = Product(
-        user_id=user.id,
-        sku=sku,
-        barcode=barcode,
-        name=name,
-        category=request.form.get("category") or "General",
-        supplier=request.form.get("supplier"),
-        cost_price=cost_price,
-        sale_price=sale_price,
-        stock=stock,
-        min_stock=min_stock,
-    )
-    db.session.add(p)
+    p = existing_sku or existing_barcode
+    if p:
+        p.sku = sku
+        p.barcode = barcode
+        p.name = name
+        p.category = request.form.get("category") or "General"
+        p.supplier = request.form.get("supplier")
+        p.cost_price = cost_price
+        p.sale_price = sale_price
+        p.stock = stock
+        p.min_stock = min_stock
+        p.is_active = True
+    else:
+        p = Product(
+            user_id=user.id,
+            sku=sku,
+            barcode=barcode,
+            name=name,
+            category=request.form.get("category") or "General",
+            supplier=request.form.get("supplier"),
+            cost_price=cost_price,
+            sale_price=sale_price,
+            stock=stock,
+            min_stock=min_stock,
+        )
+        db.session.add(p)
     try:
         db.session.commit()
     except IntegrityError:
@@ -1120,7 +1148,11 @@ def edit_product(product_id):
     if access_block:
         return access_block
 
-    product = Product.query.filter_by(id=product_id, user_id=user.id).first_or_404()
+    product = Product.query.filter_by(
+        id=product_id,
+        user_id=user.id,
+        is_active=True,
+    ).first_or_404()
     if request.method == "GET":
         return render_template("edit_product.html", product=product, user=user)
 
@@ -1206,7 +1238,11 @@ def sell():
             flash("Selecciona un producto y una cantidad válida.", "danger")
             return redirect(url_for("main.sell"))
         product = (
-            Product.query.filter_by(id=product_id, user_id=session["user_id"])
+            Product.query.filter_by(
+                id=product_id,
+                user_id=session["user_id"],
+                is_active=True,
+            )
             .with_for_update()
             .first_or_404()
         )
@@ -1228,7 +1264,10 @@ def sell():
 
     sales = Sale.query.filter_by(user_id=session["user_id"]).order_by(Sale.created_at.desc(), Sale.id.desc()).all()
     sale_groups = _group_sales_by_ticket(sales, limit=12)
-    products = Product.query.filter_by(user_id=session["user_id"]).order_by(Product.name).all()
+    products = Product.query.filter_by(
+        user_id=session["user_id"],
+        is_active=True,
+    ).order_by(Product.name).all()
     return render_template("sell.html", products=products, sales=sales, sale_groups=sale_groups, user=user, payment_method_labels=PAYMENT_METHOD_LABELS)
 
 
@@ -1301,6 +1340,7 @@ def sell_cart():
             product.id: product
             for product in Product.query.filter(
                 Product.user_id == user.id,
+                Product.is_active.is_(True),
                 Product.id.in_(requested_items.keys()),
             )
             .order_by(Product.id)
@@ -1870,7 +1910,7 @@ def admin():
     total_products = total_sales_count = total_sales_money = trial_clients = expired_clients = expiring_soon = new_this_week = new_this_month = 0
 
     for u in users:
-        products_count = Product.query.filter_by(user_id=u.id).count()
+        products_count = Product.query.filter_by(user_id=u.id, is_active=True).count()
         sales_count = Sale.query.filter_by(user_id=u.id).count()
         sales_money = db.session.query(func.sum(Sale.total)).filter_by(user_id=u.id).scalar() or 0
         days_in_patia = (today - u.created_at).days if u.created_at else 0
@@ -1914,12 +1954,15 @@ def delete_product(product_id):
     access_block = _trial_access_response(current_user())
     if access_block:
         return access_block
-    product = Product.query.filter_by(id=product_id, user_id=session["user_id"]).first_or_404()
+    product = Product.query.filter_by(
+        id=product_id,
+        user_id=session["user_id"],
+        is_active=True,
+    ).first_or_404()
     if Sale.query.filter_by(product_id=product.id, user_id=session["user_id"]).first():
-        flash(
-            "No puedes eliminar un producto con ventas registradas porque forma parte de tu historial.",
-            "danger",
-        )
+        product.is_active = False
+        db.session.commit()
+        flash("Producto retirado del catálogo. Su historial de ventas se conserva.", "success")
         return redirect(url_for("main.products") + "#catalogo")
     db.session.delete(product)
     db.session.commit()
@@ -1935,11 +1978,12 @@ def delete_all_products():
     if access_block:
         return access_block
     user_id = session["user_id"]
-    products = Product.query.filter_by(user_id=user_id).all()
+    products = Product.query.filter_by(user_id=user_id, is_active=True).all()
     deleted = 0
     protected = 0
     for product in products:
         if Sale.query.filter_by(user_id=user_id, product_id=product.id).first():
+            product.is_active = False
             protected += 1
             continue
         db.session.delete(product)
@@ -1947,7 +1991,7 @@ def delete_all_products():
     db.session.commit()
     if protected:
         flash(
-            f"Eliminamos {deleted} productos sin ventas. Conservamos {protected} porque forman parte de tu historial.",
+            f"Eliminamos {deleted} productos sin ventas y retiramos {protected} del catálogo conservando su historial.",
             "info",
         )
     else:
@@ -1968,9 +2012,14 @@ def delete_selected_products():
     deleted = 0
     protected = 0
     for product_id in ids:
-        product = Product.query.filter_by(id=product_id, user_id=user_id).first()
+        product = Product.query.filter_by(
+            id=product_id,
+            user_id=user_id,
+            is_active=True,
+        ).first()
         if product:
             if Sale.query.filter_by(product_id=product.id, user_id=user_id).first():
+                product.is_active = False
                 protected += 1
                 continue
             db.session.delete(product)
@@ -1978,7 +2027,7 @@ def delete_selected_products():
     db.session.commit()
     if protected:
         flash(
-            f"Eliminamos {deleted} seleccionados. Conservamos {protected} con historial de ventas.",
+            f"Eliminamos {deleted} seleccionados y retiramos {protected} conservando su historial.",
             "info",
         )
     else:

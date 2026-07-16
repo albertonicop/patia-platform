@@ -293,6 +293,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
         self.assertIn("ticket_id", self.columns(inspector, "sale"))
         self.assertIn("payment_method", self.columns(inspector, "sale"))
+        self.assertIn("is_active", self.columns(inspector, "product"))
         self.assertEqual(
             self.columns(inspector, "stripe_webhook_event"),
             CURRENT_WEBHOOK_COLUMNS,
@@ -300,7 +301,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260715_04",
+                "20260715_05",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -359,6 +360,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
         self.assertIn("ticket_id", self.columns(inspector, "sale"))
         self.assertIn("payment_method", self.columns(inspector, "sale"))
+        self.assertIn("is_active", self.columns(inspector, "product"))
         self.assertEqual(
             self.columns(inspector, "stripe_webhook_event"),
             CURRENT_WEBHOOK_COLUMNS,
@@ -366,7 +368,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260715_04",
+                "20260715_05",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
