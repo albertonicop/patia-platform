@@ -5224,3 +5224,26 @@ table {
   margin-top: 24px;
   text-decoration: none;
 }
+
+/* PATIA V1: edición manual de inventario */
+.app-shell-v2 .product-edit-v1__card {
+  max-width: 900px;
+}
+
+.app-shell-v2 .product-edit-v1__warning {
+  color: #7a4b16;
+  font-weight: 650;
+}
+
+.app-shell-v2 .product-edit-v1__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .app-shell-v2 .product-edit-v1__actions .btn {
+    width: 100%;
+  }
+}

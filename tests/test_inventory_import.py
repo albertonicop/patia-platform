@@ -149,6 +149,77 @@ class InventoryImportTests(unittest.TestCase):
         self.assertIn("Ya existe un producto con ese SKU", response.get_data(as_text=True))
         self.assertEqual(Product.query.filter_by(user_id=self.user.id).count(), 1)
 
+    def test_duplicate_manual_barcode_is_rejected_without_server_error(self):
+        self.add_product(barcode="750123")
+        response = self.client.post(
+            "/products/new",
+            data={
+                "sku": "SKU-LIBRE", "barcode": "750123", "name": "Segundo producto",
+                "cost_price": "5", "sale_price": "10", "stock": "2", "min_stock": "1",
+            },
+            follow_redirects=True,
+        )
+        self.assertIn("Ya existe un producto con ese código de barras", response.get_data(as_text=True))
+        self.assertEqual(Product.query.filter_by(user_id=self.user.id).count(), 1)
+
+    def test_product_edit_preserves_historical_sale_values(self):
+        product = self.add_product()
+        sale = Sale(user_id=self.user.id, product_id=product.id, quantity=2, unit_price=20, total=40)
+        db.session.add(sale)
+        db.session.commit()
+
+        response = self.client.post(
+            f"/products/{product.id}/edit",
+            data={
+                "name": "Producto editado", "sku": "EDITADO", "barcode": "8800",
+                "category": "Nueva", "supplier": "Proveedor", "cost_price": "12",
+                "sale_price": "35", "stock": "9", "min_stock": "3",
+            },
+            follow_redirects=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        db.session.refresh(product)
+        db.session.refresh(sale)
+        self.assertEqual((product.name, product.sale_price, product.stock), ("Producto editado", 35, 9))
+        self.assertEqual((sale.unit_price, sale.total), (20, 40))
+
+    def test_product_edit_rejects_other_company_product(self):
+        product = self.add_product()
+        other = User(email="other@patia.test", company_name="Otra", email_verified=True)
+        other.set_password("Password123")
+        db.session.add(other)
+        db.session.commit()
+        with self.client.session_transaction() as session:
+            session["user_id"] = other.id
+
+        response = self.client.get(f"/products/{product.id}/edit")
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_product_edit_rejects_duplicate_sku_and_barcode(self):
+        product = self.add_product(sku="ORIGINAL", barcode="100")
+        self.add_product(sku="OCUPADO", barcode="200")
+        payload = {
+            "name": "Producto", "sku": "OCUPADO", "barcode": "100",
+            "cost_price": "1", "sale_price": "2", "stock": "1", "min_stock": "1",
+        }
+        self.assertEqual(self.client.post(f"/products/{product.id}/edit", data=payload).status_code, 409)
+        payload["sku"] = "LIBRE"
+        payload["barcode"] = "200"
+        self.assertEqual(self.client.post(f"/products/{product.id}/edit", data=payload).status_code, 409)
+
+    def test_product_edit_validates_numbers_without_server_error(self):
+        product = self.add_product()
+        response = self.client.post(
+            f"/products/{product.id}/edit",
+            data={
+                "name": "Producto", "sku": "VALIDO", "cost_price": "-1",
+                "sale_price": "2", "stock": "1", "min_stock": "1",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_product_with_sales_cannot_be_deleted(self):
         product = self.add_product()
         sale = Sale(

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Editar producto{% endblock %}
+
+{% block content %}
+<div class="inventory-v2 product-edit-v1">
+  <header class="module-intro-v2">
+    <span>Inventario</span>
+    <h2>Editar producto</h2>
+    <p>Actualiza los datos actuales. Las ventas ya registradas conservarán el precio y total que tuvieron al venderse.</p>
+  </header>
+
+  <section class="card inventory-v2__panel product-edit-v1__card">
+    <form class="inventory-v2__product-form" method="post" action="{{ url_for('main.edit_product', product_id=product.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="inventory-v2__field inventory-v2__field--wide">
+        <label for="edit-product-name">Nombre del producto <span>*</span></label>
+        <input id="edit-product-name" name="name" value="{{ product.name }}" required maxlength="160" autocomplete="off">
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-sku">SKU <span>*</span></label>
+        <input id="edit-product-sku" name="sku" value="{{ product.sku }}" required maxlength="64" autocomplete="off">
+        <small>Debe ser único dentro de tu empresa.</small>
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-barcode">Código de barras <em>Opcional</em></label>
+        <input id="edit-product-barcode" name="barcode" value="{{ product.barcode or '' }}" maxlength="64" autocomplete="off">
+        <small>Si lo capturas, no puede pertenecer a otro producto de tu catálogo.</small>
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-category">Categoría</label>
+        <input id="edit-product-category" name="category" value="{{ product.category }}" maxlength="80">
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-supplier">Proveedor <em>Opcional</em></label>
+        <input id="edit-product-supplier" name="supplier" value="{{ product.supplier or '' }}" maxlength="120">
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-cost">Precio de compra</label>
+        <input id="edit-product-cost" name="cost_price" type="number" value="{{ product.cost_price }}" min="0" step="0.01" inputmode="decimal" required>
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-price">Precio de venta</label>
+        <input id="edit-product-price" name="sale_price" type="number" value="{{ product.sale_price }}" min="0" step="0.01" inputmode="decimal" required>
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-stock">Stock actual</label>
+        <input id="edit-product-stock" name="stock" type="number" value="{{ product.stock }}" min="0" step="1" inputmode="numeric" required aria-describedby="stock-change-warning">
+        <small id="stock-change-warning" class="product-edit-v1__warning">Este valor reemplaza las existencias actuales. PATIA V1.0 no conserva un historial de ajustes manuales.</small>
+      </div>
+      <div class="inventory-v2__field">
+        <label for="edit-product-min-stock">Stock mínimo</label>
+        <input id="edit-product-min-stock" name="min_stock" type="number" value="{{ product.min_stock }}" min="0" step="1" inputmode="numeric" required>
+      </div>
+      <div class="product-edit-v1__actions inventory-v2__field--wide">
+        <button class="btn" type="submit">Guardar cambios</button>
+        <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">Cancelar</a>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

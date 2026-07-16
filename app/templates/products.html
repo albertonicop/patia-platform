@@ -152,6 +152,7 @@
                 <td>{{ p.category }}</td><td>{{ p.supplier or '-' }}</td><td>{{ p.stock }} / min {{ p.min_stock }}</td>
                 <td>{{ p.sale_price|money }}</td><td>{{ p.margin }}%</td><td>{{ p.inventory_value|money }}</td>
                 <td>
+                  <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=p.id) }}">Editar</a>
                   <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm('¿Eliminar este producto? Si tiene ventas registradas, PATIA lo conservará para proteger tu historial.');">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn ghost" type="submit">Eliminar</button>

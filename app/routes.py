@@ -1059,6 +1059,10 @@ def add_product():
     if Product.query.filter_by(user_id=user.id, sku=sku).first():
         flash("Ya existe un producto con ese SKU. Usa un SKU diferente.", "danger")
         return redirect(url_for("main.products") + "#agregar-producto")
+    barcode = request.form.get("barcode", "").strip() or None
+    if barcode and Product.query.filter_by(user_id=user.id, barcode=barcode).first():
+        flash("Ya existe un producto con ese código de barras.", "danger")
+        return redirect(url_for("main.products") + "#agregar-producto")
     if (
         not math.isfinite(cost_price)
         or not math.isfinite(sale_price)
@@ -1070,7 +1074,7 @@ def add_product():
     p = Product(
         user_id=user.id,
         sku=sku,
-        barcode=request.form.get("barcode") or None,
+        barcode=barcode,
         name=name,
         category=request.form.get("category") or "General",
         supplier=request.form.get("supplier"),
@@ -1092,6 +1096,85 @@ def add_product():
         return redirect(url_for("main.products") + "#agregar-producto")
     flash("Producto creado correctamente.", "success")
     return redirect(url_for("main.products"))
+
+
+@main.route("/products/<int:product_id>/edit", methods=["GET", "POST"])
+def edit_product(product_id):
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    access_block = _trial_access_response(user)
+    if access_block:
+        return access_block
+
+    product = Product.query.filter_by(id=product_id, user_id=user.id).first_or_404()
+    if request.method == "GET":
+        return render_template("edit_product.html", product=product, user=user)
+
+    name = request.form.get("name", "").strip()
+    sku = request.form.get("sku", "").strip()
+    barcode = request.form.get("barcode", "").strip() or None
+    try:
+        cost_price = float(request.form.get("cost_price") or 0)
+        sale_price = float(request.form.get("sale_price") or 0)
+        stock = int(request.form.get("stock") or 0)
+        min_stock = int(request.form.get("min_stock") or 0)
+    except (TypeError, ValueError):
+        flash("Revisa precios y existencias e inténtalo nuevamente.", "danger")
+        return render_template("edit_product.html", product=product, user=user), 400
+
+    if not name or not sku:
+        flash("Nombre y SKU son obligatorios.", "danger")
+        return render_template("edit_product.html", product=product, user=user), 400
+    if (
+        not math.isfinite(cost_price)
+        or not math.isfinite(sale_price)
+        or min(cost_price, sale_price, stock, min_stock) < 0
+    ):
+        flash("Precios y existencias no pueden ser negativos.", "danger")
+        return render_template("edit_product.html", product=product, user=user), 400
+
+    duplicate_sku = Product.query.filter(
+        Product.user_id == user.id,
+        Product.sku == sku,
+        Product.id != product.id,
+    ).first()
+    if duplicate_sku:
+        flash("Ya existe otro producto con ese SKU.", "danger")
+        return render_template("edit_product.html", product=product, user=user), 409
+
+    if barcode:
+        duplicate_barcode = Product.query.filter(
+            Product.user_id == user.id,
+            Product.barcode == barcode,
+            Product.id != product.id,
+        ).first()
+        if duplicate_barcode:
+            flash("Ya existe otro producto con ese código de barras.", "danger")
+            return render_template("edit_product.html", product=product, user=user), 409
+
+    product.name = name
+    product.sku = sku
+    product.barcode = barcode
+    product.category = request.form.get("category", "").strip() or "General"
+    product.supplier = request.form.get("supplier", "").strip() or None
+    product.cost_price = cost_price
+    product.sale_price = sale_price
+    product.stock = stock
+    product.min_stock = min_stock
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        current_app.logger.info(
+            "Edición de producto rechazada por identificador duplicado para user_id=%s",
+            user.id,
+        )
+        flash("No pudimos guardar el producto porque el SKU ya está en uso.", "danger")
+        return render_template("edit_product.html", product=product, user=user), 409
+
+    flash("Producto actualizado correctamente. Las ventas anteriores conservaron sus importes originales.", "success")
+    return redirect(url_for("main.products") + "#catalogo")
 
 
 @main.route("/sell", methods=["GET", "POST"])
