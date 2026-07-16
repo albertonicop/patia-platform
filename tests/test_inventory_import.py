@@ -111,6 +111,8 @@ class InventoryImportTests(unittest.TestCase):
         self.assertIn("Borrar todo el catálogo", html)
         self.assertIn("Producto existente", html)
         self.assertIn("<table>", html)
+        self.assertIn('data-label="Producto"', html)
+        self.assertIn('data-label="Acciones"', html)
 
     def test_search_without_results_keeps_real_catalog_context(self):
         self.add_product()

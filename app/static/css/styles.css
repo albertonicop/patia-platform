@@ -5402,3 +5402,134 @@ table {
   .legal-v1__footer { align-items: flex-start; flex-direction: column; }
   .legal-v1__document { margin-top: 8px; }
 }
+
+/* V1.0.1 stabilization: responsive records and semantic feedback ------- */
+.app-shell-v2 .flash.success {
+    border-color: #b9e7d6;
+    background: #eefaf5;
+    color: #176649;
+}
+
+.app-shell-v2 .flash.danger {
+    border-color: #f1c6ce;
+    background: #fff3f5;
+    color: #8b2f42;
+}
+
+.app-shell-v2 .flash.info,
+.app-shell-v2 .flash.warning {
+    border-color: #d8d6f4;
+    background: #f5f4ff;
+    color: #51458d;
+}
+
+@media (max-width: 620px) {
+    .app-shell-v2 .inventory-v2__catalog .table-wrap,
+    .app-shell-v2 .pos-v2__recent .table-wrap {
+        overflow: visible;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog table,
+    .app-shell-v2 .inventory-v2__catalog tbody,
+    .app-shell-v2 .inventory-v2__catalog tr,
+    .app-shell-v2 .inventory-v2__catalog td,
+    .app-shell-v2 .pos-v2__recent table,
+    .app-shell-v2 .pos-v2__recent tbody,
+    .app-shell-v2 .pos-v2__recent tr,
+    .app-shell-v2 .pos-v2__recent td {
+        display: block;
+        width: 100%;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog table,
+    .app-shell-v2 .pos-v2__recent table {
+        min-width: 0 !important;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog thead,
+    .app-shell-v2 .pos-v2__recent thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+
+    .app-shell-v2 .inventory-v2__catalog tbody,
+    .app-shell-v2 .pos-v2__recent tbody {
+        display: grid;
+        gap: 14px;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog tr,
+    .app-shell-v2 .pos-v2__recent tr {
+        display: block;
+        width: 100%;
+        padding: 8px 15px;
+        border: 1px solid var(--v2-line);
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog td,
+    .app-shell-v2 .pos-v2__recent td {
+        display: grid;
+        grid-template-columns: minmax(88px, .42fr) minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        padding: 11px 0;
+        overflow-wrap: anywhere;
+        border-bottom: 1px solid #eceef4;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog td:last-child,
+    .app-shell-v2 .pos-v2__recent td:last-child {
+        border-bottom: 0;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog td::before,
+    .app-shell-v2 .pos-v2__recent td::before {
+        content: attr(data-label);
+        color: #62697c;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog td[data-label="Acciones"],
+    .app-shell-v2 .pos-v2__recent td[data-label="Acciones"] {
+        grid-template-columns: 1fr;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog td[data-label="Acciones"] .btn,
+    .app-shell-v2 .inventory-v2__catalog td[data-label="Acciones"] form,
+    .app-shell-v2 .pos-v2__recent .pos-v2__sale-actions,
+    .app-shell-v2 .pos-v2__recent .pos-v2__sale-actions .btn {
+        width: 100%;
+    }
+
+    .app-shell-v2 .inventory-v2__catalog td[data-label="Acciones"] .btn,
+    .app-shell-v2 .pos-v2__recent .pos-v2__sale-actions .btn {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .app-shell-v2 .inventory-v2__import-form input[type="file"] {
+        min-width: 0;
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    .app-shell-v2 .inventory-v2__import-form input[type="file"]::file-selector-button {
+        min-height: 40px;
+        margin-right: 8px;
+        padding: 0 10px;
+        border: 1px solid #d8dce6;
+        border-radius: 9px;
+        background: #f7f8fb;
+        color: #41485c;
+        font: inherit;
+        font-weight: 750;
+    }
+}

@@ -251,6 +251,9 @@ class PosFirstSaleTests(unittest.TestCase):
         self.assertIn("La cancelación se mantiene por producto", populated_html)
         self.assertIn("Café Premium", populated_html)
         self.assertIn("Cancelar línea", populated_html)
+        self.assertIn('data-label="Método"', populated_html)
+        self.assertIn('data-label="Total"', populated_html)
+        self.assertIn('data-label="Acciones"', populated_html)
 
     def test_product_names_are_never_written_with_inner_html(self):
         self.add_product(name="<img src=x onerror=alert(1)>")

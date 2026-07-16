@@ -101,12 +101,12 @@
           <tbody>
             {% for ticket in sale_groups %}
               <tr>
-                <td><strong>{{ ticket.folio }}</strong></td>
-                <td>{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ ticket.item_count }} {{ "artículo" if ticket.item_count == 1 else "artículos" }}<small>{{ ticket.sales|length }} {{ "producto" if ticket.sales|length == 1 else "productos" }}</small></td>
-                <td>{{ payment_method_labels.get(ticket.payment_method, "No especificado") }}</td>
-                <td>{{ ticket.total|money }}</td>
-                <td>
+                <td data-label="Folio"><strong>{{ ticket.folio }}</strong></td>
+                <td data-label="Fecha y hora">{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td data-label="Artículos">{{ ticket.item_count }} {{ "artículo" if ticket.item_count == 1 else "artículos" }}<small>{{ ticket.sales|length }} {{ "producto" if ticket.sales|length == 1 else "productos" }}</small></td>
+                <td data-label="Método">{{ payment_method_labels.get(ticket.payment_method, "No especificado") }}</td>
+                <td data-label="Total">{{ ticket.total|money }}</td>
+                <td data-label="Acciones">
                   <div class="pos-v2__sale-actions">
                     <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id) }}" class="btn ghost" target="_blank" rel="noopener">Ver ticket</a>
                     <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id, print=1) }}" class="btn ghost" target="_blank" rel="noopener">Reimprimir</a>

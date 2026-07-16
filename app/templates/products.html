@@ -148,10 +148,14 @@
           <tbody>
             {% for p in products %}
               <tr class="{% if p.stock <= p.min_stock %}danger-row{% endif %}">
-                <td><b>{{ p.name }}</b><small>{{ p.sku }} · {{ p.barcode or 'sin código' }}</small></td>
-                <td>{{ p.category }}</td><td>{{ p.supplier or '-' }}</td><td>{{ p.stock }} / min {{ p.min_stock }}</td>
-                <td>{{ p.sale_price|money }}</td><td>{{ p.margin }}%</td><td>{{ p.inventory_value|money }}</td>
-                <td>
+                <td data-label="Producto"><b>{{ p.name }}</b><small>{{ p.sku }} · {{ p.barcode or 'sin código' }}</small></td>
+                <td data-label="Categoría">{{ p.category }}</td>
+                <td data-label="Proveedor">{{ p.supplier or '-' }}</td>
+                <td data-label="Stock">{{ p.stock }} / min {{ p.min_stock }}</td>
+                <td data-label="Precio">{{ p.sale_price|money }}</td>
+                <td data-label="Margen">{{ p.margin }}%</td>
+                <td data-label="Valor">{{ p.inventory_value|money }}</td>
+                <td data-label="Acciones">
                   <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=p.id) }}">Editar</a>
                   <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm('¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su historial.');">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
