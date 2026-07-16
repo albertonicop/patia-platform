@@ -111,6 +111,16 @@ class PhaseEExperienceTests(unittest.TestCase):
         self.assertIn('class="sidebar-v2__toggle"', html)
         self.assertIn('aria-controls="primary-navigation"', html)
 
+    def test_whatsapp_help_is_contained_in_sidebar_without_losing_accessibility(self):
+        self.login_user()
+        html = self.client.get("/suppliers").get_data(as_text=True)
+
+        sidebar = html[html.index('<aside class="sidebar sidebar-v2">'):html.index("</aside>")]
+        self.assertIn('class="whatsapp-float whatsapp-float-v2"', sidebar)
+        self.assertIn('aria-label="Contactar a PATIA por WhatsApp"', sidebar)
+        self.assertIn('target="_blank"', sidebar)
+        self.assertIn('rel="noopener noreferrer"', sidebar)
+
     def test_logout_stays_post_with_csrf(self):
         self.login_user()
         html = self.client.get("/suppliers").get_data(as_text=True)

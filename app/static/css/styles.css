@@ -5270,6 +5270,57 @@ table {
   }
 }
 
+/* V1.0.1 stabilization: collision-free support access ------------------ */
+.app-shell-v2 .sidebar-v2 {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.app-shell-v2 .sidebar-v2 .whatsapp-float-v2 {
+    position: static !important;
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin: auto 0 12px !important;
+}
+
+.app-shell-v2 .sidebar-v2 .sidebar-v2__footer {
+    position: static !important;
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .app-shell-v2 .sidebar-v2 {
+        overflow: visible;
+    }
+
+    .app-shell-v2 .sidebar-v2 .whatsapp-float-v2 {
+        position: absolute !important;
+        top: 24px;
+        right: 112px !important;
+        left: auto !important;
+        margin: 0 !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .app-shell-v2 .sidebar-v2 .whatsapp-float-v2 {
+        width: 44px !important;
+        min-width: 44px;
+        padding: 0 !important;
+    }
+
+    .app-shell-v2 .sidebar-v2 .whatsapp-float-v2 span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+}
+
 /* PATIA V1: documentos legales operativos */
 .auth-v2__legal {
   margin: 20px 0 0;
