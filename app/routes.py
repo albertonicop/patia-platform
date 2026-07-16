@@ -1429,8 +1429,20 @@ def _safe_stripe_error(error):
         "[redacted-stripe-id]",
         message,
     )
+
+
     code = getattr(error, "code", None) or getattr(error, "http_status", None)
     return type(error).__name__, code or "none", message or "none"
+
+
+@main.route("/terminos")
+def terms():
+    return render_template("legal.html", document="terms")
+
+
+@main.route("/privacidad")
+def privacy():
+    return render_template("legal.html", document="privacy")
 
 
 @main.route("/create-checkout-session", methods=["POST"])

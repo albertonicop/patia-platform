@@ -90,6 +90,10 @@
     {% endwith %}
 
     {% block content %}{% endblock %}
+    <footer class="app-legal-footer-v1">
+      <a href="{{ url_for('main.terms') }}">Términos</a>
+      <a href="{{ url_for('main.privacy') }}">Privacidad</a>
+    </footer>
   </main>
 
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>

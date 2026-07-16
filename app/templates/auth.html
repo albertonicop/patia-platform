@@ -139,6 +139,11 @@
           <button type="submit" class="auth-btn auth-v2__submit">{{ button }}</button>
         </form>
 
+        <p class="auth-v2__legal">
+          {% if mode == "register" %}Al crear tu cuenta aceptas los {% endif %}<a href="{{ url_for('main.terms') }}">Términos de servicio</a>
+          y puedes consultar el <a href="{{ url_for('main.privacy') }}">Aviso de privacidad</a>.
+        </p>
+
         <p class="auth-v2__switch">
           {% if mode == "login" %}
             ¿Aún no tienes cuenta? <a href="/register">Comienza tu prueba gratis</a>

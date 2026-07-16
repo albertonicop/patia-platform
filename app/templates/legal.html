@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <title>{% if document == 'terms' %}Términos de servicio{% else %}Aviso de privacidad{% endif %} | PATIA</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=105">
+</head>
+<body class="legal-v1">
+  <header class="legal-v1__header">
+    <a href="{{ url_for('main.dashboard') }}" aria-label="Volver al inicio de PATIA"><img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA"></a>
+    <nav aria-label="Documentos legales"><a href="{{ url_for('main.terms') }}">Términos</a><a href="{{ url_for('main.privacy') }}">Privacidad</a></nav>
+  </header>
+  <main class="legal-v1__document">
+    <p class="legal-v1__draft">Borrador operativo sujeto a revisión legal</p>
+    {% if document == "terms" %}
+      <h1>Términos de servicio</h1>
+      <p class="legal-v1__updated">Última actualización: 15 de julio de 2026</p>
+      <p>Estos términos describen las condiciones generales para crear una cuenta y utilizar PATIA. No constituyen asesoría jurídica definitiva y deberán ser revisados por un profesional antes de su adopción final.</p>
+      <h2>1. Responsable del servicio</h2>
+      <p>Proveedor: <strong>[RAZÓN SOCIAL PENDIENTE DE DEFINIR]</strong>. Domicilio: <strong>[DOMICILIO LEGAL PENDIENTE DE DEFINIR]</strong>. Contacto legal: <strong>[CORREO DE CONTACTO PENDIENTE DE DEFINIR]</strong>.</p>
+      <h2>2. Cuenta y uso permitido</h2>
+      <p>La persona usuaria debe proporcionar información correcta, proteger sus credenciales y utilizar PATIA para la operación legítima de su negocio. No debe intentar acceder a cuentas ajenas, afectar el servicio ni usarlo para actividades ilícitas.</p>
+      <h2>3. Prueba y suscripción</h2>
+      <p>PATIA ofrece una prueba de 14 días. PATIA Pro tiene el precio mostrado durante la contratación, actualmente $199 MXN al mes. Stripe procesa el pago y puede solicitar datos adicionales conforme a sus propias condiciones.</p>
+      <h2>4. Renovación y cancelación</h2>
+      <p>La suscripción se renueva según el periodo informado en Checkout. Puede administrarse o cancelarse desde el portal de cliente. Una cancelación programada conserva el acceso hasta el final del periodo pagado, salvo que Stripe indique otra condición.</p>
+      <h2>5. Datos y disponibilidad</h2>
+      <p>La persona usuaria conserva responsabilidad sobre la exactitud de sus productos, ventas y datos del negocio. PATIA aplica medidas razonables de operación y seguridad, pero no promete disponibilidad ininterrumpida ni resultados comerciales específicos.</p>
+      <h2>6. Proveedores externos</h2>
+      <p>El servicio puede apoyarse en Render para infraestructura, Stripe para pagos y Resend para correo. Cada proveedor trata información conforme a sus propios términos y avisos.</p>
+      <h2>7. Cambios y contacto</h2>
+      <p>Los cambios materiales deberán comunicarse por medios razonables. Para soporte operativo puedes <a href="https://wa.me/522381186483" target="_blank" rel="noopener noreferrer">contactar a PATIA por WhatsApp</a>. El contacto legal definitivo permanece pendiente de completar.</p>
+    {% else %}
+      <h1>Aviso de privacidad</h1>
+      <p class="legal-v1__updated">Última actualización: 15 de julio de 2026</p>
+      <p>Este documento explica de forma general qué información utiliza PATIA. Es un borrador operativo sujeto a revisión legal y no afirma cumplimiento o certificaciones que no hayan sido verificadas.</p>
+      <h2>1. Responsable</h2>
+      <p>Responsable: <strong>[RAZÓN SOCIAL PENDIENTE DE DEFINIR]</strong>. Domicilio: <strong>[DOMICILIO LEGAL PENDIENTE DE DEFINIR]</strong>. Contacto de privacidad: <strong>[CORREO DE PRIVACIDAD PENDIENTE DE DEFINIR]</strong>.</p>
+      <h2>2. Datos almacenados</h2>
+      <p>PATIA puede almacenar datos de cuenta y contacto, información del negocio, catálogo, proveedores, ventas, configuración de suscripción e identificadores técnicos necesarios para operar y proteger el servicio.</p>
+      <h2>3. Finalidades</h2>
+      <p>Los datos se utilizan para autenticar la cuenta, prestar las funciones contratadas, generar métricas y tickets, enviar correos operativos, administrar suscripciones, atender soporte y prevenir abuso o accesos no autorizados.</p>
+      <h2>4. Proveedores y transferencias operativas</h2>
+      <p>Render puede alojar la aplicación y la base de datos; Stripe procesa pagos y administra suscripciones; Resend entrega correos. Solo se comparte la información necesaria para esas finalidades operativas, conforme a la configuración y políticas de cada proveedor.</p>
+      <h2>5. Cookies y sesiones</h2>
+      <p>PATIA utiliza cookies de sesión necesarias para mantener el acceso autenticado, aplicar protección CSRF y preservar seguridad. No se describen aquí cookies publicitarias porque PATIA no declara utilizarlas actualmente.</p>
+      <h2>6. Seguridad y conservación</h2>
+      <p>Se aplican controles técnicos razonables, como contraseñas protegidas, sesiones seguras, aislamiento entre cuentas y conexiones HTTPS en producción. Ningún sistema puede garantizar riesgo cero. Los periodos definitivos de conservación deberán formalizarse en la revisión legal.</p>
+      <h2>7. Derechos y contacto</h2>
+      <p>La persona titular podrá solicitar información, corrección o eliminación cuando resulte aplicable. El canal legal definitivo está pendiente de definir; mientras tanto puede <a href="https://wa.me/522381186483" target="_blank" rel="noopener noreferrer">contactar a PATIA por WhatsApp</a> para canalizar su solicitud.</p>
+    {% endif %}
+    <div class="legal-v1__actions"><a href="{{ url_for('main.dashboard') }}">Volver a PATIA</a></div>
+  </main>
+  <footer class="legal-v1__footer"><span>PATIA © 2026</span><a href="{{ url_for('main.terms') }}">Términos</a><a href="{{ url_for('main.privacy') }}">Privacidad</a></footer>
+</body>
+</html>
