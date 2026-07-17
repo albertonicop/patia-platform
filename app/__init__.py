@@ -4,7 +4,8 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-from flask import Flask, render_template
+from flask import Flask, render_template, session
+from flask_babel import Babel, gettext
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
@@ -17,6 +18,14 @@ db = SQLAlchemy()
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address, default_limits=[])
 migrate = Migrate()
+babel = Babel()
+
+SUPPORTED_LANGUAGES = ("es", "en")
+
+
+def select_locale():
+    selected = session.get("language", "es")
+    return selected if selected in SUPPORTED_LANGUAGES else "es"
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -96,6 +105,9 @@ def create_app():
             "RATELIMIT_STORAGE_URI",
             "memory://",
         ),
+        BABEL_DEFAULT_LOCALE="es",
+        BABEL_SUPPORTED_LOCALES=SUPPORTED_LANGUAGES,
+        BABEL_TRANSLATION_DIRECTORIES="translations",
     )
 
     trusted_proxy_hops = int(
@@ -114,6 +126,7 @@ def create_app():
     migrate.init_app(app, db)
     csrf.init_app(app)
     limiter.init_app(app)
+    babel.init_app(app, locale_selector=select_locale)
 
     from .routes import current_user, has_pro_access, main
 
@@ -128,6 +141,8 @@ def create_app():
         return {
             "has_pro_access": has_pro_access(user),
             "trial_days_left": trial_days_left,
+            "supported_languages": SUPPORTED_LANGUAGES,
+            "current_language": select_locale(),
         }
 
     @app.cli.command("audit-manual-pro-candidates")
@@ -185,8 +200,8 @@ def create_app():
         return render_template(
             "error.html",
             status_code=status_code,
-            error_title=title,
-            error_message=message,
+            error_title=gettext(title),
+            error_message=gettext(message),
         ), status_code
 
     for status_code in (400, 403, 404, 429):

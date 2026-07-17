@@ -39,7 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
         menuToggle.addEventListener("click", () => {
             const open = navigation.classList.toggle("is-open");
             menuToggle.setAttribute("aria-expanded", String(open));
-            menuToggle.querySelector("span").textContent = open ? "Cerrar" : "Menú";
+            menuToggle.querySelector("span").textContent = open
+                ? menuToggle.dataset.closeLabel
+                : menuToggle.dataset.openLabel;
         });
     }
 

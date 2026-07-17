@@ -1,20 +1,20 @@
 {% extends 'base_clean.html' %}
-{% block title %}Verificar correo{% endblock %}
+{% block title %}{{ _("Verificar correo") }}{% endblock %}
 {% block content %}
 
 <main class="verify-v2">
   <div class="card verify-v2__card">
     <span class="verify-v2__icon" aria-hidden="true"><i class="fa-regular fa-envelope"></i></span>
-    <span class="verify-v2__eyebrow">Un último paso</span>
-    <h1>Verifica tu correo</h1>
+    <span class="verify-v2__eyebrow">{{ _("Un último paso") }}</span>
+    <h1>{{ _("Verifica tu correo") }}</h1>
     <p class="verify-v2__intro">
-        Te enviamos un código de 6 dígitos a <strong>{{ user.email }}</strong>. 
-        Ingrésalo aquí para activar tu cuenta.
+        {{ _("Te enviamos un código de 6 dígitos a") }} <strong>{{ user.email }}</strong>.
+        {{ _("Ingrésalo aquí para activar tu cuenta.") }}
     </p>
 
     <form method="POST" class="verify-v2__form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="verification-code">Código de verificación</label>
+        <label for="verification-code">{{ _("Código de verificación") }}</label>
         <input 
             id="verification-code"
             type="text" 
@@ -26,14 +26,14 @@
             autofocus
             required
         >
-        <button class="btn" type="submit">Verificar correo</button>
+        <button class="btn" type="submit">{{ _("Verificar correo") }}</button>
     </form>
 
     <div class="verify-v2__resend">
-      <p>¿No recibiste el código? Revisa spam o solicita uno nuevo.</p>
+      <p>{{ _("¿No recibiste el código? Revisa spam o solicita uno nuevo.") }}</p>
       <form method="POST" action="/resend-verification">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn ghost" type="submit">Reenviar código</button>
+        <button class="btn ghost" type="submit">{{ _("Reenviar código") }}</button>
       </form>
     </div>
   </div>

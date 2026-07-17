@@ -121,7 +121,7 @@ class PosFirstSaleTests(unittest.TestCase):
         self.assertIn('id="checkout-button" type="button" disabled', html)
         self.assertIn("if (!cart.length || saleSubmitting) return", html)
         self.assertIn("saleSubmitting = true", html)
-        self.assertIn('checkoutButton.textContent = "Registrando venta…"', html)
+        self.assertIn("checkoutButton.textContent = POS_I18N.submitting", html)
         self.assertIn("saleSubmitting = false", html)
 
     def test_successful_sale_returns_confirmation_and_updates_stock(self):

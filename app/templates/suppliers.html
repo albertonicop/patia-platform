@@ -1,69 +1,69 @@
 {% extends 'base.html' %}
-{% block title %}Proveedores{% endblock %}
+{% block title %}{{ _("Proveedores") }}{% endblock %}
 {% block content %}
 
 <div class="suppliers-v2">
 <section class="suppliers-v2__intro">
-  <span>Compras y abastecimiento</span>
-  <h2>Mantén a tus proveedores a la mano</h2>
-  <p>Guarda sus datos de contacto y abre WhatsApp directamente cuando necesites preparar un pedido.</p>
+  <span>{{ _("Compras y abastecimiento") }}</span>
+  <h2>{{ _("Mantén a tus proveedores a la mano") }}</h2>
+  <p>{{ _("Guarda sus datos de contacto y abre WhatsApp directamente cuando necesites preparar un pedido.") }}</p>
 </section>
 
 <section class="suppliers-v2__layout">
   <div class="card suppliers-v2__form-card" id="agregar-proveedor">
-    <h3>{% if suppliers %}Agregar proveedor{% else %}Agrega tu primer proveedor{% endif %}</h3>
+    <h3>{% if suppliers %}{{ _("Agregar proveedor") }}{% else %}{{ _("Agrega tu primer proveedor") }}{% endif %}</h3>
     <form method="POST" class="stack suppliers-v2__form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label for="supplier-name">Proveedor</label>
-      <input id="supplier-name" name="name" required placeholder="Nombre del proveedor">
-      <label for="supplier-contact">Persona de contacto <small>Opcional</small></label>
-      <input id="supplier-contact" name="contact" placeholder="Nombre del contacto">
-      <label for="supplier-phone">WhatsApp o teléfono <small>Opcional</small></label>
-      <input id="supplier-phone" name="phone" inputmode="tel" placeholder="Ej. 238 123 4567">
-      <label for="supplier-notes">Notas <small>Opcional</small></label>
-      <textarea id="supplier-notes" name="notes" placeholder="Productos, horarios o condiciones de compra"></textarea>
-      <button class="btn" type="submit">Guardar proveedor</button>
+      <label for="supplier-name">{{ _("Proveedor") }}</label>
+      <input id="supplier-name" name="name" required placeholder="{{ _('Nombre del proveedor') }}">
+      <label for="supplier-contact">{{ _("Persona de contacto") }} <small>{{ _("Opcional") }}</small></label>
+      <input id="supplier-contact" name="contact" placeholder="{{ _('Nombre del contacto') }}">
+      <label for="supplier-phone">{{ _("WhatsApp o teléfono") }} <small>{{ _("Opcional") }}</small></label>
+      <input id="supplier-phone" name="phone" inputmode="tel" placeholder="{{ _('Ej. 238 123 4567') }}">
+      <label for="supplier-notes">{{ _("Notas") }} <small>{{ _("Opcional") }}</small></label>
+      <textarea id="supplier-notes" name="notes" placeholder="{{ _('Productos, horarios o condiciones de compra') }}"></textarea>
+      <button class="btn" type="submit">{{ _("Guardar proveedor") }}</button>
     </form>
   </div>
 
   <div class="card suppliers-v2__list-card">
-    <h3>Directorio de proveedores</h3>
+    <h3>{{ _("Directorio de proveedores") }}</h3>
     {% if suppliers %}
     <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Proveedor</th>
-          <th>Contacto</th>
-          <th>Teléfono</th>
-          <th>WhatsApp</th>
-<th>Acciones</th>
+          <th>{{ _("Proveedor") }}</th>
+          <th>{{ _("Contacto") }}</th>
+          <th>{{ _("Teléfono") }}</th>
+          <th>{{ _("WhatsApp") }}</th>
+<th>{{ _("Acciones") }}</th>
         </tr>
       </thead>
       <tbody>
         {% for s in suppliers %}
         <tr>
-          <td data-label="Proveedor">{{ s.name }}</td>
-          <td data-label="Contacto">{{ s.contact or '-' }}</td>
-          <td data-label="Teléfono">{{ s.phone or '-' }}</td>
-          <td data-label="WhatsApp">
+          <td data-label="{{ _('Proveedor') }}">{{ s.name }}</td>
+          <td data-label="{{ _('Contacto') }}">{{ s.contact or '-' }}</td>
+          <td data-label="{{ _('Teléfono') }}">{{ s.phone or '-' }}</td>
+          <td data-label="{{ _('WhatsApp') }}">
             {% if s.phone %}
               <a class="btn ghost" target="_blank"
                  href="https://wa.me/{{ s.phone|replace(' ', '')|replace('-', '') }}?text=Hola%20{{ s.name }},%20necesito%20hacer%20un%20pedido%20para%20mi%20tienda.">
-                 Pedir
+                 {{ _("Pedir") }}
               </a>
             {% else %}
               -
             {% endif %}
           </td>
-          <td data-label="Acciones">
+          <td data-label="{{ _('Acciones') }}">
 <form class="keep-scroll" method="POST"
       action="/suppliers/{{s.id}}/delete"
-      onsubmit="return confirm('¿Eliminar este proveedor?');">
+      onsubmit="return confirm({{ _('¿Eliminar este proveedor?')|tojson }});">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
 <button class="btn ghost" type="submit">
-Eliminar
+{{ _("Eliminar") }}
 </button>
 
 </form>
@@ -76,9 +76,9 @@ Eliminar
     {% else %}
       <div class="suppliers-v2__empty module-empty-v2">
         <i class="fa-solid fa-truck-ramp-box" aria-hidden="true"></i>
-        <h4>Aún no tienes proveedores</h4>
-        <p>Registra el primero para consultar sus datos y contactarlo sin buscar en otras aplicaciones.</p>
-        <a class="btn" href="#agregar-proveedor">Agregar primer proveedor</a>
+        <h4>{{ _("Aún no tienes proveedores") }}</h4>
+        <p>{{ _("Registra el primero para consultar sus datos y contactarlo sin buscar en otras aplicaciones.") }}</p>
+        <a class="btn" href="#agregar-proveedor">{{ _("Agregar primer proveedor") }}</a>
       </div>
     {% endif %}
   </div>

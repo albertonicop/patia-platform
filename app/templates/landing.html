@@ -1,161 +1,162 @@
 <!doctype html>
-<html lang="es">
+<html lang="{{ current_language }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
-  <title>PATIA | Control de inventario y ventas para PyMEs</title>
+  <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
   <meta name="description" content="Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=107">
 </head>
 
 <body class="landing-v2 landing-premium-v1">
+  {% include "_language_selector.html" %}
   <header class="landing-v2__header">
-    <a href="/" class="landing-v2__brand" aria-label="PATIA, inicio">
+    <a href="/" class="landing-v2__brand" aria-label="{{ _('PATIA, inicio') }}">
       <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
     </a>
-    <nav class="landing-v2__nav" aria-label="Navegación principal">
-      <a href="#beneficios">Beneficios</a>
-      <a href="#como-funciona">Cómo funciona</a>
-      <a href="#precio">Precio</a>
-      <a href="/login" class="landing-v2__login">Iniciar sesión</a>
+    <nav class="landing-v2__nav" aria-label="{{ _('Navegación principal') }}">
+      <a href="#beneficios">{{ _("Beneficios") }}</a>
+      <a href="#como-funciona">{{ _("Cómo funciona") }}</a>
+      <a href="#precio">{{ _("Precio") }}</a>
+      <a href="/login" class="landing-v2__login">{{ _("Iniciar sesión") }}</a>
     </nav>
   </header>
 
   <main>
     <section class="landing-v2__hero">
       <div class="landing-v2__hero-copy">
-        <span class="landing-v2__eyebrow">Control operativo para PyMEs en México</span>
-        <h1>Vende, controla tu inventario y entiende tu negocio.</h1>
+        <span class="landing-v2__eyebrow">{{ _("Control operativo para PyMEs en México") }}</span>
+        <h1>{{ _("Vende, controla tu inventario y entiende tu negocio.") }}</h1>
         <p class="landing-v2__lead">
-          PATIA conecta cada venta con tus existencias y convierte la operación diaria en indicadores claros para comprar mejor, evitar faltantes y conocer qué productos impulsan tu negocio.
+          {{ _("PATIA conecta cada venta con tus existencias y convierte la operación diaria en indicadores claros para comprar mejor, evitar faltantes y conocer qué productos impulsan tu negocio.") }}
         </p>
         <div class="landing-v2__actions">
           <a href="/register" class="landing-v2__button landing-v2__button--primary">
-            Empezar prueba de 14 días
+            {{ _("Empezar prueba de 14 días") }}
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
           <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__button landing-v2__button--secondary">
-            Contratar por $199 al mes
+            {{ _("Contratar por $199 al mes") }}
           </a>
         </div>
-        <div class="landing-v2__assurances" aria-label="Condiciones de la prueba">
-          <span><i class="fa-solid fa-check" aria-hidden="true"></i> Sin instalación</span>
-          <span><i class="fa-solid fa-check" aria-hidden="true"></i> Configuración sencilla</span>
-          <span><i class="fa-solid fa-check" aria-hidden="true"></i> Soporte directo</span>
+        <div class="landing-v2__assurances" aria-label="{{ _('Condiciones de la prueba') }}">
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin instalación") }}</span>
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Configuración sencilla") }}</span>
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Soporte directo") }}</span>
         </div>
       </div>
 
-      <div class="landing-v2__preview" aria-label="Vista previa del panel PATIA">
+      <div class="landing-v2__preview" aria-label="{{ _('Vista previa del panel PATIA') }}">
         <div class="landing-v2__preview-top">
           <div>
-            <span>Resumen semanal</span>
-            <strong>Negocio en orden</strong>
+            <span>{{ _("Resumen semanal") }}</span>
+            <strong>{{ _("Negocio en orden") }}</strong>
           </div>
-          <span class="landing-v2__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> Actualizado</span>
+          <span class="landing-v2__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> {{ _("Actualizado") }}</span>
         </div>
         <div class="landing-v2__preview-metrics">
-          <article><span>Ventas 7 días</span><strong>$18,430</strong><small>Actividad registrada</small></article>
-          <article><span>Inventario</span><strong>$82,400</strong><small>Valor estimado</small></article>
-          <article><span>Stock bajo</span><strong>3</strong><small>Productos por atender</small></article>
+          <article><span>{{ _("Ventas 7 días") }}</span><strong>$18,430</strong><small>{{ _("Actividad registrada") }}</small></article>
+          <article><span>{{ _("Inventario") }}</span><strong>$82,400</strong><small>{{ _("Valor estimado") }}</small></article>
+          <article><span>{{ _("Stock bajo") }}</span><strong>3</strong><small>{{ _("Productos por atender") }}</small></article>
         </div>
         <div class="landing-v2__preview-chart">
-          <div class="landing-v2__preview-chart-head"><span>Productos con mayor movimiento</span><small>Últimos 7 días</small></div>
+          <div class="landing-v2__preview-chart-head"><span>{{ _("Productos con mayor movimiento") }}</span><small>{{ _("Últimos 7 días") }}</small></div>
           <div class="landing-v2__bars" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </div>
         <div class="landing-v2__preview-alert">
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-          <div><strong>2 productos requieren atención</strong><span>Revisa existencias antes de tu próximo pedido.</span></div>
+          <div><strong>{{ _("2 productos requieren atención") }}</strong><span>{{ _("Revisa existencias antes de tu próximo pedido.") }}</span></div>
         </div>
       </div>
     </section>
 
-    <section class="landing-v2__trust" aria-label="Sectores objetivo">
-      <span>Hecho para negocios como el tuyo</span>
+    <section class="landing-v2__trust" aria-label="{{ _('Sectores objetivo') }}">
+        <span>{{ _("Hecho para negocios como el tuyo") }}</span>
       <div>
-        <span><i class="fa-solid fa-store" aria-hidden="true"></i> Abarrotes</span>
-        <span><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> Minisúpers</span>
-        <span><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> Ferreterías</span>
-        <span><i class="fa-solid fa-capsules" aria-hidden="true"></i> Farmacias</span>
-        <span><i class="fa-solid fa-truck" aria-hidden="true"></i> Distribuidoras</span>
+        <span><i class="fa-solid fa-store" aria-hidden="true"></i> {{ _("Abarrotes") }}</span>
+        <span><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> {{ _("Minisúpers") }}</span>
+        <span><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> {{ _("Ferreterías") }}</span>
+        <span><i class="fa-solid fa-capsules" aria-hidden="true"></i> {{ _("Farmacias") }}</span>
+        <span><i class="fa-solid fa-truck" aria-hidden="true"></i> {{ _("Distribuidoras") }}</span>
       </div>
     </section>
 
-    <section class="landing-premium-v1__proof" aria-label="Resultados operativos con PATIA">
-      <article><strong>Una sola fuente de información</strong><span>Ventas, inventario, proveedores y tickets permanecen conectados.</span></article>
-      <article><strong>Menos decisiones a ciegas</strong><span>Consulta indicadores y alertas antes de comprar o reabastecer.</span></article>
-      <article><strong>Listo para operar desde el navegador</strong><span>Sin instalaciones, desde computadora o celular.</span></article>
+    <section class="landing-premium-v1__proof" aria-label="{{ _('Resultados operativos con PATIA') }}">
+      <article><strong>{{ _("Una sola fuente de información") }}</strong><span>{{ _("Ventas, inventario, proveedores y tickets permanecen conectados.") }}</span></article>
+      <article><strong>{{ _("Menos decisiones a ciegas") }}</strong><span>{{ _("Consulta indicadores y alertas antes de comprar o reabastecer.") }}</span></article>
+      <article><strong>{{ _("Listo para operar desde el navegador") }}</strong><span>{{ _("Sin instalaciones, desde computadora o celular.") }}</span></article>
     </section>
 
     <section class="landing-v2__section" id="beneficios">
       <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">Lo que resuelve PATIA</span>
-        <h2>Menos incertidumbre. Más control diario.</h2>
-        <p>Información práctica para operar mejor, reducir faltantes y conocer el desempeño real de tu negocio.</p>
+        <span class="landing-v2__eyebrow">{{ _("Lo que resuelve PATIA") }}</span>
+        <h2>{{ _("Menos incertidumbre. Más control diario.") }}</h2>
+        <p>{{ _("Información práctica para operar mejor, reducir faltantes y conocer el desempeño real de tu negocio.") }}</p>
       </header>
       <div class="landing-v2__benefits">
         <article>
           <span class="landing-v2__benefit-icon"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></span>
-          <h3>Inventario confiable</h3>
-          <p>Consulta existencias, costos, precios y valor de inventario sin depender de libretas dispersas.</p>
+          <h3>{{ _("Inventario confiable") }}</h3>
+          <p>{{ _("Consulta existencias, costos, precios y valor de inventario sin depender de libretas dispersas.") }}</p>
         </article>
         <article>
           <span class="landing-v2__benefit-icon"><i class="fa-solid fa-cash-register" aria-hidden="true"></i></span>
-          <h3>Ventas conectadas</h3>
-          <p>Cada venta descuenta stock y alimenta tus indicadores para que la información permanezca actualizada.</p>
+          <h3>{{ _("Ventas conectadas") }}</h3>
+          <p>{{ _("Cada venta descuenta stock y alimenta tus indicadores para que la información permanezca actualizada.") }}</p>
         </article>
         <article>
           <span class="landing-v2__benefit-icon"><i class="fa-solid fa-bell" aria-hidden="true"></i></span>
-          <h3>Alertas oportunas</h3>
-          <p>Identifica productos agotados o con pocas unidades antes de perder ventas por falta de mercancía.</p>
+          <h3>{{ _("Alertas oportunas") }}</h3>
+          <p>{{ _("Identifica productos agotados o con pocas unidades antes de perder ventas por falta de mercancía.") }}</p>
         </article>
         <article>
           <span class="landing-v2__benefit-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
-          <h3>Rentabilidad visible</h3>
-          <p>Conoce productos con mayor movimiento, ventas semanales y utilidad estimada desde el panel ejecutivo.</p>
+          <h3>{{ _("Rentabilidad visible") }}</h3>
+          <p>{{ _("Conoce productos con mayor movimiento, ventas semanales y utilidad estimada desde el panel ejecutivo.") }}</p>
         </article>
       </div>
     </section>
 
     <section class="landing-v2__section landing-v2__steps" id="como-funciona">
       <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">Cómo funciona</span>
-        <h2>Empieza a tener control en tres pasos.</h2>
+        <span class="landing-v2__eyebrow">{{ _("Cómo funciona") }}</span>
+        <h2>{{ _("Empieza a tener control en tres pasos.") }}</h2>
       </header>
       <ol class="landing-v2__step-list">
-        <li><span>01</span><div><h3>Carga tus productos</h3><p>Regístralos manualmente o utiliza la plantilla de importación de PATIA.</p></div></li>
-        <li><span>02</span><div><h3>Registra tus ventas</h3><p>Usa el punto de venta para descontar existencias y mantener datos actualizados.</p></div></li>
-        <li><span>03</span><div><h3>Actúa con información</h3><p>Consulta alertas, productos destacados, ventas y necesidades de reabastecimiento.</p></div></li>
+        <li><span>01</span><div><h3>{{ _("Carga tus productos") }}</h3><p>{{ _("Regístralos manualmente o utiliza la plantilla de importación de PATIA.") }}</p></div></li>
+        <li><span>02</span><div><h3>{{ _("Registra tus ventas") }}</h3><p>{{ _("Usa el punto de venta para descontar existencias y mantener datos actualizados.") }}</p></div></li>
+        <li><span>03</span><div><h3>{{ _("Actúa con información") }}</h3><p>{{ _("Consulta alertas, productos destacados, ventas y necesidades de reabastecimiento.") }}</p></div></li>
       </ol>
     </section>
 
     <section class="landing-v2__section landing-v2__comparison">
       <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">Antes y después</span>
-        <h2>De administrar por memoria a operar con claridad.</h2>
+        <span class="landing-v2__eyebrow">{{ _("Antes y después") }}</span>
+        <h2>{{ _("De administrar por memoria a operar con claridad.") }}</h2>
       </header>
       <div class="landing-v2__comparison-grid">
         <article class="landing-v2__comparison-card landing-v2__comparison-card--before">
-          <span>Antes</span>
-          <h3>Información dispersa</h3>
+          <span>{{ _("Antes") }}</span>
+          <h3>{{ _("Información dispersa") }}</h3>
           <ul>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Inventario en libretas o archivos separados</li>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Faltantes descubiertos demasiado tarde</li>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Compras basadas únicamente en intuición</li>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> Sin visión clara de ventas y márgenes</li>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Inventario en libretas o archivos separados") }}</li>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Faltantes descubiertos demasiado tarde") }}</li>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Compras basadas únicamente en intuición") }}</li>
+            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Sin visión clara de ventas y márgenes") }}</li>
           </ul>
         </article>
         <article class="landing-v2__comparison-card landing-v2__comparison-card--after">
-          <span>Con PATIA</span>
-          <h3>Una operación conectada</h3>
+          <span>{{ _("Con PATIA") }}</span>
+          <h3>{{ _("Una operación conectada") }}</h3>
           <ul>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Productos, ventas y proveedores centralizados</li>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Alertas visibles antes de quedarte sin stock</li>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Indicadores para preparar tus compras</li>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Panel ejecutivo disponible en cualquier momento</li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Productos, ventas y proveedores centralizados") }}</li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Alertas visibles antes de quedarte sin stock") }}</li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Indicadores para preparar tus compras") }}</li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Panel ejecutivo disponible en cualquier momento") }}</li>
           </ul>
         </article>
       </div>
@@ -163,60 +164,60 @@
 
     <section class="landing-v2__section landing-premium-v1__pro-value">
       <div class="landing-premium-v1__pro-copy">
-        <span class="landing-v2__eyebrow">El valor de PATIA Pro</span>
-        <h2>No es solo registrar datos. Es saber qué hacer con ellos.</h2>
-        <p>Tu operación genera información todos los días. PATIA Pro la organiza y la convierte en seguimiento comercial útil para decidir con mayor confianza.</p>
-        <a href="#precio" class="landing-v2__button landing-v2__button--secondary">Ver precio y condiciones</a>
+        <span class="landing-v2__eyebrow">{{ _("El valor de PATIA Pro") }}</span>
+        <h2>{{ _("No es solo registrar datos. Es saber qué hacer con ellos.") }}</h2>
+        <p>{{ _("Tu operación genera información todos los días. PATIA Pro la organiza y la convierte en seguimiento comercial útil para decidir con mayor confianza.") }}</p>
+        <a href="#precio" class="landing-v2__button landing-v2__button--secondary">{{ _("Ver precio y condiciones") }}</a>
       </div>
       <div class="landing-premium-v1__pro-grid">
-        <article><i class="fa-solid fa-chart-line" aria-hidden="true"></i><div><strong>Reportes completos</strong><span>Ventas, utilidad estimada, categorías y desempeño del inventario.</span></div></article>
-        <article><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><div><strong>Recomendaciones explicadas</strong><span>Sugerencias basadas en la actividad registrada en tu propia cuenta.</span></div></article>
-        <article><i class="fa-solid fa-box-open" aria-hidden="true"></i><div><strong>Seguimiento de existencias</strong><span>Alertas y contexto para anticipar productos que necesitan atención.</span></div></article>
-        <article><i class="fa-solid fa-receipt" aria-hidden="true"></i><div><strong>Operación profesional</strong><span>POS, historial y tickets listos para consultar o imprimir.</span></div></article>
+        <article><i class="fa-solid fa-chart-line" aria-hidden="true"></i><div><strong>{{ _("Reportes completos") }}</strong><span>{{ _("Ventas, utilidad estimada, categorías y desempeño del inventario.") }}</span></div></article>
+        <article><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><div><strong>{{ _("Recomendaciones explicadas") }}</strong><span>{{ _("Sugerencias basadas en la actividad registrada en tu propia cuenta.") }}</span></div></article>
+        <article><i class="fa-solid fa-box-open" aria-hidden="true"></i><div><strong>{{ _("Seguimiento de existencias") }}</strong><span>{{ _("Alertas y contexto para anticipar productos que necesitan atención.") }}</span></div></article>
+        <article><i class="fa-solid fa-receipt" aria-hidden="true"></i><div><strong>{{ _("Operación profesional") }}</strong><span>{{ _("POS, historial y tickets listos para consultar o imprimir.") }}</span></div></article>
       </div>
     </section>
 
     <section class="landing-v2__section landing-v2__pricing" id="precio">
       <div class="landing-v2__pricing-copy">
-        <span class="landing-v2__eyebrow">Precio simple</span>
-        <h2>Todo lo necesario para controlar mejor tu negocio.</h2>
-        <p>Sin paquetes confusos ni costos ocultos. Prueba PATIA durante 14 días y decide con calma.</p>
+        <span class="landing-v2__eyebrow">{{ _("Precio simple") }}</span>
+        <h2>{{ _("Todo lo necesario para controlar mejor tu negocio.") }}</h2>
+        <p>{{ _("Sin paquetes confusos ni costos ocultos. Prueba PATIA durante 14 días y decide con calma.") }}</p>
       </div>
       <article class="landing-v2__price-card">
-        <span class="landing-v2__price-label">PATIA Pro</span>
-        <div class="landing-v2__price"><strong>$199</strong><span>MXN<br>al mes</span></div>
-        <p>Continúa operando sin límite de tiempo y desbloquea el análisis completo de tu negocio.</p>
+        <span class="landing-v2__price-label">{{ _("PATIA Pro") }}</span>
+        <div class="landing-v2__price"><strong>$199</strong><span>{{ _("MXN") }}<br>{{ _("al mes") }}</span></div>
+        <p>{{ _("Continúa operando sin límite de tiempo y desbloquea el análisis completo de tu negocio.") }}</p>
         <ul>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Inventario, ventas, proveedores y tickets</li>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Dashboard, reportes y recomendaciones IA</li>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Acceso desde computadora o celular</li>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> Suscripción mensual administrable</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Inventario, ventas, proveedores y tickets") }}</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Dashboard, reportes y recomendaciones IA") }}</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Acceso desde computadora o celular") }}</li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Suscripción mensual administrable") }}</li>
         </ul>
-        <a href="/register" class="landing-v2__button landing-v2__button--primary">Comenzar prueba gratis</a>
-        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">Contratar PATIA Pro directamente</a>
+        <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba gratis") }}</a>
+        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">{{ _("Contratar PATIA Pro directamente") }}</a>
       </article>
     </section>
 
     <section class="landing-v2__section landing-v2__faq">
       <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">Preguntas frecuentes</span>
-        <h2>Lo esencial antes de comenzar.</h2>
+        <span class="landing-v2__eyebrow">{{ _("Preguntas frecuentes") }}</span>
+        <h2>{{ _("Lo esencial antes de comenzar.") }}</h2>
       </header>
       <div class="landing-v2__faq-list">
-        <details><summary>¿Necesito instalar algún programa?</summary><p>No. PATIA funciona desde el navegador y puedes acceder desde computadora o celular.</p></details>
-        <details><summary>¿Puedo importar mis productos?</summary><p>Sí. PATIA incluye una plantilla para importar tu catálogo desde un archivo Excel o CSV.</p></details>
-        <details><summary>¿Qué pasa al terminar los 14 días?</summary><p>Tus datos permanecen en tu cuenta y puedes activar PATIA Pro por $199 MXN al mes.</p></details>
-        <details><summary>¿PATIA sirve para más de un tipo de negocio?</summary><p>Sí. Está diseñado para comercios y PyMEs que manejan productos, inventario y ventas.</p></details>
+        <details><summary>{{ _("¿Necesito instalar algún programa?") }}</summary><p>{{ _("No. PATIA funciona desde el navegador y puedes acceder desde computadora o celular.") }}</p></details>
+        <details><summary>{{ _("¿Puedo importar mis productos?") }}</summary><p>{{ _("Sí. PATIA incluye una plantilla para importar tu catálogo desde un archivo Excel o CSV.") }}</p></details>
+        <details><summary>{{ _("¿Qué pasa al terminar los 14 días?") }}</summary><p>{{ _("Tus datos permanecen en tu cuenta y puedes activar PATIA Pro por $199 MXN al mes.") }}</p></details>
+        <details><summary>{{ _("¿PATIA sirve para más de un tipo de negocio?") }}</summary><p>{{ _("Sí. Está diseñado para comercios y PyMEs que manejan productos, inventario y ventas.") }}</p></details>
       </div>
     </section>
 
     <section class="landing-v2__final">
-      <span class="landing-v2__eyebrow">Empieza hoy</span>
-      <h2>Tu negocio puede operar con más orden desde esta semana.</h2>
-      <p>Prueba PATIA durante 14 días y reúne tu operación en un solo lugar.</p>
+      <span class="landing-v2__eyebrow">{{ _("Empieza hoy") }}</span>
+      <h2>{{ _("Tu negocio puede operar con más orden desde esta semana.") }}</h2>
+      <p>{{ _("Prueba PATIA durante 14 días y reúne tu operación en un solo lugar.") }}</p>
       <div class="landing-v2__actions">
-        <a href="/register" class="landing-v2__button landing-v2__button--primary">Crear mi cuenta</a>
-        <a href="https://wa.me/522381186483" class="landing-v2__button landing-v2__button--secondary" target="_blank" rel="noopener noreferrer">Hablar con PATIA</a>
+        <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Crear mi cuenta") }}</a>
+        <a href="https://wa.me/522381186483" class="landing-v2__button landing-v2__button--secondary" target="_blank" rel="noopener noreferrer">{{ _("Hablar con PATIA") }}</a>
       </div>
     </section>
   </main>
@@ -224,16 +225,16 @@
   <footer class="landing-v2__footer">
     <div>
       <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
-      <p>Control operativo para PyMEs que quieren crecer con claridad.</p>
+      <p>{{ _("Control operativo para PyMEs que quieren crecer con claridad.") }}</p>
     </div>
     <div class="landing-v2__footer-links">
-      <a href="#beneficios">Beneficios</a>
-      <a href="#precio">Precio</a>
-      <a href="{{ url_for('main.terms') }}">Términos</a>
-      <a href="{{ url_for('main.privacy') }}">Privacidad</a>
-      <a href="/login">Iniciar sesión</a>
+      <a href="#beneficios">{{ _("Beneficios") }}</a>
+      <a href="#precio">{{ _("Precio") }}</a>
+      <a href="{{ url_for('main.terms') }}">{{ _("Términos") }}</a>
+      <a href="{{ url_for('main.privacy') }}">{{ _("Privacidad") }}</a>
+      <a href="/login">{{ _("Iniciar sesión") }}</a>
     </div>
-    <p class="landing-v2__copyright">PATIA © 2026 · NP Ventures</p>
+    <p class="landing-v2__copyright">{{ _("PATIA © 2026 · NP Ventures") }}</p>
   </footer>
 </body>
 </html>

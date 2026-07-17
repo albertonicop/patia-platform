@@ -307,6 +307,11 @@ class User(db.Model):
 
     rfc = db.Column(db.String(20), nullable=True)
     tax_regime = db.Column(db.String(120), nullable=True)
+    preferred_language = db.Column(
+        db.String(5),
+        nullable=False,
+        default="es",
+    )
 
     products = db.relationship(
         "Product",

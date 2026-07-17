@@ -4,74 +4,74 @@
 {% block content %}
 
 <section class="card" style="margin-bottom:20px;">
-  <h2>Centro de control PATIA</h2>
-  <p style="opacity:.75;">Clientes, pruebas, ventas procesadas y actividad general.</p>
+  <h2>{{ _("Centro de control PATIA") }}</h2>
+  <p style="opacity:.75;">{{ _("Clientes, pruebas, ventas procesadas y actividad general.") }}</p>
 </section>
 
 <section class="grid three" style="margin-bottom:20px;">
   <div class="card">
-    <h3>Clientes registrados</h3>
+    <h3>{{ _("Clientes registrados") }}</h3>
     <h2>{{ total_clients }}</h2>
   </div>
 
   <div class="card">
-    <h3>Productos totales</h3>
+    <h3>{{ _("Productos totales") }}</h3>
     <h2>{{ total_products }}</h2>
   </div>
 
   <div class="card">
-    <h3>Ventas procesadas</h3>
+    <h3>{{ _("Ventas procesadas") }}</h3>
     <h2>{{ total_sales_money|money }}</h2>
   </div>
 </section>
 
 <section class="grid three" style="margin-bottom:20px;">
   <div class="card">
-    <h3>En prueba</h3>
+    <h3>{{ _("En prueba") }}</h3>
     <h2>{{ trial_clients }}</h2>
   </div>
 
   <div class="card">
-    <h3>Vencen esta semana</h3>
+    <h3>{{ _("Vencen esta semana") }}</h3>
     <h2>{{ expiring_soon }}</h2>
   </div>
 
   <div class="card">
-    <h3>Pruebas vencidas</h3>
+    <h3>{{ _("Pruebas vencidas") }}</h3>
     <h2>{{ expired_clients }}</h2>
   </div>
 </section>
 
 <section class="grid two" style="margin-bottom:20px;">
   <div class="card">
-    <h3>Último cliente registrado</h3>
+    <h3>{{ _("Último cliente registrado") }}</h3>
     {% if latest_client %}
-      <h2>{{ latest_client.user.company_name or "Sin empresa" }}</h2>
+      <h2>{{ latest_client.user.company_name or _("Sin empresa") }}</h2>
       <p>{{ latest_client.user.email }}</p>
     {% else %}
-      <p>No hay clientes todavía.</p>
+      <p>{{ _("No hay clientes todavía.") }}</p>
     {% endif %}
   </div>
 
   <div class="card">
-    <h3>Cliente con más productos</h3>
+    <h3>{{ _("Cliente con más productos") }}</h3>
     {% if top_client %}
-      <h2>{{ top_client.user.company_name or "Sin empresa" }}</h2>
+      <h2>{{ top_client.user.company_name or _("Sin empresa") }}</h2>
       <p>{{ top_client.products_count }} productos registrados</p>
     {% else %}
-      <p>No hay productos todavía.</p>
+      <p>{{ _("No hay productos todavía.") }}</p>
     {% endif %}
   </div>
 </section>
 
 <section class="grid two" style="margin-bottom:20px;">
   <div class="card">
-    <h3>Nuevos esta semana</h3>
+    <h3>{{ _("Nuevos esta semana") }}</h3>
     <h2>{{ new_this_week }}</h2>
   </div>
 
   <div class="card">
-    <h3>Nuevos este mes</h3>
+    <h3>{{ _("Nuevos este mes") }}</h3>
     <h2>{{ new_this_month }}</h2>
   </div>
 </section>
@@ -85,17 +85,17 @@
     <table>
       <thead>
         <tr>
-          <th>Empresa</th>
-          <th>Contacto</th>
-          <th>Correo</th>
-          <th>Teléfono</th>
-          <th>Días en PATIA</th>
-          <th>Prueba</th>
-          <th>Productos</th>
-          <th>Ventas</th>
-          <th>Estado</th>
-          <th>WhatsApp</th>
-          <th>Acciones</th>
+          <th>{{ _("Empresa") }}</th>
+          <th>{{ _("Contacto") }}</th>
+          <th>{{ _("Correo") }}</th>
+          <th>{{ _("Teléfono") }}</th>
+          <th>{{ _("Días en PATIA") }}</th>
+          <th>{{ _("Prueba") }}</th>
+          <th>{{ _("Productos") }}</th>
+          <th>{{ _("Ventas") }}</th>
+          <th>{{ _("Estado") }}</th>
+          <th>{{ _("WhatsApp") }}</th>
+          <th>{{ _("Acciones") }}</th>
         </tr>
       </thead>
 
@@ -103,12 +103,12 @@
         {% for c in clients %}
         <tr>
           <td>
-            <b>{{ c.user.company_name or "Sin empresa" }}</b>
-            <small>{{ c.user.business_type or "Sin giro" }}</small>
+            <b>{{ c.user.company_name or _("Sin empresa") }}</b>
+            <small>{{ c.user.business_type or _("Sin giro") }}</small>
           </td>
 
           <td>
-            {{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or "Sin nombre" }}
+            {{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or _("Sin nombre") }}
           </td>
 
           <td>{{ c.user.email }}</td>
@@ -133,13 +133,13 @@
 
           <td>
            {% if c.status == "Pro" %}
-    <b style="color:#00ff66;">Pro</b>
+    <b style="color:#00ff66;">{{ _("Pro") }}</b>
 
 {% elif c.status == "Prueba" %}
-    <b style="color:#00ffcc;">Prueba</b>
+    <b style="color:#00ffcc;">{{ _("Prueba") }}</b>
 
 {% else %}
-    <b style="color:#ff8a8a;">Vencido</b>
+    <b style="color:#ff8a8a;">{{ _("Vencido") }}</b>
 {% endif %}
           </td>
 
@@ -156,7 +156,7 @@
           <td>
   <form method="POST"
       action="/admin/delete-user/{{c.user.id}}#clientes"
-      onsubmit="return confirm('¿Eliminar este cliente?');">
+      onsubmit="return confirm({{ _('¿Eliminar este cliente?')|tojson }});">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button class="btn ghost" type="submit">
         Eliminar

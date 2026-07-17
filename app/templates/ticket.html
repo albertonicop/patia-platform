@@ -1,37 +1,37 @@
 {% extends 'base.html' %}
-{% block title %}Ticket {{ folio }}{% endblock %}
+{% block title %}{{ _("Ticket") }} {{ folio }}{% endblock %}
 
 {% block content %}
 <div class="ticket-page-v2">
   <header class="module-intro-v2 ticket-page-v2__intro no-print-v2">
-    <span>Comprobante de venta</span>
-    <h2>Ticket {{ folio }}</h2>
-    <p>Consulta, reimprime o guarda una copia de esta operación.</p>
+    <span>{{ _("Comprobante de venta") }}</span>
+    <h2>{{ _("Ticket") }} {{ folio }}</h2>
+    <p>{{ _("Consulta, reimprime o guarda una copia de esta operación.") }}</p>
   </header>
 
   <div class="ticket-page-v2__layout">
     <article id="printable-ticket" class="ticket-print-v2 ticket-print-v2--80" aria-label="Ticket de venta {{ folio }}">
       <header class="ticket-print-v2__business">
-        <h1>{{ user.company_name or "Mi negocio" }}</h1>
+        <h1>{{ user.company_name or _("Mi negocio") }}</h1>
         {% if business_address %}<p>{{ business_address }}</p>{% endif %}
         {% if user.phone %}<p>Tel. {{ user.phone }}</p>{% endif %}
         {% if user.rfc %}<p>RFC: {{ user.rfc }}</p>{% endif %}
       </header>
 
       <div class="ticket-print-v2__meta">
-        <p><span>Folio</span><strong>{{ folio }}</strong></p>
-        <p><span>Fecha</span><strong>{{ ticket_created_at.strftime('%d/%m/%Y') }}</strong></p>
-        <p><span>Hora</span><strong>{{ ticket_created_at.strftime('%H:%M') }}</strong></p>
+        <p><span>{{ _("Folio") }}</span><strong>{{ folio }}</strong></p>
+        <p><span>{{ _("Fecha") }}</span><strong>{{ ticket_created_at.strftime('%d/%m/%Y') }}</strong></p>
+        <p><span>{{ _("Hora") }}</span><strong>{{ ticket_created_at.strftime('%H:%M') }}</strong></p>
       </div>
 
       <table class="ticket-print-v2__items">
-        <caption class="sr-only">Productos incluidos en la operación</caption>
-        <thead><tr><th scope="col">Cant.</th><th scope="col">Producto</th><th scope="col">P. unit.</th><th scope="col">Importe</th></tr></thead>
+        <caption class="sr-only">{{ _("Productos incluidos en la operación") }}</caption>
+        <thead><tr><th scope="col">{{ _("Cant.") }}</th><th scope="col">{{ _("Producto") }}</th><th scope="col">{{ _("P. unit.") }}</th><th scope="col">{{ _("Importe") }}</th></tr></thead>
         <tbody>
           {% for sale in sales %}
           <tr>
             <td>{{ sale.quantity }}</td>
-            <td>{{ sale.product.name if sale.product else "Producto no disponible" }}</td>
+            <td>{{ sale.product.name if sale.product else _("Producto no disponible") }}</td>
             <td>${{ "%.2f"|format(sale.unit_price) }}</td>
             <td>${{ "%.2f"|format(sale.total) }}</td>
           </tr>
@@ -40,33 +40,33 @@
       </table>
 
       <dl class="ticket-print-v2__totals">
-        <div><dt>Subtotal</dt><dd>{{ ticket_subtotal|money }}</dd></div>
+        <div><dt>{{ _("Subtotal") }}</dt><dd>{{ ticket_subtotal|money }}</dd></div>
         {# IVA y descuentos permanecerán ocultos hasta existir datos reales. #}
-        <div class="ticket-print-v2__total"><dt>Total</dt><dd>{{ ticket_total|money }}</dd></div>
+        <div class="ticket-print-v2__total"><dt>{{ _("Total") }}</dt><dd>{{ ticket_total|money }}</dd></div>
       </dl>
 
       <div class="ticket-print-v2__payment">
-        <span>Método de pago</span><strong>{{ payment_method }}</strong>
+        <span>{{ _("Método de pago") }}</span><strong>{{ payment_method }}</strong>
       </div>
 
       <footer class="ticket-print-v2__footer">
-        <strong>Gracias por su compra</strong>
-        <small>Powered by PATIA</small>
+        <strong>{{ _("Gracias por su compra") }}</strong>
+        <small>{{ _("Powered by PATIA") }}</small>
       </footer>
     </article>
 
-    <aside class="card module-card-v2 ticket-page-v2__actions no-print-v2" aria-label="Acciones del ticket">
-      <h3>Opciones del ticket</h3>
-      <p>Selecciona el ancho de tu impresora antes de continuar.</p>
+    <aside class="card module-card-v2 ticket-page-v2__actions no-print-v2" aria-label="{{ _('Acciones del ticket') }}">
+      <h3>{{ _("Opciones del ticket") }}</h3>
+      <p>{{ _("Selecciona el ancho de tu impresora antes de continuar.") }}</p>
       <fieldset class="ticket-page-v2__widths">
-        <legend>Ancho de papel</legend>
-        <label><input type="radio" name="ticket_width" value="58"> 58 mm</label>
-        <label><input type="radio" name="ticket_width" value="80" checked> 80 mm</label>
+        <legend>{{ _("Ancho de papel") }}</legend>
+        <label><input type="radio" name="ticket_width" value="58"> {{ _("58 mm") }}</label>
+        <label><input type="radio" name="ticket_width" value="80" checked> {{ _("80 mm") }}</label>
       </fieldset>
-      <button id="print-ticket" class="btn" type="button"><i class="fa-solid fa-print" aria-hidden="true"></i> Imprimir ticket</button>
-      <button id="save-ticket-pdf" class="btn ghost" type="button"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> Guardar o descargar como PDF</button>
-      <p id="pdf-help" class="ticket-page-v2__help">En el diálogo de impresión selecciona “Guardar como PDF” como destino.</p>
-      <a class="btn ghost" href="{{ url_for('main.sell') }}">Volver a ventas</a>
+      <button id="print-ticket" class="btn" type="button"><i class="fa-solid fa-print" aria-hidden="true"></i> {{ _("Imprimir ticket") }}</button>
+      <button id="save-ticket-pdf" class="btn ghost" type="button"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> {{ _("Guardar o descargar como PDF") }}</button>
+      <p id="pdf-help" class="ticket-page-v2__help">{{ _("En el diálogo de impresión selecciona “Guardar como PDF” como destino.") }}</p>
+      <a class="btn ghost" href="{{ url_for('main.sell') }}">{{ _("Volver a ventas") }}</a>
     </aside>
   </div>
 </div>

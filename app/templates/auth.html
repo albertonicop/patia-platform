@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="{{ current_language }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,39 +10,40 @@
 </head>
 
 <body class="auth-body auth-v2">
+  {% include "_language_selector.html" %}
   <main class="auth-v2__page">
     <aside class="auth-v2__story">
-      <a href="/" class="auth-v2__brand" aria-label="Volver al inicio de PATIA">
+      <a href="/" class="auth-v2__brand" aria-label="{{ _('Volver al inicio de PATIA') }}">
         <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
       </a>
       <div class="auth-v2__story-copy">
-        <span class="auth-v2__eyebrow">Control para negocios reales</span>
+        <span class="auth-v2__eyebrow">{{ _("Control para negocios reales") }}</span>
         {% if mode == "login" %}
-          <h1>Tu negocio, listo para continuar.</h1>
-          <p>Consulta ventas, inventario y alertas desde un panel claro y conectado.</p>
+          <h1>{{ _("Tu negocio, listo para continuar.") }}</h1>
+          <p>{{ _("Consulta ventas, inventario y alertas desde un panel claro y conectado.") }}</p>
         {% else %}
-          <h1>Empieza a operar con más claridad.</h1>
-          <p>Crea tu cuenta y prueba durante 14 días una forma más ordenada de controlar tu negocio.</p>
+          <h1>{{ _("Empieza a operar con más claridad.") }}</h1>
+          <p>{{ _("Crea tu cuenta y prueba durante 14 días una forma más ordenada de controlar tu negocio.") }}</p>
         {% endif %}
       </div>
       <div class="auth-v2__proof">
-        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>Inventario y ventas conectados</span></div>
-        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>Alertas de productos por agotarse</span></div>
-        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>Acceso seguro desde cualquier dispositivo</span></div>
+        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ _("Inventario y ventas conectados") }}</span></div>
+        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ _("Alertas de productos por agotarse") }}</span></div>
+        <div><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ _("Acceso seguro desde cualquier dispositivo") }}</span></div>
       </div>
-      <p class="auth-v2__story-footer">PATIA · Gestión inteligente para PyMEs</p>
+      <p class="auth-v2__story-footer">{{ _("PATIA · Gestión inteligente para PyMEs") }}</p>
     </aside>
 
     <section class="auth-v2__content">
       <div class="auth-v2__card">
         <header class="auth-v2__header">
           <span class="auth-v2__mobile-brand"><img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA"></span>
-          <span class="auth-v2__eyebrow">{% if mode == "login" %}Bienvenido de nuevo{% else %}Prueba gratuita de 14 días{% endif %}</span>
+          <span class="auth-v2__eyebrow">{% if mode == "login" %}{{ _("Bienvenido de nuevo") }}{% else %}{{ _("Prueba gratuita de 14 días") }}{% endif %}</span>
           <h2>{{ title }}</h2>
           {% if mode == "login" %}
-            <p>Ingresa tus datos para acceder al panel de tu negocio.</p>
+            <p>{{ _("Ingresa tus datos para acceder al panel de tu negocio.") }}</p>
           {% else %}
-            <p>Registra tu negocio. Todos los campos son necesarios para configurar tu cuenta.</p>
+            <p>{{ _("Registra tu negocio. Todos los campos son necesarios para configurar tu cuenta.") }}</p>
           {% endif %}
         </header>
 
@@ -67,88 +68,88 @@
           {% if mode == "register" %}
             <div class="auth-v2__grid">
               <div class="form-group auth-v2__field">
-                <label for="first_name">Nombre</label>
-                <input id="first_name" name="first_name" value="{{ form_data.get('first_name', '') if form_data is defined else '' }}" placeholder="Tu nombre" autocomplete="given-name" required>
+                <label for="first_name">{{ _("Nombre") }}</label>
+                <input id="first_name" name="first_name" value="{{ form_data.get('first_name', '') if form_data is defined else '' }}" placeholder="{{ _('Tu nombre') }}" autocomplete="given-name" required>
               </div>
               <div class="form-group auth-v2__field">
-                <label for="last_name">Apellido</label>
-                <input id="last_name" name="last_name" value="{{ form_data.get('last_name', '') if form_data is defined else '' }}" placeholder="Tu apellido" autocomplete="family-name" required>
+                <label for="last_name">{{ _("Apellido") }}</label>
+                <input id="last_name" name="last_name" value="{{ form_data.get('last_name', '') if form_data is defined else '' }}" placeholder="{{ _('Tu apellido') }}" autocomplete="family-name" required>
               </div>
             </div>
 
             <div class="form-group auth-v2__field">
-              <label for="company_name">Nombre de la empresa</label>
-              <input id="company_name" name="company_name" value="{{ form_data.get('company_name', '') if form_data is defined else '' }}" placeholder="Nombre de tu empresa" autocomplete="organization" required>
+              <label for="company_name">{{ _("Nombre de la empresa") }}</label>
+              <input id="company_name" name="company_name" value="{{ form_data.get('company_name', '') if form_data is defined else '' }}" placeholder="{{ _('Nombre de tu empresa') }}" autocomplete="organization" required>
             </div>
 
             <div class="form-group auth-v2__field">
-              <label for="phone">Teléfono</label>
-              <input id="phone" name="phone" value="{{ form_data.get('phone', '') if form_data is defined else '' }}" placeholder="Número telefónico" autocomplete="tel" required>
+              <label for="phone">{{ _("Teléfono") }}</label>
+              <input id="phone" name="phone" value="{{ form_data.get('phone', '') if form_data is defined else '' }}" placeholder="{{ _('Número telefónico') }}" autocomplete="tel" required>
             </div>
 
             <div class="form-group auth-v2__field">
-              <label for="address">Dirección</label>
-              <input id="address" name="address" value="{{ form_data.get('address', '') if form_data is defined else '' }}" placeholder="Calle, número, colonia" autocomplete="street-address" required>
+              <label for="address">{{ _("Dirección") }}</label>
+              <input id="address" name="address" value="{{ form_data.get('address', '') if form_data is defined else '' }}" placeholder="{{ _('Calle, número, colonia') }}" autocomplete="street-address" required>
             </div>
 
             <div class="auth-v2__grid">
               <div class="form-group auth-v2__field">
-                <label for="city">Ciudad</label>
-                <input id="city" name="city" value="{{ form_data.get('city', '') if form_data is defined else '' }}" placeholder="Ciudad" autocomplete="address-level2" required>
+                <label for="city">{{ _("Ciudad") }}</label>
+                <input id="city" name="city" value="{{ form_data.get('city', '') if form_data is defined else '' }}" placeholder="{{ _('Ciudad') }}" autocomplete="address-level2" required>
               </div>
               <div class="form-group auth-v2__field">
-                <label for="state">Estado</label>
-                <input id="state" name="state" value="{{ form_data.get('state', '') if form_data is defined else '' }}" placeholder="Estado" autocomplete="address-level1" required>
+                <label for="state">{{ _("Estado") }}</label>
+                <input id="state" name="state" value="{{ form_data.get('state', '') if form_data is defined else '' }}" placeholder="{{ _('Estado') }}" autocomplete="address-level1" required>
               </div>
             </div>
 
             <div class="auth-v2__grid">
               <div class="form-group auth-v2__field">
-                <label for="postal_code">Código postal</label>
-                <input id="postal_code" name="postal_code" value="{{ form_data.get('postal_code', '') if form_data is defined else '' }}" placeholder="CP" autocomplete="postal-code" required>
+                <label for="postal_code">{{ _("Código postal") }}</label>
+                <input id="postal_code" name="postal_code" value="{{ form_data.get('postal_code', '') if form_data is defined else '' }}" placeholder="{{ _('CP') }}" autocomplete="postal-code" required>
               </div>
               <div class="form-group auth-v2__field">
-                <label for="business_type">Giro del negocio</label>
+                <label for="business_type">{{ _("Giro del negocio") }}</label>
                 <select id="business_type" name="business_type" required>
-                  <option value="">Selecciona...</option>
+                  <option value="">{{ _("Selecciona...") }}</option>
                   {% set selected_business = form_data.get('business_type', '') if form_data is defined else '' %}
-                  <option value="Minisúper"{% if selected_business == 'Minisúper' %} selected{% endif %}>Minisúper</option>
-                  <option value="Abarrotes"{% if selected_business == 'Abarrotes' %} selected{% endif %}>Abarrotes</option>
-                  <option value="Ferretería"{% if selected_business == 'Ferretería' %} selected{% endif %}>Ferretería</option>
-                  <option value="Farmacia"{% if selected_business == 'Farmacia' %} selected{% endif %}>Farmacia</option>
-                  <option value="Distribuidora"{% if selected_business == 'Distribuidora' %} selected{% endif %}>Distribuidora</option>
-                  <option value="Otro"{% if selected_business == 'Otro' %} selected{% endif %}>Otro</option>
+                  <option value="Minisúper"{% if selected_business == 'Minisúper' %} selected{% endif %}>{{ _("Minisúper") }}</option>
+                  <option value="Abarrotes"{% if selected_business == 'Abarrotes' %} selected{% endif %}>{{ _("Abarrotes") }}</option>
+                  <option value="Ferretería"{% if selected_business == 'Ferretería' %} selected{% endif %}>{{ _("Ferretería") }}</option>
+                  <option value="Farmacia"{% if selected_business == 'Farmacia' %} selected{% endif %}>{{ _("Farmacia") }}</option>
+                  <option value="Distribuidora"{% if selected_business == 'Distribuidora' %} selected{% endif %}>{{ _("Distribuidora") }}</option>
+                  <option value="Otro"{% if selected_business == 'Otro' %} selected{% endif %}>{{ _("Otro") }}</option>
                 </select>
               </div>
             </div>
           {% endif %}
 
           <div class="form-group auth-v2__field">
-            <label for="email">Correo</label>
-            <input id="email" type="email" name="email" value="{{ form_data.get('email', '') if form_data is defined else '' }}" placeholder="correo@empresa.com" autocomplete="email" required>
+            <label for="email">{{ _("Correo") }}</label>
+            <input id="email" type="email" name="email" value="{{ form_data.get('email', '') if form_data is defined else '' }}" placeholder="{{ _('correo@empresa.com') }}" autocomplete="email" required>
           </div>
 
           <div class="form-group auth-v2__field">
             <div class="auth-v2__label-row">
-              <label for="password">Contraseña</label>
-              {% if mode == "login" %}<a href="/forgot-password">¿La olvidaste?</a>{% endif %}
+              <label for="password">{{ _("Contraseña") }}</label>
+              {% if mode == "login" %}<a href="/forgot-password">{{ _("¿La olvidaste?") }}</a>{% endif %}
             </div>
-            <input id="password" type="password" name="password" placeholder="Mínimo 8 caracteres" autocomplete="{% if mode == 'login' %}current-password{% else %}new-password{% endif %}" required minlength="8">
+            <input id="password" type="password" name="password" placeholder="{{ _('Mínimo 8 caracteres') }}" autocomplete="{% if mode == 'login' %}current-password{% else %}new-password{% endif %}" required minlength="8">
           </div>
 
           <button type="submit" class="auth-btn auth-v2__submit">{{ button }}</button>
         </form>
 
         <p class="auth-v2__legal">
-          {% if mode == "register" %}Al crear tu cuenta aceptas los {% endif %}<a href="{{ url_for('main.terms') }}">Términos de servicio</a>
-          y puedes consultar el <a href="{{ url_for('main.privacy') }}">Aviso de privacidad</a>.
+          {% if mode == "register" %}{{ _("Al crear tu cuenta aceptas los") }} {% endif %}<a href="{{ url_for('main.terms') }}">{{ _("Términos de servicio") }}</a>
+          {{ _("y puedes consultar el") }} <a href="{{ url_for('main.privacy') }}">{{ _("Aviso de privacidad") }}</a>.
         </p>
 
         <p class="auth-v2__switch">
           {% if mode == "login" %}
-            ¿Aún no tienes cuenta? <a href="/register">Comienza tu prueba gratis</a>
+            {{ _("¿Aún no tienes cuenta?") }} <a href="/register">{{ _("Comienza tu prueba gratis") }}</a>
           {% else %}
-            ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+            {{ _("¿Ya tienes cuenta?") }} <a href="/login">{{ _("Inicia sesión") }}</a>
           {% endif %}
         </p>
       </div>

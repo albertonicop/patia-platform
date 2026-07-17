@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Inventario inteligente{% endblock %}
+{% block title %}{{ _("Inventario inteligente") }}{% endblock %}
 
 {% block content %}
 <div class="inventory-v2">
@@ -7,12 +7,12 @@
     <section class="card inventory-v2__empty module-empty-v2" aria-labelledby="inventory-empty-title">
       <span class="inventory-v2__empty-icon" aria-hidden="true"><i class="fa-solid fa-box-open"></i></span>
       <div>
-        <span class="inventory-v2__eyebrow">Tu catálogo empieza aquí</span>
-        <h2 id="inventory-empty-title">Agrega tu primer producto</h2>
-        <p>Captura un producto manualmente o importa tu catálogo desde Excel para comenzar a controlar existencias y ventas.</p>
+        <span class="inventory-v2__eyebrow">{{ _("Tu catálogo empieza aquí") }}</span>
+        <h2 id="inventory-empty-title">{{ _("Agrega tu primer producto") }}</h2>
+        <p>{{ _("Captura un producto manualmente o importa tu catálogo desde Excel para comenzar a controlar existencias y ventas.") }}</p>
         <div class="inventory-v2__empty-actions">
-          <a class="btn" href="#agregar-producto">Agregar primer producto</a>
-          <a class="btn ghost" href="#importar-catalogo">Importar catálogo</a>
+          <a class="btn" href="#agregar-producto">{{ _("Agregar primer producto") }}</a>
+          <a class="btn ghost" href="#importar-catalogo">{{ _("Importar catálogo") }}</a>
         </div>
       </div>
     </section>
@@ -21,145 +21,145 @@
   <div class="inventory-v2__setup-grid">
     <section id="agregar-producto" class="card inventory-v2__panel">
       <header class="inventory-v2__panel-head">
-        <span class="inventory-v2__eyebrow">Alta manual</span>
-        <h3>{{ "Agrega tu primer producto" if catalog_count == 0 else "Agregar producto" }}</h3>
-        <p>Los campos marcados con <b>*</b> son obligatorios.</p>
+        <span class="inventory-v2__eyebrow">{{ _("Alta manual") }}</span>
+        <h3>{{ _("Agrega tu primer producto") if catalog_count == 0 else _("Agregar producto") }}</h3>
+        <p>{{ _("Los campos marcados con * son obligatorios.") }}</p>
       </header>
 
       <form class="inventory-v2__product-form" method="post" action="/products/new#catalogo">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="inventory-v2__field inventory-v2__field--wide">
-          <label for="product-name">Nombre del producto <span>*</span></label>
-          <input id="product-name" name="name" required autocomplete="off" placeholder="Ej. Café molido 500 g">
+          <label for="product-name">{{ _("Nombre del producto") }} <span>*</span></label>
+          <input id="product-name" name="name" required autocomplete="off" placeholder="{{ _('Ej. Café molido 500 g') }}">
         </div>
         <div class="inventory-v2__field inventory-v2__field--wide">
-          <label for="product-sku">SKU <span>*</span></label>
-          <input id="product-sku" name="sku" required autocomplete="off" placeholder="Ej. CAFE-500">
-          <small>Identificador único interno. Usa uno distinto para cada producto.</small>
+          <label for="product-sku">{{ _("SKU") }} <span>*</span></label>
+          <input id="product-sku" name="sku" required autocomplete="off" placeholder="{{ _('Ej. CAFE-500') }}">
+          <small>{{ _("Identificador único interno. Usa uno distinto para cada producto.") }}</small>
         </div>
         <div class="inventory-v2__field">
-          <label for="product-cost">Precio de compra</label>
+          <label for="product-cost">{{ _("Precio de compra") }}</label>
           <input id="product-cost" name="cost_price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
-          <small>Lo que pagas por cada unidad.</small>
+          <small>{{ _("Lo que pagas por cada unidad.") }}</small>
         </div>
         <div class="inventory-v2__field">
-          <label for="product-price">Precio de venta</label>
+          <label for="product-price">{{ _("Precio de venta") }}</label>
           <input id="product-price" name="sale_price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
-          <small>Precio que cobrarás al cliente.</small>
+          <small>{{ _("Precio que cobrarás al cliente.") }}</small>
         </div>
         <div class="inventory-v2__field">
-          <label for="product-stock">Cantidad inicial</label>
+          <label for="product-stock">{{ _("Cantidad inicial") }}</label>
           <input id="product-stock" name="stock" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-          <small>Unidades disponibles actualmente.</small>
+          <small>{{ _("Unidades disponibles actualmente.") }}</small>
         </div>
 
         <details class="inventory-v2__advanced">
-          <summary>Opciones avanzadas <span>Código, categoría, proveedor y stock mínimo</span></summary>
+          <summary>{{ _("Opciones avanzadas") }} <span>{{ _("Código, categoría, proveedor y stock mínimo") }}</span></summary>
           <div class="inventory-v2__advanced-grid">
             <div class="inventory-v2__field">
-              <label for="product-barcode">Código de barras <em>Opcional</em></label>
+              <label for="product-barcode">{{ _("Código de barras") }} <em>{{ _("Opcional") }}</em></label>
               <input id="product-barcode" name="barcode" autocomplete="off" placeholder="7500000000000">
             </div>
             <div class="inventory-v2__field">
-              <label for="product-category">Categoría <em>Opcional</em></label>
-              <input id="product-category" name="category" placeholder="Ej. Abarrotes">
+              <label for="product-category">{{ _("Categoría") }} <em>{{ _("Opcional") }}</em></label>
+              <input id="product-category" name="category" placeholder="{{ _('Ej. Abarrotes') }}">
             </div>
             <div class="inventory-v2__field">
-              <label for="product-supplier">Proveedor <em>Opcional</em></label>
-              <input id="product-supplier" name="supplier" placeholder="Ej. Distribuidora Norte">
+              <label for="product-supplier">{{ _("Proveedor") }} <em>{{ _("Opcional") }}</em></label>
+              <input id="product-supplier" name="supplier" placeholder="{{ _('Ej. Distribuidora Norte') }}">
             </div>
             <div class="inventory-v2__field">
-              <label for="product-min-stock">Stock mínimo <em>Opcional</em></label>
+              <label for="product-min-stock">{{ _("Stock mínimo") }} <em>{{ _("Opcional") }}</em></label>
               <input id="product-min-stock" name="min_stock" type="number" min="0" step="1" inputmode="numeric" placeholder="5">
-              <small>PATIA te alertará cuando llegues a esta cantidad.</small>
+              <small>{{ _("PATIA te alertará cuando llegues a esta cantidad.") }}</small>
             </div>
           </div>
         </details>
 
-        <button class="btn inventory-v2__submit" type="submit">Guardar producto</button>
+        <button class="btn inventory-v2__submit" type="submit">{{ _("Guardar producto") }}</button>
       </form>
     </section>
 
     <section id="importar-catalogo" class="card inventory-v2__panel inventory-v2__import">
       <header class="inventory-v2__panel-head">
-        <span class="inventory-v2__eyebrow">Carga masiva</span>
-        <h3>Importar desde Excel o CSV</h3>
-        <p>Formatos aceptados: <b>.xlsx</b> y <b>.csv</b>, hasta 10 MB.</p>
+        <span class="inventory-v2__eyebrow">{{ _("Carga masiva") }}</span>
+        <h3>{{ _("Importar desde Excel o CSV") }}</h3>
+        <p>{{ _("Formatos aceptados: .xlsx y .csv, hasta 10 MB.") }}</p>
       </header>
 
       <div class="inventory-v2__import-guide">
-        <h4>Antes de importar</h4>
+        <h4>{{ _("Antes de importar") }}</h4>
         <ul>
-          <li>Columnas obligatorias: SKU, Nombre del producto, Costo, Precio de venta y Stock inicial.</li>
-          <li>Si coincide el <b>SKU</b>, PATIA suma el stock importado y actualiza precios, stock mínimo y código.</li>
-          <li>Si no coincide el SKU, busca el <b>código de barras</b>. Si coincide, reemplaza stock, precios y stock mínimo.</li>
-          <li>Las filas vacías se omiten y las filas inválidas se cuentan como errores sin detener las demás.</li>
+          <li>{{ _("Columnas obligatorias: SKU, Nombre del producto, Costo, Precio de venta y Stock inicial.") }}</li>
+          <li>{{ _("Si coincide el") }} <b>{{ _("SKU") }}</b>{{ _(", PATIA suma el stock importado y actualiza precios, stock mínimo y código.") }}</li>
+          <li>{{ _("Si no coincide el SKU, busca el") }} <b>{{ _("código de barras") }}</b>{{ _(". Si coincide, reemplaza stock, precios y stock mínimo.") }}</li>
+          <li>{{ _("Las filas vacías se omiten y las filas inválidas se cuentan como errores sin detener las demás.") }}</li>
         </ul>
       </div>
 
       <a href="/download-template" class="btn ghost inventory-v2__template-link">
-        <i class="fa-solid fa-download" aria-hidden="true"></i> Descargar plantilla PATIA
+        <i class="fa-solid fa-download" aria-hidden="true"></i> {{ _("Descargar plantilla PATIA") }}
       </a>
 
       <form id="catalog-import-form" class="inventory-v2__import-form" method="POST" action="/import-products" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="catalog-file">Selecciona tu archivo <span>*</span></label>
+        <label for="catalog-file">{{ _("Selecciona tu archivo") }} <span>*</span></label>
         <input id="catalog-file" type="file" name="catalog_file" accept=".csv,.xlsx" required>
-        <button id="catalog-import-submit" class="btn" type="submit">Importar archivo</button>
-        <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden>Importando catálogo… No cierres esta ventana.</p>
+        <button id="catalog-import-submit" class="btn" type="submit">{{ _("Importar archivo") }}</button>
+        <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden>{{ _("Importando catálogo… No cierres esta ventana.") }}</p>
       </form>
     </section>
   </div>
 
   {% if catalog_count > 0 %}
-    <section class="card inventory-v2__summary" aria-label="Resumen de inventario">
-      <span>Productos en catálogo</span>
+    <section class="card inventory-v2__summary" aria-label="{{ _('Resumen de inventario') }}">
+      <span>{{ _("Productos en catálogo") }}</span>
       <strong>{{ catalog_count }}</strong>
     </section>
 
     <section id="catalogo" class="card inventory-v2__catalog">
       <div class="section-head inventory-v2__catalog-head">
-        <h3>Catálogo</h3>
+        <h3>{{ _("Catálogo") }}</h3>
         <form method="GET" action="{{ url_for('main.products') }}#catalogo" role="search">
-          <label class="sr-only" for="catalog-search">Buscar producto</label>
-          <input id="catalog-search" name="q" value="{{ q }}" placeholder="Buscar producto…" aria-describedby="catalog-search-help">
-          <small id="catalog-search-help">Busca por nombre, SKU o categoría.</small>
+          <label class="sr-only" for="catalog-search">{{ _("Buscar producto") }}</label>
+          <input id="catalog-search" name="q" value="{{ q }}" placeholder="{{ _('Buscar producto…') }}" aria-describedby="catalog-search-help">
+          <small id="catalog-search-help">{{ _("Busca por nombre, SKU o categoría.") }}</small>
         </form>
       </div>
 
       <div class="inventory-v2__bulk-actions">
-        <button class="btn ghost" id="btn-select-mode" type="button">Seleccionar productos</button>
-        <form method="POST" action="/products/delete-all" onsubmit="return confirm('¿Eliminar los productos sin ventas? Los productos que forman parte del historial se conservarán.');">
+        <button class="btn ghost" id="btn-select-mode" type="button">{{ _("Seleccionar productos") }}</button>
+        <form method="POST" action="/products/delete-all" onsubmit="return confirm({{ _('¿Eliminar los productos sin ventas? Los productos que forman parte del historial se conservarán.')|tojson }});">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="btn ghost inventory-v2__danger-action" type="submit">Borrar todo el catálogo</button>
+          <button class="btn ghost inventory-v2__danger-action" type="submit">{{ _("Borrar todo el catálogo") }}</button>
         </form>
         <form method="POST" action="/products/delete-selected" id="form-delete-selected" hidden>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="ids" id="selected-ids">
-          <button class="btn ghost inventory-v2__danger-action" type="submit">Eliminar seleccionados</button>
+          <button class="btn ghost inventory-v2__danger-action" type="submit">{{ _("Eliminar seleccionados") }}</button>
         </form>
       </div>
 
       {% if products %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Producto</th><th>Categoría</th><th>Proveedor</th><th>Stock</th><th>Precio</th><th>Margen</th><th>Valor</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Categoría") }}</th><th>{{ _("Proveedor") }}</th><th>{{ _("Stock") }}</th><th>{{ _("Precio") }}</th><th>{{ _("Margen") }}</th><th>{{ _("Valor") }}</th><th>{{ _("Acciones") }}</th></tr></thead>
           <tbody>
             {% for p in products %}
               <tr class="{% if p.stock <= p.min_stock %}danger-row{% endif %}">
-                <td data-label="Producto"><b>{{ p.name }}</b><small>{{ p.sku }} · {{ p.barcode or 'sin código' }}</small></td>
-                <td data-label="Categoría">{{ p.category }}</td>
-                <td data-label="Proveedor">{{ p.supplier or '-' }}</td>
-                <td data-label="Stock">{{ p.stock }} / min {{ p.min_stock }}</td>
-                <td data-label="Precio">{{ p.sale_price|money }}</td>
-                <td data-label="Margen">{{ p.margin }}%</td>
-                <td data-label="Valor">{{ p.inventory_value|money }}</td>
-                <td data-label="Acciones">
-                  <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=p.id) }}">Editar</a>
-                  <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm('¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su historial.');">
+                <td data-label="{{ _('Producto') }}"><b>{{ p.name }}</b><small>{{ p.sku }} · {{ p.barcode or 'sin código' }}</small></td>
+                <td data-label="{{ _('Categoría') }}">{{ p.category }}</td>
+                <td data-label="{{ _('Proveedor') }}">{{ p.supplier or '-' }}</td>
+                <td data-label="{{ _('Stock') }}">{{ p.stock }} / min {{ p.min_stock }}</td>
+                <td data-label="{{ _('Precio') }}">{{ p.sale_price|money }}</td>
+                <td data-label="{{ _('Margen') }}">{{ p.margin }}%</td>
+                <td data-label="{{ _('Valor') }}">{{ p.inventory_value|money }}</td>
+                <td data-label="{{ _('Acciones') }}">
+                  <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=p.id) }}">{{ _("Editar") }}</a>
+                  <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm({{ _('¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su historial.')|tojson }});">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn ghost" type="submit">Eliminar</button>
+                    <button class="btn ghost" type="submit">{{ _("Eliminar") }}</button>
                   </form>
                 </td>
               </tr>
@@ -171,8 +171,8 @@
         <div class="inventory-v2__search-empty module-empty-v2" role="status">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
           <h4>No encontramos productos para “{{ q }}”</h4>
-          <p>Prueba con otro nombre, SKU o categoría.</p>
-          <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">Limpiar búsqueda</a>
+          <p>{{ _("Prueba con otro nombre, SKU o categoría.") }}</p>
+          <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">{{ _("Limpiar búsqueda") }}</a>
         </div>
       {% endif %}
     </section>
@@ -180,6 +180,12 @@
 </div>
 
 <script>
+const INVENTORY_I18N = {
+  importing: {{ _("Importando catálogo…")|tojson }}{% if catalog_count > 0 %},
+  cancelSelection: {{ _("Cancelar selección")|tojson }},
+  selectProducts: {{ _("Seleccionar productos")|tojson }},
+  deleteSelected: {{ _("¿Eliminar %(count)s productos seleccionados?")|tojson }}{% endif %}
+};
 const importForm = document.getElementById("catalog-import-form");
 const importButton = document.getElementById("catalog-import-submit");
 const importStatus = document.getElementById("catalog-import-status");
@@ -192,7 +198,7 @@ importForm.addEventListener("submit", function(event) {
   }
   importSubmitting = true;
   importButton.disabled = true;
-  importButton.textContent = "Importando catálogo…";
+  importButton.textContent = INVENTORY_I18N.importing;
   importStatus.hidden = false;
   importForm.setAttribute("aria-busy", "true");
 });
@@ -205,7 +211,7 @@ const selectedIds = document.getElementById("selected-ids");
 
 btnSelect.addEventListener("click", function() {
   selectMode = !selectMode;
-  this.textContent = selectMode ? "Cancelar selección" : "Seleccionar productos";
+  this.textContent = selectMode ? INVENTORY_I18N.cancelSelection : INVENTORY_I18N.selectProducts;
   formSelected.hidden = !selectMode;
   document.querySelectorAll("#catalogo tbody tr").forEach(row => {
     const current = row.querySelector('input[type="checkbox"]');
@@ -222,7 +228,7 @@ btnSelect.addEventListener("click", function() {
 
 formSelected.addEventListener("submit", function(event) {
   const checked = [...document.querySelectorAll('#catalogo tbody input[type="checkbox"]:checked')];
-  if (!checked.length || !confirm(`¿Eliminar ${checked.length} productos seleccionados?`)) {
+  if (!checked.length || !confirm(INVENTORY_I18N.deleteSelected.replace("%(count)s", checked.length))) {
     event.preventDefault();
     return;
   }

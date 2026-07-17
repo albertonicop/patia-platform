@@ -9,13 +9,21 @@ import stripe
 import secrets
 import uuid
 import re
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, send_file, jsonify, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort
+from flask_babel import force_locale, gettext
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
+from urllib.parse import urljoin, urlparse
 from . import csrf, db, limiter
 from .models import Product, Sale, StripeWebhookEvent, Supplier, User
 
 main = Blueprint("main", __name__)
+SUPPORTED_LANGUAGES = {"es", "en"}
+
+
+def flash(message, category="message"):
+    """Translate application-owned notices without altering user-provided data."""
+    return flask_flash(gettext(message), category)
 
 
 def current_user():
@@ -33,6 +41,29 @@ def current_user():
     return user
 
 
+def _safe_next_url(candidate):
+    if not candidate:
+        return url_for("main.dashboard")
+    base = urlparse(request.host_url)
+    target = urlparse(urljoin(request.host_url, candidate))
+    if target.scheme in {"http", "https"} and target.netloc == base.netloc:
+        return target.path + (f"?{target.query}" if target.query else "")
+    return url_for("main.dashboard")
+
+
+@main.route("/language", methods=["POST"])
+def set_language():
+    language = request.form.get("language", "").lower()
+    if language not in SUPPORTED_LANGUAGES:
+        language = "es"
+    session["language"] = language
+    user = current_user()
+    if user and user.preferred_language != language:
+        user.preferred_language = language
+        db.session.commit()
+    return redirect(_safe_next_url(request.form.get("next") or request.referrer))
+
+
 def trial_expired(user):
     if not user:
         return True
@@ -48,7 +79,7 @@ def _trial_access_response(user, *, json_response=False):
     if json_response:
         return jsonify({
             "ok": False,
-            "error": "Tu periodo de prueba terminó. Activa PATIA Pro para continuar.",
+            "error": gettext("Tu periodo de prueba terminó. Activa PATIA Pro para continuar."),
         }), 403
     flash(
         "Tu periodo de prueba terminó. Activa PATIA Pro para continuar.",
@@ -87,7 +118,25 @@ PAYMENT_METHOD_LABELS = {
 
 
 def _payment_method_label(value):
-    return PAYMENT_METHOD_LABELS.get(value, "No especificado")
+    return gettext(PAYMENT_METHOD_LABELS.get(value, "No especificado"))
+
+
+def _subscription_status_label(value):
+    labels = {
+        "active": gettext("Activa"),
+        "trialing": gettext("En prueba"),
+        "past_due": gettext("Pago pendiente"),
+        "unpaid": gettext("Sin pagar"),
+        "canceled": gettext("Cancelada"),
+        "incomplete": gettext("Incompleta"),
+        "incomplete_expired": gettext("Incompleta y vencida"),
+        "paused": gettext("Pausada"),
+    }
+    return labels.get((value or "").lower(), gettext("Sin suscripción"))
+
+
+def _translated_payment_method_labels():
+    return {key: gettext(label) for key, label in PAYMENT_METHOD_LABELS.items()}
 
 
 def _group_sales_by_ticket(sales, *, limit=None):
@@ -271,20 +320,21 @@ def _has_managed_stripe_subscription(user):
         return True
 
 
-def send_email(to, subject, html):
+def send_email(to, subject, html, language="es"):
     api_key = current_app.config.get("RESEND_API_KEY")
     sender = current_app.config.get("RESEND_FROM")
     if not api_key or not sender:
         current_app.logger.error("Resend no está configurado; correo no enviado.")
         return False
     try:
-        resend.api_key = api_key
-        resend.Emails.send({
-            "from": sender,
-            "to": to,
-            "subject": subject,
-            "html": html
-        })
+        with force_locale(language if language in SUPPORTED_LANGUAGES else "es"):
+            resend.api_key = api_key
+            resend.Emails.send({
+                "from": sender,
+                "to": to,
+                "subject": gettext(subject),
+                "html": html,
+            })
         return True
     except Exception:
         current_app.logger.exception("No se pudo enviar un correo con Resend.")
@@ -295,6 +345,9 @@ def send_email(to, subject, html):
 @limiter.limit("3 per hour", methods=["POST"])
 def register():
     if request.method == "POST":
+        selected_language = session.get("language", "es")
+        if selected_language not in SUPPORTED_LANGUAGES:
+            selected_language = "es"
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         required_fields = {
@@ -316,11 +369,11 @@ def register():
             if not request.form.get(field, "").strip()
         ]
         if missing:
-            flash("Completa todos los campos obligatorios.", "danger")
+            flash(gettext("Completa todos los campos obligatorios."), "danger")
             return render_template(
                 "auth.html",
-                title="Crear cuenta",
-                button="Crear cuenta",
+                title=gettext("Crear cuenta"),
+                button=gettext("Crear cuenta"),
                 mode="register",
                 plan=request.form.get("plan"),
                 form_data=request.form,
@@ -328,22 +381,22 @@ def register():
         try:
             validate_email(email, check_deliverability=True)
         except EmailNotValidError:
-            flash("El correo no es válido o no existe.", "danger")
+            flash(gettext("El correo no es válido o no existe."), "danger")
             return render_template(
                 "auth.html",
-                title="Crear cuenta",
-                button="Crear cuenta",
+                title=gettext("Crear cuenta"),
+                button=gettext("Crear cuenta"),
                 mode="register",
                 plan=request.form.get("plan"),
                 form_data=request.form,
             ), 400
 
         if len(password) < 8:
-            flash("La contraseña debe tener al menos 8 caracteres.", "danger")
+            flash(gettext("La contraseña debe tener al menos 8 caracteres."), "danger")
             return render_template(
                 "auth.html",
-                title="Crear cuenta",
-                button="Crear cuenta",
+                title=gettext("Crear cuenta"),
+                button=gettext("Crear cuenta"),
                 mode="register",
                 plan=request.form.get("plan"),
                 form_data=request.form,
@@ -360,17 +413,18 @@ def register():
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            flash("Ese correo ya está registrado.", "danger")
+            flash(gettext("Ese correo ya está registrado."), "danger")
             return render_template(
                 "auth.html",
-                title="Crear cuenta",
-                button="Crear cuenta",
+                title=gettext("Crear cuenta"),
+                button=gettext("Crear cuenta"),
                 mode="register",
                 plan=request.form.get("plan"),
                 form_data=request.form,
             ), 409
 
         user = User(email=email, company_name=company_name)
+        user.preferred_language = selected_language
         user.first_name = first_name
         user.last_name = last_name
         user.phone = phone
@@ -386,17 +440,18 @@ def register():
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            flash("Ese correo ya está registrado.", "danger")
+            flash(gettext("Ese correo ya está registrado."), "danger")
             return render_template(
                 "auth.html",
-                title="Crear cuenta",
-                button="Crear cuenta",
+                title=gettext("Crear cuenta"),
+                button=gettext("Crear cuenta"),
                 mode="register",
                 plan=request.form.get("plan"),
                 form_data=request.form,
             ), 409
 
         session.clear()
+        session["language"] = user.preferred_language
         session["user_id"] = user.id
         session["post_verify_destination"] = (
             "subscribe"
@@ -409,19 +464,21 @@ def register():
         user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
         db.session.commit()
 
-        email_sent = send_email(
-            to=user.email,
-            subject="Verifica tu correo en PATIA",
-            html=f"""
+        with force_locale(user.preferred_language):
+            email_sent = send_email(
+                to=user.email,
+                subject=gettext("Verifica tu correo en PATIA"),
+                html=f"""
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                 <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
-                <h1 style="color:#29d3a8;">Verifica tu correo</h1>
-                <p style="color:#9aa8c7;font-size:16px;">Tu codigo de verificacion es:</p>
+                <h1 style="color:#29d3a8;">{gettext("Verifica tu correo")}</h1>
+                <p style="color:#9aa8c7;font-size:16px;">{gettext("Tu código de verificación es:")}</p>
                 <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
-                <p style="color:#9aa8c7;font-size:14px;">Este codigo expira en 30 minutos.</p>
+                <p style="color:#9aa8c7;font-size:14px;">{gettext("Este código expira en 30 minutos.")}</p>
             </div>
-            """
-        )
+            """,
+                language=user.preferred_language,
+            )
         if not email_sent:
             flash(
                 "No pudimos enviar el código. Usa Reenviar código para intentarlo nuevamente.",
@@ -430,7 +487,7 @@ def register():
 
         return redirect(url_for("main.verify_email"))
 
-    return render_template("auth.html", title="Crear cuenta", button="Crear cuenta", mode="register", plan=request.args.get("plan"), form_data={})
+    return render_template("auth.html", title=gettext("Crear cuenta"), button=gettext("Crear cuenta"), mode="register", plan=request.args.get("plan"), form_data={})
 
 
 @main.route("/verify-email", methods=["GET", "POST"])
@@ -447,36 +504,38 @@ def verify_email():
         code = request.form.get("code", "").strip()
 
         if not user.verification_code or not user.verification_code_expires:
-            flash("Código inválido.", "danger")
+            flash(gettext("Código inválido."), "danger")
             return redirect(url_for("main.verify_email"))
 
         if datetime.utcnow() > user.verification_code_expires:
-            flash("El código expiró. Solicita uno nuevo.", "danger")
+            flash(gettext("El código expiró. Solicita uno nuevo."), "danger")
             return redirect(url_for("main.verify_email"))
 
         if code != user.verification_code:
-            flash("Código incorrecto.", "danger")
+            flash(gettext("Código incorrecto."), "danger")
             return redirect(url_for("main.verify_email"))
 
         user.email_verified = True
         user.verification_code = None
         user.verification_code_expires = None
         db.session.commit()
-        send_email(
-            to=user.email,
-            subject="Bienvenido a PATIA!",
-            html=f"""
+        with force_locale(user.preferred_language):
+            send_email(
+                to=user.email,
+                subject=gettext("¡Bienvenido a PATIA!"),
+                html=f"""
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                 <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
-                <h1 style="color:#29d3a8;">Bienvenido a PATIA, {user.first_name or user.company_name}!</h1>
-                <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Tu cuenta esta lista. Tienes <strong style="color:#fff;">14 dias gratis</strong> para explorar todo.</p>
-                <a href="{_public_url('/products')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Ir a mi inventario</a>
+                <h1 style="color:#29d3a8;">{gettext("Bienvenido a PATIA, %(name)s!", name=user.first_name or user.company_name)}</h1>
+                <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">{gettext("Tu cuenta está lista. Tienes 14 días gratis para explorar todo.")}</p>
+                <a href="{_public_url('/products')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Ir a mi inventario")}</a>
             </div>
-            """
-        )
+            """,
+                language=user.preferred_language,
+            )
 
         destination = session.pop("post_verify_destination", "dashboard")
-        flash("¡Correo verificado! Bienvenido a PATIA.", "success")
+        flash(gettext("¡Correo verificado! Bienvenido a PATIA."), "success")
         if destination == "subscribe":
             return redirect(url_for("main.subscribe"))
         return redirect(url_for("main.dashboard"))
@@ -496,21 +555,23 @@ def resend_verification():
     user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
     db.session.commit()
 
-    email_sent = send_email(
-        to=user.email,
-        subject="Nuevo codigo de verificacion PATIA",
-        html=f"""
+    with force_locale(user.preferred_language):
+        email_sent = send_email(
+            to=user.email,
+            subject=gettext("Nuevo código de verificación PATIA"),
+            html=f"""
         <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-            <h1 style="color:#29d3a8;">Tu nuevo codigo</h1>
+            <h1 style="color:#29d3a8;">{gettext("Tu nuevo código")}</h1>
             <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
-            <p style="color:#9aa8c7;font-size:14px;">Este codigo expira en 30 minutos.</p>
+            <p style="color:#9aa8c7;font-size:14px;">{gettext("Este código expira en 30 minutos.")}</p>
         </div>
-        """
-    )
+        """,
+            language=user.preferred_language,
+        )
     if email_sent:
-        flash("Te enviamos un nuevo código de verificación.", "success")
+        flash(gettext("Te enviamos un nuevo código de verificación."), "success")
     else:
-        flash("No pudimos enviar el código. Inténtalo nuevamente en unos minutos.", "danger")
+        flash(gettext("No pudimos enviar el código. Inténtalo nuevamente en unos minutos."), "danger")
 
     return redirect(url_for("main.verify_email"))
 
@@ -526,21 +587,23 @@ def forgot_password():
             user.reset_token = token
             user.reset_token_expires = datetime.utcnow() + timedelta(minutes=30)
             db.session.commit()
-            email_sent = send_email(
-                to=user.email,
-                subject="Recupera tu contraseña PATIA",
-                html=f"""
+            with force_locale(user.preferred_language):
+                email_sent = send_email(
+                    to=user.email,
+                    subject=gettext("Recupera tu contraseña PATIA"),
+                    html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                    <h1 style="color:#29d3a8;">Recuperar contraseña</h1>
-                    <p style="color:#9aa8c7;">Haz clic en el boton para crear una nueva contraseña. Expira en 30 minutos.</p>
-                    <a href="{_public_url(f'/reset-password/{token}')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Crear nueva contraseña</a>
+                    <h1 style="color:#29d3a8;">{gettext("Recuperar contraseña")}</h1>
+                    <p style="color:#9aa8c7;">{gettext("Haz clic en el botón para crear una nueva contraseña. Expira en 30 minutos.")}</p>
+                    <a href="{_public_url(f'/reset-password/{token}')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Crear nueva contraseña")}</a>
                 </div>
-                """
-            )
+                """,
+                    language=user.preferred_language,
+                )
             if not email_sent:
                 flash("No pudimos enviar el enlace. Inténtalo nuevamente en unos minutos.", "danger")
                 return redirect(url_for("main.forgot_password"))
-        flash("Si ese correo existe, te enviamos un enlace.", "success")
+        flash(gettext("Si ese correo existe, te enviamos un enlace."), "success")
         return redirect(url_for("main.login"))
     return render_template("forgot_password.html")
 
@@ -558,13 +621,13 @@ def reset_password(token):
     if request.method == "POST":
         password = request.form.get("password", "")
         if len(password) < 8:
-            flash("La contraseña debe tener al menos 8 caracteres.", "danger")
+            flash(gettext("La contraseña debe tener al menos 8 caracteres."), "danger")
             return render_template("reset_password.html", token=token, expired=False)
         user.set_password(password)
         user.reset_token = None
         user.reset_token_expires = None
         db.session.commit()
-        flash("Contraseña actualizada. Inicia sesión.", "success")
+        flash(gettext("Contraseña actualizada. Inicia sesión."), "success")
         return redirect(url_for("main.login"))
     return render_template("reset_password.html", token=token, expired=False)
 
@@ -578,41 +641,50 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            flash("Correo o contraseña incorrectos.", "danger")
+            flash(gettext("Correo o contraseña incorrectos."), "danger")
             return redirect(url_for("main.login"))
 
         token = secrets.token_hex(32)
         user.session_token = token
         db.session.commit()
         session.clear()
+        session["language"] = (
+            user.preferred_language
+            if user.preferred_language in SUPPORTED_LANGUAGES
+            else "es"
+        )
         session["user_id"] = user.id
         session["session_token"] = token
         days_used = (datetime.utcnow() - user.created_at).days
         if days_used >= 12 and not user.trial_warning_sent and not has_pro_access(user):
-            warning_sent = send_email(
-                to=user.email,
-                subject="Tu prueba gratuita de PATIA termina en 2 días",
-                html=f"""
+            with force_locale(user.preferred_language):
+                warning_sent = send_email(
+                    to=user.email,
+                    subject=gettext("Tu prueba gratuita de PATIA termina en 2 días"),
+                    html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                     <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
-                    <h1 style="color:#ff5c7a;">Tu prueba termina en 2 días</h1>
-                    <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">Hola {user.first_name or user.company_name}, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.</p>
-                    <a href="{_public_url('/subscribe')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">Activar PATIA Pro</a>
+                    <h1 style="color:#ff5c7a;">{gettext("Tu prueba termina en 2 días")}</h1>
+                    <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">{gettext("Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.", name=user.first_name or user.company_name)}</p>
+                    <a href="{_public_url('/subscribe')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Activar PATIA Pro")}</a>
                 </div>
-                """
-            )
+                """,
+                    language=user.preferred_language,
+                )
             if warning_sent:
                 user.trial_warning_sent = True
                 db.session.commit()
-        flash("Sesión iniciada correctamente.", "success")
+        flash(gettext("Sesión iniciada correctamente."), "success")
         return redirect(url_for("main.dashboard"))
 
-    return render_template("auth.html", title="Iniciar sesión", button="Entrar", mode="login")
+    return render_template("auth.html", title=gettext("Iniciar sesión"), button=gettext("Entrar"), mode="login")
 
 
 @main.route("/logout", methods=["POST"])
 def logout():
+    language = session.get("language", "es")
     session.clear()
+    session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
     return redirect(url_for("main.dashboard"))
 
 
@@ -696,34 +768,64 @@ def analytics():
         days_left = round(p.stock / avg_daily_sales, 1) if avg_daily_sales > 0 else None
 
         if p.stock <= 0:
-            alerts.append({"type": "critical", "title": f"{p.name} agotado", "text": "Stock actual: 0. Necesitas reabastecerlo inmediatamente."})
+            alerts.append({
+                "type": "critical",
+                "title": gettext("%(product)s agotado", product=p.name),
+                "text": gettext("Stock actual: 0. Necesitas reabastecerlo inmediatamente."),
+            })
         elif p.stock <= p.min_stock:
-            alerts.append({"type": "critical", "title": f"Reordenar {p.name}", "text": f"Stock actual: {p.stock}. Minimo recomendado: {p.min_stock}."})
+            alerts.append({
+                "type": "critical",
+                "title": gettext("Reordenar %(product)s", product=p.name),
+                "text": gettext(
+                    "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s.",
+                    stock=p.stock,
+                    minimum=p.min_stock,
+                ),
+            })
         elif days_left is not None and days_left <= 3:
-            alerts.append({"type": "critical", "title": f"{p.name} se agotara pronto", "text": f"Con el ritmo actual de ventas, se acabara en aproximadamente {days_left} dias."})
+            alerts.append({
+                "type": "critical",
+                "title": gettext("%(product)s se agotará pronto", product=p.name),
+                "text": gettext(
+                    "Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s días.",
+                    days=days_left,
+                ),
+            })
         elif days_left is not None and days_left <= 7:
-            alerts.append({"type": "warning", "title": f"Vigilar {p.name}", "text": f"Inventario estimado para {days_left} dias."})
+            alerts.append({
+                "type": "warning",
+                "title": gettext("Vigilar %(product)s", product=p.name),
+                "text": gettext("Inventario estimado para %(days)s días.", days=days_left),
+            })
 
     recommendations = []
     if top_products:
-        recommendations.append(
-            f"{top_products[0].name} es el producto con más movimiento. "
-            "Conviene revisar sus existencias antes de tu próxima compra."
-        )
+        recommendations.append(gettext(
+            "%(product)s es el producto con más movimiento. Conviene revisar sus existencias antes de tu próxima compra.",
+            product=top_products[0].name,
+        ))
     if week_sales > 0:
-        recommendations.append(
-            f"En los últimos 7 días registraste ${week_sales:,.0f} MXN en ventas."
-        )
+        recommendations.append(gettext(
+            "En los últimos 7 días registraste $%(amount)s MXN en ventas.",
+            amount=f"{week_sales:,.0f}",
+        ))
     if profit > 0:
-        recommendations.append(
-            f"Tu utilidad estimada de los últimos 7 días es ${profit:,.0f} MXN, "
-            "considerando el costo registrado de los productos vendidos."
-        )
+        recommendations.append(gettext(
+            "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, considerando el costo registrado de los productos vendidos.",
+            amount=f"{profit:,.0f}",
+        ))
     if low_stock:
-        noun = "producto" if low_stock == 1 else "productos"
         recommendations.append(
-            f"Tienes {low_stock} {noun} con inventario bajo. "
-            "Revísalo antes de que afecte una venta."
+            gettext(
+                "Tienes %(count)s producto con inventario bajo. Revísalo antes de que afecte una venta.",
+                count=low_stock,
+            )
+            if low_stock == 1
+            else gettext(
+                "Tienes %(count)s productos con inventario bajo. Revísalos antes de que afecten una venta.",
+                count=low_stock,
+            )
         )
 
     alerts = alerts[:5]
@@ -746,7 +848,9 @@ def analytics():
 def dashboard():
     user = current_user()
     if not user:
+        language = session.get("language", "es")
         session.clear()
+        session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
         return render_template("landing.html")
     dashboard_data = analytics()
     has_basic_data = all(
@@ -756,29 +860,29 @@ def dashboard():
     has_sales = dashboard_data["total_sales"] > 0
     onboarding_steps = [
         {
-            "title": "Completa los datos básicos",
-            "text": "Confirma la información principal de tu negocio.",
+            "title": gettext("Completa los datos básicos"),
+            "text": gettext("Confirma la información principal de tu negocio."),
             "completed": has_basic_data,
-            "action_label": "Completar datos",
+            "action_label": gettext("Completar datos"),
             "action_url": url_for("main.settings"),
         },
         {
-            "title": "Agrega tu primer producto",
-            "text": "Captura un producto o importa tu catálogo desde Excel.",
+            "title": gettext("Agrega tu primer producto"),
+            "text": gettext("Captura un producto o importa tu catálogo desde Excel."),
             "completed": has_products,
-            "action_label": "Agregar primer producto",
+            "action_label": gettext("Agregar primer producto"),
             "action_url": url_for("main.products"),
         },
         {
-            "title": "Registra tu primera venta",
-            "text": "Prueba el punto de venta con un producto de tu catálogo.",
+            "title": gettext("Registra tu primera venta"),
+            "text": gettext("Prueba el punto de venta con un producto de tu catálogo."),
             "completed": has_sales,
-            "action_label": "Registrar primera venta" if has_products else None,
+            "action_label": gettext("Registrar primera venta") if has_products else None,
             "action_url": url_for("main.sell") if has_products else None,
         },
         {
-            "title": "Revisa tus resultados",
-            "text": "Consulta ventas, inventario y alertas en este panel.",
+            "title": gettext("Revisa tus resultados"),
+            "text": gettext("Consulta ventas, inventario y alertas en este panel."),
             "completed": has_sales,
             "action_label": None,
             "action_url": None,
@@ -837,17 +941,30 @@ def download_template():
 
     import pandas as pd
 
-    columns = ["SKU", "Codigo de barras", "Nombre del producto", "Categoria", "Proveedor", "Costo", "Precio de venta", "Stock inicial", "Stock minimo"]
+    columns = [
+        gettext("SKU"),
+        gettext("Código de barras"),
+        gettext("Nombre del producto"),
+        gettext("Categoría"),
+        gettext("Proveedor"),
+        gettext("Costo"),
+        gettext("Precio de venta"),
+        gettext("Stock inicial"),
+        gettext("Stock mínimo"),
+    ]
     df = pd.DataFrame(columns=columns)
     output = BytesIO()
 
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="PRODUCTOS", startrow=3)
+        sheet_name = gettext("PRODUCTOS")
+        df.to_excel(writer, index=False, sheet_name=sheet_name, startrow=3)
         workbook = writer.book
-        ws = writer.sheets["PRODUCTOS"]
+        ws = writer.sheets[sheet_name]
 
-        ws["A1"] = "PATIA - Plantilla oficial de productos"
-        ws["A2"] = "Llena esta tabla con tus productos. No cambies los nombres de las columnas."
+        ws["A1"] = gettext("PATIA - Plantilla oficial de productos")
+        ws["A2"] = gettext(
+            "Llena esta tabla con tus productos. No cambies los nombres de las columnas."
+        )
         ws.merge_cells("A1:I1")
         ws.merge_cells("A2:I2")
 
@@ -911,34 +1028,56 @@ def import_products():
             df = pd.read_csv(file)
             first_data_row = 2
         elif filename.endswith(".xlsx"):
-            df = pd.read_excel(file, sheet_name="PRODUCTOS", header=3)
+            workbook = pd.ExcelFile(file)
+            sheet_name = next(
+                (
+                    name
+                    for name in workbook.sheet_names
+                    if name.upper() in {"PRODUCTOS", "PRODUCTS"}
+                ),
+                None,
+            )
+            if not sheet_name:
+                raise ValueError("missing product sheet")
+            df = pd.read_excel(workbook, sheet_name=sheet_name, header=3)
             first_data_row = 5
         else:
             flash("Usa un archivo CSV o Excel .xlsx.", "danger")
             return redirect(url_for("main.products") + "#importar-catalogo")
 
-        essential_columns = {
-            "SKU",
-            "Nombre del producto",
-            "Costo",
-            "Precio de venta",
-            "Stock inicial",
+        column_aliases = {
+            "SKU": "sku",
+            "Codigo de barras": "barcode",
+            "Código de barras": "barcode",
+            "Barcode": "barcode",
+            "Nombre del producto": "name",
+            "Product name": "name",
+            "Categoria": "category",
+            "Categoría": "category",
+            "Category": "category",
+            "Proveedor": "supplier",
+            "Supplier": "supplier",
+            "Costo": "cost_price",
+            "Cost": "cost_price",
+            "Precio de venta": "sale_price",
+            "Sale price": "sale_price",
+            "Stock inicial": "stock",
+            "Initial stock": "stock",
+            "Stock minimo": "min_stock",
+            "Stock mínimo": "min_stock",
+            "Minimum stock": "min_stock",
         }
+        df = df.rename(columns=column_aliases)
+        essential_columns = {"sku", "name", "cost_price", "sale_price", "stock"}
         missing_columns = sorted(essential_columns - set(df.columns))
         if missing_columns:
             flash(
-                "El archivo no contiene las columnas obligatorias: "
-                + ", ".join(missing_columns)
-                + ". Descarga la plantilla PATIA e inténtalo de nuevo.",
+                gettext(
+                    "El archivo no contiene todas las columnas obligatorias. Descarga la plantilla PATIA e inténtalo de nuevo."
+                ),
                 "danger",
             )
             return redirect(url_for("main.products") + "#importar-catalogo")
-
-        df = df.rename(columns={
-            "SKU": "sku", "Codigo de barras": "barcode", "Nombre del producto": "name",
-            "Categoria": "category", "Proveedor": "supplier", "Costo": "cost_price",
-            "Precio de venta": "sale_price", "Stock inicial": "stock", "Stock minimo": "min_stock"
-        })
 
         summary = {"created": 0, "updated": 0, "omitted": 0, "errors": 0}
 
@@ -1031,14 +1170,10 @@ def import_products():
                 )
 
         db.session.commit()
-        flash(
-            "Importación terminada: "
-            f"{summary['created']} creados, "
-            f"{summary['updated']} actualizados, "
-            f"{summary['omitted']} omitidos y "
-            f"{summary['errors']} errores.",
-            "success",
-        )
+        flash(gettext(
+            "Importación terminada: %(created)s creados, %(updated)s actualizados, %(omitted)s omitidos y %(errors)s errores.",
+            **summary,
+        ), "success")
 
     except Exception:
         db.session.rollback()
@@ -1259,7 +1394,14 @@ def sell():
             sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price, ticket_id=str(uuid.uuid4()), payment_method=payment_method)
             db.session.add(sale)
             db.session.commit()
-            flash(f"Venta registrada: {product.name} x{qty}.", "success")
+            flash(
+                gettext(
+                    "Venta registrada: %(product)s x%(quantity)s.",
+                    product=product.name,
+                    quantity=qty,
+                ),
+                "success",
+            )
         return redirect(url_for("main.sell"))
 
     sales = Sale.query.filter_by(user_id=session["user_id"]).order_by(Sale.created_at.desc(), Sale.id.desc()).all()
@@ -1268,51 +1410,58 @@ def sell():
         user_id=session["user_id"],
         is_active=True,
     ).order_by(Product.name).all()
-    return render_template("sell.html", products=products, sales=sales, sale_groups=sale_groups, user=user, payment_method_labels=PAYMENT_METHOD_LABELS)
+    return render_template(
+        "sell.html",
+        products=products,
+        sales=sales,
+        sale_groups=sale_groups,
+        user=user,
+        payment_method_labels=_translated_payment_method_labels(),
+    )
 
 
 @main.route("/sell-cart", methods=["POST"])
 def sell_cart():
     user = current_user()
     if not user:
-        return jsonify({"ok": False, "error": "No autenticado"}), 401
+        return jsonify({"ok": False, "error": gettext("No autenticado")}), 401
     access_block = _trial_access_response(user, json_response=True)
     if access_block:
         return access_block
 
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
-        return jsonify({"ok": False, "error": "Solicitud inválida"}), 400
+        return jsonify({"ok": False, "error": gettext("Solicitud inválida")}), 400
 
     items = data.get("items")
     if not isinstance(items, list) or not items:
-        return jsonify({"ok": False, "error": "El carrito está vacío"}), 400
+        return jsonify({"ok": False, "error": gettext("El carrito está vacío")}), 400
 
     payment_method = data.get("payment_method", "cash")
     if payment_method not in PAYMENT_METHOD_LABELS:
-        return jsonify({"ok": False, "error": "Selecciona un método de pago válido"}), 400
+        return jsonify({"ok": False, "error": gettext("Selecciona un método de pago válido")}), 400
 
     request_id = data.get("request_id")
     if request_id:
         try:
             request_id = str(uuid.UUID(str(request_id)))
         except (TypeError, ValueError, AttributeError):
-            return jsonify({"ok": False, "error": "Solicitud inválida"}), 400
+            return jsonify({"ok": False, "error": gettext("Solicitud inválida")}), 400
 
     try:
         requested_items = {}
         for item in items:
             if not isinstance(item, dict):
-                return jsonify({"ok": False, "error": "Artículo inválido"}), 400
+                return jsonify({"ok": False, "error": gettext("Artículo inválido")}), 400
 
             try:
                 product_id = int(item["product_id"])
                 quantity = int(item["quantity"])
             except (KeyError, TypeError, ValueError):
-                return jsonify({"ok": False, "error": "Artículo inválido"}), 400
+                return jsonify({"ok": False, "error": gettext("Artículo inválido")}), 400
 
             if quantity <= 0:
-                return jsonify({"ok": False, "error": "La cantidad debe ser mayor a cero"}), 400
+                return jsonify({"ok": False, "error": gettext("La cantidad debe ser mayor a cero")}), 400
 
             requested_items[product_id] = requested_items.get(product_id, 0) + quantity
 
@@ -1349,7 +1498,7 @@ def sell_cart():
         }
 
         if len(products) != len(requested_items):
-            return jsonify({"ok": False, "error": "Producto no encontrado"}), 404
+            return jsonify({"ok": False, "error": gettext("Producto no encontrado")}), 404
 
         # Repetir la verificación tras bloquear inventario evita que dos workers
         # procesen simultáneamente el mismo request_id.
@@ -1375,7 +1524,10 @@ def sell_cart():
         for product_id, quantity in requested_items.items():
             product = products[product_id]
             if product.stock < quantity:
-                return jsonify({"ok": False, "error": f"Stock insuficiente: {product.name}"}), 409
+                return jsonify({
+                    "ok": False,
+                    "error": gettext("Stock insuficiente: %(product)s", product=product.name),
+                }), 409
 
         ticket_id = request_id or str(uuid.uuid4())
         sales = []
@@ -1400,7 +1552,7 @@ def sell_cart():
     except Exception:
         db.session.rollback()
         current_app.logger.exception("Error al procesar el carrito")
-        return jsonify({"ok": False, "error": "No se pudo procesar la venta"}), 500
+        return jsonify({"ok": False, "error": gettext("No se pudo procesar la venta")}), 500
 
 
 @main.route("/reports")
@@ -1824,6 +1976,7 @@ def subscription():
         user=user,
         subscription_info=subscription_info,
         has_paid_access=has_pro_access(user),
+        subscription_status_label=_subscription_status_label(user.subscription_status),
     )
 
 
@@ -1991,11 +2144,18 @@ def delete_all_products():
     db.session.commit()
     if protected:
         flash(
-            f"Eliminamos {deleted} productos sin ventas y retiramos {protected} del catálogo conservando su historial.",
+            gettext(
+                "Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del catálogo conservando su historial.",
+                deleted=deleted,
+                protected=protected,
+            ),
             "info",
         )
     else:
-        flash(f"Eliminamos {deleted} productos del catálogo.", "success")
+        flash(
+            gettext("Eliminamos %(count)s productos del catálogo.", count=deleted),
+            "success",
+        )
     return redirect(url_for("main.products"))
 
 
@@ -2027,11 +2187,15 @@ def delete_selected_products():
     db.session.commit()
     if protected:
         flash(
-            f"Eliminamos {deleted} seleccionados y retiramos {protected} conservando su historial.",
+            gettext(
+                "Eliminamos %(deleted)s seleccionados y retiramos %(protected)s conservando su historial.",
+                deleted=deleted,
+                protected=protected,
+            ),
             "info",
         )
     else:
-        flash(f"{deleted} productos eliminados.", "success")
+        flash(gettext("%(count)s productos eliminados.", count=deleted), "success")
     return redirect(url_for("main.products"))
 
 

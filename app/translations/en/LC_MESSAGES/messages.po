@@ -1,0 +1,3648 @@
+# English translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-07-17 13:17-0600\n"
+"PO-Revision-Date: 2026-07-17 11:53-0600\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/routes.py:82 app/routes.py:85
+msgid "Tu periodo de prueba terminó. Activa PATIA Pro para continuar."
+msgstr "Your trial period is over. Activate PATIA Pro to continue."
+
+#: app/routes.py:126
+msgid "Activa"
+msgstr ""
+
+#: app/routes.py:127 app/templates/admin.html:30
+msgid "En prueba"
+msgstr "On test"
+
+#: app/routes.py:128
+msgid "Pago pendiente"
+msgstr ""
+
+#: app/routes.py:129
+msgid "Sin pagar"
+msgstr ""
+
+#: app/routes.py:130
+msgid "Cancelada"
+msgstr ""
+
+#: app/routes.py:131
+msgid "Incompleta"
+msgstr ""
+
+#: app/routes.py:132
+msgid "Incompleta y vencida"
+msgstr ""
+
+#: app/routes.py:133
+msgid "Pausada"
+msgstr ""
+
+#: app/routes.py:135
+msgid "Sin suscripción"
+msgstr "No subscription"
+
+#: app/routes.py:372
+msgid "Completa todos los campos obligatorios."
+msgstr "Complete all required fields."
+
+#: app/routes.py:375 app/routes.py:376 app/routes.py:387 app/routes.py:388
+#: app/routes.py:398 app/routes.py:399 app/routes.py:419 app/routes.py:420
+#: app/routes.py:446 app/routes.py:447 app/routes.py:490
+msgid "Crear cuenta"
+msgstr "Create account"
+
+#: app/routes.py:384
+msgid "El correo no es válido o no existe."
+msgstr "The email address is invalid or does not exist."
+
+#: app/routes.py:395 app/routes.py:624
+msgid "La contraseña debe tener al menos 8 caracteres."
+msgstr "The password must be at least 8 characters."
+
+#: app/routes.py:416 app/routes.py:443
+msgid "Ese correo ya está registrado."
+msgstr "That email address is already registered."
+
+#: app/routes.py:470
+msgid "Verifica tu correo en PATIA"
+msgstr "Check your email in PATIA"
+
+#: app/routes.py:474 app/templates/verify_email.html:9
+msgid "Verifica tu correo"
+msgstr "Verify your email"
+
+#: app/routes.py:475
+msgid "Tu código de verificación es:"
+msgstr "Your verification code is:"
+
+#: app/routes.py:477 app/routes.py:566
+msgid "Este código expira en 30 minutos."
+msgstr "This code expires in 30 minutes."
+
+#: app/routes.py:484
+msgid ""
+"No pudimos enviar el código. Usa Reenviar código para intentarlo "
+"nuevamente."
+msgstr "We couldn't send the code. Use Resend Code to try again."
+
+#: app/routes.py:507
+msgid "Código inválido."
+msgstr "Invalid code."
+
+#: app/routes.py:511
+msgid "El código expiró. Solicita uno nuevo."
+msgstr "The code expired. Request a new one."
+
+#: app/routes.py:515
+msgid "Código incorrecto."
+msgstr "Incorrect code."
+
+#: app/routes.py:525
+msgid "¡Bienvenido a PATIA!"
+msgstr "Welcome to PATIA!"
+
+#: app/routes.py:529
+#, python-format
+msgid "Bienvenido a PATIA, %(name)s!"
+msgstr "Welcome to PATIA, %(name)s!"
+
+#: app/routes.py:530
+msgid "Tu cuenta está lista. Tienes 14 días gratis para explorar todo."
+msgstr "Your account is ready. You have 14 days free to explore everything."
+
+#: app/routes.py:531
+msgid "Ir a mi inventario"
+msgstr "Go to my inventory"
+
+#: app/routes.py:538
+msgid "¡Correo verificado! Bienvenido a PATIA."
+msgstr "Email verified! Welcome to PATIA."
+
+#: app/routes.py:561
+msgid "Nuevo código de verificación PATIA"
+msgstr "New PATIA verification code"
+
+#: app/routes.py:564
+msgid "Tu nuevo código"
+msgstr "Your new code"
+
+#: app/routes.py:572
+msgid "Te enviamos un nuevo código de verificación."
+msgstr "We sent you a new verification code."
+
+#: app/routes.py:574
+msgid "No pudimos enviar el código. Inténtalo nuevamente en unos minutos."
+msgstr "We could not send the code. Try again in a few minutes."
+
+#: app/routes.py:593
+msgid "Recupera tu contraseña PATIA"
+msgstr "Recover your PATIA password"
+
+#: app/routes.py:596
+msgid "Recuperar contraseña"
+msgstr "Recover password"
+
+#: app/routes.py:597
+msgid ""
+"Haz clic en el botón para crear una nueva contraseña. Expira en 30 "
+"minutos."
+msgstr "Click the button to create a new password. Expires in 30 minutes."
+
+#: app/routes.py:598
+msgid "Crear nueva contraseña"
+msgstr "Create new password"
+
+#: app/routes.py:604
+msgid "No pudimos enviar el enlace. Inténtalo nuevamente en unos minutos."
+msgstr "We couldn't send the link. Please try again in a few minutes."
+
+#: app/routes.py:606
+msgid "Si ese correo existe, te enviamos un enlace."
+msgstr "If that email exists, we sent a link."
+
+#: app/routes.py:630
+msgid "Contraseña actualizada. Inicia sesión."
+msgstr "Password updated. Sign in."
+
+#: app/routes.py:644
+msgid "Correo o contraseña incorrectos."
+msgstr "Incorrect email or password."
+
+#: app/routes.py:663
+msgid "Tu prueba gratuita de PATIA termina en 2 días"
+msgstr "Your free PATIA trial ends in 2 days"
+
+#: app/routes.py:667
+msgid "Tu prueba termina en 2 días"
+msgstr "Your trial ends in 2 days"
+
+#: app/routes.py:668
+#, python-format
+msgid ""
+"Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No "
+"pierdas el acceso a tu inventario y ventas."
+msgstr ""
+"Hello %(name)s, your PATIA free trial period ends soon. Don't lose access"
+" to your inventory and sales."
+
+#: app/routes.py:669 app/templates/base.html:80
+msgid "Activar PATIA Pro"
+msgstr "Activate PATIA Pro"
+
+#: app/routes.py:677
+msgid "Sesión iniciada correctamente."
+msgstr "Signed in successfully."
+
+#: app/routes.py:680 app/templates/landing.html:23
+#: app/templates/landing.html:235
+msgid "Iniciar sesión"
+msgstr "Sign in"
+
+#: app/routes.py:680
+msgid "Entrar"
+msgstr "Sign in"
+
+#: app/routes.py:773
+#, python-format
+msgid "%(product)s agotado"
+msgstr "%(product)s sold out"
+
+#: app/routes.py:774
+msgid "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
+msgstr "Current stock: 0. You need to restock immediately."
+
+#: app/routes.py:779
+#, python-format
+msgid "Reordenar %(product)s"
+msgstr "Reorder %(product)s"
+
+#: app/routes.py:781
+#, python-format
+msgid "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s."
+msgstr "Current stock: %(stock)s. Recommended minimum: %(minimum)s."
+
+#: app/routes.py:789
+#, python-format
+msgid "%(product)s se agotará pronto"
+msgstr "%(product)s will be out of stock soon"
+
+#: app/routes.py:791
+#, python-format
+msgid ""
+"Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s "
+"días."
+msgstr "At the current sales rate, it will be gone in approximately %(days)s days."
+
+#: app/routes.py:798
+#, python-format
+msgid "Vigilar %(product)s"
+msgstr "Monitor %(product)s"
+
+#: app/routes.py:799
+#, python-format
+msgid "Inventario estimado para %(days)s días."
+msgstr "Estimated inventory for %(days)s days."
+
+#: app/routes.py:805
+#, python-format
+msgid ""
+"%(product)s es el producto con más movimiento. Conviene revisar sus "
+"existencias antes de tu próxima compra."
+msgstr ""
+"%(product)s is the product with the most movement. It is a good idea to "
+"check their stock before your next purchase."
+
+#: app/routes.py:810
+#, python-format
+msgid "En los últimos 7 días registraste $%(amount)s MXN en ventas."
+msgstr "In the last 7 days you recorded $%(amount)s MXN in sales."
+
+#: app/routes.py:815
+#, python-format
+msgid ""
+"Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, "
+"considerando el costo registrado de los productos vendidos."
+msgstr ""
+"Your estimated profit for the last 7 days is $%(amount)s MXN, considering"
+" the recorded cost of products sold."
+
+#: app/routes.py:821
+#, python-format
+msgid ""
+"Tienes %(count)s producto con inventario bajo. Revísalo antes de que "
+"afecte una venta."
+msgstr ""
+"You have %(count)s product with low inventory. Review it before it "
+"affects a sale."
+
+#: app/routes.py:826
+#, python-format
+msgid ""
+"Tienes %(count)s productos con inventario bajo. Revísalos antes de que "
+"afecten una venta."
+msgstr ""
+"You have %(count)s products with low inventory. Review them before they "
+"affect a sale."
+
+#: app/routes.py:863
+msgid "Completa los datos básicos"
+msgstr "Complete the basic information"
+
+#: app/routes.py:864
+msgid "Confirma la información principal de tu negocio."
+msgstr "Confirm the main information of your business."
+
+#: app/routes.py:866
+msgid "Completar datos"
+msgstr "Complete data"
+
+#: app/routes.py:870 app/templates/products.html:11
+#: app/templates/products.html:25
+msgid "Agrega tu primer producto"
+msgstr "Add your first product"
+
+#: app/routes.py:871
+msgid "Captura un producto o importa tu catálogo desde Excel."
+msgstr "Capture a product or import your catalog from Excel."
+
+#: app/routes.py:873 app/templates/products.html:14
+msgid "Agregar primer producto"
+msgstr "Add first product"
+
+#: app/routes.py:877
+msgid "Registra tu primera venta"
+msgstr "Register your first sale"
+
+#: app/routes.py:878
+msgid "Prueba el punto de venta con un producto de tu catálogo."
+msgstr "Test the point of sale with a product from your catalog."
+
+#: app/routes.py:880
+msgid "Registrar primera venta"
+msgstr "Register first sale"
+
+#: app/routes.py:884
+msgid "Revisa tus resultados"
+msgstr "Check your results"
+
+#: app/routes.py:885
+msgid "Consulta ventas, inventario y alertas en este panel."
+msgstr "View sales, inventory, and alerts in this dashboard."
+
+#: app/routes.py:945 app/templates/edit_product.html:20
+#: app/templates/products.html:37 app/templates/products.html:95
+msgid "SKU"
+msgstr ""
+
+#: app/routes.py:946 app/templates/edit_product.html:25
+#: app/templates/products.html:61
+msgid "Código de barras"
+msgstr "Bar-code"
+
+#: app/routes.py:947 app/templates/edit_product.html:16
+#: app/templates/products.html:33
+msgid "Nombre del producto"
+msgstr "Product name"
+
+#: app/routes.py:948 app/templates/edit_product.html:30
+#: app/templates/products.html:65 app/templates/products.html:147
+#: app/templates/products.html:152
+msgid "Categoría"
+msgstr "Category"
+
+#: app/routes.py:949 app/templates/edit_product.html:34
+#: app/templates/products.html:69 app/templates/products.html:147
+#: app/templates/products.html:153 app/templates/suppliers.html:17
+#: app/templates/suppliers.html:36 app/templates/suppliers.html:46
+msgid "Proveedor"
+msgstr "Supplier"
+
+#: app/routes.py:950
+msgid "Costo"
+msgstr ""
+
+#: app/routes.py:951 app/templates/edit_product.html:42
+#: app/templates/products.html:47
+msgid "Precio de venta"
+msgstr "Sale price"
+
+#: app/routes.py:952
+msgid "Stock inicial"
+msgstr ""
+
+#: app/routes.py:953 app/templates/edit_product.html:51
+#: app/templates/products.html:73
+msgid "Stock mínimo"
+msgstr "Minimum stock"
+
+#: app/routes.py:959
+msgid "PRODUCTOS"
+msgstr ""
+
+#: app/routes.py:964
+msgid "PATIA - Plantilla oficial de productos"
+msgstr ""
+
+#: app/routes.py:966
+msgid ""
+"Llena esta tabla con tus productos. No cambies los nombres de las "
+"columnas."
+msgstr ""
+
+#: app/routes.py:1022
+msgid "Selecciona un archivo."
+msgstr "Select a file."
+
+#: app/routes.py:1045
+msgid "Usa un archivo CSV o Excel .xlsx."
+msgstr "Use a CSV or Excel .xlsx file."
+
+#: app/routes.py:1076
+msgid ""
+"El archivo no contiene todas las columnas obligatorias. Descarga la "
+"plantilla PATIA e inténtalo de nuevo."
+msgstr ""
+
+#: app/routes.py:1174
+#, python-format
+msgid ""
+"Importación terminada: %(created)s creados, %(updated)s actualizados, "
+"%(omitted)s omitidos y %(errors)s errores."
+msgstr ""
+
+#: app/routes.py:1182
+msgid ""
+"No pudimos procesar el archivo. Verifica que use la plantilla PATIA e "
+"inténtalo de nuevo."
+msgstr ""
+"We could not process the file. Verify that it uses the PATIA template and"
+" try again."
+
+#: app/routes.py:1206 app/routes.py:1303
+msgid "Revisa precios y existencias e inténtalo nuevamente."
+msgstr "Check prices and stock and try again."
+
+#: app/routes.py:1209 app/routes.py:1307
+msgid "Nombre y SKU son obligatorios."
+msgstr "Name and SKU are required."
+
+#: app/routes.py:1213
+msgid "Ya existe un producto con ese SKU. Usa un SKU diferente."
+msgstr "A product with that SKU already exists. Use a different SKU."
+
+#: app/routes.py:1221
+msgid "Ya existe un producto con ese código de barras."
+msgstr "A product with that barcode already exists."
+
+#: app/routes.py:1225
+msgid "El SKU y el código de barras pertenecen a productos históricos diferentes."
+msgstr "The SKU and barcode belong to different historical products."
+
+#: app/routes.py:1234 app/routes.py:1314
+msgid "Precios y existencias no pueden ser negativos."
+msgstr "Prices and stocks cannot be negative."
+
+#: app/routes.py:1271 app/routes.py:1353
+msgid "No pudimos guardar el producto porque el SKU ya está en uso."
+msgstr "We couldn't save the product because the SKU is already in use."
+
+#: app/routes.py:1273
+msgid "Producto creado correctamente."
+msgstr "Successfully created product."
+
+#: app/routes.py:1323
+msgid "Ya existe otro producto con ese SKU."
+msgstr "Another product already exists with that SKU."
+
+#: app/routes.py:1333
+msgid "Ya existe otro producto con ese código de barras."
+msgstr "There is already another product with that barcode."
+
+#: app/routes.py:1356
+msgid ""
+"Producto actualizado correctamente. Las ventas anteriores conservaron sus"
+" importes originales."
+msgstr ""
+"Product updated successfully. Previous sales retained their original "
+"amounts."
+
+#: app/routes.py:1373
+msgid "Selecciona un producto y una cantidad válida."
+msgstr "Select a product and a valid quantity."
+
+#: app/routes.py:1385
+msgid "La cantidad debe ser mayor a cero."
+msgstr "The quantity must be greater than zero."
+
+#: app/routes.py:1387
+msgid "No hay suficiente inventario."
+msgstr "There is not enough inventory."
+
+#: app/routes.py:1391
+msgid "Selecciona un método de pago válido."
+msgstr "Select a valid payment method."
+
+#: app/routes.py:1399
+#, python-format
+msgid "Venta registrada: %(product)s x%(quantity)s."
+msgstr ""
+
+#: app/routes.py:1427
+msgid "No autenticado"
+msgstr "Not authenticated"
+
+#: app/routes.py:1434 app/routes.py:1449
+msgid "Solicitud inválida"
+msgstr "Invalid request"
+
+#: app/routes.py:1438
+msgid "El carrito está vacío"
+msgstr "The cart is empty"
+
+#: app/routes.py:1442
+msgid "Selecciona un método de pago válido"
+msgstr "Select a valid payment method"
+
+#: app/routes.py:1455 app/routes.py:1461
+msgid "Artículo inválido"
+msgstr "Invalid item"
+
+#: app/routes.py:1464
+msgid "La cantidad debe ser mayor a cero"
+msgstr "The quantity must be greater than zero"
+
+#: app/routes.py:1501
+msgid "Producto no encontrado"
+msgstr "Product not found"
+
+#: app/routes.py:1529
+#, python-format
+msgid "Stock insuficiente: %(product)s"
+msgstr "Insufficient stock: %(product)s"
+
+#: app/routes.py:1555
+msgid "No se pudo procesar la venta"
+msgstr "The sale could not be processed"
+
+#: app/routes.py:1580
+msgid "Escribe el nombre del proveedor."
+msgstr "Write the name of the supplier."
+
+#: app/routes.py:1584 app/routes.py:1592
+msgid "Ese proveedor ya existe."
+msgstr "That provider already exists."
+
+#: app/routes.py:1594
+msgid "Proveedor guardado."
+msgstr "Saved Provider."
+
+#: app/routes.py:1608 app/routes.py:1647
+msgid "Verifica tu correo antes de activar PATIA Pro."
+msgstr "Check your email before activating PATIA Pro."
+
+#: app/routes.py:1611
+msgid "El pago fue cancelado. No se realizó ningún cargo."
+msgstr "The payment was cancelled. No charge was made."
+
+#: app/routes.py:1650 app/routes.py:2029
+msgid "La facturación no está disponible en este entorno."
+msgstr "Billing is not available in this environment."
+
+#: app/routes.py:1681
+msgid "No pudimos validar tu suscripción. Intenta nuevamente."
+msgstr "We could not validate your subscription. Try again."
+
+#: app/routes.py:1720
+msgid "No pudimos iniciar el pago. Intenta nuevamente."
+msgstr "We could not initiate the payment. Try again."
+
+#: app/routes.py:1911 app/routes.py:1919
+msgid "No se pudo validar la sesión de pago."
+msgstr "The payment session could not be validated."
+
+#: app/routes.py:1928
+msgid "La sesión de pago no pertenece a este usuario."
+msgstr "The payment session does not belong to this user."
+
+#: app/routes.py:1932
+msgid "Tu cuenta PATIA Pro está activa."
+msgstr "Your PATIA Pro account is active."
+
+#: app/routes.py:1934
+msgid "Pago recibido. Estamos confirmando tu suscripción con Stripe."
+msgstr "Payment received. We are confirming your subscription with Stripe."
+
+#: app/routes.py:1952
+msgid "Venta cancelada. Stock devuelto al inventario."
+msgstr "Sale cancelled. Stock returned to inventory."
+
+#: app/routes.py:1973
+msgid "No pudimos actualizar el estado de tu suscripción."
+msgstr "We were unable to update your subscription status."
+
+#: app/routes.py:1993
+msgid "Tu suscripcion se cancelara al final del periodo pagado."
+msgstr "Your subscription will be canceled at the end of the paid period."
+
+#: app/routes.py:1997
+msgid "No pudimos cancelar la suscripción. Intenta nuevamente."
+msgstr "We couldn't unsubscribe. Try again."
+
+#: app/routes.py:2011
+msgid "Tu suscripcion ha sido reactivada."
+msgstr "Your subscription has been reactivated."
+
+#: app/routes.py:2015
+msgid "No pudimos reactivar la suscripción. Intenta nuevamente."
+msgstr "We were unable to reactivate the subscription. Try again."
+
+#: app/routes.py:2046
+msgid "No pudimos abrir el portal de facturación."
+msgstr "We were unable to open the billing portal."
+
+#: app/routes.py:2057
+msgid "No autorizado."
+msgstr "Unauthorized."
+
+#: app/routes.py:2118
+msgid "Producto retirado del catálogo. Su historial de ventas se conserva."
+msgstr "Product removed from the catalog. Your sales history is preserved."
+
+#: app/routes.py:2122
+msgid "Producto eliminado correctamente."
+msgstr "Product disposed correctly."
+
+#: app/routes.py:2148
+#, python-format
+msgid ""
+"Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del"
+" catálogo conservando su historial."
+msgstr ""
+
+#: app/routes.py:2156
+#, python-format
+msgid "Eliminamos %(count)s productos del catálogo."
+msgstr ""
+
+#: app/routes.py:2191
+#, python-format
+msgid ""
+"Eliminamos %(deleted)s seleccionados y retiramos %(protected)s "
+"conservando su historial."
+msgstr ""
+
+#: app/routes.py:2198
+#, python-format
+msgid "%(count)s productos eliminados."
+msgstr ""
+
+#: app/routes.py:2212
+msgid "Proveedor eliminado correctamente."
+msgstr "Vendor removed successfully."
+
+#: app/routes.py:2223
+msgid "No puedes eliminar tu cuenta de administrador."
+msgstr "You cannot delete your administrator account."
+
+#: app/routes.py:2227
+msgid ""
+"No puedes eliminar este usuario mientras tenga una suscripción Stripe "
+"gestionable."
+msgstr ""
+"You cannot delete this user while they have a manageable Stripe "
+"subscription."
+
+#: app/routes.py:2233
+msgid "Cliente eliminado correctamente."
+msgstr "Client deleted successfully."
+
+#: app/routes.py:2246
+msgid "Cliente marcado como PRO."
+msgstr "Client marked as PRO."
+
+#: app/routes.py:2260
+msgid "El nombre del negocio es obligatorio."
+msgstr "The business name is required."
+
+#: app/routes.py:2271
+msgid "Configuración guardada."
+msgstr "Saved settings."
+
+#: app/templates/_language_selector.html:1
+msgid "Idioma"
+msgstr "Language"
+
+#: app/templates/_language_selector.html:3
+msgid "ES"
+msgstr "IS"
+
+#: app/templates/_language_selector.html:5
+msgid "EN"
+msgstr "IN"
+
+#: app/templates/admin.html:7
+msgid "Centro de control PATIA"
+msgstr "PATIA control center"
+
+#: app/templates/admin.html:8
+msgid "Clientes, pruebas, ventas procesadas y actividad general."
+msgstr "Clients, tests, sales processed and general activity."
+
+#: app/templates/admin.html:13
+msgid "Clientes registrados"
+msgstr "Registered customers"
+
+#: app/templates/admin.html:18
+msgid "Productos totales"
+msgstr "Total products"
+
+#: app/templates/admin.html:23
+msgid "Ventas procesadas"
+msgstr "Sales processed"
+
+#: app/templates/admin.html:35
+msgid "Vencen esta semana"
+msgstr "They expire this week"
+
+#: app/templates/admin.html:40
+msgid "Pruebas vencidas"
+msgstr "Overdue tests"
+
+#: app/templates/admin.html:47
+msgid "Último cliente registrado"
+msgstr "Last registered customer"
+
+#: app/templates/admin.html:49 app/templates/admin.html:59
+#: app/templates/admin.html:106
+msgid "Sin empresa"
+msgstr ""
+
+#: app/templates/admin.html:52
+msgid "No hay clientes todavía."
+msgstr "There are no clients yet."
+
+#: app/templates/admin.html:57
+msgid "Cliente con más productos"
+msgstr "Customer with more products"
+
+#: app/templates/admin.html:62
+msgid "No hay productos todavía."
+msgstr "There are no products yet."
+
+#: app/templates/admin.html:69
+msgid "Nuevos esta semana"
+msgstr "New this week"
+
+#: app/templates/admin.html:74
+msgid "Nuevos este mes"
+msgstr "New this month"
+
+#: app/templates/admin.html:88
+msgid "Empresa"
+msgstr "Company"
+
+#: app/templates/admin.html:89 app/templates/settings.html:32
+#: app/templates/suppliers.html:37 app/templates/suppliers.html:47
+msgid "Contacto"
+msgstr "Contact"
+
+#: app/templates/admin.html:90 app/templates/auth.html:128
+#: app/templates/forgot_password.html:36
+msgid "Correo"
+msgstr "Email"
+
+#: app/templates/admin.html:91 app/templates/auth.html:86
+#: app/templates/settings.html:36 app/templates/suppliers.html:38
+#: app/templates/suppliers.html:48
+msgid "Teléfono"
+msgstr "Phone"
+
+#: app/templates/admin.html:92
+msgid "Días en PATIA"
+msgstr "Days in PATIA"
+
+#: app/templates/admin.html:93 app/templates/admin.html:139
+#: app/templates/subscribe.html:79 app/templates/subscribe.html:80
+#: app/templates/subscribe.html:81 app/templates/subscribe.html:82
+#: app/templates/subscribe.html:83 app/templates/subscribe.html:84
+#: app/templates/subscribe.html:85
+msgid "Prueba"
+msgstr "Proof"
+
+#: app/templates/admin.html:94
+msgid "Productos"
+msgstr "Products"
+
+#: app/templates/admin.html:95
+msgid "Ventas"
+msgstr "Sales"
+
+#: app/templates/admin.html:96 app/templates/auth.html:101
+#: app/templates/auth.html:102 app/templates/settings.html:58
+msgid "Estado"
+msgstr "State"
+
+#: app/templates/admin.html:97 app/templates/suppliers.html:39
+#: app/templates/suppliers.html:49
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+#: app/templates/admin.html:98 app/templates/products.html:147
+#: app/templates/products.html:158 app/templates/sell.html:100
+#: app/templates/sell.html:109 app/templates/suppliers.html:40
+#: app/templates/suppliers.html:59
+msgid "Acciones"
+msgstr "Actions"
+
+#: app/templates/admin.html:107
+msgid "Sin giro"
+msgstr ""
+
+#: app/templates/admin.html:111
+msgid "Sin nombre"
+msgstr ""
+
+#: app/templates/admin.html:136
+msgid "Pro"
+msgstr "Pro"
+
+#: app/templates/admin.html:142
+msgid "Vencido"
+msgstr "Defeated"
+
+#: app/templates/admin.html:159
+msgid "¿Eliminar este cliente?"
+msgstr ""
+
+#: app/templates/auth.html:16 app/templates/forgot_password.html:14
+#: app/templates/legal.html:13 app/templates/reset_password.html:14
+msgid "Volver al inicio de PATIA"
+msgstr "Return to the beginning of PATIA"
+
+#: app/templates/auth.html:20
+msgid "Control para negocios reales"
+msgstr "Control for real businesses"
+
+#: app/templates/auth.html:22
+msgid "Tu negocio, listo para continuar."
+msgstr "Your business, ready to keep moving."
+
+#: app/templates/auth.html:23
+msgid "Consulta ventas, inventario y alertas desde un panel claro y conectado."
+msgstr "View sales, inventory, and alerts from one clear, connected dashboard."
+
+#: app/templates/auth.html:25
+msgid "Empieza a operar con más claridad."
+msgstr "Start running your business with greater clarity."
+
+#: app/templates/auth.html:26
+msgid ""
+"Crea tu cuenta y prueba durante 14 días una forma más ordenada de "
+"controlar tu negocio."
+msgstr ""
+"Create your account and try a more organized way to run your business for"
+" 14 days."
+
+#: app/templates/auth.html:30
+msgid "Inventario y ventas conectados"
+msgstr "Connected inventory and sales"
+
+#: app/templates/auth.html:31
+msgid "Alertas de productos por agotarse"
+msgstr "Low-stock product alerts"
+
+#: app/templates/auth.html:32
+msgid "Acceso seguro desde cualquier dispositivo"
+msgstr "Secure access from any device"
+
+#: app/templates/auth.html:34
+msgid "PATIA · Gestión inteligente para PyMEs"
+msgstr "PATIA · Smart management for SMEs"
+
+#: app/templates/auth.html:41
+msgid "Bienvenido de nuevo"
+msgstr "Welcome back"
+
+#: app/templates/auth.html:41
+msgid "Prueba gratuita de 14 días"
+msgstr "14-day free trial"
+
+#: app/templates/auth.html:44
+msgid "Ingresa tus datos para acceder al panel de tu negocio."
+msgstr "Enter your details to access your business dashboard."
+
+#: app/templates/auth.html:46
+msgid ""
+"Registra tu negocio. Todos los campos son necesarios para configurar tu "
+"cuenta."
+msgstr "Register your business. All fields are required to set up your account."
+
+#: app/templates/auth.html:71
+msgid "Nombre"
+msgstr "First name"
+
+#: app/templates/auth.html:72
+msgid "Tu nombre"
+msgstr "your name"
+
+#: app/templates/auth.html:75
+msgid "Apellido"
+msgstr "Last name"
+
+#: app/templates/auth.html:76
+msgid "Tu apellido"
+msgstr "Your last name"
+
+#: app/templates/auth.html:81
+msgid "Nombre de la empresa"
+msgstr "Business name"
+
+#: app/templates/auth.html:82
+msgid "Nombre de tu empresa"
+msgstr "Name of your company"
+
+#: app/templates/auth.html:87
+msgid "Número telefónico"
+msgstr "Telephone number"
+
+#: app/templates/auth.html:91 app/templates/settings.html:46
+msgid "Dirección"
+msgstr "Address"
+
+#: app/templates/auth.html:92
+msgid "Calle, número, colonia"
+msgstr "Street, number, neighborhood"
+
+#: app/templates/auth.html:97 app/templates/auth.html:98
+#: app/templates/settings.html:54
+msgid "Ciudad"
+msgstr "City"
+
+#: app/templates/auth.html:108 app/templates/settings.html:62
+msgid "Código postal"
+msgstr "Postal code"
+
+#: app/templates/auth.html:109
+msgid "CP"
+msgstr "CP"
+
+#: app/templates/auth.html:112
+msgid "Giro del negocio"
+msgstr "Business type"
+
+#: app/templates/auth.html:114
+msgid "Selecciona..."
+msgstr "Select..."
+
+#: app/templates/auth.html:116
+msgid "Minisúper"
+msgstr "convenience store"
+
+#: app/templates/auth.html:117 app/templates/landing.html:80
+msgid "Abarrotes"
+msgstr "Groceries"
+
+#: app/templates/auth.html:118
+msgid "Ferretería"
+msgstr "Hardware"
+
+#: app/templates/auth.html:119
+msgid "Farmacia"
+msgstr "Pharmacy"
+
+#: app/templates/auth.html:120
+msgid "Distribuidora"
+msgstr "Distributor"
+
+#: app/templates/auth.html:121 app/templates/sell.html:79
+msgid "Otro"
+msgstr "Other"
+
+#: app/templates/auth.html:129 app/templates/forgot_password.html:37
+msgid "correo@empresa.com"
+msgstr "email@company.com"
+
+#: app/templates/auth.html:134
+msgid "Contraseña"
+msgstr "Password"
+
+#: app/templates/auth.html:135
+msgid "¿La olvidaste?"
+msgstr "Forgot it?"
+
+#: app/templates/auth.html:137 app/templates/reset_password.html:45
+msgid "Mínimo 8 caracteres"
+msgstr "Minimum 8 characters"
+
+#: app/templates/auth.html:144
+msgid "Al crear tu cuenta aceptas los"
+msgstr "By creating your account, you accept the"
+
+#: app/templates/auth.html:144 app/templates/legal.html:19
+msgid "Términos de servicio"
+msgstr "Terms of Service"
+
+#: app/templates/auth.html:145
+msgid "y puedes consultar el"
+msgstr "and you can review the"
+
+#: app/templates/auth.html:145 app/templates/legal.html:37
+msgid "Aviso de privacidad"
+msgstr "Privacy Notice"
+
+#: app/templates/auth.html:150
+msgid "¿Aún no tienes cuenta?"
+msgstr "Do not have an account yet?"
+
+#: app/templates/auth.html:150
+msgid "Comienza tu prueba gratis"
+msgstr "Start your free trial"
+
+#: app/templates/auth.html:152
+msgid "¿Ya tienes cuenta?"
+msgstr "Already have an account?"
+
+#: app/templates/auth.html:152
+msgid "Inicia sesión"
+msgstr "Sign in"
+
+#: app/templates/base.html:12 app/templates/base_clean.html:7
+#: app/templates/dashboard.html:35
+msgid "PATIA"
+msgstr ""
+
+#: app/templates/base.html:27
+msgid "Gestión inteligente"
+msgstr "Smart management"
+
+#: app/templates/base.html:30 app/templates/base.html:31
+msgid "Menú"
+msgstr "Menu"
+
+#: app/templates/base.html:30
+msgid "Cerrar"
+msgstr "Close"
+
+#: app/templates/base.html:36 app/templates/landing.html:19
+msgid "Navegación principal"
+msgstr "Main navigation"
+
+#: app/templates/base.html:37
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: app/templates/base.html:38 app/templates/edit_product.html:7
+#: app/templates/landing.html:61
+msgid "Inventario"
+msgstr "Inventory"
+
+#: app/templates/base.html:39 app/templates/sell.html:2
+msgid "Punto de venta"
+msgstr "Point of sale"
+
+#: app/templates/base.html:41 app/templates/base.html:43
+#: app/templates/base.html:45 app/templates/reports.html:2
+msgid "Reportes IA"
+msgstr "AI Reports"
+
+#: app/templates/base.html:43 app/templates/base.html:45
+msgid "PRO"
+msgstr ""
+
+#: app/templates/base.html:47 app/templates/suppliers.html:2
+msgid "Proveedores"
+msgstr "Suppliers"
+
+#: app/templates/base.html:48 app/templates/settings.html:2
+msgid "Configuración"
+msgstr "Settings"
+
+#: app/templates/base.html:54
+msgid "Cerrar sesión"
+msgstr "Sign out"
+
+#: app/templates/base.html:65
+msgid "Contactar a PATIA por WhatsApp"
+msgstr "Contact PATIA by WhatsApp"
+
+#: app/templates/base.html:68
+msgid "Ayuda"
+msgstr "Help"
+
+#: app/templates/base.html:75
+msgid "Plan actual: PATIA Pro"
+msgstr "Current plan: PATIA Pro"
+
+#: app/templates/base.html:76
+msgid "Suscripción activa · $199 MXN/mes"
+msgstr "Active subscription ? $199 MXN/month"
+
+#: app/templates/base.html:78
+msgid "Plan actual: Prueba"
+msgstr "Current plan: Trial"
+
+#: app/templates/base.html:79
+#, python-format
+msgid "%(days)s días restantes · $199 MXN/mes"
+msgstr "%(days)s days remaining ? $199 MXN/month"
+
+#: app/templates/base.html:89
+msgid "Centro de control"
+msgstr "Control center"
+
+#: app/templates/base.html:107 app/templates/landing.html:233
+#: app/templates/legal.html:14 app/templates/legal.html:57
+msgid "Términos"
+msgstr "Terms"
+
+#: app/templates/base.html:108 app/templates/landing.html:234
+#: app/templates/legal.html:14 app/templates/legal.html:57
+msgid "Privacidad"
+msgstr "Privacy"
+
+#: app/templates/dashboard.html:2
+msgid "Panel ejecutivo"
+msgstr "Executive dashboard"
+
+#: app/templates/dashboard.html:9
+msgid "Resumen del negocio"
+msgstr "Business overview"
+
+#: app/templates/dashboard.html:10
+msgid "Lo importante de tu negocio, en una sola vista."
+msgstr "The essentials of your business, in one view."
+
+#: app/templates/dashboard.html:11
+msgid "Revisa ventas, inventario y acciones que necesitan tu atención."
+msgstr "Review sales, inventory, and actions that need your attention."
+
+#: app/templates/dashboard.html:16
+msgid "Plan actual: PRO"
+msgstr "Current plan: PRO"
+
+#: app/templates/dashboard.html:22
+#, python-format
+msgid "Prueba gratuita · Te quedan %(days)s días"
+msgstr "Free trial ? %(days)s days remaining"
+
+#: app/templates/dashboard.html:27
+msgid "Actualizar a PRO"
+msgstr "Upgrade to PRO"
+
+#: app/templates/dashboard.html:34
+msgid "Visión ejecutiva"
+msgstr "Executive vision"
+
+#: app/templates/dashboard.html:44
+msgid "Primeros pasos"
+msgstr "Getting started"
+
+#: app/templates/dashboard.html:45
+msgid "Pon PATIA en marcha"
+msgstr "Get PATIA up and running"
+
+#: app/templates/dashboard.html:46
+msgid ""
+"Sigue el siguiente paso disponible. PATIA actualizará el progreso "
+"automáticamente con tu actividad."
+msgstr ""
+"Follow the next available step. PATIA will update your progress "
+"automatically."
+
+#: app/templates/dashboard.html:71
+msgid "Completado"
+msgstr "Completed"
+
+#: app/templates/dashboard.html:71
+msgid "Disponible después"
+msgstr "Available later"
+
+#: app/templates/dashboard.html:79
+msgid "¿Ya tienes un catálogo?"
+msgstr "Already have a catalog?"
+
+#: app/templates/dashboard.html:80 app/templates/products.html:15
+msgid "Importar catálogo"
+msgstr "Import catalog"
+
+#: app/templates/dashboard.html:86
+msgid "Indicadores principales"
+msgstr "Main indicators"
+
+#: app/templates/dashboard.html:89
+msgid "Ventas hoy"
+msgstr "Sales today"
+
+#: app/templates/dashboard.html:93
+msgid "Actividad del día"
+msgstr "Today?s activity"
+
+#: app/templates/dashboard.html:98 app/templates/landing.html:60
+msgid "Ventas 7 días"
+msgstr "7-day sales"
+
+#: app/templates/dashboard.html:102
+msgid "Rendimiento semanal"
+msgstr "Weekly performance"
+
+#: app/templates/dashboard.html:107 app/templates/reports.html:25
+msgid "Valor inventario"
+msgstr "Inventory value"
+
+#: app/templates/dashboard.html:111
+msgid "Capital estimado"
+msgstr "Estimated capital"
+
+#: app/templates/dashboard.html:116 app/templates/landing.html:62
+msgid "Stock bajo"
+msgstr "Low stock"
+
+#: app/templates/dashboard.html:120
+msgid "Requieren atención"
+msgstr "Needs attention"
+
+#: app/templates/dashboard.html:128
+msgid "Rendimiento"
+msgstr "Performance"
+
+#: app/templates/dashboard.html:129
+msgid "Productos más vendidos"
+msgstr "Best-selling products"
+
+#: app/templates/dashboard.html:143
+msgid "Aún no hay ventas para mostrar"
+msgstr "No sales to display yet"
+
+#: app/templates/dashboard.html:144
+msgid ""
+"Cuando registres tus primeras ventas, aquí verás el rendimiento de tus "
+"productos."
+msgstr "Once you record your first sales, product performance will appear here."
+
+#: app/templates/dashboard.html:154
+msgid "Inteligencia comercial"
+msgstr "Business intelligence"
+
+#: app/templates/dashboard.html:155
+msgid "Copiloto PATIA"
+msgstr "Co-pilot PATIA"
+
+#: app/templates/dashboard.html:165
+msgid "Basado en tus ventas e inventario registrados en PATIA."
+msgstr "Based on the sales and inventory recorded in PATIA."
+
+#: app/templates/dashboard.html:171
+msgid "Necesitamos conocer un poco más tu negocio"
+msgstr "We need to learn a little more about your business"
+
+#: app/templates/dashboard.html:171
+msgid ""
+"Agrega productos y registra ventas. Con esos datos PATIA podrá darte "
+"recomendaciones útiles y explicables."
+msgstr ""
+"Add products and record sales so PATIA can provide useful, explainable "
+"recommendations."
+
+#: app/templates/dashboard.html:204
+msgid "Operación"
+msgstr "Operations"
+
+#: app/templates/dashboard.html:205
+msgid "Alertas que requieren atención"
+msgstr "Alerts that need attention"
+
+#: app/templates/dashboard.html:226
+msgid "Todo bajo control"
+msgstr "Everything is under control"
+
+#: app/templates/dashboard.html:228
+msgid "No hay productos con stock crítico en este momento."
+msgstr "No products have critical stock levels right now."
+
+#: app/templates/edit_product.html:8
+msgid "Editar producto"
+msgstr "Edit product"
+
+#: app/templates/edit_product.html:9
+msgid ""
+"Actualiza los datos actuales. Las ventas ya registradas conservarán el "
+"precio y total que tuvieron al venderse."
+msgstr ""
+"Update current data. Sales already registered will retain the price and "
+"total they had when sold."
+
+#: app/templates/edit_product.html:22
+msgid "Debe ser único dentro de tu empresa."
+msgstr "It must be unique within your company."
+
+#: app/templates/edit_product.html:25 app/templates/edit_product.html:34
+#: app/templates/products.html:61 app/templates/products.html:65
+#: app/templates/products.html:69 app/templates/products.html:73
+#: app/templates/suppliers.html:19 app/templates/suppliers.html:21
+#: app/templates/suppliers.html:23
+msgid "Opcional"
+msgstr "Optional"
+
+#: app/templates/edit_product.html:27
+msgid "Si lo capturas, no puede pertenecer a otro producto de tu catálogo."
+msgstr "If you capture it, it cannot belong to another product in your catalog."
+
+#: app/templates/edit_product.html:38 app/templates/products.html:42
+msgid "Precio de compra"
+msgstr "Purchase price"
+
+#: app/templates/edit_product.html:46
+msgid "Stock actual"
+msgstr "Current stock"
+
+#: app/templates/edit_product.html:48
+msgid ""
+"Este valor reemplaza las existencias actuales. PATIA V1.0 no conserva un "
+"historial de ajustes manuales."
+msgstr ""
+"This value replaces current stock. PATIA V1.0 does not retain a history "
+"of manual adjustments."
+
+#: app/templates/edit_product.html:55 app/templates/settings.html:88
+msgid "Guardar cambios"
+msgstr "Save changes"
+
+#: app/templates/edit_product.html:56
+msgid "Cancelar"
+msgstr "Cancel"
+
+#: app/templates/error.html:5
+msgid "Ir al inicio de PATIA"
+msgstr "Go to the beginning of PATIA"
+
+#: app/templates/error.html:11 app/templates/legal.html:55
+msgid "Volver a PATIA"
+msgstr "Return to PATIA"
+
+#: app/templates/forgot_password.html:7
+msgid "Recuperar contraseña | PATIA"
+msgstr "Recover password | PATIA"
+
+#: app/templates/forgot_password.html:18
+msgid "Acceso a tu cuenta"
+msgstr "Access to your account"
+
+#: app/templates/forgot_password.html:19
+msgid "¿Olvidaste tu contraseña?"
+msgstr "Forgot your password?"
+
+#: app/templates/forgot_password.html:20
+msgid "Escribe tu correo y te enviaremos un enlace válido durante 30 minutos."
+msgstr "Write your email and we will send you a link valid for 30 minutes."
+
+#: app/templates/forgot_password.html:39
+msgid "Enviar enlace"
+msgstr "Send link"
+
+#: app/templates/forgot_password.html:42 app/templates/reset_password.html:51
+msgid "Volver a iniciar sesión"
+msgstr "Login again"
+
+#: app/templates/landing.html:7
+msgid "PATIA | Control de inventario y ventas para PyMEs"
+msgstr "PATIA | Inventory and sales control for SMEs"
+
+#: app/templates/landing.html:16
+msgid "PATIA, inicio"
+msgstr "PATIA, beginning"
+
+#: app/templates/landing.html:20 app/templates/landing.html:231
+msgid "Beneficios"
+msgstr "Benefits"
+
+#: app/templates/landing.html:21 app/templates/landing.html:126
+msgid "Cómo funciona"
+msgstr "How it works"
+
+#: app/templates/landing.html:22 app/templates/landing.html:232
+#: app/templates/products.html:147 app/templates/products.html:155
+#: app/templates/subscribe.html:85
+msgid "Precio"
+msgstr "Pricing"
+
+#: app/templates/landing.html:30
+msgid "Control operativo para PyMEs en México"
+msgstr "Operational control for small businesses in Mexico"
+
+#: app/templates/landing.html:31
+msgid "Vende, controla tu inventario y entiende tu negocio."
+msgstr "Sell, control inventory, and understand your business."
+
+#: app/templates/landing.html:33
+msgid ""
+"PATIA conecta cada venta con tus existencias y convierte la operación "
+"diaria en indicadores claros para comprar mejor, evitar faltantes y "
+"conocer qué productos impulsan tu negocio."
+msgstr ""
+"PATIA connects every sale to inventory and turns daily operations into "
+"clear indicators for smarter purchasing, fewer stockouts, and better "
+"product decisions."
+
+#: app/templates/landing.html:37
+msgid "Empezar prueba de 14 días"
+msgstr "Start 14-day trial"
+
+#: app/templates/landing.html:41
+msgid "Contratar por $199 al mes"
+msgstr "Subscribe for $199 per month"
+
+#: app/templates/landing.html:44
+msgid "Condiciones de la prueba"
+msgstr "Test conditions"
+
+#: app/templates/landing.html:45
+msgid "Sin instalación"
+msgstr "No installation"
+
+#: app/templates/landing.html:46
+msgid "Configuración sencilla"
+msgstr "Simple setup"
+
+#: app/templates/landing.html:47
+msgid "Soporte directo"
+msgstr "Direct support"
+
+#: app/templates/landing.html:51
+msgid "Vista previa del panel PATIA"
+msgstr "PATIA panel preview"
+
+#: app/templates/landing.html:54
+msgid "Resumen semanal"
+msgstr "Weekly overview"
+
+#: app/templates/landing.html:55
+msgid "Negocio en orden"
+msgstr "Business under control"
+
+#: app/templates/landing.html:57
+msgid "Actualizado"
+msgstr "Updated"
+
+#: app/templates/landing.html:60
+msgid "Actividad registrada"
+msgstr "Recorded activity"
+
+#: app/templates/landing.html:61
+msgid "Valor estimado"
+msgstr "Estimated value"
+
+#: app/templates/landing.html:62
+msgid "Productos por atender"
+msgstr "Products to review"
+
+#: app/templates/landing.html:65
+msgid "Productos con mayor movimiento"
+msgstr "Top-moving products"
+
+#: app/templates/landing.html:65
+msgid "Últimos 7 días"
+msgstr "Last 7 days"
+
+#: app/templates/landing.html:72
+msgid "2 productos requieren atención"
+msgstr "2 products need attention"
+
+#: app/templates/landing.html:72
+msgid "Revisa existencias antes de tu próximo pedido."
+msgstr "Review stock before your next order."
+
+#: app/templates/landing.html:77
+msgid "Sectores objetivo"
+msgstr "Target sectors"
+
+#: app/templates/landing.html:78
+msgid "Hecho para negocios como el tuyo"
+msgstr "Built for businesses like yours"
+
+#: app/templates/landing.html:81
+msgid "Minisúpers"
+msgstr "convenience stores"
+
+#: app/templates/landing.html:82
+msgid "Ferreterías"
+msgstr "Hardware stores"
+
+#: app/templates/landing.html:83
+msgid "Farmacias"
+msgstr "Pharmacies"
+
+#: app/templates/landing.html:84
+msgid "Distribuidoras"
+msgstr "Distributors"
+
+#: app/templates/landing.html:88
+msgid "Resultados operativos con PATIA"
+msgstr "Operational results with PATIA"
+
+#: app/templates/landing.html:89
+msgid "Una sola fuente de información"
+msgstr "One source of truth"
+
+#: app/templates/landing.html:89
+msgid "Ventas, inventario, proveedores y tickets permanecen conectados."
+msgstr "Sales, inventory, suppliers, and receipts stay connected."
+
+#: app/templates/landing.html:90
+msgid "Menos decisiones a ciegas"
+msgstr "Fewer decisions made blindly"
+
+#: app/templates/landing.html:90
+msgid "Consulta indicadores y alertas antes de comprar o reabastecer."
+msgstr "Review indicators and alerts before purchasing or restocking."
+
+#: app/templates/landing.html:91
+msgid "Listo para operar desde el navegador"
+msgstr "Ready to use in your browser"
+
+#: app/templates/landing.html:91
+msgid "Sin instalaciones, desde computadora o celular."
+msgstr "No installation, from desktop or mobile."
+
+#: app/templates/landing.html:96
+msgid "Lo que resuelve PATIA"
+msgstr "What PATIA solves"
+
+#: app/templates/landing.html:97
+msgid "Menos incertidumbre. Más control diario."
+msgstr "Less uncertainty. More daily control."
+
+#: app/templates/landing.html:98
+msgid ""
+"Información práctica para operar mejor, reducir faltantes y conocer el "
+"desempeño real de tu negocio."
+msgstr ""
+"Practical information to operate better, reduce stockouts, and understand"
+" real business performance."
+
+#: app/templates/landing.html:103
+msgid "Inventario confiable"
+msgstr "Reliable inventory"
+
+#: app/templates/landing.html:104
+msgid ""
+"Consulta existencias, costos, precios y valor de inventario sin depender "
+"de libretas dispersas."
+msgstr ""
+"View stock, costs, prices, and inventory value without scattered "
+"notebooks."
+
+#: app/templates/landing.html:108
+msgid "Ventas conectadas"
+msgstr "Connected sales"
+
+#: app/templates/landing.html:109
+msgid ""
+"Cada venta descuenta stock y alimenta tus indicadores para que la "
+"información permanezca actualizada."
+msgstr "Every sale updates stock and your indicators automatically."
+
+#: app/templates/landing.html:113
+msgid "Alertas oportunas"
+msgstr "Timely alerts"
+
+#: app/templates/landing.html:114
+msgid ""
+"Identifica productos agotados o con pocas unidades antes de perder ventas"
+" por falta de mercancía."
+msgstr "Identify out-of-stock and low-stock products before losing sales."
+
+#: app/templates/landing.html:118
+msgid "Rentabilidad visible"
+msgstr "Visible profitability"
+
+#: app/templates/landing.html:119
+msgid ""
+"Conoce productos con mayor movimiento, ventas semanales y utilidad "
+"estimada desde el panel ejecutivo."
+msgstr ""
+"See top-moving products, weekly sales, and estimated profit from the "
+"executive dashboard."
+
+#: app/templates/landing.html:127
+msgid "Empieza a tener control en tres pasos."
+msgstr "Take control in three steps."
+
+#: app/templates/landing.html:130
+msgid "Carga tus productos"
+msgstr "Load your products"
+
+#: app/templates/landing.html:130
+msgid "Regístralos manualmente o utiliza la plantilla de importación de PATIA."
+msgstr "Add them manually or use PATIA?s import template."
+
+#: app/templates/landing.html:131
+msgid "Registra tus ventas"
+msgstr "Record your sales"
+
+#: app/templates/landing.html:131
+msgid ""
+"Usa el punto de venta para descontar existencias y mantener datos "
+"actualizados."
+msgstr "Use the point of sale to update inventory and keep data current."
+
+#: app/templates/landing.html:132
+msgid "Actúa con información"
+msgstr "Act on information"
+
+#: app/templates/landing.html:132
+msgid ""
+"Consulta alertas, productos destacados, ventas y necesidades de "
+"reabastecimiento."
+msgstr "Review alerts, top products, sales, and restocking needs."
+
+#: app/templates/landing.html:138
+msgid "Antes y después"
+msgstr "Before and after"
+
+#: app/templates/landing.html:139
+msgid "De administrar por memoria a operar con claridad."
+msgstr "Move from memory-based management to clear operations."
+
+#: app/templates/landing.html:143
+msgid "Antes"
+msgstr "Before"
+
+#: app/templates/landing.html:144
+msgid "Información dispersa"
+msgstr "Scattered information"
+
+#: app/templates/landing.html:146
+msgid "Inventario en libretas o archivos separados"
+msgstr "Inventory in notebooks or separate files"
+
+#: app/templates/landing.html:147
+msgid "Faltantes descubiertos demasiado tarde"
+msgstr "Stockouts discovered too late"
+
+#: app/templates/landing.html:148
+msgid "Compras basadas únicamente en intuición"
+msgstr "Purchases based only on intuition"
+
+#: app/templates/landing.html:149
+msgid "Sin visión clara de ventas y márgenes"
+msgstr "No clear view of sales and margins"
+
+#: app/templates/landing.html:153
+msgid "Con PATIA"
+msgstr "With PATIA"
+
+#: app/templates/landing.html:154
+msgid "Una operación conectada"
+msgstr "A connected operation"
+
+#: app/templates/landing.html:156
+msgid "Productos, ventas y proveedores centralizados"
+msgstr "Products, sales, and suppliers centralized"
+
+#: app/templates/landing.html:157
+msgid "Alertas visibles antes de quedarte sin stock"
+msgstr "Visible alerts before running out of stock"
+
+#: app/templates/landing.html:158
+msgid "Indicadores para preparar tus compras"
+msgstr "Indicators to prepare purchases"
+
+#: app/templates/landing.html:159
+msgid "Panel ejecutivo disponible en cualquier momento"
+msgstr "Executive dashboard available at any time"
+
+#: app/templates/landing.html:167
+msgid "El valor de PATIA Pro"
+msgstr "The value of PATIA Pro"
+
+#: app/templates/landing.html:168
+msgid "No es solo registrar datos. Es saber qué hacer con ellos."
+msgstr "It is not just recording data. It is knowing what to do with it."
+
+#: app/templates/landing.html:169
+msgid ""
+"Tu operación genera información todos los días. PATIA Pro la organiza y "
+"la convierte en seguimiento comercial útil para decidir con mayor "
+"confianza."
+msgstr ""
+"Your operation generates information every day. PATIA Pro organizes it "
+"and turns it into useful business insight for more confident decisions."
+
+#: app/templates/landing.html:170
+msgid "Ver precio y condiciones"
+msgstr "View pricing and terms"
+
+#: app/templates/landing.html:173
+msgid "Reportes completos"
+msgstr "Complete reports"
+
+#: app/templates/landing.html:173
+msgid "Ventas, utilidad estimada, categorías y desempeño del inventario."
+msgstr "Sales, estimated profit, categories, and inventory performance."
+
+#: app/templates/landing.html:174
+msgid "Recomendaciones explicadas"
+msgstr "Explained recommendations"
+
+#: app/templates/landing.html:174
+msgid "Sugerencias basadas en la actividad registrada en tu propia cuenta."
+msgstr "Suggestions based on activity recorded in your own account."
+
+#: app/templates/landing.html:175
+msgid "Seguimiento de existencias"
+msgstr "Inventory tracking"
+
+#: app/templates/landing.html:175
+msgid "Alertas y contexto para anticipar productos que necesitan atención."
+msgstr "Alerts and context to anticipate products that need attention."
+
+#: app/templates/landing.html:176
+msgid "Operación profesional"
+msgstr "Professional operations"
+
+#: app/templates/landing.html:176
+msgid "POS, historial y tickets listos para consultar o imprimir."
+msgstr "POS, history, and receipts ready to view or print."
+
+#: app/templates/landing.html:182
+msgid "Precio simple"
+msgstr "Simple pricing"
+
+#: app/templates/landing.html:183
+msgid "Todo lo necesario para controlar mejor tu negocio."
+msgstr "Everything you need to run your business with greater control."
+
+#: app/templates/landing.html:184
+msgid ""
+"Sin paquetes confusos ni costos ocultos. Prueba PATIA durante 14 días y "
+"decide con calma."
+msgstr ""
+"No confusing packages or hidden costs. Try PATIA for 14 days and decide "
+"with confidence."
+
+#: app/templates/landing.html:187 app/templates/subscribe.html:77
+#: app/templates/subscribe.html:79 app/templates/subscribe.html:80
+#: app/templates/subscribe.html:81 app/templates/subscribe.html:82
+#: app/templates/subscribe.html:83 app/templates/subscribe.html:84
+#: app/templates/subscribe.html:85
+msgid "PATIA Pro"
+msgstr ""
+
+#: app/templates/landing.html:188
+msgid "MXN"
+msgstr "MXN"
+
+#: app/templates/landing.html:188
+msgid "al mes"
+msgstr "per month"
+
+#: app/templates/landing.html:189
+msgid ""
+"Continúa operando sin límite de tiempo y desbloquea el análisis completo "
+"de tu negocio."
+msgstr ""
+"Continue operating without a time limit and unlock complete business "
+"analysis."
+
+#: app/templates/landing.html:191
+msgid "Inventario, ventas, proveedores y tickets"
+msgstr "Inventory, sales, suppliers, and receipts"
+
+#: app/templates/landing.html:192
+msgid "Dashboard, reportes y recomendaciones IA"
+msgstr "Dashboard, reports, and AI recommendations"
+
+#: app/templates/landing.html:193
+msgid "Acceso desde computadora o celular"
+msgstr "Access from desktop or mobile"
+
+#: app/templates/landing.html:194
+msgid "Suscripción mensual administrable"
+msgstr "Manageable monthly subscription"
+
+#: app/templates/landing.html:196
+msgid "Comenzar prueba gratis"
+msgstr "Start free trial"
+
+#: app/templates/landing.html:197
+msgid "Contratar PATIA Pro directamente"
+msgstr "Subscribe to PATIA Pro"
+
+#: app/templates/landing.html:203
+msgid "Preguntas frecuentes"
+msgstr "Frequently asked questions"
+
+#: app/templates/landing.html:204
+msgid "Lo esencial antes de comenzar."
+msgstr "The essentials before getting started."
+
+#: app/templates/landing.html:207
+msgid "¿Necesito instalar algún programa?"
+msgstr "Do I need to install any software?"
+
+#: app/templates/landing.html:207
+msgid ""
+"No. PATIA funciona desde el navegador y puedes acceder desde computadora "
+"o celular."
+msgstr "No. PATIA works in your browser and is available on desktop or mobile."
+
+#: app/templates/landing.html:208
+msgid "¿Puedo importar mis productos?"
+msgstr "Can I import my products?"
+
+#: app/templates/landing.html:208
+msgid ""
+"Sí. PATIA incluye una plantilla para importar tu catálogo desde un "
+"archivo Excel o CSV."
+msgstr ""
+"Yes. PATIA includes a template for importing your catalog from Excel or "
+"CSV."
+
+#: app/templates/landing.html:209
+msgid "¿Qué pasa al terminar los 14 días?"
+msgstr "What happens after the 14-day trial?"
+
+#: app/templates/landing.html:209
+msgid ""
+"Tus datos permanecen en tu cuenta y puedes activar PATIA Pro por $199 MXN"
+" al mes."
+msgstr ""
+"Your data remains in your account and you can activate PATIA Pro for $199"
+" MXN per month."
+
+#: app/templates/landing.html:210
+msgid "¿PATIA sirve para más de un tipo de negocio?"
+msgstr "Does PATIA work for different types of businesses?"
+
+#: app/templates/landing.html:210
+msgid ""
+"Sí. Está diseñado para comercios y PyMEs que manejan productos, "
+"inventario y ventas."
+msgstr ""
+"Yes. It is designed for stores and small businesses that manage products,"
+" inventory, and sales."
+
+#: app/templates/landing.html:215
+msgid "Empieza hoy"
+msgstr "Start today"
+
+#: app/templates/landing.html:216
+msgid "Tu negocio puede operar con más orden desde esta semana."
+msgstr "Your business can operate more efficiently this week."
+
+#: app/templates/landing.html:217
+msgid "Prueba PATIA durante 14 días y reúne tu operación en un solo lugar."
+msgstr "Try PATIA for 14 days and bring your operation together in one place."
+
+#: app/templates/landing.html:219
+msgid "Crear mi cuenta"
+msgstr "Create my account"
+
+#: app/templates/landing.html:220
+msgid "Hablar con PATIA"
+msgstr "Talk to PATIA"
+
+#: app/templates/landing.html:228
+msgid "Control operativo para PyMEs que quieren crecer con claridad."
+msgstr "Operational control for small businesses that want to grow with clarity."
+
+#: app/templates/landing.html:237
+msgid "PATIA © 2026 · NP Ventures"
+msgstr "PATIA © 2026 · NP Ventures"
+
+#: app/templates/legal.html:14
+msgid "Documentos legales"
+msgstr "Legal documents"
+
+#: app/templates/legal.html:17
+msgid "Borrador operativo sujeto a revisión legal"
+msgstr "Operational draft subject to legal review"
+
+#: app/templates/legal.html:20 app/templates/legal.html:38
+msgid "Última actualización: 15 de julio de 2026"
+msgstr "Last update: July 15, 2026"
+
+#: app/templates/legal.html:21
+msgid ""
+"Estos términos describen las condiciones generales para crear una cuenta "
+"y utilizar PATIA. No constituyen asesoría jurídica definitiva y deberán "
+"ser revisados por un profesional antes de su adopción final."
+msgstr ""
+"These terms describe the general conditions for creating an account and "
+"using PATIA. They do not constitute definitive legal advice and must be "
+"reviewed by a professional before final adoption."
+
+#: app/templates/legal.html:22
+msgid "1. Responsable del servicio"
+msgstr "1. Responsible for the service"
+
+#: app/templates/legal.html:23
+msgid "Proveedor:"
+msgstr "Supplier:"
+
+#: app/templates/legal.html:23 app/templates/legal.html:41
+msgid "[RAZÓN SOCIAL PENDIENTE DE DEFINIR]"
+msgstr "[COMPANY NAME TO BE DEFINED]"
+
+#: app/templates/legal.html:23 app/templates/legal.html:41
+msgid ". Domicilio:"
+msgstr ". Home:"
+
+#: app/templates/legal.html:23 app/templates/legal.html:41
+msgid "[DOMICILIO LEGAL PENDIENTE DE DEFINIR]"
+msgstr "[LEGAL ADDRESS TO BE DEFINED]"
+
+#: app/templates/legal.html:23
+msgid ". Contacto legal:"
+msgstr ". Legal contact:"
+
+#: app/templates/legal.html:23
+msgid "[CORREO DE CONTACTO PENDIENTE DE DEFINIR]"
+msgstr "[CONTACT EMAIL TO BE DEFINED]"
+
+#: app/templates/legal.html:24
+msgid "2. Cuenta y uso permitido"
+msgstr "2. Account and permitted use"
+
+#: app/templates/legal.html:25
+msgid ""
+"La persona usuaria debe proporcionar información correcta, proteger sus "
+"credenciales y utilizar PATIA para la operación legítima de su negocio. "
+"No debe intentar acceder a cuentas ajenas, afectar el servicio ni usarlo "
+"para actividades ilícitas."
+msgstr ""
+"The user must provide correct information, protect their credentials and "
+"use PATIA for the legitimate operation of their business. You should not "
+"attempt to access other people's accounts, affect the service or use it "
+"for illegal activities."
+
+#: app/templates/legal.html:26
+msgid "3. Prueba y suscripción"
+msgstr "3. Trial and subscription"
+
+#: app/templates/legal.html:27
+msgid ""
+"PATIA ofrece una prueba de 14 días. PATIA Pro tiene el precio mostrado "
+"durante la contratación, actualmente $199 MXN al mes. Stripe procesa el "
+"pago y puede solicitar datos adicionales conforme a sus propias "
+"condiciones."
+msgstr ""
+"PATIA offers a 14-day trial. PATIA Pro has the price shown during the "
+"contract, currently $199 MXN per month. Stripe processes the payment and "
+"may request additional data under its own terms."
+
+#: app/templates/legal.html:28
+msgid "4. Renovación y cancelación"
+msgstr "4. Renewal and cancellation"
+
+#: app/templates/legal.html:29
+msgid ""
+"La suscripción se renueva según el periodo informado en Checkout. Puede "
+"administrarse o cancelarse desde el portal de cliente. Una cancelación "
+"programada conserva el acceso hasta el final del periodo pagado, salvo "
+"que Stripe indique otra condición."
+msgstr ""
+"The subscription is renewed according to the period reported in Checkout."
+" It can be managed or canceled from the customer portal. A scheduled "
+"cancellation retains access until the end of the paid period, unless "
+"otherwise specified by Stripe."
+
+#: app/templates/legal.html:30
+msgid "5. Datos y disponibilidad"
+msgstr "5. Data and availability"
+
+#: app/templates/legal.html:31
+msgid ""
+"La persona usuaria conserva responsabilidad sobre la exactitud de sus "
+"productos, ventas y datos del negocio. PATIA aplica medidas razonables de"
+" operación y seguridad, pero no promete disponibilidad ininterrumpida ni "
+"resultados comerciales específicos."
+msgstr ""
+"The user retains responsibility for the accuracy of their products, sales"
+" and business data. PATIA applies reasonable operational and security "
+"measures, but does not promise uninterrupted availability or specific "
+"business results."
+
+#: app/templates/legal.html:32
+msgid "6. Proveedores externos"
+msgstr "6. External suppliers"
+
+#: app/templates/legal.html:33
+msgid ""
+"El servicio puede apoyarse en Render para infraestructura, Stripe para "
+"pagos y Resend para correo. Cada proveedor trata información conforme a "
+"sus propios términos y avisos."
+msgstr ""
+"The service can rely on Render for infrastructure, Stripe for payments "
+"and Resend for email. Each provider processes information according to "
+"its own terms and notices."
+
+#: app/templates/legal.html:34
+msgid "7. Cambios y contacto"
+msgstr "7. Changes and contact"
+
+#: app/templates/legal.html:35
+msgid ""
+"Los cambios materiales deberán comunicarse por medios razonables. Para "
+"soporte operativo puedes"
+msgstr ""
+"Material changes must be communicated by reasonable means. For "
+"operational support you can"
+
+#: app/templates/legal.html:35 app/templates/legal.html:53
+msgid "contactar a PATIA por WhatsApp"
+msgstr "contact PATIA by WhatsApp"
+
+#: app/templates/legal.html:35
+msgid ". El contacto legal definitivo permanece pendiente de completar."
+msgstr ". The final legal contact remains pending completion."
+
+#: app/templates/legal.html:39
+msgid ""
+"Este documento explica de forma general qué información utiliza PATIA. Es"
+" un borrador operativo sujeto a revisión legal y no afirma cumplimiento o"
+" certificaciones que no hayan sido verificadas."
+msgstr ""
+"This document explains in general terms what information PATIA uses. It "
+"is an operational draft subject to legal review and does not claim "
+"compliance or certifications that have not been verified."
+
+#: app/templates/legal.html:40
+msgid "1. Responsable"
+msgstr "1. Responsible"
+
+#: app/templates/legal.html:41
+msgid "Responsable:"
+msgstr "Responsible:"
+
+#: app/templates/legal.html:41
+msgid ". Contacto de privacidad:"
+msgstr ". Privacy Contact:"
+
+#: app/templates/legal.html:41
+msgid "[CORREO DE PRIVACIDAD PENDIENTE DE DEFINIR]"
+msgstr "[PRIVACY EMAIL TO BE DEFINED]"
+
+#: app/templates/legal.html:42
+msgid "2. Datos almacenados"
+msgstr "2. Stored data"
+
+#: app/templates/legal.html:43
+msgid ""
+"PATIA puede almacenar datos de cuenta y contacto, información del "
+"negocio, catálogo, proveedores, ventas, configuración de suscripción e "
+"identificadores técnicos necesarios para operar y proteger el servicio."
+msgstr ""
+"PATIA may store account and contact data, business information, catalog, "
+"suppliers, sales, subscription settings and technical identifiers "
+"necessary to operate and protect the service."
+
+#: app/templates/legal.html:44
+msgid "3. Finalidades"
+msgstr "3. Purposes"
+
+#: app/templates/legal.html:45
+msgid ""
+"Los datos se utilizan para autenticar la cuenta, prestar las funciones "
+"contratadas, generar métricas y tickets, enviar correos operativos, "
+"administrar suscripciones, atender soporte y prevenir abuso o accesos no "
+"autorizados."
+msgstr ""
+"The data is used to authenticate the account, provide contracted "
+"functions, generate metrics and tickets, send operational emails, manage "
+"subscriptions, provide support, and prevent abuse or unauthorized access."
+
+#: app/templates/legal.html:46
+msgid "4. Proveedores y transferencias operativas"
+msgstr "4. Suppliers and operational transfers"
+
+#: app/templates/legal.html:47
+msgid ""
+"Render puede alojar la aplicación y la base de datos; Stripe procesa "
+"pagos y administra suscripciones; Resend entrega correos. Solo se "
+"comparte la información necesaria para esas finalidades operativas, "
+"conforme a la configuración y políticas de cada proveedor."
+msgstr ""
+"Render can host the application and database; Stripe processes payments "
+"and manages subscriptions; Resend delivers emails. Only the information "
+"necessary for these operational purposes is shared, in accordance with "
+"the configuration and policies of each provider."
+
+#: app/templates/legal.html:48
+msgid "5. Cookies y sesiones"
+msgstr "5. Cookies and sessions"
+
+#: app/templates/legal.html:49
+msgid ""
+"PATIA utiliza cookies de sesión necesarias para mantener el acceso "
+"autenticado, aplicar protección CSRF y preservar seguridad. No se "
+"describen aquí cookies publicitarias porque PATIA no declara utilizarlas "
+"actualmente."
+msgstr ""
+"PATIA uses necessary session cookies to maintain authenticated access, "
+"apply CSRF protection and preserve security. Advertising cookies are not "
+"described here because PATIA does not currently declare to use them."
+
+#: app/templates/legal.html:50
+msgid "6. Seguridad y conservación"
+msgstr "6. Security and conservation"
+
+#: app/templates/legal.html:51
+msgid ""
+"Se aplican controles técnicos razonables, como contraseñas protegidas, "
+"sesiones seguras, aislamiento entre cuentas y conexiones HTTPS en "
+"producción. Ningún sistema puede garantizar riesgo cero. Los periodos "
+"definitivos de conservación deberán formalizarse en la revisión legal."
+msgstr ""
+"Reasonable technical controls are applied, such as protected passwords, "
+"secure sessions, isolation between accounts, and HTTPS connections in "
+"production. No system can guarantee zero risk. The definitive retention "
+"periods must be formalized in the legal review."
+
+#: app/templates/legal.html:52
+msgid "7. Derechos y contacto"
+msgstr "7. Rights and contact"
+
+#: app/templates/legal.html:53
+msgid ""
+"La persona titular podrá solicitar información, corrección o eliminación "
+"cuando resulte aplicable. El canal legal definitivo está pendiente de "
+"definir; mientras tanto puede"
+msgstr ""
+"The owner may request information, correction or deletion when "
+"applicable. The definitive legal channel is pending definition; meanwhile"
+" you can"
+
+#: app/templates/legal.html:53
+msgid "para canalizar su solicitud."
+msgstr "to channel your request."
+
+#: app/templates/legal.html:57
+msgid "PATIA © 2026"
+msgstr "PATIA © 2026"
+
+#: app/templates/products.html:2
+msgid "Inventario inteligente"
+msgstr "Smart inventory"
+
+#: app/templates/products.html:10
+msgid "Tu catálogo empieza aquí"
+msgstr "Your catalog starts here"
+
+#: app/templates/products.html:12
+msgid ""
+"Captura un producto manualmente o importa tu catálogo desde Excel para "
+"comenzar a controlar existencias y ventas."
+msgstr ""
+"Add a product manually or import your Excel catalog to start controlling "
+"inventory and sales."
+
+#: app/templates/products.html:24
+msgid "Alta manual"
+msgstr "Manual entry"
+
+#: app/templates/products.html:25
+msgid "Agregar producto"
+msgstr "Add product"
+
+#: app/templates/products.html:26
+msgid "Los campos marcados con * son obligatorios."
+msgstr "Fields marked with * are required."
+
+#: app/templates/products.html:34
+msgid "Ej. Café molido 500 g"
+msgstr "Ex. Ground coffee 500 g"
+
+#: app/templates/products.html:38
+msgid "Ej. CAFE-500"
+msgstr "CAFE-500"
+
+#: app/templates/products.html:39
+msgid "Identificador único interno. Usa uno distinto para cada producto."
+msgstr "Internal unique identifier. Use a different one for each product."
+
+#: app/templates/products.html:44
+msgid "Lo que pagas por cada unidad."
+msgstr "What you pay for each unit."
+
+#: app/templates/products.html:49
+msgid "Precio que cobrarás al cliente."
+msgstr "Price you will charge the client."
+
+#: app/templates/products.html:52
+msgid "Cantidad inicial"
+msgstr "Initial quantity"
+
+#: app/templates/products.html:54
+msgid "Unidades disponibles actualmente."
+msgstr "Units currently available."
+
+#: app/templates/products.html:58
+msgid "Opciones avanzadas"
+msgstr "Advanced options"
+
+#: app/templates/products.html:58
+msgid "Código, categoría, proveedor y stock mínimo"
+msgstr "Barcode, category, supplier, and minimum stock"
+
+#: app/templates/products.html:66
+msgid "Ej. Abarrotes"
+msgstr "Ex. Groceries"
+
+#: app/templates/products.html:70
+msgid "Ej. Distribuidora Norte"
+msgstr "Ex. Northern Distributor"
+
+#: app/templates/products.html:75
+msgid "PATIA te alertará cuando llegues a esta cantidad."
+msgstr "PATIA will alert you when you reach this amount."
+
+#: app/templates/products.html:80
+msgid "Guardar producto"
+msgstr "Save product"
+
+#: app/templates/products.html:86
+msgid "Carga masiva"
+msgstr "Bulk upload"
+
+#: app/templates/products.html:87
+msgid "Importar desde Excel o CSV"
+msgstr "Import from Excel or CSV"
+
+#: app/templates/products.html:88
+msgid "Formatos aceptados: .xlsx y .csv, hasta 10 MB."
+msgstr "Accepted formats: .xlsx and .csv, up to 10 MB."
+
+#: app/templates/products.html:92
+msgid "Antes de importar"
+msgstr "Before importing"
+
+#: app/templates/products.html:94
+msgid ""
+"Columnas obligatorias: SKU, Nombre del producto, Costo, Precio de venta y"
+" Stock inicial."
+msgstr "Mandatory columns: SKU, Product name, Cost, Sales price and Initial stock."
+
+#: app/templates/products.html:95
+msgid "Si coincide el"
+msgstr "If it matches"
+
+#: app/templates/products.html:95
+msgid ""
+", PATIA suma el stock importado y actualiza precios, stock mínimo y "
+"código."
+msgstr ""
+", PATIA adds the imported stock and updates prices, minimum stock and "
+"code."
+
+#: app/templates/products.html:96
+msgid "Si no coincide el SKU, busca el"
+msgstr "If the SKU does not match, search for the"
+
+#: app/templates/products.html:96
+msgid "código de barras"
+msgstr "bar-code"
+
+#: app/templates/products.html:96
+msgid ". Si coincide, reemplaza stock, precios y stock mínimo."
+msgstr ". If it matches, replace stock, prices and minimum stock."
+
+#: app/templates/products.html:97
+msgid ""
+"Las filas vacías se omiten y las filas inválidas se cuentan como errores "
+"sin detener las demás."
+msgstr ""
+"Empty rows are skipped and invalid rows are counted as errors without "
+"stopping the others."
+
+#: app/templates/products.html:102
+msgid "Descargar plantilla PATIA"
+msgstr "Download PATIA template"
+
+#: app/templates/products.html:107
+msgid "Selecciona tu archivo"
+msgstr "Select your file"
+
+#: app/templates/products.html:109
+msgid "Importar archivo"
+msgstr "Import file"
+
+#: app/templates/products.html:110
+msgid "Importando catálogo… No cierres esta ventana."
+msgstr "Importing catalog… Do not close this window."
+
+#: app/templates/products.html:116
+msgid "Resumen de inventario"
+msgstr "Inventory Summary"
+
+#: app/templates/products.html:117
+msgid "Productos en catálogo"
+msgstr "Products in catalog"
+
+#: app/templates/products.html:123
+msgid "Catálogo"
+msgstr "Catalog"
+
+#: app/templates/products.html:125 app/templates/sell.html:43
+msgid "Buscar producto"
+msgstr "Search product"
+
+#: app/templates/products.html:126
+msgid "Buscar producto…"
+msgstr "Search product…"
+
+#: app/templates/products.html:127
+msgid "Busca por nombre, SKU o categoría."
+msgstr "Search by name, SKU or category."
+
+#: app/templates/products.html:132 app/templates/products.html:186
+msgid "Seleccionar productos"
+msgstr "Select products"
+
+#: app/templates/products.html:133
+msgid ""
+"¿Eliminar los productos sin ventas? Los productos que forman parte del "
+"historial se conservarán."
+msgstr ""
+
+#: app/templates/products.html:135
+msgid "Borrar todo el catálogo"
+msgstr "Delete entire catalog"
+
+#: app/templates/products.html:140
+msgid "Eliminar seleccionados"
+msgstr "Delete selected"
+
+#: app/templates/products.html:147 app/templates/products.html:151
+#: app/templates/sell.html:67 app/templates/ticket.html:29
+msgid "Producto"
+msgstr "Product"
+
+#: app/templates/products.html:147 app/templates/products.html:154
+msgid "Stock"
+msgstr "stock"
+
+#: app/templates/products.html:147 app/templates/products.html:156
+msgid "Margen"
+msgstr "Margin"
+
+#: app/templates/products.html:147 app/templates/products.html:157
+msgid "Valor"
+msgstr "Worth"
+
+#: app/templates/products.html:159
+msgid "Editar"
+msgstr "Edit"
+
+#: app/templates/products.html:160
+msgid ""
+"¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su"
+" historial."
+msgstr ""
+
+#: app/templates/products.html:162 app/templates/sell.html:154
+#: app/templates/suppliers.html:66
+msgid "Eliminar"
+msgstr "Remove"
+
+#: app/templates/products.html:174
+msgid "Prueba con otro nombre, SKU o categoría."
+msgstr "Try another name, SKU or category."
+
+#: app/templates/products.html:175
+msgid "Limpiar búsqueda"
+msgstr "Clear search"
+
+#: app/templates/products.html:184
+msgid "Importando catálogo…"
+msgstr "Importing catalog?"
+
+#: app/templates/products.html:185
+msgid "Cancelar selección"
+msgstr "Cancel selection"
+
+#: app/templates/products.html:187
+#, python-format
+msgid "¿Eliminar %(count)s productos seleccionados?"
+msgstr ""
+
+#: app/templates/reports.html:9
+msgid "Utilidad estimada"
+msgstr "Estimated profit"
+
+#: app/templates/reports.html:11
+msgid ""
+"Ventas de los últimos 7 días menos el costo registrado de las unidades "
+"vendidas."
+msgstr "Sales for the last 7 days minus the recorded cost of units sold."
+
+#: app/templates/reports.html:15
+msgid "Productos activos"
+msgstr "Active products"
+
+#: app/templates/reports.html:20
+msgid "Alertas"
+msgstr "Alerts"
+
+#: app/templates/reports.html:33
+msgid "Ventas por categoría"
+msgstr "Sales by category"
+
+#: app/templates/reports.html:41
+msgid "Aún no hay ventas para analizar"
+msgstr "No sales to analyze yet"
+
+#: app/templates/reports.html:42
+msgid ""
+"Después de registrar ventas, aquí verás qué categorías generan más "
+"ingresos."
+msgstr ""
+"After recording sales, you will see which categories generate the most "
+"revenue."
+
+#: app/templates/reports.html:43
+msgid "Registrar una venta"
+msgstr "Record a sale"
+
+#: app/templates/reports.html:49
+msgid "Recomendaciones para vender más"
+msgstr "Recommendations to sell more"
+
+#: app/templates/reports.html:67
+msgid "Todavía no hay recomendaciones"
+msgstr "No recommendations yet"
+
+#: app/templates/reports.html:68
+msgid ""
+"Registra ventas y movimientos de inventario para recibir sugerencias "
+"basadas en tu operación."
+msgstr ""
+"Record sales and inventory movements to receive suggestions based on your"
+" operations."
+
+#: app/templates/reset_password.html:7
+msgid "Nueva contraseña | PATIA"
+msgstr "New password | PATIA"
+
+#: app/templates/reset_password.html:30
+msgid "Enlace no disponible"
+msgstr "Link not available"
+
+#: app/templates/reset_password.html:31
+msgid "Solicita un enlace nuevo"
+msgstr "Request a new link"
+
+#: app/templates/reset_password.html:32
+msgid ""
+"Este enlace ya expiró o no es válido. Por seguridad, cada enlace puede "
+"usarse durante 30 minutos."
+msgstr ""
+"This link has already expired or is invalid. For security, each link can "
+"be used for 30 minutes."
+
+#: app/templates/reset_password.html:34
+msgid "Solicitar nuevo enlace"
+msgstr "Request new link"
+
+#: app/templates/reset_password.html:37
+msgid "Protege tu cuenta"
+msgstr "Protect your account"
+
+#: app/templates/reset_password.html:38
+msgid "Crea una nueva contraseña"
+msgstr "Create a new password"
+
+#: app/templates/reset_password.html:39
+msgid ""
+"Usa al menos 8 caracteres y evita reutilizar una contraseña de otro "
+"servicio."
+msgstr ""
+"Use at least 8 characters and avoid reusing a password from another "
+"service."
+
+#: app/templates/reset_password.html:44
+msgid "Nueva contraseña"
+msgstr "New password"
+
+#: app/templates/reset_password.html:47
+msgid "Guardar contraseña"
+msgstr "Save password"
+
+#: app/templates/sell.html:10
+msgid "Prepara tu punto de venta"
+msgstr "Prepare your point of sale"
+
+#: app/templates/sell.html:11
+msgid "Agrega inventario antes de vender"
+msgstr "Add inventory before selling"
+
+#: app/templates/sell.html:12
+msgid ""
+"Necesitas al menos un producto con precio y existencias para registrar tu"
+" primera venta."
+msgstr "You need at least one priced product in stock to record your first sale."
+
+#: app/templates/sell.html:13
+msgid "Ir a inventario"
+msgstr "Go to inventory"
+
+#: app/templates/sell.html:20
+msgid "Cerrar confirmación"
+msgstr "Close confirmation"
+
+#: app/templates/sell.html:23
+msgid "Operación completada"
+msgstr "Operation completed"
+
+#: app/templates/sell.html:24
+msgid "Venta registrada correctamente"
+msgstr "Sale recorded successfully"
+
+#: app/templates/sell.html:25 app/templates/sell.html:100
+#: app/templates/sell.html:104 app/templates/ticket.html:22
+msgid "Folio"
+msgstr "Reference"
+
+#: app/templates/sell.html:25 app/templates/sell.html:100
+#: app/templates/sell.html:108 app/templates/ticket.html:45
+msgid "Total"
+msgstr "Total"
+
+#: app/templates/sell.html:25 app/templates/sell.html:74
+#: app/templates/ticket.html:49
+msgid "Método de pago"
+msgstr "Payment method"
+
+#: app/templates/sell.html:28 app/templates/sell.html:111
+msgid "Ver ticket"
+msgstr "See ticket"
+
+#: app/templates/sell.html:29 app/templates/ticket.html:66
+msgid "Imprimir ticket"
+msgstr "Print receipt"
+
+#: app/templates/sell.html:30
+msgid "Nueva venta"
+msgstr "New sale"
+
+#: app/templates/sell.html:37
+msgid "Venta nueva"
+msgstr "New sale"
+
+#: app/templates/sell.html:38
+msgid "Busca y agrega productos"
+msgstr "Search and add products"
+
+#: app/templates/sell.html:39
+msgid "Escribe nombre, SKU o código de barras. También puedes usar tu escáner."
+msgstr "Enter a name, SKU, or barcode. You can also use your scanner."
+
+#: app/templates/sell.html:47
+msgid "Nombre, SKU o código de barras"
+msgstr "Name, SKU or barcode"
+
+#: app/templates/sell.html:51
+msgid "Productos encontrados"
+msgstr "Products found"
+
+#: app/templates/sell.html:56
+msgid "Carrito"
+msgstr "Cart"
+
+#: app/templates/sell.html:56
+msgid "Productos de la venta"
+msgstr "Sale items"
+
+#: app/templates/sell.html:57
+msgid "0 artículos"
+msgstr "0 items"
+
+#: app/templates/sell.html:62
+msgid "Busca un producto para comenzar la venta."
+msgstr "Search for a product to start the sale."
+
+#: app/templates/sell.html:67
+msgid "Precio unitario"
+msgstr "Unit price"
+
+#: app/templates/sell.html:67
+msgid "Cantidad"
+msgstr "Amount"
+
+#: app/templates/sell.html:67 app/templates/ticket.html:43
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#: app/templates/sell.html:67
+msgid "Acción"
+msgstr "Action"
+
+#: app/templates/sell.html:76
+msgid "Efectivo"
+msgstr "Cash"
+
+#: app/templates/sell.html:77
+msgid "Tarjeta"
+msgstr "Card"
+
+#: app/templates/sell.html:78
+msgid "Transferencia"
+msgstr "Bank transfer"
+
+#: app/templates/sell.html:81
+msgid "Solo registra cómo pagó el cliente; PATIA no procesa pagos con tarjeta."
+msgstr ""
+"It only records how the customer paid; PATIA does not process card "
+"payments."
+
+#: app/templates/sell.html:83
+msgid "Total de la venta"
+msgstr "Sale total"
+
+#: app/templates/sell.html:83
+msgid "$0.00 MXN"
+msgstr "$0.00 MXN"
+
+#: app/templates/sell.html:84 app/templates/sell.html:157
+msgid "Registrar venta"
+msgstr "Record sale"
+
+#: app/templates/sell.html:92
+msgid "Historial inmediato"
+msgstr "Recent history"
+
+#: app/templates/sell.html:93
+msgid "Ventas recientes"
+msgstr "Recent sales"
+
+#: app/templates/sell.html:94
+msgid ""
+"Cada operación aparece en un solo ticket. La cancelación se mantiene por "
+"producto y devuelve sus unidades al inventario."
+msgstr ""
+"Each operation appears on a single ticket. The cancellation is maintained"
+" per product and returns its units to inventory."
+
+#: app/templates/sell.html:100 app/templates/sell.html:105
+msgid "Fecha y hora"
+msgstr "Date and time"
+
+#: app/templates/sell.html:100 app/templates/sell.html:106
+msgid "Artículos"
+msgstr "Articles"
+
+#: app/templates/sell.html:100 app/templates/sell.html:107
+msgid "Método"
+msgstr "Method"
+
+#: app/templates/sell.html:106 app/templates/sell.html:151
+msgid "artículo"
+msgstr "item"
+
+#: app/templates/sell.html:106 app/templates/sell.html:152
+msgid "artículos"
+msgstr "items"
+
+#: app/templates/sell.html:106
+msgid "producto"
+msgstr ""
+
+#: app/templates/sell.html:106
+msgid "productos"
+msgstr ""
+
+#: app/templates/sell.html:107 app/templates/sell.html:160
+msgid "No especificado"
+msgstr "Not specified"
+
+#: app/templates/sell.html:112
+msgid "Reimprimir"
+msgstr "Reprint"
+
+#: app/templates/sell.html:115
+msgid "Cancelar un producto"
+msgstr "Cancel a product"
+
+#: app/templates/sell.html:116
+msgid ""
+"La cancelación se aplica solo a la línea seleccionada, no al ticket "
+"completo."
+msgstr "The cancellation applies only to the selected line, not the entire ticket."
+
+#: app/templates/sell.html:118
+msgid "¿Cancelar esta línea? Sus unidades regresarán al inventario."
+msgstr ""
+
+#: app/templates/sell.html:121
+msgid "Cancelar línea"
+msgstr "Cancel line"
+
+#: app/templates/sell.html:134
+msgid "Aún no hay ventas registradas"
+msgstr "No sales recorded yet"
+
+#: app/templates/sell.html:135
+msgid "Tu primera venta aparecerá aquí con su recibo y opciones de cancelación."
+msgstr ""
+"Your first sale will appear here with its receipt and cancellation "
+"options."
+
+#: app/templates/sell.html:144
+msgid "No encontramos productos con esa búsqueda."
+msgstr "No products matched that search."
+
+#: app/templates/sell.html:145
+#, python-format
+msgid "%(count)s disponibles"
+msgstr "%(count)s available"
+
+#: app/templates/sell.html:146
+msgid "Sin existencias"
+msgstr "Out of stock"
+
+#: app/templates/sell.html:147
+#, python-format
+msgid "%(count)s productos encontrados."
+msgstr "%(count)s products found."
+
+#: app/templates/sell.html:148
+#, python-format
+msgid "%(name)s no tiene existencias disponibles."
+msgstr "%(name)s has no available stock."
+
+#: app/templates/sell.html:149
+#, python-format
+msgid "Solo hay %(count)s unidades disponibles de %(name)s."
+msgstr "Only %(count)s units of %(name)s are available."
+
+#: app/templates/sell.html:150
+#, python-format
+msgid "%(name)s agregado al carrito."
+msgstr "%(name)s added to the cart."
+
+#: app/templates/sell.html:153
+#, python-format
+msgid "Cantidad de %(name)s"
+msgstr "Quantity of %(name)s"
+
+#: app/templates/sell.html:155
+#, python-format
+msgid "Eliminar %(name)s del carrito"
+msgstr "Remove %(name)s from cart"
+
+#: app/templates/sell.html:156
+msgid "Registrando venta…"
+msgstr "Recording sale?"
+
+#: app/templates/sell.html:158
+msgid "No se pudo registrar la venta."
+msgstr "The sale could not be recorded."
+
+#: app/templates/sell.html:159
+msgid "No se pudo registrar la venta. Inténtalo nuevamente."
+msgstr "The sale could not be recorded. Try again."
+
+#: app/templates/settings.html:7
+msgid "Perfil del negocio"
+msgstr "Business profile"
+
+#: app/templates/settings.html:8
+msgid "Configura la información de tu empresa"
+msgstr "Configure your business information"
+
+#: app/templates/settings.html:9
+msgid ""
+"Estos datos identifican tu negocio y pueden aparecer en los tickets de "
+"venta que entregues a tus clientes."
+msgstr ""
+"These details identify your business and may appear on sales receipts "
+"provided to customers."
+
+#: app/templates/settings.html:18
+msgid "Información del negocio"
+msgstr "Business information"
+
+#: app/templates/settings.html:18
+msgid "El nombre con el que reconoces tu operación."
+msgstr "The name you use to identify your operation."
+
+#: app/templates/settings.html:22
+msgid "Nombre del negocio"
+msgstr "Business name"
+
+#: app/templates/settings.html:23
+msgid "Mi tienda"
+msgstr "my store"
+
+#: app/templates/settings.html:24
+msgid "Usa el nombre comercial que conocen tus clientes."
+msgstr "Use the business name your customers know."
+
+#: app/templates/settings.html:32
+msgid "Información para identificar y contactar a tu negocio."
+msgstr "Information used to identify and contact your business."
+
+#: app/templates/settings.html:37 app/templates/suppliers.html:22
+msgid "Ej. 238 123 4567"
+msgstr "Ex. 238 123 4567"
+
+#: app/templates/settings.html:38
+msgid "Incluye lada para que el número sea fácil de reconocer."
+msgstr "Includes label so the number is easy to recognize."
+
+#: app/templates/settings.html:46
+msgid "Ubicación principal desde la que opera tu negocio."
+msgstr "The primary location where your business operates."
+
+#: app/templates/settings.html:50
+msgid "Calle y número"
+msgstr "Street and number"
+
+#: app/templates/settings.html:51
+msgid "Calle, número exterior e interior"
+msgstr "Street, exterior and interior number"
+
+#: app/templates/settings.html:71
+msgid "Información fiscal"
+msgstr "Tax information"
+
+#: app/templates/settings.html:71
+msgid "Completa estos datos solo si los necesitas en tus comprobantes."
+msgstr "Complete these details only if you need them on your receipts."
+
+#: app/templates/settings.html:75
+msgid "RFC"
+msgstr ""
+
+#: app/templates/settings.html:76
+msgid "XAXX010101000"
+msgstr "XAXX010101000"
+
+#: app/templates/settings.html:77
+msgid "Captúralo sin espacios ni guiones."
+msgstr "Capture it without spaces or dashes."
+
+#: app/templates/settings.html:80
+msgid "Régimen fiscal"
+msgstr "Tax regime"
+
+#: app/templates/settings.html:81
+msgid "Régimen Simplificado de Confianza"
+msgstr "Simplified Trust Regime"
+
+#: app/templates/settings.html:87
+msgid "Revisa que la información sea correcta antes de guardar."
+msgstr "Check that the information is correct before saving."
+
+#: app/templates/subscribe.html:8
+msgid "PATIA Pro para negocios en operación"
+msgstr "PATIA Pro for operating businesses"
+
+#: app/templates/subscribe.html:9
+msgid "Convierte la actividad diaria de tu negocio en decisiones más claras."
+msgstr "Turn daily business activity into clearer decisions."
+
+#: app/templates/subscribe.html:10
+msgid ""
+"Mantén inventario, ventas, tickets y seguimiento comercial en un solo "
+"sistema, sin perder acceso al terminar tu prueba."
+msgstr ""
+"Keep inventory, sales, tickets, and business tracking in one system after"
+" your trial ends."
+
+#: app/templates/subscribe.html:11
+msgid "Condiciones de PATIA Pro"
+msgstr "PATIA Pro conditions"
+
+#: app/templates/subscribe.html:12
+msgid "Sin plazo forzoso"
+msgstr "No mandatory deadline"
+
+#: app/templates/subscribe.html:13
+msgid "Cancela desde tu cuenta"
+msgstr "Cancel from your account"
+
+#: app/templates/subscribe.html:14
+msgid "Pago seguro con Stripe"
+msgstr "Secure payment with Stripe"
+
+#: app/templates/subscribe.html:17 app/templates/subscribe.html:85
+#: app/templates/subscription.html:39
+msgid "$199 MXN al mes"
+msgstr "$199 MXN per month"
+
+#: app/templates/subscribe.html:18
+msgid "Plan mensual"
+msgstr "Monthly plan"
+
+#: app/templates/subscribe.html:20
+msgid "MXN al mes"
+msgstr "MXN per month"
+
+#: app/templates/subscribe.html:24
+msgid "Beneficios principales de PATIA Pro"
+msgstr "Main benefits of PATIA Pro"
+
+#: app/templates/subscribe.html:25
+msgid "Entiende qué está pasando"
+msgstr "Understand what is happening"
+
+#: app/templates/subscribe.html:25
+msgid "Consulta ventas, utilidad estimada y productos con mayor movimiento."
+msgstr "Consult sales, estimated profit and products with the greatest movement."
+
+#: app/templates/subscribe.html:26
+msgid "Anticipa faltantes"
+msgstr "Anticipate shortages"
+
+#: app/templates/subscribe.html:26
+msgid ""
+"Detecta existencias bajas antes de perder una venta o hacer tu siguiente "
+"compra."
+msgstr "Spot low stock before you miss a sale or make your next purchase."
+
+#: app/templates/subscribe.html:27
+msgid "Recibe contexto útil"
+msgstr "Get helpful context"
+
+#: app/templates/subscribe.html:27
+msgid ""
+"Obtén recomendaciones explicadas a partir de tus ventas e inventario "
+"registrados."
+msgstr "Get explained recommendations from your recorded sales and inventory."
+
+#: app/templates/subscribe.html:34
+msgid "Todo PATIA, todos los días"
+msgstr "All PATIA, every day"
+
+#: app/templates/subscribe.html:35
+msgid "Una operación conectada de principio a fin"
+msgstr "A connected operation from start to finish"
+
+#: app/templates/subscribe.html:37
+msgid "Plan completo"
+msgstr "Complete plan"
+
+#: app/templates/subscribe.html:39
+msgid ""
+"PATIA Pro conserva la continuidad de tu operación y desbloquea la lectura"
+" inteligente de los datos que ya generas al vender."
+msgstr ""
+"PATIA Pro preserves the continuity of your operation and unlocks "
+"intelligent reading of the data you already generate when selling."
+
+#: app/templates/subscribe.html:41
+msgid "Dashboard ejecutivo completo"
+msgstr "Complete executive dashboard"
+
+#: app/templates/subscribe.html:41
+msgid "Ventas, valor del inventario, alertas y rendimiento en una sola vista."
+msgstr "Sales, inventory value, alerts and performance in a single view."
+
+#: app/templates/subscribe.html:42 app/templates/subscribe.html:82
+msgid "Reportes y recomendaciones IA"
+msgstr "AI reports and recommendations"
+
+#: app/templates/subscribe.html:42
+msgid "Hallazgos comerciales basados en la información real de tu cuenta."
+msgstr "Trading findings based on your actual account information."
+
+#: app/templates/subscribe.html:43
+msgid "Inventario profesional"
+msgstr "Professional inventory"
+
+#: app/templates/subscribe.html:43
+msgid "Productos, costos, precios, existencias, alertas e importación por Excel."
+msgstr "Products, costs, prices, stocks, alerts and import by Excel."
+
+#: app/templates/subscribe.html:44
+msgid "Punto de venta y tickets"
+msgstr "Point of sale and tickets"
+
+#: app/templates/subscribe.html:44
+msgid "Ventas conectadas al stock, métodos de pago e impresión profesional."
+msgstr "Sales connected to stock, payment methods and professional printing."
+
+#: app/templates/subscribe.html:45
+msgid "Historial operativo"
+msgstr "Operational history"
+
+#: app/templates/subscribe.html:45
+msgid "Consulta ventas y reimprime tickets cuando lo necesites."
+msgstr "Check sales and reprint tickets when you need it."
+
+#: app/templates/subscribe.html:46
+msgid "Proveedores y datos del negocio"
+msgstr "Suppliers and business data"
+
+#: app/templates/subscribe.html:46
+msgid "Información organizada para operar y emitir tickets consistentes."
+msgstr "Organized information to operate and issue consistent tickets."
+
+#: app/templates/subscribe.html:51
+msgid "Activar PATIA Pro por $199 al mes"
+msgstr "Activate PATIA Pro for $199 per month"
+
+#: app/templates/subscribe.html:53
+msgid "Stripe procesa el pago. PATIA no almacena los datos de tu tarjeta."
+msgstr "Stripe processes the payment. PATIA does not store your card data."
+
+#: app/templates/subscribe.html:57
+msgid "Control de tu suscripción"
+msgstr "Control of your subscription"
+
+#: app/templates/subscribe.html:58
+msgid "Sin sorpresas ni procesos ocultos"
+msgstr "No surprises or hidden processes"
+
+#: app/templates/subscribe.html:60
+msgid "Cobro mensual claro"
+msgstr "Clear monthly payment"
+
+#: app/templates/subscribe.html:60
+msgid "Tu siguiente cobro ocurre un mes después de activar el plan."
+msgstr "Your next charge occurs one month after activating the plan."
+
+#: app/templates/subscribe.html:61
+msgid "Portal de cliente"
+msgstr "Customer portal"
+
+#: app/templates/subscribe.html:61
+msgid "Actualiza tu método de pago desde una sesión segura de Stripe."
+msgstr "Update your payment method from a secure Stripe session."
+
+#: app/templates/subscribe.html:62
+msgid "Cancelación administrable"
+msgstr "Manageable cancellation"
+
+#: app/templates/subscribe.html:62
+msgid "Puedes cancelar y conservar el acceso hasta terminar el periodo pagado."
+msgstr "You can cancel and retain access until the paid period ends."
+
+#: app/templates/subscribe.html:63
+msgid "Soporte PATIA"
+msgstr "PATIA Support"
+
+#: app/templates/subscribe.html:63
+msgid ""
+"Si necesitas ayuda para continuar, puedes contactar al equipo desde la "
+"aplicación."
+msgstr "If you need help continuing, you can contact the team from the app."
+
+#: app/templates/subscribe.html:65
+msgid "Volver al panel"
+msgstr "Return to panel"
+
+#: app/templates/subscribe.html:71
+msgid "Comparación transparente"
+msgstr "Transparent comparison"
+
+#: app/templates/subscribe.html:72
+msgid "Tu prueba te permite comenzar. Pro mantiene tu negocio avanzando."
+msgstr ""
+"Your test allows you to get started. Pro keeps your business moving "
+"forward."
+
+#: app/templates/subscribe.html:73
+msgid ""
+"No pierdes lo aprendido durante la prueba: conservas tu operación y "
+"añades análisis para tomar mejores decisiones."
+msgstr ""
+"You don't lose what you learned during the test: you keep your operation "
+"and add analysis to make better decisions."
+
+#: app/templates/subscribe.html:77 app/templates/subscribe.html:79
+#: app/templates/subscribe.html:80 app/templates/subscribe.html:81
+#: app/templates/subscribe.html:82 app/templates/subscribe.html:83
+#: app/templates/subscribe.html:84 app/templates/subscribe.html:85
+msgid "Capacidad"
+msgstr "Ability"
+
+#: app/templates/subscribe.html:77
+msgid "Prueba de 14 días"
+msgstr "14 day trial"
+
+#: app/templates/subscribe.html:79
+msgid "Inventario, ventas y proveedores"
+msgstr "Inventory, sales and suppliers"
+
+#: app/templates/subscribe.html:79 app/templates/subscribe.html:80
+#: app/templates/subscribe.html:82 app/templates/subscribe.html:83
+msgid "Incluido"
+msgstr "Including"
+
+#: app/templates/subscribe.html:79
+msgid "Sin límite de tiempo"
+msgstr "No time limit"
+
+#: app/templates/subscribe.html:80
+msgid "Punto de venta y tickets profesionales"
+msgstr "Point of sale and professional tickets"
+
+#: app/templates/subscribe.html:81
+msgid "Dashboard operativo"
+msgstr "Operational Dashboard"
+
+#: app/templates/subscribe.html:81
+msgid "Indicadores esenciales"
+msgstr "Essential indicators"
+
+#: app/templates/subscribe.html:81
+msgid "Seguimiento continuo"
+msgstr "Continuous monitoring"
+
+#: app/templates/subscribe.html:82 app/templates/subscribe.html:83
+msgid "Disponible en Pro"
+msgstr "Available in Pro"
+
+#: app/templates/subscribe.html:83
+msgid "Predicción y recomendaciones de inventario"
+msgstr "Inventory prediction and recommendations"
+
+#: app/templates/subscribe.html:84
+msgid "Duración del acceso"
+msgstr "Access Duration"
+
+#: app/templates/subscribe.html:84
+msgid "14 días"
+msgstr "14 days"
+
+#: app/templates/subscribe.html:84
+msgid "Mientras tu suscripción esté activa"
+msgstr "While your subscription is active"
+
+#: app/templates/subscribe.html:85
+msgid "$0 durante la prueba"
+msgstr "$0 during trial"
+
+#: app/templates/subscription.html:2
+msgid "Suscripción"
+msgstr "Subscription"
+
+#: app/templates/subscription.html:7
+msgid "Cuenta y facturación"
+msgstr "Account and billing"
+
+#: app/templates/subscription.html:8
+msgid "Tu plan, tus cobros y el control de tu suscripción"
+msgstr "Your plan, billing, and subscription controls"
+
+#: app/templates/subscription.html:9
+msgid ""
+"Consulta el estado de PATIA Pro, la siguiente fecha relevante y las "
+"opciones disponibles sin salir de tu cuenta."
+msgstr ""
+"Review PATIA Pro status, upcoming dates, and available options from your "
+"account."
+
+#: app/templates/subscription.html:16
+msgid "Plan actual"
+msgstr "Current plan"
+
+#: app/templates/subscription.html:20
+msgid "Prueba gratuita"
+msgstr "Free trial"
+
+#: app/templates/subscription.html:24
+msgid "Acceso activo"
+msgstr "Active access"
+
+#: app/templates/subscription.html:30
+msgid "Próxima renovación o fin del periodo"
+msgstr "Next renewal or period end"
+
+#: app/templates/subscription.html:31
+msgid "No disponible"
+msgstr "Not available"
+
+#: app/templates/subscription.html:34
+msgid "Cancelación programada"
+msgstr "Scheduled cancellation"
+
+#: app/templates/subscription.html:35
+msgid "Sí, al terminar el periodo"
+msgstr "Yes, at period end"
+
+#: app/templates/subscription.html:35
+msgid "No"
+msgstr "No"
+
+#: app/templates/subscription.html:38
+msgid "Precio de PATIA Pro"
+msgstr "PATIA Pro price"
+
+#: app/templates/subscription.html:47
+msgid "No pudimos procesar tu último pago"
+msgstr "We could not process your latest payment"
+
+#: app/templates/subscription.html:48
+msgid "Actualiza tu método de pago para mantener el acceso."
+msgstr "Update your payment method to maintain access."
+
+#: app/templates/subscription.html:58
+msgid "Administrar pagos"
+msgstr "Manage payments"
+
+#: app/templates/subscription.html:65
+msgid "Cancelar al final del periodo"
+msgstr "Cancel at period end"
+
+#: app/templates/subscription.html:70
+msgid "Reactivar suscripción"
+msgstr "Reactivate subscription"
+
+#: app/templates/subscription.html:75
+msgid "Conocer PATIA Pro"
+msgstr "Discover PATIA Pro"
+
+#: app/templates/subscription.html:81
+msgid "Valor y condiciones claras"
+msgstr "Clear value and terms"
+
+#: app/templates/subscription.html:82
+msgid "Lo que mantienes activo con PATIA Pro"
+msgstr "What PATIA Pro keeps active"
+
+#: app/templates/subscription.html:84
+msgid "Seguimiento completo"
+msgstr "Complete tracking"
+
+#: app/templates/subscription.html:84
+msgid "Dashboard, reportes IA y recomendaciones basadas en tus datos."
+msgstr "Dashboard, AI reports and recommendations based on your data."
+
+#: app/templates/subscription.html:85
+msgid "Operación conectada"
+msgstr "Connected operation"
+
+#: app/templates/subscription.html:85
+msgid "Inventario, ventas, proveedores, historial y tickets en una sola cuenta."
+msgstr "Inventory, sales, suppliers, history and tickets in a single account."
+
+#: app/templates/subscription.html:86
+msgid "Cuándo se cobra"
+msgstr "When is it charged?"
+
+#: app/templates/subscription.html:86
+msgid ""
+"El cargo mensual se procesa en la fecha de renovación indicada en tu "
+"cuenta."
+msgstr ""
+"The monthly charge is processed on the renewal date indicated on your "
+"account."
+
+#: app/templates/subscription.html:87
+msgid "Si cancelas"
+msgstr "If you cancel"
+
+#: app/templates/subscription.html:87
+msgid "Conservas el acceso hasta terminar el periodo que ya pagaste."
+msgstr "You retain access until the end of the period you have already paid for."
+
+#: app/templates/subscription.html:88
+msgid "Cómo administrarla"
+msgstr "How to manage it"
+
+#: app/templates/subscription.html:88
+msgid ""
+"El portal seguro te permite actualizar tu tarjeta y consultar la "
+"facturación."
+msgstr "The secure portal allows you to update your card and check billing."
+
+#: app/templates/suppliers.html:7
+msgid "Compras y abastecimiento"
+msgstr "Purchasing and supply"
+
+#: app/templates/suppliers.html:8
+msgid "Mantén a tus proveedores a la mano"
+msgstr "Keep your suppliers within reach"
+
+#: app/templates/suppliers.html:9
+msgid ""
+"Guarda sus datos de contacto y abre WhatsApp directamente cuando "
+"necesites preparar un pedido."
+msgstr ""
+"Save contact details and open WhatsApp directly when you need to place an"
+" order."
+
+#: app/templates/suppliers.html:14
+msgid "Agregar proveedor"
+msgstr "Add supplier"
+
+#: app/templates/suppliers.html:14
+msgid "Agrega tu primer proveedor"
+msgstr "Add your first supplier"
+
+#: app/templates/suppliers.html:18
+msgid "Nombre del proveedor"
+msgstr "Supplier name"
+
+#: app/templates/suppliers.html:19
+msgid "Persona de contacto"
+msgstr "Contact person"
+
+#: app/templates/suppliers.html:20
+msgid "Nombre del contacto"
+msgstr "Contact name"
+
+#: app/templates/suppliers.html:21
+msgid "WhatsApp o teléfono"
+msgstr "WhatsApp or phone"
+
+#: app/templates/suppliers.html:23
+msgid "Notas"
+msgstr "Notes"
+
+#: app/templates/suppliers.html:24
+msgid "Productos, horarios o condiciones de compra"
+msgstr "Products, schedules or purchase conditions"
+
+#: app/templates/suppliers.html:25
+msgid "Guardar proveedor"
+msgstr "Save supplier"
+
+#: app/templates/suppliers.html:30
+msgid "Directorio de proveedores"
+msgstr "Supplier directory"
+
+#: app/templates/suppliers.html:53
+msgid "Pedir"
+msgstr "Order"
+
+#: app/templates/suppliers.html:62
+msgid "¿Eliminar este proveedor?"
+msgstr ""
+
+#: app/templates/suppliers.html:79
+msgid "Aún no tienes proveedores"
+msgstr "You do not have suppliers yet"
+
+#: app/templates/suppliers.html:80
+msgid ""
+"Registra el primero para consultar sus datos y contactarlo sin buscar en "
+"otras aplicaciones."
+msgstr "Add your first supplier to keep contact details in one place."
+
+#: app/templates/suppliers.html:81
+msgid "Agregar primer proveedor"
+msgstr "Add first supplier"
+
+#: app/templates/ticket.html:2 app/templates/ticket.html:8
+msgid "Ticket"
+msgstr "Receipt"
+
+#: app/templates/ticket.html:7
+msgid "Comprobante de venta"
+msgstr "Sales receipt"
+
+#: app/templates/ticket.html:9
+msgid "Consulta, reimprime o guarda una copia de esta operación."
+msgstr "View, reprint, or save a copy of this transaction."
+
+#: app/templates/ticket.html:15
+msgid "Mi negocio"
+msgstr ""
+
+#: app/templates/ticket.html:23
+msgid "Fecha"
+msgstr "Date"
+
+#: app/templates/ticket.html:24
+msgid "Hora"
+msgstr "Time"
+
+#: app/templates/ticket.html:28
+msgid "Productos incluidos en la operación"
+msgstr "Products included in the operation"
+
+#: app/templates/ticket.html:29
+msgid "Cant."
+msgstr "Qty."
+
+#: app/templates/ticket.html:29
+msgid "P. unit."
+msgstr "Unit price"
+
+#: app/templates/ticket.html:29
+msgid "Importe"
+msgstr "Amount"
+
+#: app/templates/ticket.html:34
+msgid "Producto no disponible"
+msgstr ""
+
+#: app/templates/ticket.html:53
+msgid "Gracias por su compra"
+msgstr "Thank you for your purchase"
+
+#: app/templates/ticket.html:54
+msgid "Powered by PATIA"
+msgstr "Powered by PATIA"
+
+#: app/templates/ticket.html:58
+msgid "Acciones del ticket"
+msgstr "Ticket Actions"
+
+#: app/templates/ticket.html:59
+msgid "Opciones del ticket"
+msgstr "Receipt options"
+
+#: app/templates/ticket.html:60
+msgid "Selecciona el ancho de tu impresora antes de continuar."
+msgstr "Select your printer width before continuing."
+
+#: app/templates/ticket.html:62
+msgid "Ancho de papel"
+msgstr "Paper width"
+
+#: app/templates/ticket.html:63
+msgid "58 mm"
+msgstr "58mm"
+
+#: app/templates/ticket.html:64
+msgid "80 mm"
+msgstr "80mm"
+
+#: app/templates/ticket.html:67
+msgid "Guardar o descargar como PDF"
+msgstr "Save or download as PDF"
+
+#: app/templates/ticket.html:68
+msgid "En el diálogo de impresión selecciona “Guardar como PDF” como destino."
+msgstr "In the print dialog select “Save as PDF” as the destination."
+
+#: app/templates/ticket.html:69
+msgid "Volver a ventas"
+msgstr "Back to sales"
+
+#: app/templates/trial_expired.html:6
+msgid "Tu prueba gratuita ha finalizado"
+msgstr "Your free trial has ended"
+
+#: app/templates/verify_email.html:2 app/templates/verify_email.html:29
+msgid "Verificar correo"
+msgstr "Verify email"
+
+#: app/templates/verify_email.html:8
+msgid "Un último paso"
+msgstr "One last step"
+
+#: app/templates/verify_email.html:11
+msgid "Te enviamos un código de 6 dígitos a"
+msgstr "We sent a 6-digit code to"
+
+#: app/templates/verify_email.html:12
+msgid "Ingrésalo aquí para activar tu cuenta."
+msgstr "Enter it here to activate your account."
+
+#: app/templates/verify_email.html:17
+msgid "Código de verificación"
+msgstr "Verification code"
+
+#: app/templates/verify_email.html:33
+msgid "¿No recibiste el código? Revisa spam o solicita uno nuevo."
+msgstr "Did not receive the code? Check spam or request a new one."
+
+#: app/templates/verify_email.html:36
+msgid "Reenviar código"
+msgstr "Resend code"
+
+#~ msgid "Tu periodo de prueba terminó. Activa PATIA Pro para continuar."
+#~ msgstr "Your trial has ended. Activate PATIA Pro to continue."
+
+#~ msgid ""
+#~ "No pudimos enviar el código. Usa "
+#~ "Reenviar código para intentarlo nuevamente."
+#~ msgstr "We could not send the code. Use Resend code to try again."
+
+#~ msgid "No pudimos enviar el enlace. Inténtalo nuevamente en unos minutos."
+#~ msgstr "We could not send the link. Try again in a few minutes."
+
+#~ msgid "Selecciona un archivo."
+#~ msgstr "Select a file."
+
+#~ msgid "Usa un archivo CSV o Excel .xlsx."
+#~ msgstr "Use a CSV or Excel .xlsx file."
+
+#~ msgid ""
+#~ "El archivo no contiene las columnas "
+#~ "obligatorias: , . Descarga la plantilla"
+#~ " PATIA e inténtalo de nuevo."
+#~ msgstr ""
+#~ "The file does not contain the "
+#~ "required columns: , . Download the "
+#~ "PATIA template and try again."
+
+#~ msgid "Importación terminada: createdupdatedomittederrors"
+#~ msgstr "Import finished: createdupdatedomittederrors"
+
+#~ msgid ""
+#~ "No pudimos procesar el archivo. Verifica"
+#~ " que use la plantilla PATIA e "
+#~ "inténtalo de nuevo."
+#~ msgstr ""
+#~ "We could not process the file. "
+#~ "Verify that it uses the PATIA "
+#~ "template and try again."
+
+#~ msgid "Revisa precios y existencias e inténtalo nuevamente."
+#~ msgstr "Review prices and stock and try again."
+
+#~ msgid "Nombre y SKU son obligatorios."
+#~ msgstr "Name and SKU are required."
+
+#~ msgid "Ya existe un producto con ese SKU. Usa un SKU diferente."
+#~ msgstr "A product with that SKU already exists. Use a different SKU."
+
+#~ msgid "Ya existe un producto con ese código de barras."
+#~ msgstr "A product with that barcode already exists."
+
+#~ msgid ""
+#~ "El SKU y el código de barras "
+#~ "pertenecen a productos históricos diferentes."
+#~ msgstr "The SKU and barcode belong to different historical products."
+
+#~ msgid "Precios y existencias no pueden ser negativos."
+#~ msgstr "Prices and stock cannot be negative."
+
+#~ msgid "No pudimos guardar el producto porque el SKU ya está en uso."
+#~ msgstr "We could not save the product because the SKU is already in use."
+
+#~ msgid "Producto creado correctamente."
+#~ msgstr "Product created successfully."
+
+#~ msgid "Ya existe otro producto con ese SKU."
+#~ msgstr "Another product with that SKU already exists."
+
+#~ msgid "Ya existe otro producto con ese código de barras."
+#~ msgstr "Another product with that barcode already exists."
+
+#~ msgid ""
+#~ "Producto actualizado correctamente. Las ventas"
+#~ " anteriores conservaron sus importes "
+#~ "originales."
+#~ msgstr ""
+#~ "Product updated successfully. Previous sales"
+#~ " kept their original amounts."
+
+#~ msgid "Selecciona un producto y una cantidad válida."
+#~ msgstr "Select a product and a valid quantity."
+
+#~ msgid "La cantidad debe ser mayor a cero."
+#~ msgstr "Quantity must be greater than zero."
+
+#~ msgid "No hay suficiente inventario."
+#~ msgstr "Not enough inventory."
+
+#~ msgid "Selecciona un método de pago válido."
+#~ msgstr "Select a valid payment method."
+
+#~ msgid "Escribe el nombre del proveedor."
+#~ msgstr "Enter the supplier name."
+
+#~ msgid "Ese proveedor ya existe."
+#~ msgstr "That supplier already exists."
+
+#~ msgid "Proveedor guardado."
+#~ msgstr "Supplier saved."
+
+#~ msgid "Verifica tu correo antes de activar PATIA Pro."
+#~ msgstr "Verify your email before activating PATIA Pro."
+
+#~ msgid "El pago fue cancelado. No se realizó ningún cargo."
+#~ msgstr "Payment was canceled. No charge was made."
+
+#~ msgid "La facturación no está disponible en este entorno."
+#~ msgstr "Billing is not available in this environment."
+
+#~ msgid "No pudimos validar tu suscripción. Intenta nuevamente."
+#~ msgstr "We could not validate your subscription. Try again."
+
+#~ msgid "No pudimos iniciar el pago. Intenta nuevamente."
+#~ msgstr "We could not start the payment. Try again."
+
+#~ msgid "No se pudo validar la sesión de pago."
+#~ msgstr "The payment session could not be verified."
+
+#~ msgid "La sesión de pago no pertenece a este usuario."
+#~ msgstr "The payment session does not belong to this user."
+
+#~ msgid "Tu cuenta PATIA Pro está activa."
+#~ msgstr "Your PATIA Pro account is active."
+
+#~ msgid "Pago recibido. Estamos confirmando tu suscripción con Stripe."
+#~ msgstr "Payment received. We are confirming your subscription with Stripe."
+
+#~ msgid "Venta cancelada. Stock devuelto al inventario."
+#~ msgstr "Sale canceled. Stock was returned to inventory."
+
+#~ msgid "No pudimos actualizar el estado de tu suscripción."
+#~ msgstr "We could not update your subscription status."
+
+#~ msgid "Tu suscripcion se cancelara al final del periodo pagado."
+#~ msgstr "Your subscription will be canceled at the end of the paid period."
+
+#~ msgid "No pudimos cancelar la suscripción. Intenta nuevamente."
+#~ msgstr "We could not cancel the subscription. Try again."
+
+#~ msgid "Tu suscripcion ha sido reactivada."
+#~ msgstr "Your subscription has been reactivated."
+
+#~ msgid "No pudimos reactivar la suscripción. Intenta nuevamente."
+#~ msgstr "We could not reactivate the subscription. Try again."
+
+#~ msgid "No pudimos abrir el portal de facturación."
+#~ msgstr "We could not open the billing portal."
+
+#~ msgid "No autorizado."
+#~ msgstr "Unauthorized."
+
+#~ msgid "Producto retirado del catálogo. Su historial de ventas se conserva."
+#~ msgstr "Product removed from the catalog. Its sales history is preserved."
+
+#~ msgid "Producto eliminado correctamente."
+#~ msgstr "Product deleted successfully."
+
+#~ msgid "Proveedor eliminado correctamente."
+#~ msgstr "Supplier deleted successfully."
+
+#~ msgid "No puedes eliminar tu cuenta de administrador."
+#~ msgstr "You cannot delete your administrator account."
+
+#~ msgid ""
+#~ "No puedes eliminar este usuario mientras"
+#~ " tenga una suscripción Stripe gestionable."
+#~ msgstr ""
+#~ "You cannot delete this user while "
+#~ "they have a manageable Stripe "
+#~ "subscription."
+
+#~ msgid "Cliente eliminado correctamente."
+#~ msgstr "Client deleted successfully."
+
+#~ msgid "Cliente marcado como PRO."
+#~ msgstr "Client marked as PRO."
+
+#~ msgid "El nombre del negocio es obligatorio."
+#~ msgstr "Business name is required."
+
+#~ msgid "Configuración guardada."
+#~ msgstr "Settings saved."
+

@@ -1,0 +1,6 @@
+<form class="language-switcher" method="POST" action="{{ url_for('main.set_language') }}" aria-label="{{ _('Idioma') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" name="language" value="es"{% if current_language == "es" %} class="is-active" aria-current="true"{% endif %}>{{ _("ES") }}</button>
+  <span aria-hidden="true">/</span>
+  <button type="submit" name="language" value="en"{% if current_language == "en" %} class="is-active" aria-current="true"{% endif %}>{{ _("EN") }}</button>
+</form>

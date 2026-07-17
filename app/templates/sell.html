@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Punto de venta{% endblock %}
+{% block title %}{{ _("Punto de venta") }}{% endblock %}
 {% block content %}
 
 <div class="pos-v2">
@@ -7,81 +7,81 @@
     <section class="card pos-v2__empty module-empty-v2" aria-labelledby="pos-empty-title">
       <span class="pos-v2__empty-icon" aria-hidden="true"><i class="fa-solid fa-cash-register"></i></span>
       <div>
-        <span class="pos-v2__eyebrow">Prepara tu punto de venta</span>
-        <h2 id="pos-empty-title">Agrega inventario antes de vender</h2>
-        <p>Necesitas al menos un producto con precio y existencias para registrar tu primera venta.</p>
-        <a class="btn" href="{{ url_for('main.products') }}#agregar-producto">Ir a inventario</a>
+        <span class="pos-v2__eyebrow">{{ _("Prepara tu punto de venta") }}</span>
+        <h2 id="pos-empty-title">{{ _("Agrega inventario antes de vender") }}</h2>
+        <p>{{ _("Necesitas al menos un producto con precio y existencias para registrar tu primera venta.") }}</p>
+        <a class="btn" href="{{ url_for('main.products') }}#agregar-producto">{{ _("Ir a inventario") }}</a>
       </div>
     </section>
   {% else %}
     <div id="sale-confirmation" class="pos-v2__modal" role="dialog" aria-modal="true" aria-labelledby="sale-confirmation-title" hidden>
       <div class="pos-v2__modal-backdrop" data-close-confirmation></div>
       <section class="pos-v2__confirmation" role="document">
-        <button id="confirmation-close" class="pos-v2__modal-close" type="button" aria-label="Cerrar confirmación"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <button id="confirmation-close" class="pos-v2__modal-close" type="button" aria-label="{{ _('Cerrar confirmación') }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
         <span class="pos-v2__confirmation-icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
         <div class="pos-v2__confirmation-copy">
-          <span class="pos-v2__eyebrow">Operación completada</span>
-          <h3 id="sale-confirmation-title">Venta registrada correctamente</h3>
-          <dl><div><dt>Folio</dt><dd id="confirmation-folio"></dd></div><div><dt>Total</dt><dd id="confirmation-total"></dd></div><div><dt>Método de pago</dt><dd id="confirmation-payment"></dd></div></dl>
+          <span class="pos-v2__eyebrow">{{ _("Operación completada") }}</span>
+          <h3 id="sale-confirmation-title">{{ _("Venta registrada correctamente") }}</h3>
+          <dl><div><dt>{{ _("Folio") }}</dt><dd id="confirmation-folio"></dd></div><div><dt>{{ _("Total") }}</dt><dd id="confirmation-total"></dd></div><div><dt>{{ _("Método de pago") }}</dt><dd id="confirmation-payment"></dd></div></dl>
         </div>
         <div class="pos-v2__confirmation-actions">
-          <a id="confirmation-ticket" class="btn ghost" target="_blank" rel="noopener">Ver ticket</a>
-          <a id="confirmation-print" class="btn ghost" target="_blank" rel="noopener">Imprimir ticket</a>
-          <button id="confirmation-new-sale" class="btn" type="button">Nueva venta</button>
+          <a id="confirmation-ticket" class="btn ghost" target="_blank" rel="noopener">{{ _("Ver ticket") }}</a>
+          <a id="confirmation-print" class="btn ghost" target="_blank" rel="noopener">{{ _("Imprimir ticket") }}</a>
+          <button id="confirmation-new-sale" class="btn" type="button">{{ _("Nueva venta") }}</button>
         </div>
       </section>
     </div>
 
     <section class="card pos-v2__sale-panel" aria-labelledby="sale-panel-title">
       <header class="pos-v2__panel-head">
-        <span class="pos-v2__eyebrow">Venta nueva</span>
-        <h2 id="sale-panel-title">Busca y agrega productos</h2>
-        <p>Escribe nombre, SKU o código de barras. También puedes usar tu escáner.</p>
+        <span class="pos-v2__eyebrow">{{ _("Venta nueva") }}</span>
+        <h2 id="sale-panel-title">{{ _("Busca y agrega productos") }}</h2>
+        <p>{{ _("Escribe nombre, SKU o código de barras. También puedes usar tu escáner.") }}</p>
       </header>
 
       <div class="pos-v2__search">
-        <label for="product-search">Buscar producto</label>
+        <label for="product-search">{{ _("Buscar producto") }}</label>
         <div class="pos-v2__search-control">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
           <input id="product-search" type="search" autocomplete="off" autofocus
-                 placeholder="Nombre, SKU o código de barras"
+                 placeholder="{{ _('Nombre, SKU o código de barras') }}"
                  role="combobox" aria-autocomplete="list" aria-expanded="false"
                  aria-controls="product-results">
         </div>
-        <div id="product-results" class="pos-v2__results" role="listbox" aria-label="Productos encontrados" hidden></div>
+        <div id="product-results" class="pos-v2__results" role="listbox" aria-label="{{ _('Productos encontrados') }}" hidden></div>
         <p id="product-search-status" class="pos-v2__search-status" role="status" aria-live="polite"></p>
       </div>
 
       <div class="pos-v2__cart-head">
-        <div><span class="pos-v2__eyebrow">Carrito</span><h3>Productos de la venta</h3></div>
-        <span id="cart-count" class="pos-v2__cart-count">0 artículos</span>
+        <div><span class="pos-v2__eyebrow">{{ _("Carrito") }}</span><h3>{{ _("Productos de la venta") }}</h3></div>
+        <span id="cart-count" class="pos-v2__cart-count">{{ _("0 artículos") }}</span>
       </div>
 
       <div id="cart-empty" class="pos-v2__cart-empty">
         <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i>
-        <p>Busca un producto para comenzar la venta.</p>
+        <p>{{ _("Busca un producto para comenzar la venta.") }}</p>
       </div>
 
       <div id="cart-table-wrap" class="table-wrap pos-v2__cart-table" hidden>
         <table>
-          <thead><tr><th>Producto</th><th>Precio unitario</th><th>Cantidad</th><th>Subtotal</th><th>Acción</th></tr></thead>
+          <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Precio unitario") }}</th><th>{{ _("Cantidad") }}</th><th>{{ _("Subtotal") }}</th><th>{{ _("Acción") }}</th></tr></thead>
           <tbody id="cart-body"></tbody>
         </table>
       </div>
 
       <footer class="pos-v2__checkout">
         <div class="pos-v2__payment-method">
-          <label for="payment-method">Método de pago</label>
+          <label for="payment-method">{{ _("Método de pago") }}</label>
           <select id="payment-method">
-            <option value="cash" selected>Efectivo</option>
-            <option value="card">Tarjeta</option>
-            <option value="transfer">Transferencia</option>
-            <option value="other">Otro</option>
+            <option value="cash" selected>{{ _("Efectivo") }}</option>
+            <option value="card">{{ _("Tarjeta") }}</option>
+            <option value="transfer">{{ _("Transferencia") }}</option>
+            <option value="other">{{ _("Otro") }}</option>
           </select>
-          <small>Solo registra cómo pagó el cliente; PATIA no procesa pagos con tarjeta.</small>
+          <small>{{ _("Solo registra cómo pagó el cliente; PATIA no procesa pagos con tarjeta.") }}</small>
         </div>
-        <div><span>Total de la venta</span><strong id="cart-total">$0.00 MXN</strong></div>
-        <button class="btn" id="checkout-button" type="button" disabled>Registrar venta</button>
+        <div><span>{{ _("Total de la venta") }}</span><strong id="cart-total">{{ _("$0.00 MXN") }}</strong></div>
+        <button class="btn" id="checkout-button" type="button" disabled>{{ _("Registrar venta") }}</button>
       </footer>
       <p id="checkout-error" class="pos-v2__checkout-error" role="alert" hidden></p>
     </section>
@@ -89,36 +89,36 @@
 
   <section class="card pos-v2__recent" aria-labelledby="recent-sales-title">
     <header class="pos-v2__panel-head">
-      <span class="pos-v2__eyebrow">Historial inmediato</span>
-      <h2 id="recent-sales-title">Ventas recientes</h2>
-      {% if sale_groups %}<p>Cada operación aparece en un solo ticket. La cancelación se mantiene por producto y devuelve sus unidades al inventario.</p>{% endif %}
+      <span class="pos-v2__eyebrow">{{ _("Historial inmediato") }}</span>
+      <h2 id="recent-sales-title">{{ _("Ventas recientes") }}</h2>
+      {% if sale_groups %}<p>{{ _("Cada operación aparece en un solo ticket. La cancelación se mantiene por producto y devuelve sus unidades al inventario.") }}</p>{% endif %}
     </header>
 
     {% if sale_groups %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Folio</th><th>Fecha y hora</th><th>Artículos</th><th>Método</th><th>Total</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>{{ _("Folio") }}</th><th>{{ _("Fecha y hora") }}</th><th>{{ _("Artículos") }}</th><th>{{ _("Método") }}</th><th>{{ _("Total") }}</th><th>{{ _("Acciones") }}</th></tr></thead>
           <tbody>
             {% for ticket in sale_groups %}
               <tr>
-                <td data-label="Folio"><strong>{{ ticket.folio }}</strong></td>
-                <td data-label="Fecha y hora">{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td data-label="Artículos">{{ ticket.item_count }} {{ "artículo" if ticket.item_count == 1 else "artículos" }}<small>{{ ticket.sales|length }} {{ "producto" if ticket.sales|length == 1 else "productos" }}</small></td>
-                <td data-label="Método">{{ payment_method_labels.get(ticket.payment_method, "No especificado") }}</td>
-                <td data-label="Total">{{ ticket.total|money }}</td>
-                <td data-label="Acciones">
+                <td data-label="{{ _('Folio') }}"><strong>{{ ticket.folio }}</strong></td>
+                <td data-label="{{ _('Fecha y hora') }}">{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td data-label="{{ _('Artículos') }}">{{ ticket.item_count }} {{ _("artículo") if ticket.item_count == 1 else _("artículos") }}<small>{{ ticket.sales|length }} {{ _("producto") if ticket.sales|length == 1 else _("productos") }}</small></td>
+                <td data-label="{{ _('Método') }}">{{ payment_method_labels.get(ticket.payment_method, _("No especificado")) }}</td>
+                <td data-label="{{ _('Total') }}">{{ ticket.total|money }}</td>
+                <td data-label="{{ _('Acciones') }}">
                   <div class="pos-v2__sale-actions">
-                    <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id) }}" class="btn ghost" target="_blank" rel="noopener">Ver ticket</a>
-                    <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id, print=1) }}" class="btn ghost" target="_blank" rel="noopener">Reimprimir</a>
+                    <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id) }}" class="btn ghost" target="_blank" rel="noopener">{{ _("Ver ticket") }}</a>
+                    <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id, print=1) }}" class="btn ghost" target="_blank" rel="noopener">{{ _("Reimprimir") }}</a>
                   </div>
                   <details class="pos-v2__cancel-lines">
-                    <summary>Cancelar un producto</summary>
-                    <p>La cancelación se aplica solo a la línea seleccionada, no al ticket completo.</p>
+                    <summary>{{ _("Cancelar un producto") }}</summary>
+                    <p>{{ _("La cancelación se aplica solo a la línea seleccionada, no al ticket completo.") }}</p>
                     {% for sale in ticket.sales %}
-                    <form method="POST" action="/sales/{{ sale.id }}/cancel" onsubmit="return confirm('¿Cancelar esta línea? Sus unidades regresarán al inventario.');">
+                    <form method="POST" action="/sales/{{ sale.id }}/cancel" onsubmit="return confirm({{ _('¿Cancelar esta línea? Sus unidades regresarán al inventario.')|tojson }});">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <span>{{ sale.product.name if sale.product else 'Producto' }} × {{ sale.quantity }}</span>
-                      <button class="btn ghost" type="submit">Cancelar línea</button>
+                      <button class="btn ghost" type="submit">{{ _("Cancelar línea") }}</button>
                     </form>
                     {% endfor %}
                   </details>
@@ -131,8 +131,8 @@
     {% else %}
       <div class="pos-v2__recent-empty module-empty-v2">
         <i class="fa-solid fa-receipt" aria-hidden="true"></i>
-        <h3>Aún no hay ventas registradas</h3>
-        <p>Tu primera venta aparecerá aquí con su recibo y opciones de cancelación.</p>
+        <h3>{{ _("Aún no hay ventas registradas") }}</h3>
+        <p>{{ _("Tu primera venta aparecerá aquí con su recibo y opciones de cancelación.") }}</p>
       </div>
     {% endif %}
   </section>
@@ -140,6 +140,25 @@
 
 {% if products %}
 <script>
+const POS_I18N = {
+  noResults: {{ _("No encontramos productos con esa búsqueda.")|tojson }},
+  available: {{ _("%(count)s disponibles", count="__COUNT__")|tojson }},
+  outOfStock: {{ _("Sin existencias")|tojson }},
+  results: {{ _("%(count)s productos encontrados.", count="__COUNT__")|tojson }},
+  unavailable: {{ _("%(name)s no tiene existencias disponibles.", name="__NAME__")|tojson }},
+  limited: {{ _("Solo hay %(count)s unidades disponibles de %(name)s.", count="__COUNT__", name="__NAME__")|tojson }},
+  added: {{ _("%(name)s agregado al carrito.", name="__NAME__")|tojson }},
+  item: {{ _("artículo")|tojson }},
+  items: {{ _("artículos")|tojson }},
+  quantity: {{ _("Cantidad de %(name)s", name="__NAME__")|tojson }},
+  remove: {{ _("Eliminar")|tojson }},
+  removeFromCart: {{ _("Eliminar %(name)s del carrito", name="__NAME__")|tojson }},
+  submitting: {{ _("Registrando venta…")|tojson }},
+  submit: {{ _("Registrar venta")|tojson }},
+  saleError: {{ _("No se pudo registrar la venta.")|tojson }},
+  retryError: {{ _("No se pudo registrar la venta. Inténtalo nuevamente.")|tojson }},
+  unspecified: {{ _("No especificado")|tojson }}
+};
 const PRODUCTS = [
   {% for product in products %}
   {
@@ -212,7 +231,7 @@ function renderResults() {
     return;
   }
   if (!visibleResults.length) {
-    searchStatus.textContent = "No encontramos productos con esa búsqueda.";
+    searchStatus.textContent = POS_I18N.noResults;
     closeResults();
     return;
   }
@@ -237,7 +256,7 @@ function renderResults() {
     const price = document.createElement("b");
     price.textContent = `$${Number(product.price).toFixed(2)}`;
     const stock = document.createElement("small");
-    stock.textContent = product.stock > 0 ? `${product.stock} disponibles` : "Sin existencias";
+    stock.textContent = product.stock > 0 ? POS_I18N.available.replace("__COUNT__", product.stock) : POS_I18N.outOfStock;
     availability.append(price, stock);
     option.append(details, availability);
     option.addEventListener("click", () => selectProduct(product));
@@ -245,23 +264,23 @@ function renderResults() {
   });
   resultsBox.hidden = false;
   searchInput.setAttribute("aria-expanded", "true");
-  searchStatus.textContent = `${visibleResults.length} productos encontrados.`;
+  searchStatus.textContent = POS_I18N.results.replace("__COUNT__", visibleResults.length);
 }
 
 function selectProduct(product) {
   if (product.stock <= 0) {
-    searchStatus.textContent = `${product.name} no tiene existencias disponibles.`;
+    searchStatus.textContent = POS_I18N.unavailable.replace("__NAME__", product.name);
     return;
   }
   const existing = cart.find(item => item.id === product.id);
   if (existing && existing.quantity >= product.stock) {
-    searchStatus.textContent = `Solo hay ${product.stock} unidades disponibles de ${product.name}.`;
+    searchStatus.textContent = POS_I18N.limited.replace("__COUNT__", product.stock).replace("__NAME__", product.name);
     return;
   }
   if (existing) existing.quantity += 1;
   else cart.push({...product, quantity: 1});
   searchInput.value = "";
-  searchStatus.textContent = `${product.name} agregado al carrito.`;
+  searchStatus.textContent = POS_I18N.added.replace("__NAME__", product.name);
   closeResults();
   renderCart();
   searchInput.focus();
@@ -301,7 +320,7 @@ function updateQuantity(productId, value) {
   if (!Number.isInteger(quantity) || quantity <= 0) {
     cart = cart.filter(product => product.id !== productId);
   } else if (quantity > item.stock) {
-    searchStatus.textContent = `Solo hay ${item.stock} unidades disponibles de ${item.name}.`;
+    searchStatus.textContent = POS_I18N.limited.replace("__COUNT__", item.stock).replace("__NAME__", item.name);
   } else {
     item.quantity = quantity;
   }
@@ -312,8 +331,8 @@ function renderCart() {
   cartBody.replaceChildren();
   const articleCount = cart.reduce((total, item) => total + item.quantity, 0);
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  cartCount.textContent = `${articleCount} ${articleCount === 1 ? "artículo" : "artículos"}`;
-  cartTotal.textContent = total.toLocaleString("es-MX", {style: "currency", currency: "MXN"}) + " MXN";
+  cartCount.textContent = `${articleCount} ${articleCount === 1 ? POS_I18N.item : POS_I18N.items}`;
+  cartTotal.textContent = total.toLocaleString({{ ("en-US" if current_language == "en" else "es-MX")|tojson }}, {style: "currency", currency: "MXN"}) + " MXN";
   cartEmpty.hidden = cart.length > 0;
   cartTableWrap.hidden = cart.length === 0;
   checkoutButton.disabled = cart.length === 0 || saleSubmitting;
@@ -324,7 +343,7 @@ function renderCart() {
     const name = document.createElement("strong");
     name.textContent = item.name;
     const stock = document.createElement("small");
-    stock.textContent = `${item.stock} disponibles`;
+    stock.textContent = POS_I18N.available.replace("__COUNT__", item.stock);
     nameCell.append(name, stock);
 
     const priceCell = document.createElement("td");
@@ -335,7 +354,7 @@ function renderCart() {
     quantityInput.min = "1";
     quantityInput.max = String(item.stock);
     quantityInput.value = String(item.quantity);
-    quantityInput.setAttribute("aria-label", `Cantidad de ${item.name}`);
+    quantityInput.setAttribute("aria-label", POS_I18N.quantity.replace("__NAME__", item.name));
     quantityInput.addEventListener("change", () => updateQuantity(item.id, quantityInput.value));
     quantityCell.appendChild(quantityInput);
 
@@ -345,8 +364,8 @@ function renderCart() {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.className = "btn ghost pos-v2__remove";
-    removeButton.textContent = "Eliminar";
-    removeButton.setAttribute("aria-label", `Eliminar ${item.name} del carrito`);
+    removeButton.textContent = POS_I18N.remove;
+    removeButton.setAttribute("aria-label", POS_I18N.removeFromCart.replace("__NAME__", item.name));
     removeButton.addEventListener("click", () => {
       cart = cart.filter(product => product.id !== item.id);
       renderCart();
@@ -365,7 +384,7 @@ checkoutButton.addEventListener("click", async () => {
   if (!cart.length || saleSubmitting) return;
   saleSubmitting = true;
   checkoutButton.disabled = true;
-  checkoutButton.textContent = "Registrando venta…";
+  checkoutButton.textContent = POS_I18N.submitting;
   checkoutError.hidden = true;
   const requestId = newRequestId();
   const items = cart.map(item => ({product_id: item.id, quantity: item.quantity}));
@@ -380,7 +399,7 @@ checkoutButton.addEventListener("click", async () => {
       body: JSON.stringify({items, request_id: requestId, payment_method: paymentMethod.value})
     });
     const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.error || "No se pudo registrar la venta.");
+    if (!response.ok || !data.ok) throw new Error(data.error || POS_I18N.saleError);
     sessionStorage.setItem("patia_sale_confirmation", JSON.stringify({
       folio: data.folio,
       total: data.total,
@@ -391,8 +410,8 @@ checkoutButton.addEventListener("click", async () => {
   } catch (error) {
     saleSubmitting = false;
     checkoutButton.disabled = false;
-    checkoutButton.textContent = "Registrar venta";
-    checkoutError.textContent = error.message || "No se pudo registrar la venta. Inténtalo nuevamente.";
+    checkoutButton.textContent = POS_I18N.submit;
+    checkoutError.textContent = error.message || POS_I18N.retryError;
     checkoutError.hidden = false;
   }
 });
@@ -403,9 +422,9 @@ if (storedConfirmation) {
   try {
     const confirmation = JSON.parse(storedConfirmation);
     const confirmationModal = document.getElementById("sale-confirmation");
-    document.getElementById("confirmation-total").textContent = Number(confirmation.total).toLocaleString("es-MX", {style: "currency", currency: "MXN"}) + " MXN";
+    document.getElementById("confirmation-total").textContent = Number(confirmation.total).toLocaleString({{ ("en-US" if current_language == "en" else "es-MX")|tojson }}, {style: "currency", currency: "MXN"}) + " MXN";
     document.getElementById("confirmation-folio").textContent = confirmation.folio;
-    document.getElementById("confirmation-payment").textContent = confirmation.payment_method || "No especificado";
+    document.getElementById("confirmation-payment").textContent = confirmation.payment_method || POS_I18N.unspecified;
     document.getElementById("confirmation-ticket").href = confirmation.ticket_url;
     document.getElementById("confirmation-print").href = `${confirmation.ticket_url}?print=1`;
     confirmationModal.hidden = false;

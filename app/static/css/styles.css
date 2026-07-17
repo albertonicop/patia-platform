@@ -5534,6 +5534,50 @@ table {
 }
 
 /* Premium polish: authoritative shared overrides and Pro presentation --- */
+.language-switcher {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border: 1px solid rgba(213, 216, 226, .92);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 5px 18px rgba(23, 25, 39, .08);
+    color: #7a8090;
+    font-size: 11px;
+}
+
+.language-switcher button {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #61687a;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.language-switcher button:hover,
+.language-switcher button:focus-visible,
+.language-switcher button.is-active {
+    background: #efedff;
+    color: #5f4ee0;
+}
+
+@media (max-width: 480px) {
+    .language-switcher {
+        top: 8px;
+        right: 8px;
+    }
+}
+
 .app-shell-v2 {
     background: radial-gradient(circle at 82% 0%, rgba(105, 86, 232, .055), transparent 28rem), #f5f7fb !important;
 }
