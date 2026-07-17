@@ -454,9 +454,8 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-.app-shell-v2 .reports-v2 .reports-recommendation,
-.app-shell-v2 .reports-v2 .reports-text {
-    color: #4d5366;
+.app-shell-v2 .reports-v2 .reports-recommendations-card .reports-recommendation .reports-text {
+    color: var(--v2-ink, #374151) !important;
 }
 
 .app-shell-v2 .reports-v2 .reports-recommendation {
