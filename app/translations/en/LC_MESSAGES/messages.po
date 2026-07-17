@@ -691,11 +691,11 @@ msgstr "Language"
 
 #: app/templates/_language_selector.html:3
 msgid "ES"
-msgstr "IS"
+msgstr "ES"
 
 #: app/templates/_language_selector.html:5
 msgid "EN"
-msgstr "IN"
+msgstr "EN"
 
 #: app/templates/admin.html:7
 msgid "Centro de control PATIA"
@@ -3645,4 +3645,3 @@ msgstr "Resend code"
 
 #~ msgid "Configuración guardada."
 #~ msgstr "Settings saved."
-
