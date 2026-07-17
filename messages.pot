@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-17 13:17-0600\n"
+"POT-Creation-Date: 2026-07-17 16:34-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -405,8 +405,8 @@ msgstr ""
 
 #: app/routes.py:1076
 msgid ""
-"El archivo no contiene todas las columnas obligatorias. Descarga la "
-"plantilla PATIA e inténtalo de nuevo."
+"El archivo no contiene las columnas obligatorias. Descarga la plantilla "
+"PATIA e inténtalo de nuevo."
 msgstr ""
 
 #: app/routes.py:1174

@@ -1073,7 +1073,7 @@ def import_products():
         if missing_columns:
             flash(
                 gettext(
-                    "El archivo no contiene todas las columnas obligatorias. Descarga la plantilla PATIA e inténtalo de nuevo."
+                    "El archivo no contiene las columnas obligatorias. Descarga la plantilla PATIA e inténtalo de nuevo."
                 ),
                 "danger",
             )

@@ -184,7 +184,7 @@ const INVENTORY_I18N = {
   importing: {{ _("Importando catálogo…")|tojson }}{% if catalog_count > 0 %},
   cancelSelection: {{ _("Cancelar selección")|tojson }},
   selectProducts: {{ _("Seleccionar productos")|tojson }},
-  deleteSelected: {{ _("¿Eliminar %(count)s productos seleccionados?")|tojson }}{% endif %}
+  deleteSelected: {{ _("¿Eliminar %(count)s productos seleccionados?", count="__COUNT__")|tojson }}{% endif %}
 };
 const importForm = document.getElementById("catalog-import-form");
 const importButton = document.getElementById("catalog-import-submit");
@@ -228,7 +228,7 @@ btnSelect.addEventListener("click", function() {
 
 formSelected.addEventListener("submit", function(event) {
   const checked = [...document.querySelectorAll('#catalogo tbody input[type="checkbox"]:checked')];
-  if (!checked.length || !confirm(INVENTORY_I18N.deleteSelected.replace("%(count)s", checked.length))) {
+  if (!checked.length || !confirm(INVENTORY_I18N.deleteSelected.replace("__COUNT__", checked.length))) {
     event.preventDefault();
     return;
   }
