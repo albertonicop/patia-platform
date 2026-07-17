@@ -12,7 +12,7 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_patia")
 os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
-from app.models import Product, Sale, User
+from app.models import Product, Sale, SalesTicket, User
 
 
 class PosFirstSaleTests(unittest.TestCase):
@@ -37,6 +37,7 @@ class PosFirstSaleTests(unittest.TestCase):
     def setUp(self):
         db.session.rollback()
         Sale.query.delete()
+        SalesTicket.query.delete()
         Product.query.delete()
         User.query.delete()
         db.session.commit()
@@ -143,6 +144,8 @@ class PosFirstSaleTests(unittest.TestCase):
         db.session.refresh(product)
         self.assertEqual(product.stock, 3)
         self.assertEqual(Sale.query.one().payment_method, "transfer")
+        self.assertEqual(SalesTicket.query.one().payment_method, "transfer")
+        self.assertEqual(SalesTicket.query.one().folio, "TKT-000001")
 
     def test_sale_rejects_unknown_payment_method(self):
         product = self.add_product()
@@ -180,8 +183,12 @@ class PosFirstSaleTests(unittest.TestCase):
         for value, label in (("cash", "Efectivo"), ("card", "Tarjeta"), ("transfer", "Transferencia"), ("other", "Otro")):
             self.assertIn(f'value="{value}"', html)
             self.assertIn(label, html)
-        self.assertIn("PATIA no procesa pagos con tarjeta", html)
+        self.assertIn(
+            "Selecciona cómo pagó el cliente. Este dato se usará para registrar la venta.",
+            html,
+        )
         self.assertIn("payment_method: paymentMethod.value", html)
+
 
     def test_repeated_request_id_does_not_charge_twice(self):
         product = self.add_product(stock=5)

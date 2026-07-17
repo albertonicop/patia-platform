@@ -132,6 +132,8 @@ class DashboardOnboardingTests(unittest.TestCase):
             product_id=product.id,
             quantity=2,
             unit_price=20,
+            unit_cost=product.cost_price,
+            cost_is_estimated=False,
             total=40,
         ))
         db.session.commit()

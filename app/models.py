@@ -93,6 +93,53 @@ class Product(db.Model):
         return round(self.stock * self.cost_price, 2)
 
 
+class SalesTicket(db.Model):
+    __tablename__ = "sales_ticket"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "number",
+            name="uq_sales_ticket_user_number",
+        ),
+        db.UniqueConstraint(
+            "user_id",
+            "public_id",
+            name="uq_sales_ticket_user_public_id",
+        ),
+        db.Index(
+            "ix_sales_ticket_user_created_at",
+            "user_id",
+            "created_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    number = db.Column(db.Integer, nullable=False)
+    public_id = db.Column(db.String(36), nullable=False)
+    payment_method = db.Column(db.String(20), nullable=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+    )
+
+    sales = db.relationship(
+        "Sale",
+        back_populates="sales_ticket",
+        passive_deletes=True,
+    )
+
+    @property
+    def folio(self):
+        return f"TKT-{self.number:06d}"
+
+
 class Sale(db.Model):
     __table_args__ = (
         db.Index(
@@ -147,9 +194,25 @@ class Sale(db.Model):
 
     ticket_id = db.Column(db.String(36), nullable=True)
     payment_method = db.Column(db.String(20), nullable=True)
+    sales_ticket_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_ticket.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    unit_cost = db.Column(db.Float, nullable=True)
+    cost_is_estimated = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+    )
 
     product = db.relationship(
         "Product",
+        back_populates="sales",
+    )
+    sales_ticket = db.relationship(
+        "SalesTicket",
         back_populates="sales",
     )
 
@@ -312,6 +375,11 @@ class User(db.Model):
         nullable=False,
         default="es",
     )
+    next_ticket_number = db.Column(
+        db.Integer,
+        nullable=False,
+        default=1,
+    )
 
     products = db.relationship(
         "Product",
@@ -321,6 +389,12 @@ class User(db.Model):
     )
     sales = db.relationship(
         "Sale",
+        backref="owner",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    sales_tickets = db.relationship(
+        "SalesTicket",
         backref="owner",
         cascade="all, delete-orphan",
         passive_deletes=True,

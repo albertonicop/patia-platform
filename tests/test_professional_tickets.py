@@ -152,7 +152,7 @@ class ProfessionalTicketTests(unittest.TestCase):
         html = self.client.get("/sell").get_data(as_text=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertRegex(data["folio"], r"^V-\d{6}$")
+        self.assertRegex(data["folio"], r"^TKT-\d{6}$")
         self.assertTrue(data["ticket_url"].startswith("/ticket/"))
         self.assertIn('role="dialog"', html)
         self.assertIn('aria-modal="true"', html)

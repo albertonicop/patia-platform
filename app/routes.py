@@ -11,11 +11,12 @@ import uuid
 import re
 from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort
 from flask_babel import force_locale, gettext
-from sqlalchemy import func
+from sqlalchemy import case, func, update
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 from urllib.parse import urljoin, urlparse
 from . import csrf, db, limiter
-from .models import Product, Sale, StripeWebhookEvent, Supplier, User
+from .models import Product, Sale, SalesTicket, StripeWebhookEvent, Supplier, User
 
 main = Blueprint("main", __name__)
 SUPPORTED_LANGUAGES = {"es", "en"}
@@ -94,11 +95,17 @@ def money(value):
 
 def _sale_ticket_key(sale):
     """Identificador interno estable, incluso para ventas históricas sin UUID."""
-    return sale.ticket_id or f"sale-{sale.id}"
+    return (
+        sale.sales_ticket.public_id
+        if sale.sales_ticket
+        else sale.ticket_id or f"sale-{sale.id}"
+    )
 
 
 def _short_sale_folio(sales):
     """Folio legible y estable sin reemplazar el identificador interno."""
+    if sales[0].sales_ticket:
+        return sales[0].sales_ticket.folio
     ticket_id = sales[0].ticket_id
     if ticket_id:
         try:
@@ -107,6 +114,26 @@ def _short_sale_folio(sales):
         except (ValueError, TypeError, AttributeError):
             pass
     return f"V-{min(sale.id for sale in sales):06d}"
+
+
+def _create_sales_ticket(user_id, payment_method, *, ticket_id=None):
+    """Allocate a per-company ticket number atomically inside the sale transaction."""
+    next_number = db.session.execute(
+        update(User)
+        .where(User.id == user_id)
+        .values(next_ticket_number=User.next_ticket_number + 1)
+        .returning(User.next_ticket_number)
+        .execution_options(synchronize_session=False)
+    ).scalar_one()
+    ticket = SalesTicket(
+        user_id=user_id,
+        number=next_number - 1,
+        public_id=ticket_id or str(uuid.uuid4()),
+        payment_method=payment_method,
+    )
+    db.session.add(ticket)
+    db.session.flush()
+    return ticket
 
 
 PAYMENT_METHOD_LABELS = {
@@ -145,11 +172,16 @@ def _group_sales_by_ticket(sales, *, limit=None):
         key = _sale_ticket_key(sale)
         group = grouped.setdefault(key, {
             "ticket_id": key,
+            "ticket": sale.sales_ticket,
             "sales": [],
             "created_at": sale.created_at,
             "total": 0,
             "item_count": 0,
-            "payment_method": sale.payment_method,
+            "payment_method": (
+                sale.sales_ticket.payment_method
+                if sale.sales_ticket
+                else sale.payment_method
+            ),
         })
         group["sales"].append(sale)
         group["total"] += sale.total
@@ -722,10 +754,18 @@ def analytics():
     ).scalar() or 0
 
     profit = (
-        db.session.query(func.sum((Sale.unit_price - Product.cost_price) * Sale.quantity))
-        .join(Product)
+        db.session.query(
+            func.sum(
+                case(
+                    (
+                        Sale.unit_cost.is_not(None),
+                        (Sale.unit_price - Sale.unit_cost) * Sale.quantity,
+                    ),
+                    else_=0,
+                )
+            )
+        )
         .filter(
-            Product.user_id == user_id,
             Sale.user_id == user_id,
             Sale.created_at >= week_start,
         )
@@ -1390,8 +1430,20 @@ def sell():
             if payment_method not in PAYMENT_METHOD_LABELS:
                 flash("Selecciona un método de pago válido.", "danger")
                 return redirect(url_for("main.sell"))
+            ticket = _create_sales_ticket(user.id, payment_method)
             product.stock -= qty
-            sale = Sale(user_id=session["user_id"], product_id=product.id, quantity=qty, unit_price=product.sale_price, total=qty * product.sale_price, ticket_id=str(uuid.uuid4()), payment_method=payment_method)
+            sale = Sale(
+                user_id=user.id,
+                product_id=product.id,
+                quantity=qty,
+                unit_price=product.sale_price,
+                unit_cost=product.cost_price if product.cost_price > 0 else None,
+                cost_is_estimated=False,
+                total=qty * product.sale_price,
+                ticket_id=ticket.public_id,
+                sales_ticket_id=ticket.id,
+                payment_method=payment_method,
+            )
             db.session.add(sale)
             db.session.commit()
             flash(
@@ -1404,7 +1456,15 @@ def sell():
             )
         return redirect(url_for("main.sell"))
 
-    sales = Sale.query.filter_by(user_id=session["user_id"]).order_by(Sale.created_at.desc(), Sale.id.desc()).all()
+    sales = (
+        Sale.query.options(
+            selectinload(Sale.product),
+            selectinload(Sale.sales_ticket),
+        )
+        .filter_by(user_id=user.id)
+        .order_by(Sale.created_at.desc(), Sale.id.desc())
+        .all()
+    )
     sale_groups = _group_sales_by_ticket(sales, limit=12)
     products = Product.query.filter_by(
         user_id=session["user_id"],
@@ -1529,12 +1589,27 @@ def sell_cart():
                     "error": gettext("Stock insuficiente: %(product)s", product=product.name),
                 }), 409
 
-        ticket_id = request_id or str(uuid.uuid4())
+        ticket = _create_sales_ticket(
+            user.id,
+            payment_method,
+            ticket_id=request_id,
+        )
+        ticket_id = ticket.public_id
         sales = []
         for product_id, quantity in requested_items.items():
             product = products[product_id]
             product.stock -= quantity
-            sale = Sale(user_id=user.id, product_id=product.id, quantity=quantity, unit_price=product.sale_price, total=quantity * product.sale_price, payment_method=payment_method)
+            sale = Sale(
+                user_id=user.id,
+                product_id=product.id,
+                quantity=quantity,
+                unit_price=product.sale_price,
+                unit_cost=product.cost_price if product.cost_price > 0 else None,
+                cost_is_estimated=False,
+                total=quantity * product.sale_price,
+                payment_method=payment_method,
+                sales_ticket_id=ticket.id,
+            )
             sale.ticket_id = ticket_id
             db.session.add(sale)
             sales.append(sale)
@@ -2290,13 +2365,47 @@ def ticket(ticket_ref):
         return redirect(url_for("main.login"))
 
     if ticket_ref.startswith("sale-") and ticket_ref[5:].isdigit():
-        sale = Sale.query.filter_by(id=int(ticket_ref[5:]), user_id=user.id).first_or_404()
-        sales = [sale]
+        sale = (
+            Sale.query.options(
+                selectinload(Sale.product),
+                selectinload(Sale.sales_ticket),
+            )
+            .filter_by(id=int(ticket_ref[5:]), user_id=user.id)
+            .first_or_404()
+        )
+        if sale.sales_ticket_id:
+            sales = (
+                Sale.query.options(
+                    selectinload(Sale.product),
+                    selectinload(Sale.sales_ticket),
+                )
+                .filter_by(user_id=user.id, sales_ticket_id=sale.sales_ticket_id)
+                .order_by(Sale.id)
+                .all()
+            )
+        else:
+            sales = [sale]
     else:
-        sales = Sale.query.filter_by(
-            ticket_id=ticket_ref,
+        ticket_header = SalesTicket.query.filter_by(
             user_id=user.id,
-        ).order_by(Sale.id).all()
+            public_id=ticket_ref,
+        ).first()
+        sales = (
+            Sale.query.options(
+                selectinload(Sale.product),
+                selectinload(Sale.sales_ticket),
+            )
+            .filter(
+                Sale.user_id == user.id,
+                (
+                    Sale.sales_ticket_id == ticket_header.id
+                    if ticket_header
+                    else Sale.ticket_id == ticket_ref
+                ),
+            )
+            .order_by(Sale.id)
+            .all()
+        )
         if not sales:
             abort(404)
 
@@ -2316,7 +2425,11 @@ def ticket(ticket_ref):
         ticket_subtotal=sum(sale.total for sale in sales),
         item_count=sum(sale.quantity for sale in sales),
         ticket_created_at=min(sale.created_at for sale in sales),
-        payment_method=_payment_method_label(sales[0].payment_method),
+        payment_method=_payment_method_label(
+            sales[0].sales_ticket.payment_method
+            if sales[0].sales_ticket
+            else sales[0].payment_method
+        ),
         business_address=", ".join(address_parts),
         auto_print=request.args.get("print") == "1",
     )
