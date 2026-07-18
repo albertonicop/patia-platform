@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-17 23:44-0600\n"
+"POT-Creation-Date: 2026-07-18 08:10-0600\n"
 "PO-Revision-Date: 2026-07-17 11:53-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -221,7 +221,7 @@ msgid "Sesión iniciada correctamente."
 msgstr "Signed in successfully."
 
 #: app/routes.py:759 app/templates/landing.html:23
-#: app/templates/landing.html:274
+#: app/templates/landing.html:276
 msgid "Iniciar sesión"
 msgstr "Sign in"
 
@@ -789,7 +789,7 @@ msgstr "Select..."
 msgid "Minisúper"
 msgstr "convenience store"
 
-#: app/templates/auth.html:117 app/templates/landing.html:92
+#: app/templates/auth.html:117 app/templates/landing.html:89
 msgid "Abarrotes"
 msgstr "Groceries"
 
@@ -883,7 +883,7 @@ msgid "Dashboard"
 msgstr "Dashboard"
 
 #: app/templates/base.html:38 app/templates/edit_product.html:7
-#: app/templates/landing.html:72
+#: app/templates/landing.html:69
 msgid "Inventario"
 msgstr "Inventory"
 
@@ -941,17 +941,17 @@ msgstr "%(days)s days remaining ? $199 MXN/month"
 msgid "Centro de control"
 msgstr "Control center"
 
-#: app/templates/base.html:107 app/templates/landing.html:272
+#: app/templates/base.html:107 app/templates/landing.html:274
 #: app/templates/legal.html:14 app/templates/legal.html:57
 msgid "Términos"
 msgstr "Terms"
 
-#: app/templates/base.html:108 app/templates/landing.html:273
+#: app/templates/base.html:108 app/templates/landing.html:275
 #: app/templates/legal.html:14 app/templates/legal.html:57
 msgid "Privacidad"
 msgstr "Privacy"
 
-#: app/templates/dashboard.html:2 app/templates/landing.html:60
+#: app/templates/dashboard.html:2 app/templates/landing.html:57
 msgid "Panel ejecutivo"
 msgstr "Executive dashboard"
 
@@ -1028,7 +1028,7 @@ msgstr "Sales today"
 msgid "Actividad del día"
 msgstr "Today?s activity"
 
-#: app/templates/dashboard.html:98 app/templates/landing.html:71
+#: app/templates/dashboard.html:98 app/templates/landing.html:68
 msgid "Ventas 7 días"
 msgstr "7-day sales"
 
@@ -1044,7 +1044,7 @@ msgstr "Inventory value"
 msgid "Capital estimado"
 msgstr "Estimated capital"
 
-#: app/templates/dashboard.html:116 app/templates/landing.html:73
+#: app/templates/dashboard.html:116 app/templates/landing.html:70
 msgid "Stock bajo"
 msgstr "Low stock"
 
@@ -1234,20 +1234,20 @@ msgstr ""
 msgid "PATIA, inicio"
 msgstr "PATIA, beginning"
 
-#: app/templates/landing.html:20 app/templates/landing.html:270
+#: app/templates/landing.html:20 app/templates/landing.html:272
 msgid "Beneficios"
 msgstr "Benefits"
 
-#: app/templates/landing.html:21 app/templates/landing.html:138
+#: app/templates/landing.html:21 app/templates/landing.html:135
 msgid "Cómo funciona"
 msgstr "How it works"
 
 #: app/templates/landing.html:22
-msgid "PATIA Pro · $199/mes"
-msgstr "PATIA Pro · $199/month"
+msgid "Precios"
+msgstr "Pricing"
 
-#: app/templates/landing.html:24 app/templates/landing.html:45
-#: app/templates/landing.html:208 app/templates/landing.html:231
+#: app/templates/landing.html:24 app/templates/landing.html:43
+#: app/templates/landing.html:205 app/templates/landing.html:228
 msgid "Comenzar prueba gratis"
 msgstr "Start free trial"
 
@@ -1261,11 +1261,11 @@ msgstr "Your business, under control. Every day."
 
 #: app/templates/landing.html:34
 msgid ""
-"Administra inventario, ventas y reportes desde un solo lugar. Prueba "
-"PATIA gratis durante 14 días y continúa por $199 MXN al mes."
+"Administra inventario, ventas y reportes desde un solo lugar para tomar "
+"decisiones con información clara."
 msgstr ""
-"Manage inventory, sales, and reports in one place. Try PATIA free for "
-"14 days, then continue for $199 MXN per month."
+"Manage inventory, sales, and reports in one place so you can make decisions "
+"with clear information."
 
 #: app/templates/landing.html:36 app/templates/subscribe.html:11
 msgid "Condiciones de PATIA Pro"
@@ -1275,127 +1275,123 @@ msgstr "PATIA Pro conditions"
 msgid "14 días gratis"
 msgstr "14 days free"
 
-#: app/templates/landing.html:39
+#: app/templates/landing.html:38
 msgid "Después, $199 MXN al mes"
 msgstr "Then, $199 MXN per month"
 
-#: app/templates/landing.html:41
+#: app/templates/landing.html:39
 msgid "Cancela cuando quieras"
 msgstr "Cancel anytime"
 
-#: app/templates/landing.html:50
+#: app/templates/landing.html:48
 msgid "Ver demo"
 msgstr "Watch demo"
 
-#: app/templates/landing.html:53
-msgid "Sin tarjeta para comenzar · Cancela cuando quieras"
-msgstr "No card required to start · Cancel anytime"
-
-#: app/templates/landing.html:57
+#: app/templates/landing.html:54
 msgid "Vista previa del panel PATIA"
 msgstr "PATIA panel preview"
 
-#: app/templates/landing.html:65
+#: app/templates/landing.html:62
 msgid "Resumen semanal"
 msgstr "Weekly overview"
 
-#: app/templates/landing.html:66
+#: app/templates/landing.html:63
 msgid "Negocio en orden"
 msgstr "Business under control"
 
-#: app/templates/landing.html:68
+#: app/templates/landing.html:65
 msgid "Actualizado"
 msgstr "Updated"
 
-#: app/templates/landing.html:71
+#: app/templates/landing.html:68
 msgid "Actividad registrada"
 msgstr "Recorded activity"
 
-#: app/templates/landing.html:72
+#: app/templates/landing.html:69
 msgid "Valor estimado"
 msgstr "Estimated value"
 
-#: app/templates/landing.html:73
+#: app/templates/landing.html:70
 msgid "Productos por atender"
 msgstr "Products to review"
 
-#: app/templates/landing.html:76
+#: app/templates/landing.html:73
 msgid "Productos con mayor movimiento"
 msgstr "Top-moving products"
 
-#: app/templates/landing.html:76 app/templates/reports.html:22
+#: app/templates/landing.html:73 app/templates/reports.html:22
 msgid "Últimos 7 días"
 msgstr "Last 7 days"
 
-#: app/templates/landing.html:83
+#: app/templates/landing.html:80
 msgid "2 productos requieren atención"
 msgstr "2 products need attention"
 
-#: app/templates/landing.html:83
+#: app/templates/landing.html:80
 msgid "Revisa existencias antes de tu próximo pedido."
 msgstr "Review stock before your next order."
 
-#: app/templates/landing.html:89
+#: app/templates/landing.html:86
 msgid "Sectores objetivo"
 msgstr "Target sectors"
 
-#: app/templates/landing.html:90
+#: app/templates/landing.html:87
 msgid "Hecho para negocios como el tuyo"
 msgstr "Built for businesses like yours"
 
-#: app/templates/landing.html:93
+#: app/templates/landing.html:90
 msgid "Minisúpers"
 msgstr "convenience stores"
 
-#: app/templates/landing.html:94
+#: app/templates/landing.html:91
 msgid "Ferreterías"
 msgstr "Hardware stores"
 
-#: app/templates/landing.html:95
+#: app/templates/landing.html:92
 msgid "Farmacias"
 msgstr "Pharmacies"
 
-#: app/templates/landing.html:96
+#: app/templates/landing.html:93
 msgid "Distribuidoras"
 msgstr "Distributors"
 
-#: app/templates/landing.html:100
+#: app/templates/landing.html:97
 msgid "Resultados operativos con PATIA"
 msgstr "Operational results with PATIA"
 
-#: app/templates/landing.html:101
+#: app/templates/landing.html:98
 msgid "Una sola fuente de información"
 msgstr "One source of truth"
 
-#: app/templates/landing.html:101
+#: app/templates/landing.html:98
 msgid "Ventas, inventario, proveedores y tickets permanecen conectados."
 msgstr "Sales, inventory, suppliers, and receipts stay connected."
 
-#: app/templates/landing.html:102
+#: app/templates/landing.html:99
 msgid "Menos decisiones a ciegas"
 msgstr "Fewer decisions made blindly"
 
-#: app/templates/landing.html:102
+#: app/templates/landing.html:99
 msgid "Consulta indicadores y alertas antes de comprar o reabastecer."
 msgstr "Review indicators and alerts before purchasing or restocking."
 
-#: app/templates/landing.html:103
+#: app/templates/landing.html:100
 msgid "Listo para operar desde el navegador"
 msgstr "Ready to use in your browser"
 
-#: app/templates/landing.html:103
+#: app/templates/landing.html:100
 msgid "Sin instalaciones, desde computadora o celular."
 msgstr "No installation, from desktop or mobile."
 
-#: app/templates/landing.html:108
+#: app/templates/landing.html:105
 msgid "Lo que resuelve PATIA"
 msgstr "What PATIA solves"
 
-#: app/templates/landing.html:109
+#: app/templates/landing.html:106
 msgid "Menos incertidumbre. Más control diario."
 msgstr "Less uncertainty. More daily control."
 
-#: app/templates/landing.html:110
+#: app/templates/landing.html:107
 msgid ""
 "Información práctica para operar mejor, reducir faltantes y conocer el "
 "desempeño real de tu negocio."
@@ -1403,11 +1399,11 @@ msgstr ""
 "Practical information to operate better, reduce stockouts, and understand"
 " real business performance."
 
-#: app/templates/landing.html:115
+#: app/templates/landing.html:112
 msgid "Inventario confiable"
 msgstr "Reliable inventory"
 
-#: app/templates/landing.html:116
+#: app/templates/landing.html:113
 msgid ""
 "Consulta existencias, costos, precios y valor de inventario sin depender "
 "de libretas dispersas."
@@ -1415,31 +1411,31 @@ msgstr ""
 "View stock, costs, prices, and inventory value without scattered "
 "notebooks."
 
-#: app/templates/landing.html:120
+#: app/templates/landing.html:117
 msgid "Ventas conectadas"
 msgstr "Connected sales"
 
-#: app/templates/landing.html:121
+#: app/templates/landing.html:118
 msgid ""
 "Cada venta descuenta stock y alimenta tus indicadores para que la "
 "información permanezca actualizada."
 msgstr "Every sale updates stock and your indicators automatically."
 
-#: app/templates/landing.html:125
+#: app/templates/landing.html:122
 msgid "Alertas oportunas"
 msgstr "Timely alerts"
 
-#: app/templates/landing.html:126
+#: app/templates/landing.html:123
 msgid ""
 "Identifica productos agotados o con pocas unidades antes de perder ventas"
 " por falta de mercancía."
 msgstr "Identify out-of-stock and low-stock products before losing sales."
 
-#: app/templates/landing.html:130
+#: app/templates/landing.html:127
 msgid "Rentabilidad visible"
 msgstr "Visible profitability"
 
-#: app/templates/landing.html:131
+#: app/templates/landing.html:128
 msgid ""
 "Conoce productos con mayor movimiento, ventas semanales y utilidad "
 "estimada desde el panel ejecutivo."
@@ -1447,103 +1443,103 @@ msgstr ""
 "See top-moving products, weekly sales, and estimated profit from the "
 "executive dashboard."
 
-#: app/templates/landing.html:139
+#: app/templates/landing.html:136
 msgid "Empieza a tener control en tres pasos."
 msgstr "Take control in three steps."
 
-#: app/templates/landing.html:142
+#: app/templates/landing.html:139
 msgid "Carga tus productos"
 msgstr "Load your products"
 
-#: app/templates/landing.html:142
+#: app/templates/landing.html:139
 msgid "Regístralos manualmente o utiliza la plantilla de importación de PATIA."
 msgstr "Add them manually or use PATIA?s import template."
 
-#: app/templates/landing.html:143
+#: app/templates/landing.html:140
 msgid "Registra tus ventas"
 msgstr "Record your sales"
 
-#: app/templates/landing.html:143
+#: app/templates/landing.html:140
 msgid ""
 "Usa el punto de venta para descontar existencias y mantener datos "
 "actualizados."
 msgstr "Use the point of sale to update inventory and keep data current."
 
-#: app/templates/landing.html:144
+#: app/templates/landing.html:141
 msgid "Actúa con información"
 msgstr "Act on information"
 
-#: app/templates/landing.html:144
+#: app/templates/landing.html:141
 msgid ""
 "Consulta alertas, productos destacados, ventas y necesidades de "
 "reabastecimiento."
 msgstr "Review alerts, top products, sales, and restocking needs."
 
-#: app/templates/landing.html:150
+#: app/templates/landing.html:147
 msgid "Antes y después"
 msgstr "Before and after"
 
-#: app/templates/landing.html:151
+#: app/templates/landing.html:148
 msgid "De administrar por memoria a operar con claridad."
 msgstr "Move from memory-based management to clear operations."
 
-#: app/templates/landing.html:155
+#: app/templates/landing.html:152
 msgid "Antes"
 msgstr "Before"
 
-#: app/templates/landing.html:156
+#: app/templates/landing.html:153
 msgid "Información dispersa"
 msgstr "Scattered information"
 
-#: app/templates/landing.html:158
+#: app/templates/landing.html:155
 msgid "Inventario en libretas o archivos separados"
 msgstr "Inventory in notebooks or separate files"
 
-#: app/templates/landing.html:159
+#: app/templates/landing.html:156
 msgid "Faltantes descubiertos demasiado tarde"
 msgstr "Stockouts discovered too late"
 
-#: app/templates/landing.html:160
+#: app/templates/landing.html:157
 msgid "Compras basadas únicamente en intuición"
 msgstr "Purchases based only on intuition"
 
-#: app/templates/landing.html:161
+#: app/templates/landing.html:158
 msgid "Sin visión clara de ventas y márgenes"
 msgstr "No clear view of sales and margins"
 
-#: app/templates/landing.html:165
+#: app/templates/landing.html:162
 msgid "Con PATIA"
 msgstr "With PATIA"
 
-#: app/templates/landing.html:166
+#: app/templates/landing.html:163
 msgid "Una operación conectada"
 msgstr "A connected operation"
 
-#: app/templates/landing.html:168
+#: app/templates/landing.html:165
 msgid "Productos, ventas y proveedores centralizados"
 msgstr "Products, sales, and suppliers centralized"
 
-#: app/templates/landing.html:169
+#: app/templates/landing.html:166
 msgid "Alertas visibles antes de quedarte sin stock"
 msgstr "Visible alerts before running out of stock"
 
-#: app/templates/landing.html:170
+#: app/templates/landing.html:167
 msgid "Indicadores para preparar tus compras"
 msgstr "Indicators to prepare purchases"
 
-#: app/templates/landing.html:171
+#: app/templates/landing.html:168
 msgid "Panel ejecutivo disponible en cualquier momento"
 msgstr "Executive dashboard available at any time"
 
-#: app/templates/landing.html:179
+#: app/templates/landing.html:176
 msgid "El valor de PATIA Pro"
 msgstr "The value of PATIA Pro"
 
-#: app/templates/landing.html:180
+#: app/templates/landing.html:177
 msgid "No es solo registrar datos. Es saber qué hacer con ellos."
 msgstr "It is not just recording data. It is knowing what to do with it."
 
-#: app/templates/landing.html:181
+#: app/templates/landing.html:178
 msgid ""
 "Tu operación genera información todos los días. PATIA Pro la organiza y "
 "la convierte en seguimiento comercial útil para decidir con mayor "
@@ -1552,51 +1548,51 @@ msgstr ""
 "Your operation generates information every day. PATIA Pro organizes it "
 "and turns it into useful business insight for more confident decisions."
 
-#: app/templates/landing.html:182
+#: app/templates/landing.html:179
 msgid "Ver precio y condiciones"
 msgstr "View pricing and terms"
 
-#: app/templates/landing.html:185
+#: app/templates/landing.html:182
 msgid "Reportes completos"
 msgstr "Complete reports"
 
-#: app/templates/landing.html:185
+#: app/templates/landing.html:182
 msgid "Ventas, utilidad estimada, categorías y desempeño del inventario."
 msgstr "Sales, estimated profit, categories, and inventory performance."
 
-#: app/templates/landing.html:186
+#: app/templates/landing.html:183
 msgid "Recomendaciones explicadas"
 msgstr "Explained recommendations"
 
-#: app/templates/landing.html:186
+#: app/templates/landing.html:183
 msgid "Sugerencias basadas en la actividad registrada en tu propia cuenta."
 msgstr "Suggestions based on activity recorded in your own account."
 
-#: app/templates/landing.html:187
+#: app/templates/landing.html:184
 msgid "Seguimiento de existencias"
 msgstr "Inventory tracking"
 
-#: app/templates/landing.html:187
+#: app/templates/landing.html:184
 msgid "Alertas y contexto para anticipar productos que necesitan atención."
 msgstr "Alerts and context to anticipate products that need attention."
 
-#: app/templates/landing.html:188
+#: app/templates/landing.html:185
 msgid "Operación profesional"
 msgstr "Professional operations"
 
-#: app/templates/landing.html:188
+#: app/templates/landing.html:185
 msgid "POS, historial y tickets listos para consultar o imprimir."
 msgstr "POS, history, and receipts ready to view or print."
 
-#: app/templates/landing.html:194
+#: app/templates/landing.html:191
 msgid "Precio simple"
 msgstr "Simple pricing"
 
-#: app/templates/landing.html:195
+#: app/templates/landing.html:192
 msgid "Todo lo necesario para controlar mejor tu negocio."
 msgstr "Everything you need to run your business with greater control."
 
-#: app/templates/landing.html:196
+#: app/templates/landing.html:193
 msgid ""
 "Sin paquetes confusos ni costos ocultos. Prueba PATIA durante 14 días y "
 "decide con calma."
@@ -1604,7 +1600,7 @@ msgstr ""
 "No confusing packages or hidden costs. Try PATIA for 14 days and decide "
 "with confidence."
 
-#: app/templates/landing.html:199 app/templates/subscribe.html:77
+#: app/templates/landing.html:196 app/templates/subscribe.html:77
 #: app/templates/subscribe.html:79 app/templates/subscribe.html:80
 #: app/templates/subscribe.html:81 app/templates/subscribe.html:82
 #: app/templates/subscribe.html:83 app/templates/subscribe.html:84
@@ -1612,15 +1608,15 @@ msgstr ""
 msgid "PATIA Pro"
 msgstr "PATIA Pro"
 
-#: app/templates/landing.html:200
+#: app/templates/landing.html:197
 msgid "MXN"
 msgstr "MXN"
 
-#: app/templates/landing.html:200
+#: app/templates/landing.html:197
 msgid "al mes"
 msgstr "per month"
 
-#: app/templates/landing.html:201
+#: app/templates/landing.html:198
 msgid ""
 "Continúa operando sin límite de tiempo y desbloquea el análisis completo "
 "de tu negocio."
@@ -1628,49 +1624,49 @@ msgstr ""
 "Continue operating without a time limit and unlock complete business "
 "analysis."
 
-#: app/templates/landing.html:203
+#: app/templates/landing.html:200
 msgid "Inventario, ventas, proveedores y tickets"
 msgstr "Inventory, sales, suppliers, and receipts"
 
-#: app/templates/landing.html:204
+#: app/templates/landing.html:201
 msgid "Dashboard, reportes y recomendaciones IA"
 msgstr "Dashboard, reports, and AI recommendations"
 
-#: app/templates/landing.html:205
+#: app/templates/landing.html:202
 msgid "Acceso desde computadora o celular"
 msgstr "Access from desktop or mobile"
 
-#: app/templates/landing.html:206
+#: app/templates/landing.html:203
 msgid "Suscripción mensual administrable"
 msgstr "Manageable monthly subscription"
 
-#: app/templates/landing.html:209
-msgid "Suscribirse por $199 MXN/mes"
+#: app/templates/landing.html:206
+msgid "Suscribirme por $199 MXN/mes"
 msgstr "Subscribe for $199 MXN/month"
 
-#: app/templates/landing.html:215
+#: app/templates/landing.html:212
 msgid "Preguntas frecuentes"
 msgstr "Frequently asked questions"
 
-#: app/templates/landing.html:216
+#: app/templates/landing.html:213
 msgid "Lo esencial antes de comenzar."
 msgstr "The essentials before getting started."
 
-#: app/templates/landing.html:219
+#: app/templates/landing.html:216
 msgid "¿Necesito instalar algún programa?"
 msgstr "Do I need to install any software?"
 
-#: app/templates/landing.html:219
+#: app/templates/landing.html:216
 msgid ""
 "No. PATIA funciona desde el navegador y puedes acceder desde computadora "
 "o celular."
 msgstr "No. PATIA works in your browser and is available on desktop or mobile."
 
-#: app/templates/landing.html:220
+#: app/templates/landing.html:217
 msgid "¿Puedo importar mis productos?"
 msgstr "Can I import my products?"
 
-#: app/templates/landing.html:220
+#: app/templates/landing.html:217
 msgid ""
 "Sí. PATIA incluye una plantilla para importar tu catálogo desde un "
 "archivo Excel o CSV."
@@ -1678,11 +1674,11 @@ msgstr ""
 "Yes. PATIA includes a template for importing your catalog from Excel or "
 "CSV."
 
-#: app/templates/landing.html:221
+#: app/templates/landing.html:218
 msgid "¿Qué pasa al terminar los 14 días?"
 msgstr "What happens after the 14-day trial?"
 
-#: app/templates/landing.html:221
+#: app/templates/landing.html:218
 msgid ""
 "Tus datos permanecen en tu cuenta y puedes activar PATIA Pro por $199 MXN"
 " al mes."
@@ -1690,11 +1686,11 @@ msgstr ""
 "Your data remains in your account and you can activate PATIA Pro for $199"
 " MXN per month."
 
-#: app/templates/landing.html:222
+#: app/templates/landing.html:219
 msgid "¿PATIA sirve para más de un tipo de negocio?"
 msgstr "Does PATIA work for different types of businesses?"
 
-#: app/templates/landing.html:222
+#: app/templates/landing.html:219
 msgid ""
 "Sí. Está diseñado para comercios y PyMEs que manejan productos, "
 "inventario y ventas."
@@ -1702,43 +1698,43 @@ msgstr ""
 "Yes. It is designed for stores and small businesses that manage products,"
 " inventory, and sales."
 
-#: app/templates/landing.html:227
+#: app/templates/landing.html:224
 msgid "Empieza hoy"
 msgstr "Start today"
 
-#: app/templates/landing.html:228
+#: app/templates/landing.html:225
 msgid "Tu negocio puede operar con más orden desde esta semana."
 msgstr "Your business can operate more efficiently this week."
 
-#: app/templates/landing.html:229
+#: app/templates/landing.html:226
 msgid "Prueba PATIA durante 14 días y reúne tu operación en un solo lugar."
 msgstr "Try PATIA for 14 days and bring your operation together in one place."
 
-#: app/templates/landing.html:232
+#: app/templates/landing.html:229
 msgid "Hablar con PATIA"
 msgstr "Talk to PATIA"
 
-#: app/templates/landing.html:242
+#: app/templates/landing.html:239
 msgid "Demo de PATIA"
 msgstr "PATIA demo"
 
-#: app/templates/landing.html:243
+#: app/templates/landing.html:240
 msgid "Conoce PATIA en funcionamiento"
 msgstr "See PATIA in action"
 
-#: app/templates/landing.html:245
+#: app/templates/landing.html:242
 msgid "Cerrar demo"
 msgstr "Close demo"
 
-#: app/templates/landing.html:253
+#: app/templates/landing.html:255
 msgid "Tu navegador no puede reproducir este video."
 msgstr "Your browser cannot play this video."
 
-#: app/templates/landing.html:257
+#: app/templates/landing.html:259
 msgid "Demo en video próximamente"
 msgstr "Video demo coming soon"
 
-#: app/templates/landing.html:258
+#: app/templates/landing.html:260
 msgid ""
 "Estamos preparando un recorrido breve para mostrarte cómo PATIA conecta "
 "inventario, ventas y reportes."
@@ -1746,16 +1742,16 @@ msgstr ""
 "We are preparing a short walkthrough to show how PATIA connects "
 "inventory, sales, and reports."
 
-#: app/templates/landing.html:267
+#: app/templates/landing.html:269
 msgid "Control operativo para PyMEs que quieren crecer con claridad."
 msgstr "Operational control for small businesses that want to grow with clarity."
 
-#: app/templates/landing.html:271 app/templates/products.html:147
+#: app/templates/landing.html:273 app/templates/products.html:147
 #: app/templates/products.html:155 app/templates/subscribe.html:85
 msgid "Precio"
 msgstr "Pricing"
 
-#: app/templates/landing.html:276
+#: app/templates/landing.html:278
 msgid "PATIA © 2026 · NP Ventures"
 msgstr "PATIA © 2026 · NP Ventures"
 

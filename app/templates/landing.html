@@ -19,7 +19,7 @@
     <nav class="landing-v2__nav" aria-label="{{ _('Navegación principal') }}">
       <a href="#beneficios">{{ _("Beneficios") }}</a>
       <a href="#como-funciona">{{ _("Cómo funciona") }}</a>
-      <a href="#precio" class="landing-v4__nav-price">{{ _("PATIA Pro · $199/mes") }}</a>
+      <a href="#precio">{{ _("Precios") }}</a>
       <a href="/login" class="landing-v2__login">{{ _("Iniciar sesión") }}</a>
       <a href="/register" class="landing-v3__nav-cta">{{ _("Comenzar prueba gratis") }}</a>
     </nav>
@@ -31,14 +31,12 @@
         <span class="landing-v2__eyebrow"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ _("Control operativo para PyMEs en México") }}</span>
         <h1>{{ _("Tu negocio, bajo control. Todos los días.") }}</h1>
         <p class="landing-v2__lead">
-          {{ _("Administra inventario, ventas y reportes desde un solo lugar. Prueba PATIA gratis durante 14 días y continúa por $199 MXN al mes.") }}
+          {{ _("Administra inventario, ventas y reportes desde un solo lugar para tomar decisiones con información clara.") }}
         </p>
         <div class="landing-v5__terms" aria-label="{{ _('Condiciones de PATIA Pro') }}">
-          <strong>{{ _("14 días gratis") }}</strong>
-          <span aria-hidden="true">·</span>
-          <span>{{ _("Después, $199 MXN al mes") }}</span>
-          <span aria-hidden="true">·</span>
-          <span>{{ _("Cancela cuando quieras") }}</span>
+          <span><i class="fa-solid fa-gift" aria-hidden="true"></i><strong>{{ _("14 días gratis") }}</strong></span>
+          <span><i class="fa-solid fa-tag" aria-hidden="true"></i><strong>{{ _("Después, $199 MXN al mes") }}</strong></span>
+          <span><i class="fa-solid fa-circle-check" aria-hidden="true"></i><strong>{{ _("Cancela cuando quieras") }}</strong></span>
         </div>
         <div class="landing-v2__actions">
           <a href="/register" class="landing-v2__button landing-v2__button--primary">
@@ -50,7 +48,6 @@
             {{ _("Ver demo") }}
           </button>
         </div>
-        <p class="landing-v5__assurance"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin tarjeta para comenzar · Cancela cuando quieras") }}</p>
       </div>
 
       <div class="landing-v3__product-stage">
@@ -206,7 +203,7 @@
           <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Suscripción mensual administrable") }}</li>
         </ul>
         <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba gratis") }}</a>
-        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">{{ _("Suscribirse por $199 MXN/mes") }}</a>
+        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">{{ _("Suscribirme por $199 MXN/mes") }}</a>
       </article>
     </section>
 
