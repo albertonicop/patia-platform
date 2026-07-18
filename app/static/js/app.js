@@ -175,6 +175,147 @@ function initializeCustomReportPeriod() {
 
 initializeReportCharts();
 initializeCustomReportPeriod();
+
+function initializePatiaSelects() {
+    const selects = document.querySelectorAll("select:not([multiple]):not([data-native-select])");
+
+    function closeSelect(component, restoreFocus = false) {
+        const button = component.querySelector(".patia-select__trigger");
+        const listbox = component.querySelector(".patia-select__listbox");
+        button.setAttribute("aria-expanded", "false");
+        component.classList.remove("is-open");
+        listbox.hidden = true;
+        if (restoreFocus) button.focus();
+    }
+
+    function openSelect(component) {
+        document.querySelectorAll(".patia-select.is-open").forEach(openComponent => {
+            if (openComponent !== component) closeSelect(openComponent);
+        });
+        const button = component.querySelector(".patia-select__trigger");
+        const listbox = component.querySelector(".patia-select__listbox");
+        component.classList.add("is-open");
+        button.setAttribute("aria-expanded", "true");
+        listbox.hidden = false;
+        const selected = listbox.querySelector('[aria-selected="true"]');
+        (selected || listbox.querySelector('[role="option"]'))?.focus();
+    }
+
+    selects.forEach((select, selectIndex) => {
+        const component = document.createElement("div");
+        const trigger = document.createElement("button");
+        const valueLabel = document.createElement("span");
+        const chevron = document.createElement("i");
+        const listbox = document.createElement("div");
+        const listboxId = `${select.id || `patia-select-${selectIndex}`}-listbox`;
+        const fieldLabel = select.id
+            ? document.querySelector(`label[for="${CSS.escape(select.id)}"]`)
+            : null;
+
+        component.className = "patia-select";
+        trigger.className = "patia-select__trigger";
+        trigger.type = "button";
+        trigger.setAttribute("role", "combobox");
+        trigger.setAttribute("aria-haspopup", "listbox");
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.setAttribute("aria-controls", listboxId);
+        if (fieldLabel) trigger.setAttribute("aria-label", fieldLabel.textContent.trim());
+        valueLabel.className = "patia-select__value";
+        chevron.className = "fa-solid fa-chevron-down";
+        chevron.setAttribute("aria-hidden", "true");
+        trigger.append(valueLabel, chevron);
+
+        listbox.id = listboxId;
+        listbox.className = "patia-select__listbox";
+        listbox.setAttribute("role", "listbox");
+        listbox.hidden = true;
+
+        const optionButtons = [...select.options].map((option, optionIndex) => {
+            const optionButton = document.createElement("button");
+            optionButton.className = "patia-select__option";
+            optionButton.type = "button";
+            optionButton.id = `${listboxId}-option-${optionIndex}`;
+            optionButton.setAttribute("role", "option");
+            optionButton.dataset.value = option.value;
+            optionButton.textContent = option.textContent;
+            optionButton.disabled = option.disabled;
+
+            optionButton.addEventListener("click", () => {
+                select.value = option.value;
+                select.dispatchEvent(new Event("change", {bubbles: true}));
+                closeSelect(component, true);
+            });
+            return optionButton;
+        });
+
+        listbox.append(...optionButtons);
+        component.append(trigger, listbox);
+        select.insertAdjacentElement("afterend", component);
+        select.classList.add("patia-native-select");
+
+        function syncFromNative() {
+            const selectedIndex = Math.max(select.selectedIndex, 0);
+            const selectedOption = select.options[selectedIndex];
+            valueLabel.textContent = selectedOption?.textContent || "";
+            optionButtons.forEach((optionButton, optionIndex) => {
+                const selected = optionIndex === selectedIndex;
+                optionButton.setAttribute("aria-selected", String(selected));
+                optionButton.classList.toggle("is-selected", selected);
+            });
+            trigger.disabled = select.disabled;
+            component.classList.toggle("is-disabled", select.disabled);
+            if (select.validity.valid) trigger.removeAttribute("aria-invalid");
+        }
+
+        function moveOption(current, direction) {
+            const enabledOptions = optionButtons.filter(option => !option.disabled);
+            const currentIndex = Math.max(enabledOptions.indexOf(current), 0);
+            enabledOptions[(currentIndex + direction + enabledOptions.length) % enabledOptions.length]?.focus();
+        }
+
+        trigger.addEventListener("click", () => {
+            component.classList.contains("is-open") ? closeSelect(component) : openSelect(component);
+        });
+        trigger.addEventListener("keydown", event => {
+            if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
+                event.preventDefault();
+                openSelect(component);
+            }
+        });
+        listbox.addEventListener("keydown", event => {
+            const current = document.activeElement;
+            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                moveOption(current, event.key === "ArrowDown" ? 1 : -1);
+            } else if (event.key === "Home" || event.key === "End") {
+                event.preventDefault();
+                const enabled = optionButtons.filter(option => !option.disabled);
+                enabled[event.key === "Home" ? 0 : enabled.length - 1]?.focus();
+            } else if (event.key === "Escape") {
+                event.preventDefault();
+                closeSelect(component, true);
+            } else if (event.key === "Tab") {
+                closeSelect(component);
+            }
+        });
+        select.addEventListener("change", syncFromNative);
+        select.addEventListener("invalid", () => {
+            trigger.setAttribute("aria-invalid", "true");
+            trigger.focus();
+        });
+        select.form?.addEventListener("reset", () => requestAnimationFrame(syncFromNative));
+        syncFromNative();
+    });
+
+    document.addEventListener("pointerdown", event => {
+        document.querySelectorAll(".patia-select.is-open").forEach(component => {
+            if (!component.contains(event.target)) closeSelect(component);
+        });
+    });
+}
+
+initializePatiaSelects();
+
 document.addEventListener("DOMContentLoaded", () => {
     const menuToggle = document.querySelector(".sidebar-v2__toggle");
     const navigation = document.getElementById("primary-navigation");

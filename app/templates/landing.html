@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
-  <meta name="description" content="Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.">
+  <meta name="description" content="{{ _('Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=107">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=110">
 </head>
 
-<body class="landing-v2 landing-premium-v1">
+<body class="landing-v2 landing-premium-v1 landing-v3">
   {% include "_language_selector.html" %}
   <header class="landing-v2__header">
     <a href="/" class="landing-v2__brand" aria-label="{{ _('PATIA, inicio') }}">
@@ -21,34 +21,43 @@
       <a href="#como-funciona">{{ _("Cómo funciona") }}</a>
       <a href="#precio">{{ _("Precio") }}</a>
       <a href="/login" class="landing-v2__login">{{ _("Iniciar sesión") }}</a>
+      <a href="/register" class="landing-v3__nav-cta">{{ _("Probar gratis") }}</a>
     </nav>
   </header>
 
   <main>
     <section class="landing-v2__hero">
       <div class="landing-v2__hero-copy">
-        <span class="landing-v2__eyebrow">{{ _("Control operativo para PyMEs en México") }}</span>
-        <h1>{{ _("Vende, controla tu inventario y entiende tu negocio.") }}</h1>
+        <span class="landing-v2__eyebrow"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ _("Control operativo para PyMEs en México") }}</span>
+        <h1>{{ _("Controla ventas, inventario y decisiones desde un solo lugar.") }}</h1>
         <p class="landing-v2__lead">
-          {{ _("PATIA conecta cada venta con tus existencias y convierte la operación diaria en indicadores claros para comprar mejor, evitar faltantes y conocer qué productos impulsan tu negocio.") }}
+          {{ _("PATIA mantiene conectadas tus ventas y existencias para que sepas qué vendes, qué necesitas reabastecer y cómo avanza tu negocio.") }}
         </p>
         <div class="landing-v2__actions">
           <a href="/register" class="landing-v2__button landing-v2__button--primary">
-            {{ _("Empezar prueba de 14 días") }}
+            {{ _("Probar PATIA gratis") }}
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
-          <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__button landing-v2__button--secondary">
-            {{ _("Contratar por $199 al mes") }}
+          <a href="#como-funciona" class="landing-v2__button landing-v2__button--secondary">
+            <i class="fa-regular fa-circle-play" aria-hidden="true"></i>
+            {{ _("Ver cómo funciona") }}
           </a>
         </div>
+        <p class="landing-v3__price-note">{{ _("14 días gratis · Después, $199 MXN al mes · Cancela cuando quieras") }}</p>
         <div class="landing-v2__assurances" aria-label="{{ _('Condiciones de la prueba') }}">
-          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin instalación") }}</span>
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin tarjeta para comenzar") }}</span>
           <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Configuración sencilla") }}</span>
           <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Soporte directo") }}</span>
         </div>
       </div>
 
+      <div class="landing-v3__product-stage">
       <div class="landing-v2__preview" aria-label="{{ _('Vista previa del panel PATIA') }}">
+        <div class="landing-v3__preview-browser" aria-hidden="true">
+          <span><i></i><i></i><i></i></span>
+          <strong>{{ _("Panel ejecutivo") }}</strong>
+          <small>patiaapp.com</small>
+        </div>
         <div class="landing-v2__preview-top">
           <div>
             <span>{{ _("Resumen semanal") }}</span>
@@ -71,6 +80,11 @@
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           <div><strong>{{ _("2 productos requieren atención") }}</strong><span>{{ _("Revisa existencias antes de tu próximo pedido.") }}</span></div>
         </div>
+      </div>
+      <aside class="landing-v3__insight" aria-label="{{ _('Ejemplo de recomendación PATIA') }}">
+        <span><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></span>
+        <div><small>{{ _("Copiloto PATIA") }}</small><strong>{{ _("El café es tu producto con mayor movimiento esta semana.") }}</strong></div>
+      </aside>
       </div>
     </section>
 
