@@ -175,7 +175,7 @@
 
     {% if profit > 0 %}
       <p class="dashboard-v2__method-note">
-        La utilidad estimada corresponde a las ventas de los últimos 7 días menos el costo registrado de las unidades vendidas.
+        {{ _("La utilidad estimada corresponde a las ventas de los últimos 7 días menos el costo registrado de las unidades vendidas.") }}
       </p>
     {% endif %}
 
@@ -183,15 +183,15 @@
       <div class="pro-feature-card dashboard-v2__upgrade">
         <h4>
           <i class="fa-solid fa-chart-line"></i>
-          Predicción de Inventario IA
+          {{ _("Predicción de inventario") }}
         </h4>
 
         <p>
-          PATIA analizará tus ventas para predecir qué productos comprar, cuándo reabastecer y qué productos podrían agotarse.
+          {{ _("PATIA analiza tus ventas para ayudarte a decidir qué reabastecer y qué productos requieren atención.") }}
         </p>
 
         <a href="/subscribe" class="btn">
-          Desbloquear PATIA Pro
+          {{ _("Conocer PATIA Pro") }}
         </a>
       </div>
     {% endif %}

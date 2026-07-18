@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-17 18:52-0600\n"
+"POT-Creation-Date: 2026-07-17 19:19-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -620,8 +620,8 @@ msgid "WhatsApp"
 msgstr ""
 
 #: app/templates/admin.html:98 app/templates/products.html:147
-#: app/templates/products.html:158 app/templates/sell.html:100
-#: app/templates/sell.html:109 app/templates/suppliers.html:40
+#: app/templates/products.html:158 app/templates/sell.html:101
+#: app/templates/sell.html:110 app/templates/suppliers.html:40
 #: app/templates/suppliers.html:59
 msgid "Acciones"
 msgstr ""
@@ -784,7 +784,7 @@ msgstr ""
 msgid "Distribuidora"
 msgstr ""
 
-#: app/templates/auth.html:121 app/templates/sell.html:79
+#: app/templates/auth.html:121 app/templates/sell.html:80
 msgid "Otro"
 msgstr ""
 
@@ -1067,6 +1067,26 @@ msgstr ""
 msgid ""
 "Agrega productos y registra ventas. Con esos datos PATIA podrá darte "
 "recomendaciones útiles y explicables."
+msgstr ""
+
+#: app/templates/dashboard.html:178
+msgid ""
+"La utilidad estimada corresponde a las ventas de los últimos 7 días menos"
+" el costo registrado de las unidades vendidas."
+msgstr ""
+
+#: app/templates/dashboard.html:186
+msgid "Predicción de inventario"
+msgstr ""
+
+#: app/templates/dashboard.html:190
+msgid ""
+"PATIA analiza tus ventas para ayudarte a decidir qué reabastecer y qué "
+"productos requieren atención."
+msgstr ""
+
+#: app/templates/dashboard.html:194 app/templates/subscription.html:75
+msgid "Conocer PATIA Pro"
 msgstr ""
 
 #: app/templates/dashboard.html:204
@@ -2032,7 +2052,7 @@ msgstr ""
 msgid "Catálogo"
 msgstr ""
 
-#: app/templates/products.html:125 app/templates/sell.html:43
+#: app/templates/products.html:125 app/templates/sell.html:44
 msgid "Buscar producto"
 msgstr ""
 
@@ -2064,7 +2084,7 @@ msgstr ""
 
 #: app/templates/products.html:147 app/templates/products.html:151
 #: app/templates/reports.html:137 app/templates/reports.html:155
-#: app/templates/sell.html:67 app/templates/ticket.html:29
+#: app/templates/sell.html:68 app/templates/ticket.html:47
 msgid "Producto"
 msgstr ""
 
@@ -2091,7 +2111,7 @@ msgid ""
 " historial."
 msgstr ""
 
-#: app/templates/products.html:162 app/templates/sell.html:154
+#: app/templates/products.html:162 app/templates/sell.html:155
 #: app/templates/suppliers.html:66
 msgid "Eliminar"
 msgstr ""
@@ -2343,250 +2363,263 @@ msgid "Cerrar confirmación"
 msgstr ""
 
 #: app/templates/sell.html:23
-msgid "Operación completada"
+msgid "Venta confirmada"
 msgstr ""
 
-#: app/templates/sell.html:24
+#: app/templates/sell.html:24 app/templates/ticket.html:18
 msgid "Venta registrada correctamente"
 msgstr ""
 
-#: app/templates/sell.html:25 app/templates/sell.html:100
-#: app/templates/sell.html:104 app/templates/ticket.html:22
-msgid "Folio"
+#: app/templates/sell.html:24
+msgid "Venta registrada"
 msgstr ""
 
-#: app/templates/sell.html:25 app/templates/sell.html:100
-#: app/templates/sell.html:108 app/templates/ticket.html:45
+#: app/templates/sell.html:25
+msgid "El inventario y tus reportes ya están actualizados."
+msgstr ""
+
+#: app/templates/sell.html:26 app/templates/ticket.html:2
+#: app/templates/ticket.html:9
+msgid "Ticket"
+msgstr ""
+
+#: app/templates/sell.html:26 app/templates/sell.html:101
+#: app/templates/sell.html:109 app/templates/ticket.html:63
 msgid "Total"
 msgstr ""
 
-#: app/templates/sell.html:25 app/templates/sell.html:74
-#: app/templates/ticket.html:49
+#: app/templates/sell.html:26 app/templates/sell.html:75
+#: app/templates/ticket.html:66
 msgid "Método de pago"
 msgstr ""
 
-#: app/templates/sell.html:28 app/templates/sell.html:111
+#: app/templates/sell.html:29 app/templates/sell.html:112
 msgid "Ver ticket"
 msgstr ""
 
-#: app/templates/sell.html:29 app/templates/ticket.html:66
-msgid "Imprimir ticket"
-msgstr ""
-
-#: app/templates/sell.html:30
+#: app/templates/sell.html:30 app/templates/ticket.html:24
 msgid "Nueva venta"
 msgstr ""
 
-#: app/templates/sell.html:37
-msgid "Venta nueva"
+#: app/templates/sell.html:31 app/templates/ticket.html:22
+msgid "Imprimir ticket"
 msgstr ""
 
 #: app/templates/sell.html:38
-msgid "Busca y agrega productos"
+msgid "Venta nueva"
 msgstr ""
 
 #: app/templates/sell.html:39
+msgid "Busca y agrega productos"
+msgstr ""
+
+#: app/templates/sell.html:40
 msgid "Escribe nombre, SKU o código de barras. También puedes usar tu escáner."
 msgstr ""
 
-#: app/templates/sell.html:47
+#: app/templates/sell.html:48
 msgid "Nombre, SKU o código de barras"
 msgstr ""
 
-#: app/templates/sell.html:51
+#: app/templates/sell.html:52
 msgid "Productos encontrados"
 msgstr ""
 
-#: app/templates/sell.html:56
+#: app/templates/sell.html:57
 msgid "Carrito"
 msgstr ""
 
-#: app/templates/sell.html:56
+#: app/templates/sell.html:57
 msgid "Productos de la venta"
 msgstr ""
 
-#: app/templates/sell.html:57
+#: app/templates/sell.html:58
 msgid "0 artículos"
 msgstr ""
 
-#: app/templates/sell.html:62
+#: app/templates/sell.html:63
 msgid "Busca un producto para comenzar la venta."
 msgstr ""
 
-#: app/templates/sell.html:67
+#: app/templates/sell.html:68
 msgid "Precio unitario"
 msgstr ""
 
-#: app/templates/sell.html:67
+#: app/templates/sell.html:68
 msgid "Cantidad"
 msgstr ""
 
-#: app/templates/sell.html:67 app/templates/ticket.html:43
+#: app/templates/sell.html:68 app/templates/ticket.html:61
 msgid "Subtotal"
 msgstr ""
 
-#: app/templates/sell.html:67
+#: app/templates/sell.html:68
 msgid "Acción"
 msgstr ""
 
-#: app/templates/sell.html:76
+#: app/templates/sell.html:77
 msgid "Efectivo"
 msgstr ""
 
-#: app/templates/sell.html:77
+#: app/templates/sell.html:78
 msgid "Tarjeta"
 msgstr ""
 
-#: app/templates/sell.html:78
+#: app/templates/sell.html:79
 msgid "Transferencia"
 msgstr ""
 
-#: app/templates/sell.html:81
+#: app/templates/sell.html:82
 msgid ""
 "Selecciona cómo pagó el cliente. Este dato se usará para registrar la "
 "venta."
 msgstr ""
 
-#: app/templates/sell.html:83
+#: app/templates/sell.html:84
 msgid "Total de la venta"
 msgstr ""
 
-#: app/templates/sell.html:83
+#: app/templates/sell.html:84
 msgid "$0.00 MXN"
 msgstr ""
 
-#: app/templates/sell.html:84 app/templates/sell.html:157
+#: app/templates/sell.html:85 app/templates/sell.html:158
 msgid "Registrar venta"
 msgstr ""
 
-#: app/templates/sell.html:92
+#: app/templates/sell.html:93
 msgid "Historial inmediato"
 msgstr ""
 
-#: app/templates/sell.html:93
+#: app/templates/sell.html:94
 msgid "Ventas recientes"
 msgstr ""
 
-#: app/templates/sell.html:94
+#: app/templates/sell.html:95
 msgid ""
 "Cada operación aparece en un solo ticket. La cancelación se mantiene por "
 "producto y devuelve sus unidades al inventario."
 msgstr ""
 
-#: app/templates/sell.html:100 app/templates/sell.html:105
+#: app/templates/sell.html:101 app/templates/sell.html:105
+#: app/templates/ticket.html:40
+msgid "Folio"
+msgstr ""
+
+#: app/templates/sell.html:101 app/templates/sell.html:106
 msgid "Fecha y hora"
 msgstr ""
 
-#: app/templates/sell.html:100 app/templates/sell.html:106
+#: app/templates/sell.html:101 app/templates/sell.html:107
 msgid "Artículos"
 msgstr ""
 
-#: app/templates/sell.html:100 app/templates/sell.html:107
+#: app/templates/sell.html:101 app/templates/sell.html:108
 msgid "Método"
 msgstr ""
 
-#: app/templates/sell.html:106 app/templates/sell.html:151
+#: app/templates/sell.html:107 app/templates/sell.html:152
 msgid "artículo"
 msgstr ""
 
-#: app/templates/sell.html:106 app/templates/sell.html:152
+#: app/templates/sell.html:107 app/templates/sell.html:153
 msgid "artículos"
 msgstr ""
 
-#: app/templates/sell.html:106
+#: app/templates/sell.html:107
 msgid "producto"
 msgstr ""
 
-#: app/templates/sell.html:106
+#: app/templates/sell.html:107
 msgid "productos"
 msgstr ""
 
-#: app/templates/sell.html:107 app/templates/sell.html:160
+#: app/templates/sell.html:108 app/templates/sell.html:161
 msgid "No especificado"
 msgstr ""
 
-#: app/templates/sell.html:112
+#: app/templates/sell.html:113
 msgid "Reimprimir"
 msgstr ""
 
-#: app/templates/sell.html:115
+#: app/templates/sell.html:116
 msgid "Cancelar un producto"
 msgstr ""
 
-#: app/templates/sell.html:116
+#: app/templates/sell.html:117
 msgid ""
 "La cancelación se aplica solo a la línea seleccionada, no al ticket "
 "completo."
 msgstr ""
 
-#: app/templates/sell.html:118
+#: app/templates/sell.html:119
 msgid "¿Cancelar esta línea? Sus unidades regresarán al inventario."
 msgstr ""
 
-#: app/templates/sell.html:121
+#: app/templates/sell.html:122
 msgid "Cancelar línea"
 msgstr ""
 
-#: app/templates/sell.html:134
+#: app/templates/sell.html:135
 msgid "Aún no hay ventas registradas"
 msgstr ""
 
-#: app/templates/sell.html:135
+#: app/templates/sell.html:136
 msgid "Tu primera venta aparecerá aquí con su recibo y opciones de cancelación."
 msgstr ""
 
-#: app/templates/sell.html:144
+#: app/templates/sell.html:145
 msgid "No encontramos productos con esa búsqueda."
 msgstr ""
 
-#: app/templates/sell.html:145
+#: app/templates/sell.html:146
 #, python-format
 msgid "%(count)s disponibles"
 msgstr ""
 
-#: app/templates/sell.html:146
-msgid "Sin existencias"
-msgstr ""
-
 #: app/templates/sell.html:147
-#, python-format
-msgid "%(count)s productos encontrados."
+msgid "Sin existencias"
 msgstr ""
 
 #: app/templates/sell.html:148
 #, python-format
-msgid "%(name)s no tiene existencias disponibles."
+msgid "%(count)s productos encontrados."
 msgstr ""
 
 #: app/templates/sell.html:149
 #, python-format
-msgid "Solo hay %(count)s unidades disponibles de %(name)s."
+msgid "%(name)s no tiene existencias disponibles."
 msgstr ""
 
 #: app/templates/sell.html:150
 #, python-format
+msgid "Solo hay %(count)s unidades disponibles de %(name)s."
+msgstr ""
+
+#: app/templates/sell.html:151
+#, python-format
 msgid "%(name)s agregado al carrito."
 msgstr ""
 
-#: app/templates/sell.html:153
+#: app/templates/sell.html:154
 #, python-format
 msgid "Cantidad de %(name)s"
 msgstr ""
 
-#: app/templates/sell.html:155
+#: app/templates/sell.html:156
 #, python-format
 msgid "Eliminar %(name)s del carrito"
 msgstr ""
 
-#: app/templates/sell.html:156
+#: app/templates/sell.html:157
 msgid "Registrando venta…"
 msgstr ""
 
-#: app/templates/sell.html:158
+#: app/templates/sell.html:159
 msgid "No se pudo registrar la venta."
 msgstr ""
 
-#: app/templates/sell.html:159
+#: app/templates/sell.html:160
 msgid "No se pudo registrar la venta. Inténtalo nuevamente."
 msgstr ""
 
@@ -3046,10 +3079,6 @@ msgstr ""
 msgid "Reactivar suscripción"
 msgstr ""
 
-#: app/templates/subscription.html:75
-msgid "Conocer PATIA Pro"
-msgstr ""
-
 #: app/templates/subscription.html:81
 msgid "Valor y condiciones claras"
 msgstr ""
@@ -3178,92 +3207,96 @@ msgstr ""
 msgid "Agregar primer proveedor"
 msgstr ""
 
-#: app/templates/ticket.html:2 app/templates/ticket.html:8
-msgid "Ticket"
-msgstr ""
-
-#: app/templates/ticket.html:7
+#: app/templates/ticket.html:8
 msgid "Comprobante de venta"
 msgstr ""
 
-#: app/templates/ticket.html:9
-msgid "Consulta, reimprime o guarda una copia de esta operación."
-msgstr ""
-
-#: app/templates/ticket.html:15
-msgid "Mi negocio"
+#: app/templates/ticket.html:21
+msgid "Acciones principales"
 msgstr ""
 
 #: app/templates/ticket.html:23
-msgid "Fecha"
-msgstr ""
-
-#: app/templates/ticket.html:24
-msgid "Hora"
-msgstr ""
-
-#: app/templates/ticket.html:28
-msgid "Productos incluidos en la operación"
-msgstr ""
-
-#: app/templates/ticket.html:29
-msgid "Cant."
-msgstr ""
-
-#: app/templates/ticket.html:29
-msgid "P. unit."
-msgstr ""
-
-#: app/templates/ticket.html:29
-msgid "Importe"
-msgstr ""
-
-#: app/templates/ticket.html:34
-msgid "Producto no disponible"
-msgstr ""
-
-#: app/templates/ticket.html:53
-msgid "Gracias por su compra"
-msgstr ""
-
-#: app/templates/ticket.html:54
-msgid "Powered by PATIA"
-msgstr ""
-
-#: app/templates/ticket.html:58
-msgid "Acciones del ticket"
-msgstr ""
-
-#: app/templates/ticket.html:59
-msgid "Opciones del ticket"
-msgstr ""
-
-#: app/templates/ticket.html:60
-msgid "Selecciona el ancho de tu impresora antes de continuar."
-msgstr ""
-
-#: app/templates/ticket.html:62
-msgid "Ancho de papel"
-msgstr ""
-
-#: app/templates/ticket.html:63
-msgid "58 mm"
-msgstr ""
-
-#: app/templates/ticket.html:64
-msgid "80 mm"
-msgstr ""
-
-#: app/templates/ticket.html:67
 msgid "Guardar o descargar como PDF"
 msgstr ""
 
-#: app/templates/ticket.html:68
-msgid "En el diálogo de impresión selecciona “Guardar como PDF” como destino."
+#: app/templates/ticket.html:25
+msgid "Volver al POS"
 msgstr ""
 
-#: app/templates/ticket.html:69
-msgid "Volver a ventas"
+#: app/templates/ticket.html:33
+msgid "Mi negocio"
+msgstr ""
+
+#: app/templates/ticket.html:41
+msgid "Fecha"
+msgstr ""
+
+#: app/templates/ticket.html:42
+msgid "Hora"
+msgstr ""
+
+#: app/templates/ticket.html:46
+msgid "Productos incluidos en la operación"
+msgstr ""
+
+#: app/templates/ticket.html:47
+msgid "Cant."
+msgstr ""
+
+#: app/templates/ticket.html:47
+msgid "P. unit."
+msgstr ""
+
+#: app/templates/ticket.html:47
+msgid "Importe"
+msgstr ""
+
+#: app/templates/ticket.html:52
+msgid "Producto no disponible"
+msgstr ""
+
+#: app/templates/ticket.html:67
+msgid "Pago"
+msgstr ""
+
+#: app/templates/ticket.html:75
+msgid "Gracias por su compra."
+msgstr ""
+
+#: app/templates/ticket.html:76
+msgid "Powered by PATIA"
+msgstr ""
+
+#: app/templates/ticket.html:77
+msgid "Control inteligente para PyMEs"
+msgstr ""
+
+#: app/templates/ticket.html:82
+msgid "Acciones del ticket"
+msgstr ""
+
+#: app/templates/ticket.html:83
+msgid "Opciones del ticket"
+msgstr ""
+
+#: app/templates/ticket.html:84
+msgid "Selecciona el ancho de tu impresora antes de continuar."
+msgstr ""
+
+#: app/templates/ticket.html:86
+msgid "Ancho de papel"
+msgstr ""
+
+#: app/templates/ticket.html:87
+msgid "58 mm"
+msgstr ""
+
+#: app/templates/ticket.html:88
+msgid "80 mm"
+msgstr ""
+
+#: app/templates/ticket.html:90
+msgid "En el diálogo de impresión selecciona “Guardar como PDF” como destino."
 msgstr ""
 
 #: app/templates/trial_expired.html:6

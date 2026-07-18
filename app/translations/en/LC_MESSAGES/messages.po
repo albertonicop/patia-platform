@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-17 18:52-0600\n"
+"POT-Creation-Date: 2026-07-17 19:19-0600\n"
 "PO-Revision-Date: 2026-07-17 11:53-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -639,8 +639,8 @@ msgid "WhatsApp"
 msgstr "WhatsApp"
 
 #: app/templates/admin.html:98 app/templates/products.html:147
-#: app/templates/products.html:158 app/templates/sell.html:100
-#: app/templates/sell.html:109 app/templates/suppliers.html:40
+#: app/templates/products.html:158 app/templates/sell.html:101
+#: app/templates/sell.html:110 app/templates/suppliers.html:40
 #: app/templates/suppliers.html:59
 msgid "Acciones"
 msgstr "Actions"
@@ -805,7 +805,7 @@ msgstr "Pharmacy"
 msgid "Distribuidora"
 msgstr "Distributor"
 
-#: app/templates/auth.html:121 app/templates/sell.html:79
+#: app/templates/auth.html:121 app/templates/sell.html:80
 msgid "Otro"
 msgstr "Other"
 
@@ -1093,6 +1093,30 @@ msgid ""
 msgstr ""
 "Add products and record sales so PATIA can provide useful, explainable "
 "recommendations."
+
+#: app/templates/dashboard.html:178
+msgid ""
+"La utilidad estimada corresponde a las ventas de los últimos 7 días menos"
+" el costo registrado de las unidades vendidas."
+msgstr ""
+"Estimated profit is calculated from sales over the last 7 days minus the "
+"recorded cost of the units sold."
+
+#: app/templates/dashboard.html:186
+msgid "Predicción de inventario"
+msgstr "Inventory forecasting"
+
+#: app/templates/dashboard.html:190
+msgid ""
+"PATIA analiza tus ventas para ayudarte a decidir qué reabastecer y qué "
+"productos requieren atención."
+msgstr ""
+"PATIA analyzes your sales to help you decide what to restock and which "
+"products need attention."
+
+#: app/templates/dashboard.html:194 app/templates/subscription.html:75
+msgid "Conocer PATIA Pro"
+msgstr "Discover PATIA Pro"
 
 #: app/templates/dashboard.html:204
 msgid "Operación"
@@ -2134,7 +2158,7 @@ msgstr "Products in catalog"
 msgid "Catálogo"
 msgstr "Catalog"
 
-#: app/templates/products.html:125 app/templates/sell.html:43
+#: app/templates/products.html:125 app/templates/sell.html:44
 msgid "Buscar producto"
 msgstr "Search product"
 
@@ -2168,7 +2192,7 @@ msgstr "Delete selected"
 
 #: app/templates/products.html:147 app/templates/products.html:151
 #: app/templates/reports.html:137 app/templates/reports.html:155
-#: app/templates/sell.html:67 app/templates/ticket.html:29
+#: app/templates/sell.html:68 app/templates/ticket.html:47
 msgid "Producto"
 msgstr "Product"
 
@@ -2197,7 +2221,7 @@ msgstr ""
 "Remove this product from the catalog? If it has sales, PATIA will "
 "preserve its history."
 
-#: app/templates/products.html:162 app/templates/sell.html:154
+#: app/templates/products.html:162 app/templates/sell.html:155
 #: app/templates/suppliers.html:66
 msgid "Eliminar"
 msgstr "Remove"
@@ -2279,8 +2303,7 @@ msgstr "Apply range"
 msgid ""
 "Agrega el costo del producto para incluirlo en los cálculos de utilidad y"
 " margen."
-msgstr ""
-"Add the product cost to include it in profit and margin calculations."
+msgstr "Add the product cost to include it in profit and margin calculations."
 
 #: app/templates/reports.html:69
 msgid "Ventas totales"
@@ -2458,105 +2481,113 @@ msgid "Cerrar confirmación"
 msgstr "Close confirmation"
 
 #: app/templates/sell.html:23
-msgid "Operación completada"
-msgstr "Operation completed"
+msgid "Venta confirmada"
+msgstr "Sale confirmed"
 
-#: app/templates/sell.html:24
+#: app/templates/sell.html:24 app/templates/ticket.html:18
 msgid "Venta registrada correctamente"
 msgstr "Sale recorded successfully"
 
-#: app/templates/sell.html:25 app/templates/sell.html:100
-#: app/templates/sell.html:104 app/templates/ticket.html:22
-msgid "Folio"
-msgstr "Reference"
+#: app/templates/sell.html:24
+msgid "Venta registrada"
+msgstr "Sale recorded"
 
-#: app/templates/sell.html:25 app/templates/sell.html:100
-#: app/templates/sell.html:108 app/templates/ticket.html:45
+#: app/templates/sell.html:25
+msgid "El inventario y tus reportes ya están actualizados."
+msgstr "Your inventory and reports are now up to date."
+
+#: app/templates/sell.html:26 app/templates/ticket.html:2
+#: app/templates/ticket.html:9
+msgid "Ticket"
+msgstr "Receipt"
+
+#: app/templates/sell.html:26 app/templates/sell.html:101
+#: app/templates/sell.html:109 app/templates/ticket.html:63
 msgid "Total"
 msgstr "Total"
 
-#: app/templates/sell.html:25 app/templates/sell.html:74
-#: app/templates/ticket.html:49
+#: app/templates/sell.html:26 app/templates/sell.html:75
+#: app/templates/ticket.html:66
 msgid "Método de pago"
 msgstr "Payment method"
 
-#: app/templates/sell.html:28 app/templates/sell.html:111
+#: app/templates/sell.html:29 app/templates/sell.html:112
 msgid "Ver ticket"
 msgstr "See ticket"
 
-#: app/templates/sell.html:29 app/templates/ticket.html:66
-msgid "Imprimir ticket"
-msgstr "Print receipt"
-
-#: app/templates/sell.html:30
+#: app/templates/sell.html:30 app/templates/ticket.html:24
 msgid "Nueva venta"
 msgstr "New sale"
 
-#: app/templates/sell.html:37
+#: app/templates/sell.html:31 app/templates/ticket.html:22
+msgid "Imprimir ticket"
+msgstr "Print receipt"
+
+#: app/templates/sell.html:38
 msgid "Venta nueva"
 msgstr "New sale"
 
-#: app/templates/sell.html:38
+#: app/templates/sell.html:39
 msgid "Busca y agrega productos"
 msgstr "Search and add products"
 
-#: app/templates/sell.html:39
+#: app/templates/sell.html:40
 msgid "Escribe nombre, SKU o código de barras. También puedes usar tu escáner."
 msgstr "Enter a name, SKU, or barcode. You can also use your scanner."
 
-#: app/templates/sell.html:47
+#: app/templates/sell.html:48
 msgid "Nombre, SKU o código de barras"
 msgstr "Name, SKU or barcode"
 
-#: app/templates/sell.html:51
+#: app/templates/sell.html:52
 msgid "Productos encontrados"
 msgstr "Products found"
 
-#: app/templates/sell.html:56
+#: app/templates/sell.html:57
 msgid "Carrito"
 msgstr "Cart"
 
-#: app/templates/sell.html:56
+#: app/templates/sell.html:57
 msgid "Productos de la venta"
 msgstr "Sale items"
 
-#: app/templates/sell.html:57
+#: app/templates/sell.html:58
 msgid "0 artículos"
 msgstr "0 items"
 
-#: app/templates/sell.html:62
+#: app/templates/sell.html:63
 msgid "Busca un producto para comenzar la venta."
 msgstr "Search for a product to start the sale."
 
-#: app/templates/sell.html:67
+#: app/templates/sell.html:68
 msgid "Precio unitario"
 msgstr "Unit price"
 
-#: app/templates/sell.html:67
+#: app/templates/sell.html:68
 msgid "Cantidad"
 msgstr "Amount"
 
-#: app/templates/sell.html:67 app/templates/ticket.html:43
+#: app/templates/sell.html:68 app/templates/ticket.html:61
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: app/templates/sell.html:67
+#: app/templates/sell.html:68
 msgid "Acción"
 msgstr "Action"
 
-#: app/templates/sell.html:76
+#: app/templates/sell.html:77
 msgid "Efectivo"
 msgstr "Cash"
 
-#: app/templates/sell.html:77
+#: app/templates/sell.html:78
 msgid "Tarjeta"
 msgstr "Card"
 
-#: app/templates/sell.html:78
+#: app/templates/sell.html:79
 msgid "Transferencia"
 msgstr "Bank transfer"
 
-#: app/templates/sell.html:81
+#: app/templates/sell.html:82
 msgid ""
 "Selecciona cómo pagó el cliente. Este dato se usará para registrar la "
 "venta."
@@ -2564,27 +2595,27 @@ msgstr ""
 "Select how the customer paid. This information will be used to record the"
 " sale."
 
-#: app/templates/sell.html:83
+#: app/templates/sell.html:84
 msgid "Total de la venta"
 msgstr "Sale total"
 
-#: app/templates/sell.html:83
+#: app/templates/sell.html:84
 msgid "$0.00 MXN"
 msgstr "$0.00 MXN"
 
-#: app/templates/sell.html:84 app/templates/sell.html:157
+#: app/templates/sell.html:85 app/templates/sell.html:158
 msgid "Registrar venta"
 msgstr "Record sale"
 
-#: app/templates/sell.html:92
+#: app/templates/sell.html:93
 msgid "Historial inmediato"
 msgstr "Recent history"
 
-#: app/templates/sell.html:93
+#: app/templates/sell.html:94
 msgid "Ventas recientes"
 msgstr "Recent sales"
 
-#: app/templates/sell.html:94
+#: app/templates/sell.html:95
 msgid ""
 "Cada operación aparece en un solo ticket. La cancelación se mantiene por "
 "producto y devuelve sus unidades al inventario."
@@ -2592,122 +2623,127 @@ msgstr ""
 "Each operation appears on a single ticket. The cancellation is maintained"
 " per product and returns its units to inventory."
 
-#: app/templates/sell.html:100 app/templates/sell.html:105
+#: app/templates/sell.html:101 app/templates/sell.html:105
+#: app/templates/ticket.html:40
+msgid "Folio"
+msgstr "Reference"
+
+#: app/templates/sell.html:101 app/templates/sell.html:106
 msgid "Fecha y hora"
 msgstr "Date and time"
 
-#: app/templates/sell.html:100 app/templates/sell.html:106
+#: app/templates/sell.html:101 app/templates/sell.html:107
 msgid "Artículos"
 msgstr "Articles"
 
-#: app/templates/sell.html:100 app/templates/sell.html:107
+#: app/templates/sell.html:101 app/templates/sell.html:108
 msgid "Método"
 msgstr "Method"
 
-#: app/templates/sell.html:106 app/templates/sell.html:151
+#: app/templates/sell.html:107 app/templates/sell.html:152
 msgid "artículo"
 msgstr "item"
 
-#: app/templates/sell.html:106 app/templates/sell.html:152
+#: app/templates/sell.html:107 app/templates/sell.html:153
 msgid "artículos"
 msgstr "items"
 
-#: app/templates/sell.html:106
+#: app/templates/sell.html:107
 msgid "producto"
 msgstr "product"
 
-#: app/templates/sell.html:106
+#: app/templates/sell.html:107
 msgid "productos"
 msgstr "products"
 
-#: app/templates/sell.html:107 app/templates/sell.html:160
+#: app/templates/sell.html:108 app/templates/sell.html:161
 msgid "No especificado"
 msgstr "Not specified"
 
-#: app/templates/sell.html:112
+#: app/templates/sell.html:113
 msgid "Reimprimir"
 msgstr "Reprint"
 
-#: app/templates/sell.html:115
+#: app/templates/sell.html:116
 msgid "Cancelar un producto"
 msgstr "Cancel a product"
 
-#: app/templates/sell.html:116
+#: app/templates/sell.html:117
 msgid ""
 "La cancelación se aplica solo a la línea seleccionada, no al ticket "
 "completo."
 msgstr "The cancellation applies only to the selected line, not the entire ticket."
 
-#: app/templates/sell.html:118
+#: app/templates/sell.html:119
 msgid "¿Cancelar esta línea? Sus unidades regresarán al inventario."
 msgstr "Cancel this line item? Its units will be returned to inventory."
 
-#: app/templates/sell.html:121
+#: app/templates/sell.html:122
 msgid "Cancelar línea"
 msgstr "Cancel line"
 
-#: app/templates/sell.html:134
+#: app/templates/sell.html:135
 msgid "Aún no hay ventas registradas"
 msgstr "No sales recorded yet"
 
-#: app/templates/sell.html:135
+#: app/templates/sell.html:136
 msgid "Tu primera venta aparecerá aquí con su recibo y opciones de cancelación."
 msgstr ""
 "Your first sale will appear here with its receipt and cancellation "
 "options."
 
-#: app/templates/sell.html:144
+#: app/templates/sell.html:145
 msgid "No encontramos productos con esa búsqueda."
 msgstr "No products matched that search."
 
-#: app/templates/sell.html:145
+#: app/templates/sell.html:146
 #, python-format
 msgid "%(count)s disponibles"
 msgstr "%(count)s available"
 
-#: app/templates/sell.html:146
+#: app/templates/sell.html:147
 msgid "Sin existencias"
 msgstr "Out of stock"
 
-#: app/templates/sell.html:147
+#: app/templates/sell.html:148
 #, python-format
 msgid "%(count)s productos encontrados."
 msgstr "%(count)s products found."
 
-#: app/templates/sell.html:148
+#: app/templates/sell.html:149
 #, python-format
 msgid "%(name)s no tiene existencias disponibles."
 msgstr "%(name)s has no available stock."
 
-#: app/templates/sell.html:149
+#: app/templates/sell.html:150
 #, python-format
 msgid "Solo hay %(count)s unidades disponibles de %(name)s."
 msgstr "Only %(count)s units of %(name)s are available."
 
-#: app/templates/sell.html:150
+#: app/templates/sell.html:151
 #, python-format
 msgid "%(name)s agregado al carrito."
 msgstr "%(name)s added to the cart."
 
-#: app/templates/sell.html:153
+#: app/templates/sell.html:154
 #, python-format
 msgid "Cantidad de %(name)s"
 msgstr "Quantity of %(name)s"
 
-#: app/templates/sell.html:155
+#: app/templates/sell.html:156
 #, python-format
 msgid "Eliminar %(name)s del carrito"
 msgstr "Remove %(name)s from cart"
 
-#: app/templates/sell.html:156
+#: app/templates/sell.html:157
 msgid "Registrando venta…"
 msgstr "Recording sale?"
 
-#: app/templates/sell.html:158
+#: app/templates/sell.html:159
 msgid "No se pudo registrar la venta."
 msgstr "The sale could not be recorded."
 
-#: app/templates/sell.html:159
+#: app/templates/sell.html:160
 msgid "No se pudo registrar la venta. Inténtalo nuevamente."
 msgstr "The sale could not be recorded. Try again."
 
@@ -3181,10 +3217,6 @@ msgstr "Cancel at period end"
 msgid "Reactivar suscripción"
 msgstr "Reactivate subscription"
 
-#: app/templates/subscription.html:75
-msgid "Conocer PATIA Pro"
-msgstr "Discover PATIA Pro"
-
 #: app/templates/subscription.html:81
 msgid "Valor y condiciones claras"
 msgstr "Clear value and terms"
@@ -3317,93 +3349,97 @@ msgstr "Add your first supplier to keep contact details in one place."
 msgid "Agregar primer proveedor"
 msgstr "Add first supplier"
 
-#: app/templates/ticket.html:2 app/templates/ticket.html:8
-msgid "Ticket"
-msgstr "Receipt"
-
-#: app/templates/ticket.html:7
+#: app/templates/ticket.html:8
 msgid "Comprobante de venta"
 msgstr "Sales receipt"
 
-#: app/templates/ticket.html:9
-msgid "Consulta, reimprime o guarda una copia de esta operación."
-msgstr "View, reprint, or save a copy of this transaction."
-
-#: app/templates/ticket.html:15
-msgid "Mi negocio"
-msgstr "My business"
+#: app/templates/ticket.html:21
+msgid "Acciones principales"
+msgstr "Primary actions"
 
 #: app/templates/ticket.html:23
-msgid "Fecha"
-msgstr "Date"
-
-#: app/templates/ticket.html:24
-msgid "Hora"
-msgstr "Time"
-
-#: app/templates/ticket.html:28
-msgid "Productos incluidos en la operación"
-msgstr "Products included in the operation"
-
-#: app/templates/ticket.html:29
-msgid "Cant."
-msgstr "Qty."
-
-#: app/templates/ticket.html:29
-msgid "P. unit."
-msgstr "Unit price"
-
-#: app/templates/ticket.html:29
-msgid "Importe"
-msgstr "Amount"
-
-#: app/templates/ticket.html:34
-msgid "Producto no disponible"
-msgstr "Product unavailable"
-
-#: app/templates/ticket.html:53
-msgid "Gracias por su compra"
-msgstr "Thank you for your purchase"
-
-#: app/templates/ticket.html:54
-msgid "Powered by PATIA"
-msgstr "Powered by PATIA"
-
-#: app/templates/ticket.html:58
-msgid "Acciones del ticket"
-msgstr "Ticket Actions"
-
-#: app/templates/ticket.html:59
-msgid "Opciones del ticket"
-msgstr "Receipt options"
-
-#: app/templates/ticket.html:60
-msgid "Selecciona el ancho de tu impresora antes de continuar."
-msgstr "Select your printer width before continuing."
-
-#: app/templates/ticket.html:62
-msgid "Ancho de papel"
-msgstr "Paper width"
-
-#: app/templates/ticket.html:63
-msgid "58 mm"
-msgstr "58mm"
-
-#: app/templates/ticket.html:64
-msgid "80 mm"
-msgstr "80mm"
-
-#: app/templates/ticket.html:67
 msgid "Guardar o descargar como PDF"
 msgstr "Save or download as PDF"
 
-#: app/templates/ticket.html:68
+#: app/templates/ticket.html:25
+msgid "Volver al POS"
+msgstr "Back to POS"
+
+#: app/templates/ticket.html:33
+msgid "Mi negocio"
+msgstr "My business"
+
+#: app/templates/ticket.html:41
+msgid "Fecha"
+msgstr "Date"
+
+#: app/templates/ticket.html:42
+msgid "Hora"
+msgstr "Time"
+
+#: app/templates/ticket.html:46
+msgid "Productos incluidos en la operación"
+msgstr "Products included in the operation"
+
+#: app/templates/ticket.html:47
+msgid "Cant."
+msgstr "Qty."
+
+#: app/templates/ticket.html:47
+msgid "P. unit."
+msgstr "Unit price"
+
+#: app/templates/ticket.html:47
+msgid "Importe"
+msgstr "Amount"
+
+#: app/templates/ticket.html:52
+msgid "Producto no disponible"
+msgstr "Product unavailable"
+
+#: app/templates/ticket.html:67
+msgid "Pago"
+msgstr "Payment"
+
+#: app/templates/ticket.html:75
+msgid "Gracias por su compra."
+msgstr "Thank you for your purchase."
+
+#: app/templates/ticket.html:76
+msgid "Powered by PATIA"
+msgstr "Powered by PATIA"
+
+#: app/templates/ticket.html:77
+msgid "Control inteligente para PyMEs"
+msgstr "Smart control for small businesses"
+
+#: app/templates/ticket.html:82
+msgid "Acciones del ticket"
+msgstr "Ticket Actions"
+
+#: app/templates/ticket.html:83
+msgid "Opciones del ticket"
+msgstr "Receipt options"
+
+#: app/templates/ticket.html:84
+msgid "Selecciona el ancho de tu impresora antes de continuar."
+msgstr "Select your printer width before continuing."
+
+#: app/templates/ticket.html:86
+msgid "Ancho de papel"
+msgstr "Paper width"
+
+#: app/templates/ticket.html:87
+msgid "58 mm"
+msgstr "58mm"
+
+#: app/templates/ticket.html:88
+msgid "80 mm"
+msgstr "80mm"
+
+#: app/templates/ticket.html:90
 msgid "En el diálogo de impresión selecciona “Guardar como PDF” como destino."
 msgstr "In the print dialog select “Save as PDF” as the destination."
-
-#: app/templates/ticket.html:69
-msgid "Volver a ventas"
-msgstr "Back to sales"
 
 #: app/templates/trial_expired.html:6
 msgid "Tu prueba gratuita ha finalizado"
@@ -3436,256 +3472,3 @@ msgstr "Did not receive the code? Check spam or request a new one."
 #: app/templates/verify_email.html:36
 msgid "Reenviar código"
 msgstr "Resend code"
-
-#~ msgid "Tu periodo de prueba terminó. Activa PATIA Pro para continuar."
-#~ msgstr "Your trial has ended. Activate PATIA Pro to continue."
-
-#~ msgid ""
-#~ "No pudimos enviar el código. Usa "
-#~ "Reenviar código para intentarlo nuevamente."
-#~ msgstr "We couldn't send the code. Use Resend Code to try again."
-
-#~ msgid "No pudimos enviar el enlace. Inténtalo nuevamente en unos minutos."
-#~ msgstr "We couldn't send the link. Please try again in a few minutes."
-
-#~ msgid "Selecciona un archivo."
-#~ msgstr "Select a file."
-
-#~ msgid "Usa un archivo CSV o Excel .xlsx."
-#~ msgstr "Use a CSV or Excel .xlsx file."
-
-#~ msgid ""
-#~ "El archivo no contiene las columnas "
-#~ "obligatorias: , . Descarga la plantilla"
-#~ " PATIA e inténtalo de nuevo."
-#~ msgstr ""
-#~ "The file does not contain the "
-#~ "required columns: , . Download the "
-#~ "PATIA template and try again."
-
-#~ msgid "Importación terminada: createdupdatedomittederrors"
-#~ msgstr "Import finished: createdupdatedomittederrors"
-
-#~ msgid ""
-#~ "No pudimos procesar el archivo. Verifica"
-#~ " que use la plantilla PATIA e "
-#~ "inténtalo de nuevo."
-#~ msgstr ""
-#~ "We could not process the file. "
-#~ "Verify that it uses the PATIA "
-#~ "template and try again."
-
-#~ msgid "Revisa precios y existencias e inténtalo nuevamente."
-#~ msgstr "Check prices and stock and try again."
-
-#~ msgid "Nombre y SKU son obligatorios."
-#~ msgstr "Name and SKU are required."
-
-#~ msgid "Ya existe un producto con ese SKU. Usa un SKU diferente."
-#~ msgstr "A product with that SKU already exists. Use a different SKU."
-
-#~ msgid "Ya existe un producto con ese código de barras."
-#~ msgstr "A product with that barcode already exists."
-
-#~ msgid ""
-#~ "El SKU y el código de barras "
-#~ "pertenecen a productos históricos diferentes."
-#~ msgstr "The SKU and barcode belong to different historical products."
-
-#~ msgid "Precios y existencias no pueden ser negativos."
-#~ msgstr "Prices and stocks cannot be negative."
-
-#~ msgid "No pudimos guardar el producto porque el SKU ya está en uso."
-#~ msgstr "We couldn't save the product because the SKU is already in use."
-
-#~ msgid "Producto creado correctamente."
-#~ msgstr "Successfully created product."
-
-#~ msgid "Ya existe otro producto con ese SKU."
-#~ msgstr "Another product already exists with that SKU."
-
-#~ msgid "Ya existe otro producto con ese código de barras."
-#~ msgstr "There is already another product with that barcode."
-
-#~ msgid ""
-#~ "Producto actualizado correctamente. Las ventas"
-#~ " anteriores conservaron sus importes "
-#~ "originales."
-#~ msgstr ""
-#~ "Product updated successfully. Previous sales"
-#~ " retained their original amounts."
-
-#~ msgid "Selecciona un producto y una cantidad válida."
-#~ msgstr "Select a product and a valid quantity."
-
-#~ msgid "La cantidad debe ser mayor a cero."
-#~ msgstr "The quantity must be greater than zero."
-
-#~ msgid "No hay suficiente inventario."
-#~ msgstr "There is not enough inventory."
-
-#~ msgid "Selecciona un método de pago válido."
-#~ msgstr "Select a valid payment method."
-
-#~ msgid "Escribe el nombre del proveedor."
-#~ msgstr "Write the name of the supplier."
-
-#~ msgid "Ese proveedor ya existe."
-#~ msgstr "That provider already exists."
-
-#~ msgid "Proveedor guardado."
-#~ msgstr "Saved Provider."
-
-#~ msgid "Verifica tu correo antes de activar PATIA Pro."
-#~ msgstr "Check your email before activating PATIA Pro."
-
-#~ msgid "El pago fue cancelado. No se realizó ningún cargo."
-#~ msgstr "The payment was cancelled. No charge was made."
-
-#~ msgid "La facturación no está disponible en este entorno."
-#~ msgstr "Billing is not available in this environment."
-
-#~ msgid "No pudimos validar tu suscripción. Intenta nuevamente."
-#~ msgstr "We could not validate your subscription. Try again."
-
-#~ msgid "No pudimos iniciar el pago. Intenta nuevamente."
-#~ msgstr "We could not initiate the payment. Try again."
-
-#~ msgid "No se pudo validar la sesión de pago."
-#~ msgstr "The payment session could not be validated."
-
-#~ msgid "La sesión de pago no pertenece a este usuario."
-#~ msgstr "The payment session does not belong to this user."
-
-#~ msgid "Tu cuenta PATIA Pro está activa."
-#~ msgstr "Your PATIA Pro account is active."
-
-#~ msgid "Pago recibido. Estamos confirmando tu suscripción con Stripe."
-#~ msgstr "Payment received. We are confirming your subscription with Stripe."
-
-#~ msgid "Venta cancelada. Stock devuelto al inventario."
-#~ msgstr "Sale cancelled. Stock returned to inventory."
-
-#~ msgid "No pudimos actualizar el estado de tu suscripción."
-#~ msgstr "We were unable to update your subscription status."
-
-#~ msgid "Tu suscripcion se cancelara al final del periodo pagado."
-#~ msgstr "Your subscription will be canceled at the end of the paid period."
-
-#~ msgid "No pudimos cancelar la suscripción. Intenta nuevamente."
-#~ msgstr "We couldn't unsubscribe. Try again."
-
-#~ msgid "Tu suscripcion ha sido reactivada."
-#~ msgstr "Your subscription has been reactivated."
-
-#~ msgid "No pudimos reactivar la suscripción. Intenta nuevamente."
-#~ msgstr "We were unable to reactivate the subscription. Try again."
-
-#~ msgid "No pudimos abrir el portal de facturación."
-#~ msgstr "We were unable to open the billing portal."
-
-#~ msgid "No autorizado."
-#~ msgstr "Unauthorized."
-
-#~ msgid "Producto retirado del catálogo. Su historial de ventas se conserva."
-#~ msgstr "Product removed from the catalog. Your sales history is preserved."
-
-#~ msgid "Producto eliminado correctamente."
-#~ msgstr "Product disposed correctly."
-
-#~ msgid "Proveedor eliminado correctamente."
-#~ msgstr "Vendor removed successfully."
-
-#~ msgid "No puedes eliminar tu cuenta de administrador."
-#~ msgstr "You cannot delete your administrator account."
-
-#~ msgid ""
-#~ "No puedes eliminar este usuario mientras"
-#~ " tenga una suscripción Stripe gestionable."
-#~ msgstr ""
-#~ "You cannot delete this user while "
-#~ "they have a manageable Stripe "
-#~ "subscription."
-
-#~ msgid "Cliente eliminado correctamente."
-#~ msgstr "Client deleted successfully."
-
-#~ msgid "Cliente marcado como PRO."
-#~ msgstr "Client marked as PRO."
-
-#~ msgid "El nombre del negocio es obligatorio."
-#~ msgstr "The business name is required."
-
-#~ msgid "Configuración guardada."
-#~ msgstr "Saved settings."
-
-#~ msgid ""
-#~ "El archivo no contiene todas las "
-#~ "columnas obligatorias. Descarga la plantilla"
-#~ " PATIA e inténtalo de nuevo."
-#~ msgstr ""
-
-#~ msgid "Solo registra cómo pagó el cliente; PATIA no procesa pagos con tarjeta."
-#~ msgstr ""
-#~ "It only records how the customer "
-#~ "paid; PATIA does not process card "
-#~ "payments."
-
-#~ msgid ""
-#~ "Ventas de los últimos 7 días menos"
-#~ " el costo registrado de las unidades"
-#~ " vendidas."
-#~ msgstr "Sales for the last 7 days minus the recorded cost of units sold."
-
-#~ msgid "Productos activos"
-#~ msgstr "Active products"
-
-#~ msgid "Alertas"
-#~ msgstr "Alerts"
-
-#~ msgid "Ventas por categoría"
-#~ msgstr "Sales by category"
-
-#~ msgid "Aún no hay ventas para analizar"
-#~ msgstr "No sales to analyze yet"
-
-#~ msgid ""
-#~ "Después de registrar ventas, aquí verás"
-#~ " qué categorías generan más ingresos."
-#~ msgstr ""
-#~ "After recording sales, you will see "
-#~ "which categories generate the most "
-#~ "revenue."
-
-#~ msgid "Recomendaciones para vender más"
-#~ msgstr "Recommendations to sell more"
-
-#~ msgid "Todavía no hay recomendaciones"
-#~ msgstr "No recommendations yet"
-
-#~ msgid ""
-#~ "Registra ventas y movimientos de "
-#~ "inventario para recibir sugerencias basadas"
-#~ " en tu operación."
-#~ msgstr ""
-#~ "Record sales and inventory movements to"
-#~ " receive suggestions based on your "
-#~ "operations."
-
-#~ msgid ""
-#~ "%(count)s línea de venta no tiene "
-#~ "costo histórico y fue excluida de "
-#~ "utilidad y margen."
-#~ msgstr ""
-#~ "%(count)s sale line has no historical"
-#~ " cost and was excluded from profit"
-#~ " and margin."
-
-#~ msgid ""
-#~ "%(count)s líneas de venta no tienen "
-#~ "costo histórico y fueron excluidas de"
-#~ " utilidad y margen."
-#~ msgstr ""
-#~ "%(count)s sale lines have no historical"
-#~ " cost and were excluded from profit"
-#~ " and margin."

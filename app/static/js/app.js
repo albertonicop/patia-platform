@@ -20,8 +20,15 @@ function chart(id, labels, values, type='bar'){
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {duration: 220},
             plugins: {
-                legend: {display: !isBar}
+                legend: {display: !isBar},
+                tooltip: {
+                    backgroundColor: "#202435",
+                    padding: 12,
+                    cornerRadius: 10,
+                    titleFont: {weight: "700"}
+                }
             },
             scales: isBar ? {
                 x: {grid: {display: false}},
@@ -82,10 +89,19 @@ function initializeReportCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {duration: 220},
                 interaction: {mode: "index", intersect: false},
                 plugins: {
-                    legend: {display: true, position: "bottom", labels: {usePointStyle: true}},
+                    legend: {
+                        display: true,
+                        position: "bottom",
+                        labels: {usePointStyle: true, padding: 18, color: "#555d70"}
+                    },
                     tooltip: {
+                        backgroundColor: "#202435",
+                        padding: 12,
+                        cornerRadius: 10,
+                        titleFont: {weight: "700"},
                         callbacks: {
                             label: context => `${context.dataset.label}: ${reportMoney(context.raw)}`
                         }
@@ -119,10 +135,15 @@ function initializeReportCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {duration: 220},
                 cutout: "68%",
                 plugins: {
                     legend: {display: false},
                     tooltip: {
+                        backgroundColor: "#202435",
+                        padding: 12,
+                        cornerRadius: 10,
+                        titleFont: {weight: "700"},
                         callbacks: {
                             label: context => {
                                 const payment = report.payments[context.dataIndex];
@@ -148,7 +169,7 @@ function initializeCustomReportPeriod() {
         toggle.setAttribute("aria-current", "page");
         toggle.setAttribute("aria-expanded", "true");
         document.getElementById("report-start")?.focus();
-        form.scrollIntoView({block: "nearest", behavior: "smooth"});
+        form.scrollIntoView({block: "nearest"});
     });
 }
 

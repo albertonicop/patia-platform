@@ -20,14 +20,15 @@
         <button id="confirmation-close" class="pos-v2__modal-close" type="button" aria-label="{{ _('Cerrar confirmación') }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
         <span class="pos-v2__confirmation-icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
         <div class="pos-v2__confirmation-copy">
-          <span class="pos-v2__eyebrow">{{ _("Operación completada") }}</span>
-          <h3 id="sale-confirmation-title">{{ _("Venta registrada correctamente") }}</h3>
-          <dl><div><dt>{{ _("Folio") }}</dt><dd id="confirmation-folio"></dd></div><div><dt>{{ _("Total") }}</dt><dd id="confirmation-total"></dd></div><div><dt>{{ _("Método de pago") }}</dt><dd id="confirmation-payment"></dd></div></dl>
+          <span class="pos-v2__eyebrow">{{ _("Venta confirmada") }}</span>
+          <h3 id="sale-confirmation-title" aria-label="{{ _('Venta registrada correctamente') }}">{{ _("Venta registrada") }}</h3>
+          <p class="pos-v2__confirmation-note">{{ _("El inventario y tus reportes ya están actualizados.") }}</p>
+          <dl><div><dt>{{ _("Ticket") }}</dt><dd id="confirmation-folio"></dd></div><div class="pos-v2__confirmation-total"><dt>{{ _("Total") }}</dt><dd id="confirmation-total"></dd></div><div><dt>{{ _("Método de pago") }}</dt><dd id="confirmation-payment"></dd></div></dl>
         </div>
         <div class="pos-v2__confirmation-actions">
-          <a id="confirmation-ticket" class="btn ghost" target="_blank" rel="noopener">{{ _("Ver ticket") }}</a>
-          <a id="confirmation-print" class="btn ghost" target="_blank" rel="noopener">{{ _("Imprimir ticket") }}</a>
-          <button id="confirmation-new-sale" class="btn" type="button">{{ _("Nueva venta") }}</button>
+          <a id="confirmation-ticket" class="btn" target="_blank" rel="noopener"><i class="fa-solid fa-eye" aria-hidden="true"></i> {{ _("Ver ticket") }}</a>
+          <button id="confirmation-new-sale" class="btn ghost" type="button"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{ _("Nueva venta") }}</button>
+          <a id="confirmation-print" class="btn ghost" target="_blank" rel="noopener"><i class="fa-solid fa-print" aria-hidden="true"></i> {{ _("Imprimir ticket") }}</a>
         </div>
       </section>
     </div>

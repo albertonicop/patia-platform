@@ -4,12 +4,30 @@
 {% block content %}
 <div class="ticket-page-v2">
   <header class="module-intro-v2 ticket-page-v2__intro no-print-v2">
-    <span>{{ _("Comprobante de venta") }}</span>
-    <h2>{{ _("Ticket") }} {{ folio }}</h2>
-    <p>{{ _("Consulta, reimprime o guarda una copia de esta operación.") }}</p>
+    <div>
+      <span>{{ _("Comprobante de venta") }}</span>
+      <h2>{{ _("Ticket") }} {{ folio }}</h2>
+      <p class="ticket-page-v2__datetime">
+        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+        {{ ticket_created_at.strftime('%d/%m/%Y') }}
+        <span aria-hidden="true">·</span>
+        {{ ticket_created_at.strftime('%H:%M') }}
+      </p>
+      <p class="ticket-page-v2__status">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        {{ _("Venta registrada correctamente") }}
+      </p>
+    </div>
+    <div class="ticket-page-v2__quick-actions" aria-label="{{ _('Acciones principales') }}">
+      <button id="print-ticket" class="btn" type="button"><i class="fa-solid fa-print" aria-hidden="true"></i> {{ _("Imprimir ticket") }}</button>
+      <button id="save-ticket-pdf" class="btn ghost" type="button"><i class="fa-solid fa-arrow-down" aria-hidden="true"></i> {{ _("Guardar o descargar como PDF") }}</button>
+      <a class="btn ghost" href="{{ url_for('main.sell') }}"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{ _("Nueva venta") }}</a>
+      <a class="ticket-page-v2__back" href="{{ url_for('main.sell') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver al POS") }}</a>
+    </div>
   </header>
 
   <div class="ticket-page-v2__layout">
+    {% set payment_key = sales[0].sales_ticket.payment_method if sales[0].sales_ticket else sales[0].payment_method %}
     <article id="printable-ticket" class="ticket-print-v2 ticket-print-v2--80" aria-label="Ticket de venta {{ folio }}">
       <header class="ticket-print-v2__business">
         <h1>{{ user.company_name or _("Mi negocio") }}</h1>
@@ -45,13 +63,19 @@
         <div class="ticket-print-v2__total"><dt>{{ _("Total") }}</dt><dd>{{ ticket_total|money }}</dd></div>
       </dl>
 
-      <div class="ticket-print-v2__payment">
-        <span>{{ _("Método de pago") }}</span><strong>{{ payment_method }}</strong>
+      <div class="ticket-print-v2__payment" aria-label="{{ _('Método de pago') }}">
+        <span>{{ _("Pago") }}</span>
+        <strong>
+          <i class="fa-solid {% if payment_key == 'card' %}fa-credit-card{% elif payment_key == 'cash' %}fa-money-bill-wave{% elif payment_key == 'transfer' %}fa-building-columns{% else %}fa-wallet{% endif %}" aria-hidden="true"></i>
+          {{ payment_method }}
+        </strong>
       </div>
 
       <footer class="ticket-print-v2__footer">
-        <strong>{{ _("Gracias por su compra") }}</strong>
+        <strong>{{ _("Gracias por su compra.") }}</strong>
         <small>{{ _("Powered by PATIA") }}</small>
+        <small>{{ _("Control inteligente para PyMEs") }}</small>
+        <span class="ticket-print-v2__future-qr" aria-hidden="true"></span>
       </footer>
     </article>
 
@@ -63,10 +87,7 @@
         <label><input type="radio" name="ticket_width" value="58"> {{ _("58 mm") }}</label>
         <label><input type="radio" name="ticket_width" value="80" checked> {{ _("80 mm") }}</label>
       </fieldset>
-      <button id="print-ticket" class="btn" type="button"><i class="fa-solid fa-print" aria-hidden="true"></i> {{ _("Imprimir ticket") }}</button>
-      <button id="save-ticket-pdf" class="btn ghost" type="button"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i> {{ _("Guardar o descargar como PDF") }}</button>
       <p id="pdf-help" class="ticket-page-v2__help">{{ _("En el diálogo de impresión selecciona “Guardar como PDF” como destino.") }}</p>
-      <a class="btn ghost" href="{{ url_for('main.sell') }}">{{ _("Volver a ventas") }}</a>
     </aside>
   </div>
 </div>
