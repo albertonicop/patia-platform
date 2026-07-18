@@ -21,7 +21,7 @@
       <a href="#como-funciona">{{ _("Cómo funciona") }}</a>
       <a href="#precio" class="landing-v4__nav-price">{{ _("PATIA Pro · $199/mes") }}</a>
       <a href="/login" class="landing-v2__login">{{ _("Iniciar sesión") }}</a>
-      <a href="/register" class="landing-v3__nav-cta">{{ _("Probar gratis") }}</a>
+      <a href="/register" class="landing-v3__nav-cta">{{ _("Comenzar prueba gratis") }}</a>
     </nav>
   </header>
 
@@ -31,38 +31,29 @@
         <span class="landing-v2__eyebrow"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ _("Control operativo para PyMEs en México") }}</span>
         <h1>{{ _("Tu negocio, bajo control. Todos los días.") }}</h1>
         <p class="landing-v2__lead">
-          {{ _("Registra ventas, mantén tu inventario al día y descubre qué necesita atención sin perderte entre libretas y archivos.") }}
+          {{ _("Administra inventario, ventas y reportes desde un solo lugar. Prueba PATIA gratis durante 14 días y continúa por $199 MXN al mes.") }}
         </p>
-        <div class="landing-v4__offer" aria-label="{{ _('Precio de PATIA Pro') }}">
-          <div>
-            <span>{{ _("PATIA Pro") }}</span>
-            <strong>$199 <small>{{ _("MXN al mes") }}</small></strong>
-          </div>
-          <p><strong>{{ _("14 días gratis") }}</strong><span>{{ _("Sin tarjeta para comenzar · Cancela cuando quieras") }}</span></p>
+        <div class="landing-v5__terms" aria-label="{{ _('Condiciones de PATIA Pro') }}">
+          <strong>{{ _("14 días gratis") }}</strong>
+          <span aria-hidden="true">·</span>
+          <span>{{ _("Después, $199 MXN al mes") }}</span>
+          <span aria-hidden="true">·</span>
+          <span>{{ _("Cancela cuando quieras") }}</span>
         </div>
         <div class="landing-v2__actions">
           <a href="/register" class="landing-v2__button landing-v2__button--primary">
-            {{ _("Probar PATIA gratis") }}
+            {{ _("Comenzar prueba gratis") }}
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
           <button type="button" class="landing-v2__button landing-v2__button--secondary" data-demo-open>
             <i class="fa-regular fa-circle-play" aria-hidden="true"></i>
-            {{ _("Ver demo de 60 segundos") }}
+            {{ _("Ver demo") }}
           </button>
         </div>
-        <div class="landing-v2__assurances" aria-label="{{ _('Condiciones de la prueba') }}">
-          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin instalación") }}</span>
-          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Configuración sencilla") }}</span>
-          <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Soporte directo") }}</span>
-        </div>
+        <p class="landing-v5__assurance"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin tarjeta para comenzar · Cancela cuando quieras") }}</p>
       </div>
 
       <div class="landing-v3__product-stage">
-      <button type="button" class="landing-v4__preview-play" data-demo-open>
-        <span><i class="fa-solid fa-play" aria-hidden="true"></i></span>
-        <strong>{{ _("Ver PATIA en acción") }}</strong>
-        <small>{{ _("Demo interactiva · 60 segundos") }}</small>
-      </button>
       <div class="landing-v2__preview" aria-label="{{ _('Vista previa del panel PATIA') }}">
         <div class="landing-v3__preview-browser" aria-hidden="true">
           <span><i></i><i></i><i></i></span>
@@ -92,10 +83,6 @@
           <div><strong>{{ _("2 productos requieren atención") }}</strong><span>{{ _("Revisa existencias antes de tu próximo pedido.") }}</span></div>
         </div>
       </div>
-      <aside class="landing-v3__insight" aria-label="{{ _('Ejemplo de recomendación PATIA') }}">
-        <span><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></span>
-        <div><small>{{ _("Copiloto PATIA") }}</small><strong>{{ _("El café es tu producto con mayor movimiento esta semana.") }}</strong></div>
-      </aside>
       </div>
     </section>
 
@@ -219,7 +206,7 @@
           <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Suscripción mensual administrable") }}</li>
         </ul>
         <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba gratis") }}</a>
-        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">{{ _("Contratar PATIA Pro directamente") }}</a>
+        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">{{ _("Suscribirse por $199 MXN/mes") }}</a>
       </article>
     </section>
 
@@ -241,7 +228,7 @@
       <h2>{{ _("Tu negocio puede operar con más orden desde esta semana.") }}</h2>
       <p>{{ _("Prueba PATIA durante 14 días y reúne tu operación en un solo lugar.") }}</p>
       <div class="landing-v2__actions">
-        <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Crear mi cuenta") }}</a>
+        <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba gratis") }}</a>
         <a href="https://wa.me/522381186483" class="landing-v2__button landing-v2__button--secondary" target="_blank" rel="noopener noreferrer">{{ _("Hablar con PATIA") }}</a>
       </div>
     </section>
@@ -252,69 +239,30 @@
     <section class="landing-v4__demo-dialog" role="dialog" aria-modal="true" aria-labelledby="landing-demo-title">
       <header class="landing-v4__demo-header">
         <div>
-          <span>{{ _("PATIA en acción") }}</span>
-          <h2 id="landing-demo-title">{{ _("Del mostrador a una decisión clara.") }}</h2>
+          <span>{{ _("Demo de PATIA") }}</span>
+          <h2 id="landing-demo-title">{{ _("Conoce PATIA en funcionamiento") }}</h2>
         </div>
         <button type="button" class="landing-v4__demo-close" data-demo-close aria-label="{{ _('Cerrar demo') }}">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
       </header>
 
-      <div class="landing-v4__demo-stage">
-        <article class="landing-v4__demo-scene is-active" data-demo-scene="0">
-          <div class="landing-v4__demo-copy">
-            <span>01</span>
-            <h3>{{ _("Carga tu catálogo una sola vez.") }}</h3>
-            <p>{{ _("Agrega productos manualmente o importa tu archivo. PATIA reúne precios, costos y existencias en un inventario fácil de consultar.") }}</p>
-          </div>
-          <div class="landing-v4__catalog" aria-hidden="true">
-            <div class="landing-v4__mini-toolbar"><strong>{{ _("Inventario") }}</strong><span><i class="fa-solid fa-plus"></i> {{ _("Nuevo producto") }}</span></div>
-            <div class="landing-v4__product-row"><span class="landing-v4__product-icon"><i class="fa-solid fa-mug-hot"></i></span><div><strong>{{ _("Café molido") }}</strong><small>{{ "SKU CAF-01" }}</small></div><span><small>{{ _("Stock") }}</small><strong>24</strong></span><b>$145</b></div>
-            <div class="landing-v4__product-row"><span class="landing-v4__product-icon"><i class="fa-solid fa-cookie-bite"></i></span><div><strong>{{ _("Galletas artesanales") }}</strong><small>{{ "SKU GAL-08" }}</small></div><span><small>{{ _("Stock") }}</small><strong>8</strong></span><b>$68</b></div>
-            <div class="landing-v4__product-row"><span class="landing-v4__product-icon"><i class="fa-solid fa-bottle-water"></i></span><div><strong>{{ _("Agua mineral") }}</strong><small>{{ "SKU AGU-12" }}</small></div><span><small>{{ _("Stock") }}</small><strong>31</strong></span><b>$32</b></div>
-          </div>
-        </article>
-
-        <article class="landing-v4__demo-scene" data-demo-scene="1">
-          <div class="landing-v4__demo-copy">
-            <span>02</span>
-            <h3>{{ _("Registra una venta en segundos.") }}</h3>
-            <p>{{ _("Selecciona los productos y cómo pagó tu cliente. Al confirmar, PATIA descuenta las existencias y prepara el ticket.") }}</p>
-          </div>
-          <div class="landing-v4__sale" aria-hidden="true">
-            <div class="landing-v4__sale-success"><i class="fa-solid fa-check"></i><div><strong>{{ _("Venta registrada") }}</strong><small>{{ "TKT-000128" }}</small></div></div>
-            <div class="landing-v4__sale-line"><span>2 × {{ _("Café molido") }}</span><strong>$290</strong></div>
-            <div class="landing-v4__sale-line"><span>1 × {{ _("Galletas artesanales") }}</span><strong>$68</strong></div>
-            <div class="landing-v4__sale-total"><span>{{ _("Total") }}</span><strong>$358 {{ _("MXN") }}</strong></div>
-            <div class="landing-v4__sale-payment"><i class="fa-solid fa-credit-card"></i><span>{{ _("Pago con tarjeta registrado") }}</span></div>
-          </div>
-        </article>
-
-        <article class="landing-v4__demo-scene" data-demo-scene="2">
-          <div class="landing-v4__demo-copy">
-            <span>03</span>
-            <h3>{{ _("Termina el día sabiendo qué sigue.") }}</h3>
-            <p>{{ _("Consulta ventas, utilidad y productos por reabastecer. Tus decisiones parten de la operación que ya registraste.") }}</p>
-          </div>
-          <div class="landing-v4__decisions" aria-hidden="true">
-            <div class="landing-v4__decision-kpis">
-              <span><small>{{ _("Ventas de hoy") }}</small><strong>$4,860</strong></span>
-              <span><small>{{ _("Utilidad estimada") }}</small><strong>$1,742</strong></span>
-            </div>
-            <div class="landing-v4__decision-chart"><span style="--bar:45%"></span><span style="--bar:66%"></span><span style="--bar:52%"></span><span style="--bar:84%"></span><span style="--bar:73%"></span><span style="--bar:94%"></span></div>
-            <div class="landing-v4__decision-alert"><i class="fa-solid fa-box-open"></i><div><strong>{{ _("Galletas artesanales necesitan atención") }}</strong><small>{{ _("Quedan 6 unidades; es momento de revisar tu próximo pedido.") }}</small></div></div>
-          </div>
-        </article>
-      </div>
-
-      <footer class="landing-v4__demo-footer">
-        <div class="landing-v4__demo-controls" role="tablist" aria-label="{{ _('Pasos de la demo') }}">
-          <button type="button" class="is-active" data-demo-step="0" role="tab" aria-selected="true"><span>1</span>{{ _("Catálogo") }}</button>
-          <button type="button" data-demo-step="1" role="tab" aria-selected="false"><span>2</span>{{ _("Venta") }}</button>
-          <button type="button" data-demo-step="2" role="tab" aria-selected="false"><span>3</span>{{ _("Decisiones") }}</button>
+      {% set demo_video_available = config.get("PATIA_DEMO_VIDEO_AVAILABLE", false) %}
+      <div class="landing-v5__video-stage" data-video-available="{{ 'true' if demo_video_available else 'false' }}">
+        <video class="landing-v5__video" controls preload="metadata" playsinline data-demo-video {% if not demo_video_available %}hidden{% endif %}>
+          {% if demo_video_available %}
+          <source src="{{ url_for('static', filename='videos/patia-demo.mp4') }}" type="video/mp4">
+          {% else %}
+          <source data-src="{{ url_for('static', filename='videos/patia-demo.mp4') }}" type="video/mp4">
+          {% endif %}
+          {{ _("Tu navegador no puede reproducir este video.") }}
+        </video>
+        <div class="landing-v5__video-fallback" data-demo-fallback role="status" {% if demo_video_available %}hidden{% endif %}>
+          <span><i class="fa-solid fa-clapperboard" aria-hidden="true"></i></span>
+          <h3>{{ _("Demo en video próximamente") }}</h3>
+          <p>{{ _("Estamos preparando un recorrido breve para mostrarte cómo PATIA conecta inventario, ventas y reportes.") }}</p>
         </div>
-        <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Probar PATIA gratis") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-      </footer>
+      </div>
     </section>
   </div>
 
@@ -337,39 +285,19 @@
       const modal = document.querySelector('[data-demo-modal]');
       const openers = document.querySelectorAll('[data-demo-open]');
       const closers = modal?.querySelectorAll('[data-demo-close]') || [];
-      const steps = modal?.querySelectorAll('[data-demo-step]') || [];
-      const scenes = modal?.querySelectorAll('[data-demo-scene]') || [];
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      let active = 0;
-      let timer = null;
+      const video = modal?.querySelector('[data-demo-video]');
       let lastFocus = null;
-
-      const showScene = (index) => {
-        active = index;
-        scenes.forEach((scene, sceneIndex) => scene.classList.toggle('is-active', sceneIndex === index));
-        steps.forEach((step, stepIndex) => {
-          const selected = stepIndex === index;
-          step.classList.toggle('is-active', selected);
-          step.setAttribute('aria-selected', String(selected));
-        });
-      };
-
-      const startTimer = () => {
-        window.clearInterval(timer);
-        if (!reduceMotion) timer = window.setInterval(() => showScene((active + 1) % scenes.length), 5000);
-      };
 
       const openDemo = (event) => {
         lastFocus = event.currentTarget;
         modal.hidden = false;
         document.body.classList.add('landing-v4--demo-open');
-        showScene(0);
         modal.querySelector('[data-demo-close]').focus();
-        startTimer();
       };
 
       const closeDemo = () => {
-        window.clearInterval(timer);
+        video.pause();
+        video.currentTime = 0;
         modal.hidden = true;
         document.body.classList.remove('landing-v4--demo-open');
         lastFocus?.focus();
@@ -377,10 +305,6 @@
 
       openers.forEach((opener) => opener.addEventListener('click', openDemo));
       closers.forEach((closer) => closer.addEventListener('click', closeDemo));
-      steps.forEach((step, index) => step.addEventListener('click', () => {
-        showScene(index);
-        startTimer();
-      }));
 
       document.addEventListener('keydown', (event) => {
         if (modal.hidden) return;
@@ -396,16 +320,6 @@
             event.preventDefault();
             first.focus();
           }
-        }
-        if (event.key === 'ArrowRight') {
-          showScene((active + 1) % scenes.length);
-          steps[active].focus();
-          startTimer();
-        }
-        if (event.key === 'ArrowLeft') {
-          showScene((active - 1 + scenes.length) % scenes.length);
-          steps[active].focus();
-          startTimer();
         }
       });
     })();

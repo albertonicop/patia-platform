@@ -14,7 +14,11 @@ class PremiumPresentationTests(unittest.TestCase):
         landing = self.template("landing.html")
 
         self.assertIn("Tu negocio, bajo control. Todos los días.", landing)
-        self.assertIn("Ver demo de 60 segundos", landing)
+        self.assertIn("Ver demo", landing)
+        self.assertIn("videos/patia-demo.mp4", landing)
+        self.assertIn("Demo en video próximamente", landing)
+        self.assertNotIn("data-demo-scene", landing)
+        self.assertNotIn("Probar PATIA gratis", landing)
         self.assertIn("Menos decisiones a ciegas", landing)
         self.assertIn("Reportes completos", landing)
         self.assertIn("$199", landing)
