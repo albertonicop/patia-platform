@@ -13,7 +13,8 @@ class PremiumPresentationTests(unittest.TestCase):
     def test_landing_explains_a_concrete_business_outcome(self):
         landing = self.template("landing.html")
 
-        self.assertIn("Vende, controla tu inventario y entiende tu negocio", landing)
+        self.assertIn("Tu negocio, bajo control. Todos los días.", landing)
+        self.assertIn("Ver demo de 60 segundos", landing)
         self.assertIn("Menos decisiones a ciegas", landing)
         self.assertIn("Reportes completos", landing)
         self.assertIn("$199", landing)
@@ -53,7 +54,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=107", self.template(name), name)
+            self.assertIn("styles.css') }}?v=111", self.template(name), name)
 
 
 if __name__ == "__main__":

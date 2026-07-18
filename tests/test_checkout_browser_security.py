@@ -63,7 +63,7 @@ class CheckoutBrowserSecurityTests(unittest.TestCase):
         self.assertIn('name="csrf_token" value="{{ csrf_token() }}"', template)
         self.assertNotIn("preventDefault", template)
         self.assertNotIn("subscription-v2__checkout-form", app_script)
-        self.assertNotIn("preventDefault", app_script)
+        self.assertNotIn("create-checkout-session", app_script)
 
 
 if __name__ == "__main__":
