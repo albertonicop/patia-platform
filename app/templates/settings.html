@@ -65,6 +65,24 @@
       </div>
     </section>
 
+    <section class="card module-card-v2 settings-v2__section" aria-labelledby="timezone-info-title">
+      <header class="settings-v2__section-head">
+        <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-clock"></i></span>
+        <div><h3 id="timezone-info-title">{{ _("Zona horaria") }}</h3><p>{{ _("PATIA usa esta hora en tickets, ventas y reportes.") }}</p></div>
+      </header>
+      <div class="settings-v2__grid">
+        <div class="field-v2 settings-v2__wide">
+          <label for="business-timezone">{{ _("Zona horaria del negocio") }}</label>
+          <select id="business-timezone" name="timezone">
+            {% for timezone_value, timezone_label in timezone_choices %}
+              <option value="{{ timezone_value }}"{% if user.timezone == timezone_value %} selected{% endif %}>{{ timezone_label }} — {{ timezone_value }}</option>
+            {% endfor %}
+          </select>
+          <small>{{ _("Cambiarla ajusta únicamente cómo se muestran y agrupan las fechas; no modifica tus ventas guardadas.") }}</small>
+        </div>
+      </div>
+    </section>
+
     <section class="card module-card-v2 settings-v2__section" aria-labelledby="tax-info-title">
       <header class="settings-v2__section-head">
         <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-file-invoice"></i></span>

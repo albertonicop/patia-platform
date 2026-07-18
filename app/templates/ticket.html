@@ -14,7 +14,7 @@
       <header class="ticket-print-v2__business">
         <h1>{{ user.company_name or _("Mi negocio") }}</h1>
         {% if business_address %}<p>{{ business_address }}</p>{% endif %}
-        {% if user.phone %}<p>Tel. {{ user.phone }}</p>{% endif %}
+        {% if business_phone %}<p>Tel. {{ business_phone }}</p>{% endif %}
         {% if user.rfc %}<p>RFC: {{ user.rfc }}</p>{% endif %}
       </header>
 
@@ -51,7 +51,6 @@
 
       <footer class="ticket-print-v2__footer">
         <strong>{{ _("Gracias por su compra") }}</strong>
-        <small>{{ _("Ticket") }}: {{ folio }}</small>
         <small>{{ _("Powered by PATIA") }}</small>
       </footer>
     </article>

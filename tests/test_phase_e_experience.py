@@ -80,9 +80,9 @@ class PhaseEExperienceTests(unittest.TestCase):
         self.login_user(pro=True)
         html = self.client.get("/reports").get_data(as_text=True)
 
-        self.assertIn("Aún no hay ventas para analizar", html)
-        self.assertNotIn('id="categoryChart"', html)
-        self.assertNotIn("window.catLabels", html)
+        self.assertIn("Aún no hay ventas en este periodo", html)
+        self.assertNotIn('id="reportTrendChart"', html)
+        self.assertNotIn("window.reportAnalytics", html)
         self.assertNotIn("```", html)
 
     def test_reports_with_sales_keep_chart_and_existing_data(self):
@@ -94,14 +94,15 @@ class PhaseEExperienceTests(unittest.TestCase):
         db.session.commit()
         html = self.client.get("/reports").get_data(as_text=True)
 
-        self.assertIn('id="categoryChart"', html)
-        self.assertIn("window.catLabels", html)
-        self.assertIn("Bebidas", html)
+        self.assertIn('id="reportTrendChart"', html)
+        self.assertIn('id="reportPaymentsChart"', html)
+        self.assertIn("window.reportAnalytics", html)
+        self.assertIn("Producto reporte", html)
 
     def test_empty_recommendations_have_useful_state(self):
         self.login_user(pro=True)
         html = self.client.get("/reports").get_data(as_text=True)
-        self.assertIn("Todavía no hay recomendaciones", html)
+        self.assertIn("Aún no hay ventas en este periodo", html)
 
     def test_navigation_marks_active_section_and_has_mobile_toggle(self):
         self.login_user()

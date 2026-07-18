@@ -2,83 +2,200 @@
 {% block title %}{{ _("Reportes IA") }}{% endblock %}
 
 {% block content %}
-
-<div class="reports-v2">
-<section class="grid metrics reports-v2__metrics">
-  <div class="card metric">
-    <span>{{ _("Utilidad estimada") }}</span>
-    <strong>{{ profit|money }}</strong>
-    <small>{{ _("Ventas de los últimos 7 días menos el costo registrado de las unidades vendidas.") }}</small>
-  </div>
-
-  <div class="card metric">
-    <span>{{ _("Productos activos") }}</span>
-    <strong>{{ total_products }}</strong>
-  </div>
-
-  <div class="card metric">
-    <span>{{ _("Alertas") }}</span>
-    <strong>{{ alerts|length }}</strong>
-  </div>
-
-  <div class="card metric">
-    <span>{{ _("Valor inventario") }}</span>
-    <strong>{{ inventory_value|money }}</strong>
-  </div>
-</section>
-
-<section class="reports-grid">
-
-  <div class="card reports-chart-card">
-    <h3>{{ _("Ventas por categoría") }}</h3>
-    {% if category_sales %}
-<div class="reports-chart-box">
-  <canvas id="categoryChart"></canvas>
-</div>
-    {% else %}
-      <div class="reports-v2__empty module-empty-v2">
-        <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
-        <h4>{{ _("Aún no hay ventas para analizar") }}</h4>
-        <p>{{ _("Después de registrar ventas, aquí verás qué categorías generan más ingresos.") }}</p>
-        <a class="btn" href="{{ url_for('main.sell') }}">{{ _("Registrar una venta") }}</a>
-      </div>
-    {% endif %}
-  </div>
-
-  <div class="card reports-recommendations-card">
-    <h3>{{ _("Recomendaciones para vender más") }}</h3>
-
-<div class="reports-recommendations">
-  {% if recommendations %}
-  {% for r in recommendations %}
-  <div class="reports-recommendation">
-    <div class="reports-icon">
-      <i class="fa-solid fa-arrow-trend-up"></i>
+<div class="reports-v3">
+  <header class="reports-v3__intro">
+    <div>
+      <span>{{ _("Análisis del negocio") }}</span>
+      <h2>{{ _("Reportes ejecutivos") }}</h2>
+      <p>{{ _("Consulta ventas, utilidad y desempeño usando los costos guardados al momento de cada venta.") }}</p>
     </div>
+    <p class="reports-v3__range">
+      <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+      {{ report_period.start_date.strftime("%d/%m/%Y") }} — {{ report_period.end_date.strftime("%d/%m/%Y") }}
+    </p>
+  </header>
 
-    <div class="reports-text">
-      {{ r }}
-    </div>
-  </div>
-  {% endfor %}
-  {% else %}
-    <div class="reports-v2__empty reports-v2__empty--compact module-empty-v2">
-      <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
-      <h4>{{ _("Todavía no hay recomendaciones") }}</h4>
-      <p>{{ _("Registra ventas y movimientos de inventario para recibir sugerencias basadas en tu operación.") }}</p>
+  {% set show_custom_period = report_period.period == "custom" or request.args.get("period") == "custom" or request.args.get("show_custom") == "1" %}
+  <nav class="reports-v3__periods" aria-label="{{ _('Periodo del reporte') }}">
+    {% for value, label in [
+      ("today", _("Hoy")),
+      ("7d", _("Últimos 7 días")),
+      ("30d", _("Últimos 30 días")),
+      ("this_month", _("Este mes")),
+      ("previous_month", _("Mes anterior"))
+    ] %}
+      <a href="{{ url_for('main.reports', period=value) }}"
+         {% if report_period.period == value %}class="is-active" aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+    <a href="{{ url_for('main.reports', show_custom=1) }}#custom-period"
+       data-custom-period-toggle
+       aria-controls="custom-period"
+       aria-expanded="{{ 'true' if show_custom_period else 'false' }}"
+       {% if show_custom_period %}class="is-active" aria-current="page"{% endif %}>{{ _("Rango personalizado") }}</a>
+  </nav>
+
+  <form id="custom-period" class="reports-v3__custom-period" method="GET" action="{{ url_for('main.reports') }}"
+        {% if not show_custom_period %}hidden{% endif %}>
+    <input type="hidden" name="period" value="custom">
+    <label for="report-start">
+      {{ _("Desde") }}
+      <input id="report-start" type="date" name="start" value="{{ report_period.custom_start }}"
+             max="{{ report_period.end_date.isoformat() }}" required>
+    </label>
+    <label for="report-end">
+      {{ _("Hasta") }}
+      <input id="report-end" type="date" name="end" value="{{ report_period.custom_end }}"
+             max="{{ report_period.end_date.isoformat() }}" required>
+    </label>
+    <button class="btn" type="submit">{{ _("Aplicar rango") }}</button>
+  </form>
+
+  {% if report_period.error %}
+    <div class="reports-v3__notice reports-v3__notice--warning" role="alert">
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+      <p>{{ report_period.error }}</p>
     </div>
   {% endif %}
-</div>
-  </div>
 
-</section>
+  {% if unknown_cost_lines %}
+    <div class="reports-v3__notice" role="status">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <p>{{ _("Agrega el costo del producto para incluirlo en los cálculos de utilidad y margen.") }}</p>
+    </div>
+  {% endif %}
+
+  <section class="reports-v3__kpis" aria-label="{{ _('Indicadores principales') }}">
+    <article class="reports-v3__kpi">
+      <span>{{ _("Ventas totales") }}</span>
+      <strong>{{ report_kpis.sales|money }}</strong>
+      <small>{{ _("Ingresos registrados en el periodo") }}</small>
+    </article>
+    <article class="reports-v3__kpi reports-v3__kpi--violet">
+      <span>{{ _("Utilidad") }}</span>
+      <strong>{{ report_kpis.profit|money }}</strong>
+      <small>{{ _("Solo ventas con costo histórico conocido") }}</small>
+    </article>
+    <article class="reports-v3__kpi reports-v3__kpi--mint">
+      <span>{{ _("Margen") }}</span>
+      <strong>{% if report_kpis.margin is not none %}{{ "%.1f"|format(report_kpis.margin) }}%{% else %}—{% endif %}</strong>
+      <small>{{ _("Calculado sobre ingresos con costo conocido") }}</small>
+    </article>
+    <article class="reports-v3__kpi">
+      <span>{{ _("Ticket promedio") }}</span>
+      <strong>{{ report_kpis.average_ticket|money }}</strong>
+      <small>{{ _("Venta promedio por ticket") }}</small>
+    </article>
+    <article class="reports-v3__kpi">
+      <span>{{ _("Número de tickets") }}</span>
+      <strong>{{ report_kpis.ticket_count }}</strong>
+      <small>{{ _("Operaciones registradas") }}</small>
+    </article>
+  </section>
+
+  {% if report_kpis.ticket_count %}
+    <section class="reports-v3__primary-grid">
+      <article class="card reports-v3__panel reports-v3__trend">
+        <header class="reports-v3__panel-head">
+          <div><span>{{ _("Evolución diaria") }}</span><h3>{{ _("Ventas vs Utilidad") }}</h3></div>
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+        </header>
+        <div class="reports-v3__chart reports-v3__chart--line">
+          <canvas id="reportTrendChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card reports-v3__panel reports-v3__payments">
+        <header class="reports-v3__panel-head">
+          <div><span>{{ _("Composición") }}</span><h3>{{ _("Métodos de pago") }}</h3></div>
+          <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+        </header>
+        <div class="reports-v3__payment-layout">
+          <div class="reports-v3__chart reports-v3__chart--donut">
+            <canvas id="reportPaymentsChart"></canvas>
+          </div>
+          <ul class="reports-v3__payment-list">
+            {% for payment in payments_report %}
+              <li>
+                <span class="reports-v3__payment-dot reports-v3__payment-dot--{{ payment.key }}" aria-hidden="true"></span>
+                <div><strong>{{ payment.label }}</strong><small>{{ payment.tickets }} {{ _("tickets") }} · {{ "%.1f"|format(payment.percentage) }}%</small></div>
+                <b>{{ payment.amount|money }}</b>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <section class="reports-v3__rankings">
+      <article class="card reports-v3__panel">
+        <header class="reports-v3__panel-head">
+          <div><span>{{ _("Volumen") }}</span><h3>{{ _("Productos más vendidos") }}</h3></div>
+        </header>
+        {% if top_selling_report %}
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Unidades") }}</th><th>{{ _("Ingresos") }}</th></tr></thead>
+              <tbody>
+                {% for product in top_selling_report %}
+                  <tr><td>{{ product.name }}</td><td>{{ product.units }}</td><td>{{ product.revenue|money }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </article>
+
+      <article class="card reports-v3__panel">
+        <header class="reports-v3__panel-head">
+          <div><span>{{ _("Rentabilidad") }}</span><h3>{{ _("Productos más rentables") }}</h3></div>
+        </header>
+        {% if profitable_products_report %}
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Unidades") }}</th><th>{{ _("Ingresos") }}</th><th>{{ _("Costo") }}</th><th>{{ _("Utilidad") }}</th><th>{{ _("Margen") }}</th></tr></thead>
+              <tbody>
+                {% for product in profitable_products_report %}
+                  <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.units }}</td>
+                    <td>{{ product.revenue|money }}</td>
+                    {% if product.cost is none %}
+                      <td colspan="3"><span class="reports-v3__unavailable">{{ _("No disponible") }}</span></td>
+                    {% else %}
+                      <td>{{ product.cost|money }}</td>
+                      <td>{{ product.profit|money }}</td>
+                      <td>{{ "%.1f"|format(product.margin) }}%</td>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </article>
+    </section>
+  {% else %}
+    <section class="card reports-v3__empty module-empty-v2">
+      <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+      <h3>{{ _("Aún no hay ventas en este periodo") }}</h3>
+      <p>{{ _("Prueba otro periodo o registra una venta para comenzar a analizar el desempeño de tu negocio.") }}</p>
+      <a class="btn" href="{{ url_for('main.sell') }}">{{ _("Registrar una venta") }}</a>
+    </section>
+  {% endif %}
 </div>
 
-{% if category_sales %}
+{% if report_kpis.ticket_count %}
 <script>
-window.catLabels = {{ category_sales | map(attribute='category') | list | tojson }};
-window.catValues = {{ category_sales | map(attribute='revenue') | list | tojson }};
+window.reportAnalytics = {
+  daily: {{ daily_report|tojson }},
+  payments: {{ payments_report|tojson }},
+  labels: {
+    sales: {{ _("Ventas")|tojson }},
+    profit: {{ _("Utilidad")|tojson }},
+    amount: {{ _("Monto")|tojson }},
+    tickets: {{ _("Tickets")|tojson }}
+  }
+};
 </script>
 {% endif %}
-
 {% endblock %}

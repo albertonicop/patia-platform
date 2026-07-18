@@ -46,6 +46,7 @@ CURRENT_USER_COLUMNS = {
     "rfc",
     "tax_regime",
     "preferred_language",
+    "timezone",
     "next_ticket_number",
 }
 
@@ -317,7 +318,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260717_07",
+                "20260717_08",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -327,13 +328,26 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                     expected_count,
                 )
             users = connection.execute(
-                sa.text('SELECT id, email, company_name FROM "user" ORDER BY id')
+                sa.text(
+                    'SELECT id, email, company_name, timezone '
+                    'FROM "user" ORDER BY id'
+                )
             ).all()
             self.assertEqual(
                 users,
                 [
-                    (1, "first@example.test", "First Store"),
-                    (2, "second@example.test", "Second Store"),
+                    (
+                        1,
+                        "first@example.test",
+                        "First Store",
+                        "America/Mexico_City",
+                    ),
+                    (
+                        2,
+                        "second@example.test",
+                        "Second Store",
+                        "America/Mexico_City",
+                    ),
                 ],
             )
             migrated_sale = connection.execute(
@@ -406,7 +420,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260717_07",
+                "20260717_08",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),

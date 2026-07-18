@@ -17,6 +17,14 @@ from sqlalchemy.orm import selectinload
 from urllib.parse import urljoin, urlparse
 from . import csrf, db, limiter
 from .models import Product, Sale, SalesTicket, StripeWebhookEvent, Supplier, User
+from .timezones import (
+    DEFAULT_TIMEZONE,
+    TIMEZONE_CHOICES,
+    local_date_bounds_utc,
+    local_today,
+    safe_timezone_name,
+    utc_to_local,
+)
 
 main = Blueprint("main", __name__)
 SUPPORTED_LANGUAGES = {"es", "en"}
@@ -148,6 +156,27 @@ def _payment_method_label(value):
     return gettext(PAYMENT_METHOD_LABELS.get(value, "No especificado"))
 
 
+def _ticket_business_value(value):
+    """Hide empty and known placeholder business data from customer tickets."""
+    cleaned = str(value or "").strip()
+    normalized = re.sub(r"\s+", " ", cleaned).casefold()
+    if normalized in {
+        "",
+        "-",
+        "n/a",
+        "na",
+        "no configurado",
+        "no configurada",
+        "dirección no configurada",
+        "direccion no configurada",
+    }:
+        return ""
+    compact = re.sub(r"\D", "", cleaned)
+    if compact and set(compact) == {"0"}:
+        return ""
+    return cleaned
+
+
 def _subscription_status_label(value):
     labels = {
         "active": gettext("Activa"),
@@ -166,7 +195,21 @@ def _translated_payment_method_labels():
     return {key: gettext(label) for key, label in PAYMENT_METHOD_LABELS.items()}
 
 
-def _group_sales_by_ticket(sales, *, limit=None):
+def _translated_timezone_choices():
+    labels = {
+        "America/Mexico_City": gettext("Ciudad de México"),
+        "America/Cancun": gettext("Cancún"),
+        "America/Tijuana": gettext("Tijuana"),
+        "America/Hermosillo": gettext("Hermosillo"),
+        "America/Chihuahua": gettext("Chihuahua"),
+    }
+    return [
+        (timezone_name, labels[timezone_name])
+        for timezone_name, _label in TIMEZONE_CHOICES
+    ]
+
+
+def _group_sales_by_ticket(sales, *, limit=None, timezone_name=DEFAULT_TIMEZONE):
     grouped = {}
     for sale in sales:
         key = _sale_ticket_key(sale)
@@ -191,6 +234,10 @@ def _group_sales_by_ticket(sales, *, limit=None):
     result = list(grouped.values())
     for group in result:
         group["folio"] = _short_sale_folio(group["sales"])
+        group["created_at_local"] = utc_to_local(
+            group["created_at"],
+            timezone_name,
+        )
     result.sort(key=lambda group: group["created_at"], reverse=True)
     return result[:limit] if limit else result
 
@@ -725,11 +772,23 @@ def money_filter(value):
     return money(value or 0)
 
 
-def analytics():
-    today = datetime.utcnow().date()
-    start = datetime.combine(today, datetime.min.time())
-    week_start = datetime.utcnow() - timedelta(days=7)
-    user_id = session.get("user_id")
+def analytics(user=None):
+    user = user or current_user()
+    user_id = user.id if user else session.get("user_id")
+    timezone_name = safe_timezone_name(
+        user.timezone if user else DEFAULT_TIMEZONE
+    )
+    today = local_today(timezone_name)
+    start, tomorrow = local_date_bounds_utc(
+        today,
+        today + timedelta(days=1),
+        timezone_name,
+    )
+    week_start, week_end = local_date_bounds_utc(
+        today - timedelta(days=6),
+        today + timedelta(days=1),
+        timezone_name,
+    )
 
     products = Product.query.filter_by(user_id=user_id, is_active=True).all()
 
@@ -745,12 +804,14 @@ def analytics():
 
     today_sales = db.session.query(func.sum(Sale.total)).filter(
         Sale.user_id == user_id,
-        Sale.created_at >= start
+        Sale.created_at >= start,
+        Sale.created_at < tomorrow,
     ).scalar() or 0
 
     week_sales = db.session.query(func.sum(Sale.total)).filter(
         Sale.user_id == user_id,
-        Sale.created_at >= week_start
+        Sale.created_at >= week_start,
+        Sale.created_at < week_end,
     ).scalar() or 0
 
     profit = (
@@ -768,6 +829,7 @@ def analytics():
         .filter(
             Sale.user_id == user_id,
             Sale.created_at >= week_start,
+            Sale.created_at < week_end,
         )
         .scalar() or 0
     )
@@ -796,6 +858,7 @@ def analytics():
         .filter(
             Sale.user_id == user_id,
             Sale.created_at >= week_start,
+            Sale.created_at < week_end,
         )
         .group_by(Sale.product_id)
         .all()
@@ -884,6 +947,298 @@ def analytics():
     )
 
 
+REPORT_PERIODS = {
+    "today",
+    "7d",
+    "30d",
+    "this_month",
+    "previous_month",
+    "custom",
+}
+
+
+def _parse_report_period(
+    args,
+    *,
+    today=None,
+    timezone_name=DEFAULT_TIMEZONE,
+    now_utc=None,
+):
+    """Return a validated, half-open date interval for report queries."""
+    timezone_name = safe_timezone_name(timezone_name)
+    today = today or local_today(timezone_name, now_utc=now_utc)
+    period = (args.get("period") or "7d").strip()
+    error = None
+    custom_start = (args.get("start") or "").strip()
+    custom_end = (args.get("end") or "").strip()
+
+    if period not in REPORT_PERIODS:
+        period = "7d"
+        error = gettext("El periodo solicitado no es válido. Mostramos los últimos 7 días.")
+
+    if period == "today":
+        start_date = end_date = today
+    elif period == "30d":
+        start_date, end_date = today - timedelta(days=29), today
+    elif period == "this_month":
+        start_date, end_date = today.replace(day=1), today
+    elif period == "previous_month":
+        current_month = today.replace(day=1)
+        end_date = current_month - timedelta(days=1)
+        start_date = end_date.replace(day=1)
+    elif period == "custom":
+        try:
+            start_date = datetime.strptime(custom_start, "%Y-%m-%d").date()
+            end_date = datetime.strptime(custom_end, "%Y-%m-%d").date()
+            if start_date > end_date:
+                raise ValueError("start_after_end")
+            if (end_date - start_date).days > 365:
+                raise ValueError("range_too_long")
+        except (TypeError, ValueError) as exc:
+            period = "7d"
+            start_date, end_date = today - timedelta(days=6), today
+            if str(exc) == "start_after_end":
+                error = gettext("La fecha inicial no puede ser posterior a la fecha final.")
+            elif str(exc) == "range_too_long":
+                error = gettext("El rango personalizado no puede superar 366 días.")
+            else:
+                error = gettext("Escribe fechas válidas. Mostramos los últimos 7 días.")
+    else:
+        start_date, end_date = today - timedelta(days=6), today
+
+    start_at, end_before = local_date_bounds_utc(
+        start_date,
+        end_date + timedelta(days=1),
+        timezone_name,
+    )
+    return {
+        "period": period,
+        "start_date": start_date,
+        "end_date": end_date,
+        "start_at": start_at,
+        "end_before": end_before,
+        "custom_start": custom_start,
+        "custom_end": custom_end,
+        "error": error,
+    }
+
+
+def _report_analytics(
+    user_id,
+    period,
+    *,
+    timezone_name=DEFAULT_TIMEZONE,
+):
+    timezone_name = safe_timezone_name(timezone_name)
+    start_at = period["start_at"]
+    end_before = period["end_before"]
+    sale_filters = (
+        Sale.user_id == user_id,
+        Sale.created_at >= start_at,
+        Sale.created_at < end_before,
+    )
+    known_cost = Sale.unit_cost.is_not(None)
+    line_profit = Sale.total - (Sale.unit_cost * Sale.quantity)
+
+    totals = (
+        db.session.query(
+            func.coalesce(func.sum(Sale.total), 0).label("sales"),
+            func.coalesce(
+                func.sum(case((known_cost, line_profit), else_=0)),
+                0,
+            ).label("profit"),
+            func.coalesce(
+                func.sum(case((known_cost, Sale.total), else_=0)),
+                0,
+            ).label("known_revenue"),
+            func.coalesce(
+                func.sum(case((Sale.unit_cost.is_(None), 1), else_=0)),
+                0,
+            ).label("unknown_cost_lines"),
+        )
+        .filter(*sale_filters)
+        .one()
+    )
+    ticket_count = (
+        db.session.query(
+            func.count(func.distinct(Sale.ticket_id))
+            + func.coalesce(
+                func.sum(case((Sale.ticket_id.is_(None), 1), else_=0)),
+                0,
+            )
+        )
+        .filter(*sale_filters)
+        .scalar()
+        or 0
+    )
+    total_sales = float(totals.sales or 0)
+    known_profit = float(totals.profit or 0)
+    known_revenue = float(totals.known_revenue or 0)
+
+    if db.session.get_bind().dialect.name == "postgresql":
+        hour_value = func.date_trunc("hour", Sale.created_at)
+    else:
+        hour_value = func.strftime(
+            "%Y-%m-%d %H:00:00",
+            Sale.created_at,
+        )
+    daily_rows = (
+        db.session.query(
+            hour_value.label("hour"),
+            func.sum(Sale.total).label("sales"),
+            func.sum(case((known_cost, line_profit), else_=0)).label("profit"),
+        )
+        .filter(*sale_filters)
+        .group_by(hour_value)
+        .order_by(hour_value)
+        .all()
+    )
+    daily_lookup = {}
+    for row in daily_rows:
+        hour = row.hour
+        if isinstance(hour, str):
+            hour = datetime.fromisoformat(hour)
+        day_key = utc_to_local(hour, timezone_name).date().isoformat()
+        sales_value, profit_value = daily_lookup.get(day_key, (0, 0))
+        daily_lookup[day_key] = (
+            sales_value + float(row.sales or 0),
+            profit_value + float(row.profit or 0),
+        )
+    daily = []
+    cursor = period["start_date"]
+    while cursor <= period["end_date"]:
+        sales_value, profit_value = daily_lookup.get(cursor.isoformat(), (0, 0))
+        daily.append({
+            "date": cursor.isoformat(),
+            "sales": round(sales_value, 2),
+            "profit": round(profit_value, 2),
+        })
+        cursor += timedelta(days=1)
+
+    payment_key = func.coalesce(
+        SalesTicket.payment_method,
+        Sale.payment_method,
+        "other",
+    )
+    payment_rows = (
+        db.session.query(
+            payment_key.label("method"),
+            func.sum(Sale.total).label("amount"),
+            (
+                func.count(func.distinct(Sale.ticket_id))
+                + func.coalesce(
+                    func.sum(case((Sale.ticket_id.is_(None), 1), else_=0)),
+                    0,
+                )
+            ).label("tickets"),
+        )
+        .select_from(Sale)
+        .outerjoin(SalesTicket, Sale.sales_ticket_id == SalesTicket.id)
+        .filter(*sale_filters)
+        .group_by(payment_key)
+        .all()
+    )
+    payment_by_key = {
+        row.method: {
+            "amount": float(row.amount or 0),
+            "tickets": int(row.tickets or 0),
+        }
+        for row in payment_rows
+    }
+    payments = []
+    for method in PAYMENT_METHOD_LABELS:
+        item = payment_by_key.get(method, {"amount": 0, "tickets": 0})
+        payments.append({
+            "key": method,
+            "label": _payment_method_label(method),
+            "amount": round(item["amount"], 2),
+            "tickets": item["tickets"],
+            "percentage": round(
+                item["amount"] / total_sales * 100,
+                1,
+            ) if total_sales else 0,
+        })
+
+    top_selling = (
+        db.session.query(
+            Product.name.label("name"),
+            func.sum(Sale.quantity).label("units"),
+            func.sum(Sale.total).label("revenue"),
+        )
+        .join(Sale, Sale.product_id == Product.id)
+        .filter(*sale_filters, Product.user_id == user_id)
+        .group_by(Product.id, Product.name)
+        .order_by(func.sum(Sale.quantity).desc(), Product.name)
+        .limit(10)
+        .all()
+    )
+
+    unknown_lines = func.sum(
+        case((Sale.unit_cost.is_(None), 1), else_=0)
+    )
+    product_profit = func.sum(
+        case((known_cost, line_profit), else_=0)
+    )
+    profitable_rows = (
+        db.session.query(
+            Product.name.label("name"),
+            func.sum(Sale.quantity).label("units"),
+            func.sum(Sale.total).label("revenue"),
+            func.sum(
+                case(
+                    (known_cost, Sale.unit_cost * Sale.quantity),
+                    else_=0,
+                )
+            ).label("cost"),
+            product_profit.label("profit"),
+            unknown_lines.label("unknown_lines"),
+        )
+        .join(Sale, Sale.product_id == Product.id)
+        .filter(*sale_filters, Product.user_id == user_id)
+        .group_by(Product.id, Product.name)
+        .order_by(unknown_lines, product_profit.desc(), Product.name)
+        .limit(10)
+        .all()
+    )
+    profitable_products = []
+    for row in profitable_rows:
+        revenue = float(row.revenue or 0)
+        has_unknown_cost = bool(row.unknown_lines)
+        profit = None if has_unknown_cost else float(row.profit or 0)
+        profitable_products.append({
+            "name": row.name,
+            "units": int(row.units or 0),
+            "revenue": revenue,
+            "cost": None if has_unknown_cost else float(row.cost or 0),
+            "profit": profit,
+            "margin": (
+                round(profit / revenue * 100, 1)
+                if profit is not None and revenue
+                else None
+            ),
+        })
+
+    return {
+        "report_period": period,
+        "report_kpis": {
+            "sales": total_sales,
+            "profit": known_profit,
+            "margin": (
+                round(known_profit / known_revenue * 100, 1)
+                if known_revenue
+                else None
+            ),
+            "average_ticket": total_sales / ticket_count if ticket_count else 0,
+            "ticket_count": int(ticket_count),
+        },
+        "unknown_cost_lines": int(totals.unknown_cost_lines or 0),
+        "daily_report": daily,
+        "payments_report": payments,
+        "top_selling_report": top_selling,
+        "profitable_products_report": profitable_products,
+    }
+
+
 @main.route("/")
 def dashboard():
     user = current_user()
@@ -892,7 +1247,7 @@ def dashboard():
         session.clear()
         session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
         return render_template("landing.html")
-    dashboard_data = analytics()
+    dashboard_data = analytics(user)
     has_basic_data = all(
         (user.company_name, user.phone, user.city, user.state)
     )
@@ -1465,7 +1820,11 @@ def sell():
         .order_by(Sale.created_at.desc(), Sale.id.desc())
         .all()
     )
-    sale_groups = _group_sales_by_ticket(sales, limit=12)
+    sale_groups = _group_sales_by_ticket(
+        sales,
+        limit=12,
+        timezone_name=user.timezone,
+    )
     products = Product.query.filter_by(
         user_id=session["user_id"],
         is_active=True,
@@ -1636,7 +1995,20 @@ def reports():
     if not user:
         return redirect(url_for("main.login"))
     if user.email == "albertonicopat@gmail.com" or has_pro_access(user):
-        return render_template("reports.html", user=user, **analytics())
+        timezone_name = safe_timezone_name(user.timezone)
+        report_period = _parse_report_period(
+            request.args,
+            timezone_name=timezone_name,
+        )
+        return render_template(
+            "reports.html",
+            user=user,
+            **_report_analytics(
+                user.id,
+                report_period,
+                timezone_name=timezone_name,
+            ),
+        )
     return redirect(url_for("main.subscribe"))
 
 
@@ -2052,6 +2424,14 @@ def subscription():
         subscription_info=subscription_info,
         has_paid_access=has_pro_access(user),
         subscription_status_label=_subscription_status_label(user.subscription_status),
+        current_period_end_local=utc_to_local(
+            user.current_period_end,
+            user.timezone,
+        ),
+        next_payment_attempt_local=utc_to_local(
+            user.next_payment_attempt,
+            user.timezone,
+        ),
     )
 
 
@@ -2342,10 +2722,15 @@ def settings():
         user.state = request.form.get("state", "").strip()
         user.postal_code = request.form.get("postal_code", "").strip()
         user.phone = request.form.get("phone", "").strip()
+        user.timezone = safe_timezone_name(request.form.get("timezone"))
         db.session.commit()
         flash("Configuración guardada.", "success")
         return redirect(url_for("main.settings"))
-    return render_template("settings.html", user=user)
+    return render_template(
+        "settings.html",
+        user=user,
+        timezone_choices=_translated_timezone_choices(),
+    )
 
 
 @main.route("/receipt/<int:sale_id>")
@@ -2409,12 +2794,16 @@ def ticket(ticket_ref):
         if not sales:
             abort(404)
 
-    address_parts = [part for part in (
-        user.address,
-        user.city,
-        user.state,
-        user.postal_code,
-    ) if part]
+    address_parts = [
+        cleaned
+        for cleaned in (
+            _ticket_business_value(user.address),
+            _ticket_business_value(user.city),
+            _ticket_business_value(user.state),
+            _ticket_business_value(user.postal_code),
+        )
+        if cleaned
+    ]
     return render_template(
         "ticket.html",
         user=user,
@@ -2424,12 +2813,16 @@ def ticket(ticket_ref):
         ticket_total=sum(sale.total for sale in sales),
         ticket_subtotal=sum(sale.total for sale in sales),
         item_count=sum(sale.quantity for sale in sales),
-        ticket_created_at=min(sale.created_at for sale in sales),
+        ticket_created_at=utc_to_local(
+            min(sale.created_at for sale in sales),
+            user.timezone,
+        ),
         payment_method=_payment_method_label(
             sales[0].sales_ticket.payment_method
             if sales[0].sales_ticket
             else sales[0].payment_method
         ),
         business_address=", ".join(address_parts),
+        business_phone=_ticket_business_value(user.phone),
         auto_print=request.args.get("print") == "1",
     )

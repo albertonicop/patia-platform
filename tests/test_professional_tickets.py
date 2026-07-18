@@ -113,6 +113,23 @@ class ProfessionalTicketTests(unittest.TestCase):
         self.assertIn("XAXX010101000", html)
         self.assertNotIn("Código postal:", html)
 
+    def test_placeholder_business_data_is_hidden_and_folio_is_not_repeated_in_footer(self):
+        self.owner.address = "Dirección no configurada"
+        self.owner.city = "000"
+        self.owner.state = "No configurado"
+        self.owner.postal_code = "00000"
+        self.owner.phone = "000-000-0000"
+        db.session.commit()
+        ticket_id, _ = self.grouped_sale()
+
+        html = self.client.get(f"/ticket/{ticket_id}").get_data(as_text=True)
+
+        self.assertNotIn("Dirección no configurada", html)
+        self.assertNotIn("000-000-0000", html)
+        self.assertNotIn("Ticket:", html)
+        self.assertIn("Gracias por su compra", html)
+        self.assertIn("Powered by PATIA", html)
+
     def test_ticket_has_print_pdf_actions_and_thermal_styles(self):
         ticket_id, _ = self.grouped_sale()
         html = self.client.get(f"/ticket/{ticket_id}").get_data(as_text=True)

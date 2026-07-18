@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-17 17:19-0600\n"
+"POT-Creation-Date: 2026-07-17 18:52-0600\n"
 "PO-Revision-Date: 2026-07-17 11:53-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,172 +18,192 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app/routes.py:83
+#: app/routes.py:91
 msgid "Tu periodo de prueba terminó. Activa PATIA Pro para continuar."
 msgstr "Your trial period is over. Activate PATIA Pro to continue."
 
-#: app/routes.py:153
+#: app/routes.py:182
 msgid "Activa"
 msgstr "Active"
 
-#: app/routes.py:154 app/templates/admin.html:30
+#: app/routes.py:183 app/templates/admin.html:30
 msgid "En prueba"
 msgstr "On test"
 
-#: app/routes.py:155
+#: app/routes.py:184
 msgid "Pago pendiente"
 msgstr "Payment pending"
 
-#: app/routes.py:156
+#: app/routes.py:185
 msgid "Sin pagar"
 msgstr "Unpaid"
 
-#: app/routes.py:157
+#: app/routes.py:186
 msgid "Cancelada"
 msgstr "Canceled"
 
-#: app/routes.py:158
+#: app/routes.py:187
 msgid "Incompleta"
 msgstr "Incomplete"
 
-#: app/routes.py:159
+#: app/routes.py:188
 msgid "Incompleta y vencida"
 msgstr "Incomplete and expired"
 
-#: app/routes.py:160
+#: app/routes.py:189
 msgid "Pausada"
 msgstr "Paused"
 
-#: app/routes.py:162
+#: app/routes.py:191
 msgid "Sin suscripción"
 msgstr "No subscription"
 
-#: app/routes.py:404
+#: app/routes.py:200
+msgid "Ciudad de México"
+msgstr "Mexico City"
+
+#: app/routes.py:201
+msgid "Cancún"
+msgstr "Cancun"
+
+#: app/routes.py:202
+msgid "Tijuana"
+msgstr "Tijuana"
+
+#: app/routes.py:203
+msgid "Hermosillo"
+msgstr "Hermosillo"
+
+#: app/routes.py:204
+msgid "Chihuahua"
+msgstr "Chihuahua"
+
+#: app/routes.py:451
 msgid "Completa todos los campos obligatorios."
 msgstr "Complete all required fields."
 
-#: app/routes.py:407 app/routes.py:408 app/routes.py:419 app/routes.py:420
-#: app/routes.py:430 app/routes.py:431 app/routes.py:451 app/routes.py:452
-#: app/routes.py:478 app/routes.py:479 app/routes.py:522
+#: app/routes.py:454 app/routes.py:455 app/routes.py:466 app/routes.py:467
+#: app/routes.py:477 app/routes.py:478 app/routes.py:498 app/routes.py:499
+#: app/routes.py:525 app/routes.py:526 app/routes.py:569
 msgid "Crear cuenta"
 msgstr "Create account"
 
-#: app/routes.py:416
+#: app/routes.py:463
 msgid "El correo no es válido o no existe."
 msgstr "The email address is invalid or does not exist."
 
-#: app/routes.py:427 app/routes.py:656
+#: app/routes.py:474 app/routes.py:703
 msgid "La contraseña debe tener al menos 8 caracteres."
 msgstr "The password must be at least 8 characters."
 
-#: app/routes.py:448 app/routes.py:475
+#: app/routes.py:495 app/routes.py:522
 msgid "Ese correo ya está registrado."
 msgstr "That email address is already registered."
 
-#: app/routes.py:502
+#: app/routes.py:549
 msgid "Verifica tu correo en PATIA"
 msgstr "Verify your email in PATIA"
 
-#: app/routes.py:506 app/templates/verify_email.html:9
+#: app/routes.py:553 app/templates/verify_email.html:9
 msgid "Verifica tu correo"
 msgstr "Verify your email"
 
-#: app/routes.py:507
+#: app/routes.py:554
 msgid "Tu código de verificación es:"
 msgstr "Your verification code is:"
 
-#: app/routes.py:509 app/routes.py:598
+#: app/routes.py:556 app/routes.py:645
 msgid "Este código expira en 30 minutos."
 msgstr "This code expires in 30 minutes."
 
-#: app/routes.py:539
+#: app/routes.py:586
 msgid "Código inválido."
 msgstr "Invalid code."
 
-#: app/routes.py:543
+#: app/routes.py:590
 msgid "El código expiró. Solicita uno nuevo."
 msgstr "The code expired. Request a new one."
 
-#: app/routes.py:547
+#: app/routes.py:594
 msgid "Código incorrecto."
 msgstr "Incorrect code."
 
-#: app/routes.py:557
+#: app/routes.py:604
 msgid "¡Bienvenido a PATIA!"
 msgstr "Welcome to PATIA!"
 
-#: app/routes.py:561
+#: app/routes.py:608
 #, python-format
 msgid "Bienvenido a PATIA, %(name)s!"
 msgstr "Welcome to PATIA, %(name)s!"
 
-#: app/routes.py:562
+#: app/routes.py:609
 msgid "Tu cuenta está lista. Tienes 14 días gratis para explorar todo."
 msgstr "Your account is ready. You have 14 days free to explore everything."
 
-#: app/routes.py:563
+#: app/routes.py:610
 msgid "Ir a mi inventario"
 msgstr "Go to my inventory"
 
-#: app/routes.py:570
+#: app/routes.py:617
 msgid "¡Correo verificado! Bienvenido a PATIA."
 msgstr "Email verified! Welcome to PATIA."
 
-#: app/routes.py:593
+#: app/routes.py:640
 msgid "Nuevo código de verificación PATIA"
 msgstr "New PATIA verification code"
 
-#: app/routes.py:596
+#: app/routes.py:643
 msgid "Tu nuevo código"
 msgstr "Your new code"
 
-#: app/routes.py:604
+#: app/routes.py:651
 msgid "Te enviamos un nuevo código de verificación."
 msgstr "We sent you a new verification code."
 
-#: app/routes.py:606
+#: app/routes.py:653
 msgid "No pudimos enviar el código. Inténtalo nuevamente en unos minutos."
 msgstr "We could not send the code. Try again in a few minutes."
 
-#: app/routes.py:625
+#: app/routes.py:672
 msgid "Recupera tu contraseña PATIA"
 msgstr "Recover your PATIA password"
 
-#: app/routes.py:628
+#: app/routes.py:675
 msgid "Recuperar contraseña"
 msgstr "Recover password"
 
-#: app/routes.py:629
+#: app/routes.py:676
 msgid ""
 "Haz clic en el botón para crear una nueva contraseña. Expira en 30 "
 "minutos."
 msgstr "Click the button to create a new password. Expires in 30 minutes."
 
-#: app/routes.py:630
+#: app/routes.py:677
 msgid "Crear nueva contraseña"
 msgstr "Create new password"
 
-#: app/routes.py:638
+#: app/routes.py:685
 msgid "Si ese correo existe, te enviamos un enlace."
 msgstr "If that email exists, we sent a link."
 
-#: app/routes.py:662
+#: app/routes.py:709
 msgid "Contraseña actualizada. Inicia sesión."
 msgstr "Password updated. Sign in."
 
-#: app/routes.py:676
+#: app/routes.py:723
 msgid "Correo o contraseña incorrectos."
 msgstr "Incorrect email or password."
 
-#: app/routes.py:695
+#: app/routes.py:742
 msgid "Tu prueba gratuita de PATIA termina en 2 días"
 msgstr "Your free PATIA trial ends in 2 days"
 
-#: app/routes.py:699
+#: app/routes.py:746
 msgid "Tu prueba termina en 2 días"
 msgstr "Your trial ends in 2 days"
 
-#: app/routes.py:700
+#: app/routes.py:747
 #, python-format
 msgid ""
 "Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No "
@@ -192,65 +212,65 @@ msgstr ""
 "Hello %(name)s, your PATIA free trial period ends soon. Don't lose access"
 " to your inventory and sales."
 
-#: app/routes.py:701 app/templates/base.html:80
+#: app/routes.py:748 app/templates/base.html:80
 msgid "Activar PATIA Pro"
 msgstr "Activate PATIA Pro"
 
-#: app/routes.py:709
+#: app/routes.py:756
 msgid "Sesión iniciada correctamente."
 msgstr "Signed in successfully."
 
-#: app/routes.py:712 app/templates/landing.html:23
+#: app/routes.py:759 app/templates/landing.html:23
 #: app/templates/landing.html:235
 msgid "Iniciar sesión"
 msgstr "Sign in"
 
-#: app/routes.py:712
+#: app/routes.py:759
 msgid "Entrar"
 msgstr "Sign in"
 
-#: app/routes.py:813
+#: app/routes.py:876
 #, python-format
 msgid "%(product)s agotado"
 msgstr "%(product)s sold out"
 
-#: app/routes.py:814
+#: app/routes.py:877
 msgid "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
 msgstr "Current stock: 0. You need to restock immediately."
 
-#: app/routes.py:819
+#: app/routes.py:882
 #, python-format
 msgid "Reordenar %(product)s"
 msgstr "Reorder %(product)s"
 
-#: app/routes.py:821
+#: app/routes.py:884
 #, python-format
 msgid "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s."
 msgstr "Current stock: %(stock)s. Recommended minimum: %(minimum)s."
 
-#: app/routes.py:829
+#: app/routes.py:892
 #, python-format
 msgid "%(product)s se agotará pronto"
 msgstr "%(product)s will be out of stock soon"
 
-#: app/routes.py:831
+#: app/routes.py:894
 #, python-format
 msgid ""
 "Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s "
 "días."
 msgstr "At the current sales rate, it will be gone in approximately %(days)s days."
 
-#: app/routes.py:838
+#: app/routes.py:901
 #, python-format
 msgid "Vigilar %(product)s"
 msgstr "Monitor %(product)s"
 
-#: app/routes.py:839
+#: app/routes.py:902
 #, python-format
 msgid "Inventario estimado para %(days)s días."
 msgstr "Estimated inventory for %(days)s days."
 
-#: app/routes.py:845
+#: app/routes.py:908
 #, python-format
 msgid ""
 "%(product)s es el producto con más movimiento. Conviene revisar sus "
@@ -259,12 +279,12 @@ msgstr ""
 "%(product)s is the product with the most movement. It is a good idea to "
 "check their stock before your next purchase."
 
-#: app/routes.py:850
+#: app/routes.py:913
 #, python-format
 msgid "En los últimos 7 días registraste $%(amount)s MXN en ventas."
 msgstr "In the last 7 days you recorded $%(amount)s MXN in sales."
 
-#: app/routes.py:855
+#: app/routes.py:918
 #, python-format
 msgid ""
 "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, "
@@ -273,7 +293,7 @@ msgstr ""
 "Your estimated profit for the last 7 days is $%(amount)s MXN, considering"
 " the recorded cost of products sold."
 
-#: app/routes.py:861
+#: app/routes.py:924
 #, python-format
 msgid ""
 "Tienes %(count)s producto con inventario bajo. Revísalo antes de que "
@@ -282,7 +302,7 @@ msgstr ""
 "You have %(count)s product with low inventory. Review it before it "
 "affects a sale."
 
-#: app/routes.py:866
+#: app/routes.py:929
 #, python-format
 msgid ""
 "Tienes %(count)s productos con inventario bajo. Revísalos antes de que "
@@ -291,112 +311,128 @@ msgstr ""
 "You have %(count)s products with low inventory. Review them before they "
 "affect a sale."
 
-#: app/routes.py:903
+#: app/routes.py:977
+msgid "El periodo solicitado no es válido. Mostramos los últimos 7 días."
+msgstr "The requested period is invalid. We are showing the last 7 days."
+
+#: app/routes.py:1001
+msgid "La fecha inicial no puede ser posterior a la fecha final."
+msgstr "The start date cannot be later than the end date."
+
+#: app/routes.py:1003
+msgid "El rango personalizado no puede superar 366 días."
+msgstr "The custom range cannot exceed 366 days."
+
+#: app/routes.py:1005
+msgid "Escribe fechas válidas. Mostramos los últimos 7 días."
+msgstr "Enter valid dates. We are showing the last 7 days."
+
+#: app/routes.py:1258
 msgid "Completa los datos básicos"
 msgstr "Complete the basic information"
 
-#: app/routes.py:904
+#: app/routes.py:1259
 msgid "Confirma la información principal de tu negocio."
 msgstr "Confirm the main information of your business."
 
-#: app/routes.py:906
+#: app/routes.py:1261
 msgid "Completar datos"
 msgstr "Complete data"
 
-#: app/routes.py:910 app/templates/products.html:11
+#: app/routes.py:1265 app/templates/products.html:11
 #: app/templates/products.html:25
 msgid "Agrega tu primer producto"
 msgstr "Add your first product"
 
-#: app/routes.py:911
+#: app/routes.py:1266
 msgid "Captura un producto o importa tu catálogo desde Excel."
 msgstr "Capture a product or import your catalog from Excel."
 
-#: app/routes.py:913 app/templates/products.html:14
+#: app/routes.py:1268 app/templates/products.html:14
 msgid "Agregar primer producto"
 msgstr "Add first product"
 
-#: app/routes.py:917
+#: app/routes.py:1272
 msgid "Registra tu primera venta"
 msgstr "Register your first sale"
 
-#: app/routes.py:918
+#: app/routes.py:1273
 msgid "Prueba el punto de venta con un producto de tu catálogo."
 msgstr "Test the point of sale with a product from your catalog."
 
-#: app/routes.py:920
+#: app/routes.py:1275
 msgid "Registrar primera venta"
 msgstr "Register first sale"
 
-#: app/routes.py:924
+#: app/routes.py:1279
 msgid "Revisa tus resultados"
 msgstr "Check your results"
 
-#: app/routes.py:925
+#: app/routes.py:1280
 msgid "Consulta ventas, inventario y alertas en este panel."
 msgstr "View sales, inventory, and alerts in this dashboard."
 
-#: app/routes.py:985 app/templates/edit_product.html:20
+#: app/routes.py:1340 app/templates/edit_product.html:20
 #: app/templates/products.html:37 app/templates/products.html:95
 msgid "SKU"
 msgstr "SKU"
 
-#: app/routes.py:986 app/templates/edit_product.html:25
+#: app/routes.py:1341 app/templates/edit_product.html:25
 #: app/templates/products.html:61
 msgid "Código de barras"
 msgstr "Bar-code"
 
-#: app/routes.py:987 app/templates/edit_product.html:16
+#: app/routes.py:1342 app/templates/edit_product.html:16
 #: app/templates/products.html:33
 msgid "Nombre del producto"
 msgstr "Product name"
 
-#: app/routes.py:988 app/templates/edit_product.html:30
+#: app/routes.py:1343 app/templates/edit_product.html:30
 #: app/templates/products.html:65 app/templates/products.html:147
 #: app/templates/products.html:152
 msgid "Categoría"
 msgstr "Category"
 
-#: app/routes.py:989 app/templates/edit_product.html:34
+#: app/routes.py:1344 app/templates/edit_product.html:34
 #: app/templates/products.html:69 app/templates/products.html:147
 #: app/templates/products.html:153 app/templates/suppliers.html:17
 #: app/templates/suppliers.html:36 app/templates/suppliers.html:46
 msgid "Proveedor"
 msgstr "Supplier"
 
-#: app/routes.py:990
+#: app/routes.py:1345 app/templates/reports.html:155
 msgid "Costo"
 msgstr "Cost"
 
-#: app/routes.py:991 app/templates/edit_product.html:42
+#: app/routes.py:1346 app/templates/edit_product.html:42
 #: app/templates/products.html:47
 msgid "Precio de venta"
 msgstr "Sale price"
 
-#: app/routes.py:992
+#: app/routes.py:1347
 msgid "Stock inicial"
 msgstr "Initial stock"
 
-#: app/routes.py:993 app/templates/edit_product.html:51
+#: app/routes.py:1348 app/templates/edit_product.html:51
 #: app/templates/products.html:73
 msgid "Stock mínimo"
 msgstr "Minimum stock"
 
-#: app/routes.py:999
+#: app/routes.py:1354
 msgid "PRODUCTOS"
 msgstr "PRODUCTS"
 
-#: app/routes.py:1004
+#: app/routes.py:1359
 msgid "PATIA - Plantilla oficial de productos"
 msgstr "PATIA - Official product template"
 
-#: app/routes.py:1006
+#: app/routes.py:1361
 msgid ""
 "Llena esta tabla con tus productos. No cambies los nombres de las "
 "columnas."
 msgstr "Fill this table with your products. Do not change the column names."
 
-#: app/routes.py:1116
+#: app/routes.py:1471
 msgid ""
 "El archivo no contiene las columnas obligatorias. Descarga la plantilla "
 "PATIA e inténtalo de nuevo."
@@ -404,7 +440,7 @@ msgstr ""
 "The file does not contain the required columns. Download the PATIA "
 "template and try again."
 
-#: app/routes.py:1214
+#: app/routes.py:1569
 #, python-format
 msgid ""
 "Importación terminada: %(created)s creados, %(updated)s actualizados, "
@@ -413,49 +449,49 @@ msgstr ""
 "Import completed: %(created)s created, %(updated)s updated, %(omitted)s "
 "skipped, and %(errors)s errors."
 
-#: app/routes.py:1451
+#: app/routes.py:1806
 #, python-format
 msgid "Venta registrada: %(product)s x%(quantity)s."
 msgstr "Sale recorded: %(product)s x%(quantity)s."
 
-#: app/routes.py:1487
+#: app/routes.py:1846
 msgid "No autenticado"
 msgstr "Not authenticated"
 
-#: app/routes.py:1494 app/routes.py:1509
+#: app/routes.py:1853 app/routes.py:1868
 msgid "Solicitud inválida"
 msgstr "Invalid request"
 
-#: app/routes.py:1498
+#: app/routes.py:1857
 msgid "El carrito está vacío"
 msgstr "The cart is empty"
 
-#: app/routes.py:1502
+#: app/routes.py:1861
 msgid "Selecciona un método de pago válido"
 msgstr "Select a valid payment method"
 
-#: app/routes.py:1515 app/routes.py:1521
+#: app/routes.py:1874 app/routes.py:1880
 msgid "Artículo inválido"
 msgstr "Invalid item"
 
-#: app/routes.py:1524
+#: app/routes.py:1883
 msgid "La cantidad debe ser mayor a cero"
 msgstr "The quantity must be greater than zero"
 
-#: app/routes.py:1561
+#: app/routes.py:1920
 msgid "Producto no encontrado"
 msgstr "Product not found"
 
-#: app/routes.py:1589
+#: app/routes.py:1948
 #, python-format
 msgid "Stock insuficiente: %(product)s"
 msgstr "Insufficient stock: %(product)s"
 
-#: app/routes.py:1630
+#: app/routes.py:1989
 msgid "No se pudo procesar la venta"
 msgstr "The sale could not be processed"
 
-#: app/routes.py:2223
+#: app/routes.py:2603
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del"
@@ -464,12 +500,12 @@ msgstr ""
 "We deleted %(deleted)s products without sales and removed %(protected)s "
 "from the catalog while preserving their history."
 
-#: app/routes.py:2231
+#: app/routes.py:2611
 #, python-format
 msgid "Eliminamos %(count)s productos del catálogo."
 msgstr "We deleted %(count)s products from the catalog."
 
-#: app/routes.py:2266
+#: app/routes.py:2646
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s seleccionados y retiramos %(protected)s "
@@ -478,7 +514,7 @@ msgstr ""
 "We deleted %(deleted)s selected products and removed %(protected)s while "
 "preserving their history."
 
-#: app/routes.py:2273
+#: app/routes.py:2653
 #, python-format
 msgid "%(count)s productos eliminados."
 msgstr "%(count)s products deleted."
@@ -588,7 +624,7 @@ msgstr "Proof"
 msgid "Productos"
 msgstr "Products"
 
-#: app/templates/admin.html:95
+#: app/templates/admin.html:95 app/templates/reports.html:193
 msgid "Ventas"
 msgstr "Sales"
 
@@ -980,7 +1016,7 @@ msgstr "Already have a catalog?"
 msgid "Importar catálogo"
 msgstr "Import catalog"
 
-#: app/templates/dashboard.html:86
+#: app/templates/dashboard.html:86 app/templates/reports.html:67
 msgid "Indicadores principales"
 msgstr "Main indicators"
 
@@ -1000,7 +1036,7 @@ msgstr "7-day sales"
 msgid "Rendimiento semanal"
 msgstr "Weekly performance"
 
-#: app/templates/dashboard.html:107 app/templates/reports.html:25
+#: app/templates/dashboard.html:107
 msgid "Valor inventario"
 msgstr "Inventory value"
 
@@ -1020,7 +1056,7 @@ msgstr "Needs attention"
 msgid "Rendimiento"
 msgstr "Performance"
 
-#: app/templates/dashboard.html:129
+#: app/templates/dashboard.html:129 app/templates/reports.html:132
 msgid "Productos más vendidos"
 msgstr "Best-selling products"
 
@@ -1118,7 +1154,7 @@ msgstr ""
 "This value replaces current stock. PATIA V1.0 does not retain a history "
 "of manual adjustments."
 
-#: app/templates/edit_product.html:55 app/templates/settings.html:88
+#: app/templates/edit_product.html:55 app/templates/settings.html:106
 msgid "Guardar cambios"
 msgstr "Save changes"
 
@@ -1254,7 +1290,7 @@ msgstr "Products to review"
 msgid "Productos con mayor movimiento"
 msgstr "Top-moving products"
 
-#: app/templates/landing.html:65
+#: app/templates/landing.html:65 app/templates/reports.html:22
 msgid "Últimos 7 días"
 msgstr "Last 7 days"
 
@@ -2131,6 +2167,7 @@ msgid "Eliminar seleccionados"
 msgstr "Delete selected"
 
 #: app/templates/products.html:147 app/templates/products.html:151
+#: app/templates/reports.html:137 app/templates/reports.html:155
 #: app/templates/sell.html:67 app/templates/ticket.html:29
 msgid "Producto"
 msgstr "Product"
@@ -2140,6 +2177,7 @@ msgid "Stock"
 msgstr "stock"
 
 #: app/templates/products.html:147 app/templates/products.html:156
+#: app/templates/reports.html:79 app/templates/reports.html:155
 msgid "Margen"
 msgstr "Margin"
 
@@ -2185,59 +2223,169 @@ msgstr "Cancel selection"
 msgid "¿Eliminar %(count)s productos seleccionados?"
 msgstr "Delete %(count)s selected products?"
 
+#: app/templates/reports.html:8
+msgid "Análisis del negocio"
+msgstr "Business analysis"
+
 #: app/templates/reports.html:9
-msgid "Utilidad estimada"
-msgstr "Estimated profit"
+msgid "Reportes ejecutivos"
+msgstr "Executive reports"
 
-#: app/templates/reports.html:11
+#: app/templates/reports.html:10
 msgid ""
-"Ventas de los últimos 7 días menos el costo registrado de las unidades "
-"vendidas."
-msgstr "Sales for the last 7 days minus the recorded cost of units sold."
+"Consulta ventas, utilidad y desempeño usando los costos guardados al "
+"momento de cada venta."
+msgstr ""
+"Review sales, profit, and performance using the costs saved at the time "
+"of each sale."
 
-#: app/templates/reports.html:15
-msgid "Productos activos"
-msgstr "Active products"
+#: app/templates/reports.html:19
+msgid "Periodo del reporte"
+msgstr "Report period"
 
-#: app/templates/reports.html:20
-msgid "Alertas"
-msgstr "Alerts"
+#: app/templates/reports.html:21
+msgid "Hoy"
+msgstr "Today"
 
-#: app/templates/reports.html:33
-msgid "Ventas por categoría"
-msgstr "Sales by category"
+#: app/templates/reports.html:23
+msgid "Últimos 30 días"
+msgstr "Last 30 days"
+
+#: app/templates/reports.html:24
+msgid "Este mes"
+msgstr "This month"
+
+#: app/templates/reports.html:25
+msgid "Mes anterior"
+msgstr "Previous month"
+
+#: app/templates/reports.html:34
+msgid "Rango personalizado"
+msgstr "Custom range"
 
 #: app/templates/reports.html:41
-msgid "Aún no hay ventas para analizar"
-msgstr "No sales to analyze yet"
+msgid "Desde"
+msgstr "From"
 
-#: app/templates/reports.html:42
+#: app/templates/reports.html:46
+msgid "Hasta"
+msgstr "To"
+
+#: app/templates/reports.html:50
+msgid "Aplicar rango"
+msgstr "Apply range"
+
+#: app/templates/reports.html:63
 msgid ""
-"Después de registrar ventas, aquí verás qué categorías generan más "
-"ingresos."
+"Agrega el costo del producto para incluirlo en los cálculos de utilidad y"
+" margen."
 msgstr ""
-"After recording sales, you will see which categories generate the most "
-"revenue."
+"Add the product cost to include it in profit and margin calculations."
 
-#: app/templates/reports.html:43
+#: app/templates/reports.html:69
+msgid "Ventas totales"
+msgstr "Total sales"
+
+#: app/templates/reports.html:71
+msgid "Ingresos registrados en el periodo"
+msgstr "Revenue recorded in this period"
+
+#: app/templates/reports.html:74 app/templates/reports.html:155
+#: app/templates/reports.html:194
+msgid "Utilidad"
+msgstr "Profit"
+
+#: app/templates/reports.html:76
+msgid "Solo ventas con costo histórico conocido"
+msgstr "Only sales with a known historical cost"
+
+#: app/templates/reports.html:81
+msgid "Calculado sobre ingresos con costo conocido"
+msgstr "Calculated from revenue with known cost"
+
+#: app/templates/reports.html:84
+msgid "Ticket promedio"
+msgstr "Average ticket"
+
+#: app/templates/reports.html:86
+msgid "Venta promedio por ticket"
+msgstr "Average sale per ticket"
+
+#: app/templates/reports.html:89
+msgid "Número de tickets"
+msgstr "Number of tickets"
+
+#: app/templates/reports.html:91
+msgid "Operaciones registradas"
+msgstr "Recorded transactions"
+
+#: app/templates/reports.html:99
+msgid "Evolución diaria"
+msgstr "Daily trend"
+
+#: app/templates/reports.html:99
+msgid "Ventas vs Utilidad"
+msgstr "Sales vs Profit"
+
+#: app/templates/reports.html:109
+msgid "Composición"
+msgstr "Composition"
+
+#: app/templates/reports.html:109
+msgid "Métodos de pago"
+msgstr "Payment methods"
+
+#: app/templates/reports.html:120
+msgid "tickets"
+msgstr "tickets"
+
+#: app/templates/reports.html:132
+msgid "Volumen"
+msgstr "Volume"
+
+#: app/templates/reports.html:137 app/templates/reports.html:155
+msgid "Unidades"
+msgstr "Units"
+
+#: app/templates/reports.html:137 app/templates/reports.html:155
+msgid "Ingresos"
+msgstr "Revenue"
+
+#: app/templates/reports.html:150
+msgid "Rentabilidad"
+msgstr "Profitability"
+
+#: app/templates/reports.html:150
+msgid "Productos más rentables"
+msgstr "Most profitable products"
+
+#: app/templates/reports.html:163 app/templates/subscription.html:31
+msgid "No disponible"
+msgstr "Not available"
+
+#: app/templates/reports.html:180
+msgid "Aún no hay ventas en este periodo"
+msgstr "There are no sales in this period yet"
+
+#: app/templates/reports.html:181
+msgid ""
+"Prueba otro periodo o registra una venta para comenzar a analizar el "
+"desempeño de tu negocio."
+msgstr ""
+"Try another period or record a sale to begin analyzing your business "
+"performance."
+
+#: app/templates/reports.html:182
 msgid "Registrar una venta"
 msgstr "Record a sale"
 
-#: app/templates/reports.html:49
-msgid "Recomendaciones para vender más"
-msgstr "Recommendations to sell more"
+#: app/templates/reports.html:195
+msgid "Monto"
+msgstr "Amount"
 
-#: app/templates/reports.html:67
-msgid "Todavía no hay recomendaciones"
-msgstr "No recommendations yet"
-
-#: app/templates/reports.html:68
-msgid ""
-"Registra ventas y movimientos de inventario para recibir sugerencias "
-"basadas en tu operación."
-msgstr ""
-"Record sales and inventory movements to receive suggestions based on your"
-" operations."
+#: app/templates/reports.html:196
+msgid "Tickets"
+msgstr "Tickets"
 
 #: app/templates/reset_password.html:7
 msgid "Nueva contraseña | PATIA"
@@ -2336,7 +2484,7 @@ msgstr "Payment method"
 msgid "Ver ticket"
 msgstr "See ticket"
 
-#: app/templates/sell.html:29 app/templates/ticket.html:67
+#: app/templates/sell.html:29 app/templates/ticket.html:66
 msgid "Imprimir ticket"
 msgstr "Print receipt"
 
@@ -2413,8 +2561,8 @@ msgid ""
 "Selecciona cómo pagó el cliente. Este dato se usará para registrar la "
 "venta."
 msgstr ""
-"Select how the customer paid. This information will be used to record the "
-"sale."
+"Select how the customer paid. This information will be used to record the"
+" sale."
 
 #: app/templates/sell.html:83
 msgid "Total de la venta"
@@ -2624,34 +2772,54 @@ msgid "Calle, número exterior e interior"
 msgstr "Street, exterior and interior number"
 
 #: app/templates/settings.html:71
+msgid "Zona horaria"
+msgstr "Time zone"
+
+#: app/templates/settings.html:71
+msgid "PATIA usa esta hora en tickets, ventas y reportes."
+msgstr "PATIA uses this time on tickets, sales, and reports."
+
+#: app/templates/settings.html:75
+msgid "Zona horaria del negocio"
+msgstr "Business time zone"
+
+#: app/templates/settings.html:81
+msgid ""
+"Cambiarla ajusta únicamente cómo se muestran y agrupan las fechas; no "
+"modifica tus ventas guardadas."
+msgstr ""
+"Changing it only adjusts how dates are displayed and grouped; it does not"
+" modify your saved sales."
+
+#: app/templates/settings.html:89
 msgid "Información fiscal"
 msgstr "Tax information"
 
-#: app/templates/settings.html:71
+#: app/templates/settings.html:89
 msgid "Completa estos datos solo si los necesitas en tus comprobantes."
 msgstr "Complete these details only if you need them on your receipts."
 
-#: app/templates/settings.html:75
+#: app/templates/settings.html:93
 msgid "RFC"
 msgstr "Tax ID"
 
-#: app/templates/settings.html:76
+#: app/templates/settings.html:94
 msgid "XAXX010101000"
 msgstr "XAXX010101000"
 
-#: app/templates/settings.html:77
+#: app/templates/settings.html:95
 msgid "Captúralo sin espacios ni guiones."
 msgstr "Capture it without spaces or dashes."
 
-#: app/templates/settings.html:80
+#: app/templates/settings.html:98
 msgid "Régimen fiscal"
 msgstr "Tax regime"
 
-#: app/templates/settings.html:81
+#: app/templates/settings.html:99
 msgid "Régimen Simplificado de Confianza"
 msgstr "Simplified Trust Regime"
 
-#: app/templates/settings.html:87
+#: app/templates/settings.html:105
 msgid "Revisa que la información sea correcta antes de guardar."
 msgstr "Check that the information is correct before saving."
 
@@ -2972,10 +3140,6 @@ msgstr "Active access"
 msgid "Próxima renovación o fin del periodo"
 msgstr "Next renewal or period end"
 
-#: app/templates/subscription.html:31
-msgid "No disponible"
-msgstr "Not available"
-
 #: app/templates/subscription.html:34
 msgid "Cancelación programada"
 msgstr "Scheduled cancellation"
@@ -2999,6 +3163,11 @@ msgstr "We could not process your latest payment"
 #: app/templates/subscription.html:48
 msgid "Actualiza tu método de pago para mantener el acceso."
 msgstr "Update your payment method to maintain access."
+
+#: app/templates/subscription.html:49
+#, python-format
+msgid "Próximo intento: %(date)s."
+msgstr "Next attempt: %(date)s."
 
 #: app/templates/subscription.html:58
 msgid "Administrar pagos"
@@ -3149,7 +3318,6 @@ msgid "Agregar primer proveedor"
 msgstr "Add first supplier"
 
 #: app/templates/ticket.html:2 app/templates/ticket.html:8
-#: app/templates/ticket.html:54
 msgid "Ticket"
 msgstr "Receipt"
 
@@ -3197,43 +3365,43 @@ msgstr "Product unavailable"
 msgid "Gracias por su compra"
 msgstr "Thank you for your purchase"
 
-#: app/templates/ticket.html:55
+#: app/templates/ticket.html:54
 msgid "Powered by PATIA"
 msgstr "Powered by PATIA"
 
-#: app/templates/ticket.html:59
+#: app/templates/ticket.html:58
 msgid "Acciones del ticket"
 msgstr "Ticket Actions"
 
-#: app/templates/ticket.html:60
+#: app/templates/ticket.html:59
 msgid "Opciones del ticket"
 msgstr "Receipt options"
 
-#: app/templates/ticket.html:61
+#: app/templates/ticket.html:60
 msgid "Selecciona el ancho de tu impresora antes de continuar."
 msgstr "Select your printer width before continuing."
 
-#: app/templates/ticket.html:63
+#: app/templates/ticket.html:62
 msgid "Ancho de papel"
 msgstr "Paper width"
 
-#: app/templates/ticket.html:64
+#: app/templates/ticket.html:63
 msgid "58 mm"
 msgstr "58mm"
 
-#: app/templates/ticket.html:65
+#: app/templates/ticket.html:64
 msgid "80 mm"
 msgstr "80mm"
 
-#: app/templates/ticket.html:68
+#: app/templates/ticket.html:67
 msgid "Guardar o descargar como PDF"
 msgstr "Save or download as PDF"
 
-#: app/templates/ticket.html:69
+#: app/templates/ticket.html:68
 msgid "En el diálogo de impresión selecciona “Guardar como PDF” como destino."
 msgstr "In the print dialog select “Save as PDF” as the destination."
 
-#: app/templates/ticket.html:70
+#: app/templates/ticket.html:69
 msgid "Volver a ventas"
 msgstr "Back to sales"
 
@@ -3462,3 +3630,62 @@ msgstr "Resend code"
 #~ "It only records how the customer "
 #~ "paid; PATIA does not process card "
 #~ "payments."
+
+#~ msgid ""
+#~ "Ventas de los últimos 7 días menos"
+#~ " el costo registrado de las unidades"
+#~ " vendidas."
+#~ msgstr "Sales for the last 7 days minus the recorded cost of units sold."
+
+#~ msgid "Productos activos"
+#~ msgstr "Active products"
+
+#~ msgid "Alertas"
+#~ msgstr "Alerts"
+
+#~ msgid "Ventas por categoría"
+#~ msgstr "Sales by category"
+
+#~ msgid "Aún no hay ventas para analizar"
+#~ msgstr "No sales to analyze yet"
+
+#~ msgid ""
+#~ "Después de registrar ventas, aquí verás"
+#~ " qué categorías generan más ingresos."
+#~ msgstr ""
+#~ "After recording sales, you will see "
+#~ "which categories generate the most "
+#~ "revenue."
+
+#~ msgid "Recomendaciones para vender más"
+#~ msgstr "Recommendations to sell more"
+
+#~ msgid "Todavía no hay recomendaciones"
+#~ msgstr "No recommendations yet"
+
+#~ msgid ""
+#~ "Registra ventas y movimientos de "
+#~ "inventario para recibir sugerencias basadas"
+#~ " en tu operación."
+#~ msgstr ""
+#~ "Record sales and inventory movements to"
+#~ " receive suggestions based on your "
+#~ "operations."
+
+#~ msgid ""
+#~ "%(count)s línea de venta no tiene "
+#~ "costo histórico y fue excluida de "
+#~ "utilidad y margen."
+#~ msgstr ""
+#~ "%(count)s sale line has no historical"
+#~ " cost and was excluded from profit"
+#~ " and margin."
+
+#~ msgid ""
+#~ "%(count)s líneas de venta no tienen "
+#~ "costo histórico y fueron excluidas de"
+#~ " utilidad y margen."
+#~ msgstr ""
+#~ "%(count)s sale lines have no historical"
+#~ " cost and were excluded from profit"
+#~ " and margin."

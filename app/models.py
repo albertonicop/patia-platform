@@ -375,6 +375,11 @@ class User(db.Model):
         nullable=False,
         default="es",
     )
+    timezone = db.Column(
+        db.String(64),
+        nullable=False,
+        default="America/Mexico_City",
+    )
     next_ticket_number = db.Column(
         db.Integer,
         nullable=False,

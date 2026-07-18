@@ -28,7 +28,7 @@
       <dl class="subscription-v2__details">
         <div>
           <dt>{{ _("Próxima renovación o fin del periodo") }}</dt>
-          <dd>{% if user.current_period_end %}{{ user.current_period_end.strftime("%d/%m/%Y") }}{% else %}{{ _("No disponible") }}{% endif %}</dd>
+          <dd>{% if current_period_end_local %}{{ current_period_end_local.strftime("%d/%m/%Y") }}{% else %}{{ _("No disponible") }}{% endif %}</dd>
         </div>
         <div>
           <dt>{{ _("Cancelación programada") }}</dt>
@@ -46,7 +46,7 @@
           <div>
             <strong>{{ _("No pudimos procesar tu último pago") }}</strong>
             <p>{{ _("Actualiza tu método de pago para mantener el acceso.") }}
-            {% if user.next_payment_attempt %} Próximo intento: {{ user.next_payment_attempt.strftime("%d/%m/%Y %H:%M") }} UTC.{% endif %}</p>
+            {% if next_payment_attempt_local %} {{ _("Próximo intento: %(date)s.", date=next_payment_attempt_local.strftime("%d/%m/%Y %H:%M")) }}{% endif %}</p>
           </div>
         </div>
       {% endif %}

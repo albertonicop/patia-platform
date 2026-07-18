@@ -127,10 +127,11 @@ class SalesTicketFoundationTests(unittest.TestCase):
         client = self.client_for(user)
         first_print = client.get(f"/ticket/{ticket_ref}").get_data(as_text=True)
         second_print = client.get(f"/ticket/{ticket_ref}").get_data(as_text=True)
-        self.assertIn("Ticket: TKT-000001", first_print)
+        self.assertIn("<strong>TKT-000001</strong>", first_print)
+        self.assertNotIn("Ticket: TKT-000001", first_print)
         self.assertEqual(
-            first_print.count("Ticket: TKT-000001"),
-            second_print.count("Ticket: TKT-000001"),
+            first_print.count("<strong>TKT-000001</strong>"),
+            second_print.count("<strong>TKT-000001</strong>"),
         )
 
     def test_all_supported_payment_methods_are_stored_on_header_and_lines(self):

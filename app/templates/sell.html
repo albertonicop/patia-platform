@@ -102,7 +102,7 @@
             {% for ticket in sale_groups %}
               <tr>
                 <td data-label="{{ _('Folio') }}"><strong>{{ ticket.folio }}</strong></td>
-                <td data-label="{{ _('Fecha y hora') }}">{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td data-label="{{ _('Fecha y hora') }}">{{ ticket.created_at_local.strftime('%d/%m/%Y %H:%M') }}</td>
                 <td data-label="{{ _('Artículos') }}">{{ ticket.item_count }} {{ _("artículo") if ticket.item_count == 1 else _("artículos") }}<small>{{ ticket.sales|length }} {{ _("producto") if ticket.sales|length == 1 else _("productos") }}</small></td>
                 <td data-label="{{ _('Método') }}">{{ payment_method_labels.get(ticket.payment_method, _("No especificado")) }}</td>
                 <td data-label="{{ _('Total') }}">{{ ticket.total|money }}</td>
