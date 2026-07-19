@@ -800,7 +800,11 @@ def analytics(user=None):
         .scalar()
         or 0
     )
-    low_stock = sum(1 for p in products if p.stock <= p.min_stock)
+    low_stock_products = sorted(
+        (p for p in products if p.stock <= p.min_stock),
+        key=lambda p: (p.stock - p.min_stock, p.name.casefold()),
+    )
+    low_stock = len(low_stock_products)
 
     today_sales = db.session.query(func.sum(Sale.total)).filter(
         Sale.user_id == user_id,
@@ -937,6 +941,7 @@ def analytics(user=None):
         total_sales=total_sales,
         inventory_value=inventory_value,
         low_stock=low_stock,
+        low_stock_products=low_stock_products,
         today_sales=today_sales,
         week_sales=week_sales,
         profit=profit,
@@ -1308,12 +1313,18 @@ def products():
     if trial_expired(user):
         return render_template("trial_expired.html")
     q = request.args.get("q", "").strip()
+    low_stock_only = request.args.get("low_stock") == "1"
     catalog_query = Product.query.filter(
         Product.user_id == session["user_id"],
         Product.is_active.is_(True),
     )
     catalog_count = catalog_query.count()
+    low_stock_count = catalog_query.filter(
+        Product.stock <= Product.min_stock,
+    ).count()
     query = catalog_query
+    if low_stock_only:
+        query = query.filter(Product.stock <= Product.min_stock)
     if q:
         query = query.filter(
             Product.name.ilike(f"%{q}%") |
@@ -1324,6 +1335,8 @@ def products():
         "products.html",
         products=query.order_by(Product.name).all(),
         catalog_count=catalog_count,
+        low_stock_count=low_stock_count,
+        low_stock_only=low_stock_only,
         q=q,
         user=user,
     )

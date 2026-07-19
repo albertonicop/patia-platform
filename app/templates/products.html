@@ -124,9 +124,32 @@
         <form method="GET" action="{{ url_for('main.products') }}#catalogo" role="search">
           <label class="sr-only" for="catalog-search">{{ _("Buscar producto") }}</label>
           <input id="catalog-search" name="q" value="{{ q }}" placeholder="{{ _('Buscar producto…') }}" aria-describedby="catalog-search-help">
+          {% if low_stock_only %}<input type="hidden" name="low_stock" value="1">{% endif %}
           <small id="catalog-search-help">{{ _("Busca por nombre, SKU o categoría.") }}</small>
         </form>
       </div>
+
+      <div class="inventory-v2__stock-filter" aria-label="{{ _('Filtros de inventario') }}">
+        <a class="inventory-v2__filter-chip{% if low_stock_only %} is-active{% endif %}"
+           href="{{ url_for('main.products', low_stock=1, q=q or None) }}#catalogo"
+           {% if low_stock_only %}aria-current="true"{% endif %}>
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          {{ _("Ver productos con stock bajo (%(count)s)", count=low_stock_count) }}
+        </a>
+        {% if low_stock_only %}
+          <a class="inventory-v2__clear-filter" href="{{ url_for('main.products', q=q or None) }}#catalogo">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            {{ _("Quitar filtro") }}
+          </a>
+        {% endif %}
+      </div>
+
+      {% if low_stock_count == 0 and not low_stock_only %}
+        <div class="inventory-v2__stock-ok module-empty-v2" role="status">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+          <p>{{ _("Tu inventario está en orden. No hay productos que requieran reabastecimiento.") }}</p>
+        </div>
+      {% endif %}
 
       <div class="inventory-v2__bulk-actions">
         <button class="btn ghost" id="btn-select-mode" type="button">{{ _("Seleccionar productos") }}</button>
@@ -169,10 +192,16 @@
       </div>
       {% else %}
         <div class="inventory-v2__search-empty module-empty-v2" role="status">
-          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-          <h4>No encontramos productos para “{{ q }}”</h4>
-          <p>{{ _("Prueba con otro nombre, SKU o categoría.") }}</p>
-          <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">{{ _("Limpiar búsqueda") }}</a>
+          {% if low_stock_only and not q %}
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+            <h4>{{ _("Tu inventario está en orden. No hay productos que requieran reabastecimiento.") }}</h4>
+            <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">{{ _("Ver todos los productos") }}</a>
+          {% else %}
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <h4>{{ _("No encontramos productos para “%(query)s”", query=q) }}</h4>
+            <p>{{ _("Prueba con otro nombre, SKU o categoría.") }}</p>
+            <a class="btn ghost" href="{{ url_for('main.products', low_stock=1 if low_stock_only else None) }}#catalogo">{{ _("Limpiar búsqueda") }}</a>
+          {% endif %}
         </div>
       {% endif %}
     </section>

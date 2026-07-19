@@ -111,15 +111,65 @@
     <small>{{ _("Capital estimado") }}</small>
   </article>
 
-  <article class="dashboard-v2__metric dashboard-v2__metric--coral">
+  <button class="dashboard-v2__metric dashboard-v2__metric--coral dashboard-v2__metric--action"
+          type="button"
+          id="low-stock-open"
+          aria-haspopup="dialog"
+          aria-controls="low-stock-dialog">
     <div class="dashboard-v2__metric-head">
       <span>{{ _("Stock bajo") }}</span>
       <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
     </div>
     <strong>{{ low_stock }}</strong>
-    <small>{{ _("Requieren atención") }}</small>
-  </article>
+    <small>{{ _("Ver productos que requieren atención") }}</small>
+  </button>
 </section>
+
+<dialog class="dashboard-v2__stock-dialog" id="low-stock-dialog" aria-labelledby="low-stock-title">
+  <div class="dashboard-v2__stock-dialog-head">
+    <div>
+      <span class="dashboard-v2__kicker">{{ _("Inventario") }}</span>
+      <h3 id="low-stock-title">{{ _("Productos con stock bajo") }}</h3>
+      <p>{{ _("Revisa las existencias antes de que afecten una venta.") }}</p>
+    </div>
+    <button class="dashboard-v2__dialog-close" type="button" data-close-low-stock aria-label="{{ _('Cerrar') }}">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  {% if low_stock_products %}
+    <div class="dashboard-v2__stock-list">
+      {% for product in low_stock_products %}
+        <article class="dashboard-v2__stock-item">
+          <div class="dashboard-v2__stock-product">
+            <strong>{{ product.name }}</strong>
+            <span>{{ _("SKU: %(sku)s", sku=product.sku) }}</span>
+            {% if product.supplier %}
+              <small><i class="fa-regular fa-building" aria-hidden="true"></i> {{ product.supplier }}</small>
+            {% endif %}
+          </div>
+          <dl>
+            <div><dt>{{ _("Stock actual") }}</dt><dd>{{ product.stock }}</dd></div>
+            <div><dt>{{ _("Stock mínimo") }}</dt><dd>{{ product.min_stock }}</dd></div>
+            <div>
+              <dt>{{ _("Reabastecer") }}</dt>
+              <dd>{{ product.min_stock - product.stock if product.min_stock > product.stock else 0 }}</dd>
+            </div>
+          </dl>
+          <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=product.id) }}">{{ _("Ver producto") }}</a>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="dashboard-v2__stock-dialog-actions">
+      <a class="btn" href="{{ url_for('main.products', low_stock=1) }}#catalogo">{{ _("Ver inventario filtrado") }}</a>
+    </div>
+  {% else %}
+    <div class="module-empty-v2 dashboard-v2__stock-empty">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <h4>{{ _("Tu inventario está en orden. No hay productos que requieran reabastecimiento.") }}</h4>
+    </div>
+  {% endif %}
+</dialog>
 
 <section class="dashboard-v2__workspace">
   <article class="dashboard-v2__panel dashboard-v2__chart-panel">
@@ -234,6 +284,18 @@
 <script>
   window.topLabels = {{ top_products | map(attribute='name') | list | tojson }};
   window.topValues = {{ top_products | map(attribute='qty') | list | tojson }};
+
+  const lowStockDialog = document.getElementById("low-stock-dialog");
+  const lowStockOpen = document.getElementById("low-stock-open");
+  const lowStockClose = lowStockDialog.querySelector("[data-close-low-stock]");
+
+  lowStockOpen.addEventListener("click", () => lowStockDialog.showModal());
+  lowStockClose.addEventListener("click", () => lowStockDialog.close());
+  lowStockDialog.addEventListener("click", (event) => {
+    if (event.target === lowStockDialog) {
+      lowStockDialog.close();
+    }
+  });
 </script>
 
 {% endblock %}

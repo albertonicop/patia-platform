@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-18 08:10-0600\n"
+"POT-Creation-Date: 2026-07-18 18:31-0600\n"
 "PO-Revision-Date: 2026-07-17 11:53-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -229,48 +229,48 @@ msgstr "Sign in"
 msgid "Entrar"
 msgstr "Sign in"
 
-#: app/routes.py:876
+#: app/routes.py:880
 #, python-format
 msgid "%(product)s agotado"
 msgstr "%(product)s sold out"
 
-#: app/routes.py:877
+#: app/routes.py:881
 msgid "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
 msgstr "Current stock: 0. You need to restock immediately."
 
-#: app/routes.py:882
+#: app/routes.py:886
 #, python-format
 msgid "Reordenar %(product)s"
 msgstr "Reorder %(product)s"
 
-#: app/routes.py:884
+#: app/routes.py:888
 #, python-format
 msgid "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s."
 msgstr "Current stock: %(stock)s. Recommended minimum: %(minimum)s."
 
-#: app/routes.py:892
+#: app/routes.py:896
 #, python-format
 msgid "%(product)s se agotará pronto"
 msgstr "%(product)s will be out of stock soon"
 
-#: app/routes.py:894
+#: app/routes.py:898
 #, python-format
 msgid ""
 "Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s "
 "días."
 msgstr "At the current sales rate, it will be gone in approximately %(days)s days."
 
-#: app/routes.py:901
+#: app/routes.py:905
 #, python-format
 msgid "Vigilar %(product)s"
 msgstr "Monitor %(product)s"
 
-#: app/routes.py:902
+#: app/routes.py:906
 #, python-format
 msgid "Inventario estimado para %(days)s días."
 msgstr "Estimated inventory for %(days)s days."
 
-#: app/routes.py:908
+#: app/routes.py:912
 #, python-format
 msgid ""
 "%(product)s es el producto con más movimiento. Conviene revisar sus "
@@ -279,12 +279,12 @@ msgstr ""
 "%(product)s is the product with the most movement. It is a good idea to "
 "check their stock before your next purchase."
 
-#: app/routes.py:913
+#: app/routes.py:917
 #, python-format
 msgid "En los últimos 7 días registraste $%(amount)s MXN en ventas."
 msgstr "In the last 7 days you recorded $%(amount)s MXN in sales."
 
-#: app/routes.py:918
+#: app/routes.py:922
 #, python-format
 msgid ""
 "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, "
@@ -293,7 +293,7 @@ msgstr ""
 "Your estimated profit for the last 7 days is $%(amount)s MXN, considering"
 " the recorded cost of products sold."
 
-#: app/routes.py:924
+#: app/routes.py:928
 #, python-format
 msgid ""
 "Tienes %(count)s producto con inventario bajo. Revísalo antes de que "
@@ -302,7 +302,7 @@ msgstr ""
 "You have %(count)s product with low inventory. Review it before it "
 "affects a sale."
 
-#: app/routes.py:929
+#: app/routes.py:933
 #, python-format
 msgid ""
 "Tienes %(count)s productos con inventario bajo. Revísalos antes de que "
@@ -311,128 +311,128 @@ msgstr ""
 "You have %(count)s products with low inventory. Review them before they "
 "affect a sale."
 
-#: app/routes.py:977
+#: app/routes.py:982
 msgid "El periodo solicitado no es válido. Mostramos los últimos 7 días."
 msgstr "The requested period is invalid. We are showing the last 7 days."
 
-#: app/routes.py:1001
+#: app/routes.py:1006
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr "The start date cannot be later than the end date."
 
-#: app/routes.py:1003
+#: app/routes.py:1008
 msgid "El rango personalizado no puede superar 366 días."
 msgstr "The custom range cannot exceed 366 days."
 
-#: app/routes.py:1005
+#: app/routes.py:1010
 msgid "Escribe fechas válidas. Mostramos los últimos 7 días."
 msgstr "Enter valid dates. We are showing the last 7 days."
 
-#: app/routes.py:1258
+#: app/routes.py:1263
 msgid "Completa los datos básicos"
 msgstr "Complete the basic information"
 
-#: app/routes.py:1259
+#: app/routes.py:1264
 msgid "Confirma la información principal de tu negocio."
 msgstr "Confirm the main information of your business."
 
-#: app/routes.py:1261
+#: app/routes.py:1266
 msgid "Completar datos"
 msgstr "Complete data"
 
-#: app/routes.py:1265 app/templates/products.html:11
+#: app/routes.py:1270 app/templates/products.html:11
 #: app/templates/products.html:25
 msgid "Agrega tu primer producto"
 msgstr "Add your first product"
 
-#: app/routes.py:1266
+#: app/routes.py:1271
 msgid "Captura un producto o importa tu catálogo desde Excel."
 msgstr "Capture a product or import your catalog from Excel."
 
-#: app/routes.py:1268 app/templates/products.html:14
+#: app/routes.py:1273 app/templates/products.html:14
 msgid "Agregar primer producto"
 msgstr "Add first product"
 
-#: app/routes.py:1272
+#: app/routes.py:1277
 msgid "Registra tu primera venta"
 msgstr "Register your first sale"
 
-#: app/routes.py:1273
+#: app/routes.py:1278
 msgid "Prueba el punto de venta con un producto de tu catálogo."
 msgstr "Test the point of sale with a product from your catalog."
 
-#: app/routes.py:1275
+#: app/routes.py:1280
 msgid "Registrar primera venta"
 msgstr "Register first sale"
 
-#: app/routes.py:1279
+#: app/routes.py:1284
 msgid "Revisa tus resultados"
 msgstr "Check your results"
 
-#: app/routes.py:1280
+#: app/routes.py:1285
 msgid "Consulta ventas, inventario y alertas en este panel."
 msgstr "View sales, inventory, and alerts in this dashboard."
 
-#: app/routes.py:1340 app/templates/edit_product.html:20
+#: app/routes.py:1353 app/templates/edit_product.html:20
 #: app/templates/products.html:37 app/templates/products.html:95
 msgid "SKU"
 msgstr "SKU"
 
-#: app/routes.py:1341 app/templates/edit_product.html:25
+#: app/routes.py:1354 app/templates/edit_product.html:25
 #: app/templates/products.html:61
 msgid "Código de barras"
 msgstr "Bar-code"
 
-#: app/routes.py:1342 app/templates/edit_product.html:16
+#: app/routes.py:1355 app/templates/edit_product.html:16
 #: app/templates/products.html:33
 msgid "Nombre del producto"
 msgstr "Product name"
 
-#: app/routes.py:1343 app/templates/edit_product.html:30
-#: app/templates/products.html:65 app/templates/products.html:147
-#: app/templates/products.html:152
+#: app/routes.py:1356 app/templates/edit_product.html:30
+#: app/templates/products.html:65 app/templates/products.html:170
+#: app/templates/products.html:175
 msgid "Categoría"
 msgstr "Category"
 
-#: app/routes.py:1344 app/templates/edit_product.html:34
-#: app/templates/products.html:69 app/templates/products.html:147
-#: app/templates/products.html:153 app/templates/suppliers.html:17
+#: app/routes.py:1357 app/templates/edit_product.html:34
+#: app/templates/products.html:69 app/templates/products.html:170
+#: app/templates/products.html:176 app/templates/suppliers.html:17
 #: app/templates/suppliers.html:36 app/templates/suppliers.html:46
 msgid "Proveedor"
 msgstr "Supplier"
 
-#: app/routes.py:1345 app/templates/reports.html:155
+#: app/routes.py:1358 app/templates/reports.html:155
 msgid "Costo"
 msgstr "Cost"
 
-#: app/routes.py:1346 app/templates/edit_product.html:42
+#: app/routes.py:1359 app/templates/edit_product.html:42
 #: app/templates/products.html:47
 msgid "Precio de venta"
 msgstr "Sale price"
 
-#: app/routes.py:1347
+#: app/routes.py:1360
 msgid "Stock inicial"
 msgstr "Initial stock"
 
-#: app/routes.py:1348 app/templates/edit_product.html:51
-#: app/templates/products.html:73
+#: app/routes.py:1361 app/templates/dashboard.html:153
+#: app/templates/edit_product.html:51 app/templates/products.html:73
 msgid "Stock mínimo"
 msgstr "Minimum stock"
 
-#: app/routes.py:1354
+#: app/routes.py:1367
 msgid "PRODUCTOS"
 msgstr "PRODUCTS"
 
-#: app/routes.py:1359
+#: app/routes.py:1372
 msgid "PATIA - Plantilla oficial de productos"
 msgstr "PATIA - Official product template"
 
-#: app/routes.py:1361
+#: app/routes.py:1374
 msgid ""
 "Llena esta tabla con tus productos. No cambies los nombres de las "
 "columnas."
 msgstr "Fill this table with your products. Do not change the column names."
 
-#: app/routes.py:1471
+#: app/routes.py:1484
 msgid ""
 "El archivo no contiene las columnas obligatorias. Descarga la plantilla "
 "PATIA e inténtalo de nuevo."
@@ -440,7 +440,7 @@ msgstr ""
 "The file does not contain the required columns. Download the PATIA "
 "template and try again."
 
-#: app/routes.py:1569
+#: app/routes.py:1582
 #, python-format
 msgid ""
 "Importación terminada: %(created)s creados, %(updated)s actualizados, "
@@ -449,49 +449,49 @@ msgstr ""
 "Import completed: %(created)s created, %(updated)s updated, %(omitted)s "
 "skipped, and %(errors)s errors."
 
-#: app/routes.py:1806
+#: app/routes.py:1819
 #, python-format
 msgid "Venta registrada: %(product)s x%(quantity)s."
 msgstr "Sale recorded: %(product)s x%(quantity)s."
 
-#: app/routes.py:1846
+#: app/routes.py:1859
 msgid "No autenticado"
 msgstr "Not authenticated"
 
-#: app/routes.py:1853 app/routes.py:1868
+#: app/routes.py:1866 app/routes.py:1881
 msgid "Solicitud inválida"
 msgstr "Invalid request"
 
-#: app/routes.py:1857
+#: app/routes.py:1870
 msgid "El carrito está vacío"
 msgstr "The cart is empty"
 
-#: app/routes.py:1861
+#: app/routes.py:1874
 msgid "Selecciona un método de pago válido"
 msgstr "Select a valid payment method"
 
-#: app/routes.py:1874 app/routes.py:1880
+#: app/routes.py:1887 app/routes.py:1893
 msgid "Artículo inválido"
 msgstr "Invalid item"
 
-#: app/routes.py:1883
+#: app/routes.py:1896
 msgid "La cantidad debe ser mayor a cero"
 msgstr "The quantity must be greater than zero"
 
-#: app/routes.py:1920
+#: app/routes.py:1933
 msgid "Producto no encontrado"
 msgstr "Product not found"
 
-#: app/routes.py:1948
+#: app/routes.py:1961
 #, python-format
 msgid "Stock insuficiente: %(product)s"
 msgstr "Insufficient stock: %(product)s"
 
-#: app/routes.py:1989
+#: app/routes.py:2002
 msgid "No se pudo procesar la venta"
 msgstr "The sale could not be processed"
 
-#: app/routes.py:2603
+#: app/routes.py:2616
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del"
@@ -500,12 +500,12 @@ msgstr ""
 "We deleted %(deleted)s products without sales and removed %(protected)s "
 "from the catalog while preserving their history."
 
-#: app/routes.py:2611
+#: app/routes.py:2624
 #, python-format
 msgid "Eliminamos %(count)s productos del catálogo."
 msgstr "We deleted %(count)s products from the catalog."
 
-#: app/routes.py:2646
+#: app/routes.py:2659
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s seleccionados y retiramos %(protected)s "
@@ -514,7 +514,7 @@ msgstr ""
 "We deleted %(deleted)s selected products and removed %(protected)s while "
 "preserving their history."
 
-#: app/routes.py:2653
+#: app/routes.py:2666
 #, python-format
 msgid "%(count)s productos eliminados."
 msgstr "%(count)s products deleted."
@@ -638,8 +638,8 @@ msgstr "State"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
-#: app/templates/admin.html:98 app/templates/products.html:147
-#: app/templates/products.html:158 app/templates/sell.html:101
+#: app/templates/admin.html:98 app/templates/products.html:170
+#: app/templates/products.html:181 app/templates/sell.html:101
 #: app/templates/sell.html:110 app/templates/suppliers.html:40
 #: app/templates/suppliers.html:59
 msgid "Acciones"
@@ -870,7 +870,7 @@ msgstr "Smart management"
 msgid "Menú"
 msgstr "Menu"
 
-#: app/templates/base.html:30
+#: app/templates/base.html:30 app/templates/dashboard.html:135
 msgid "Cerrar"
 msgstr "Close"
 
@@ -882,8 +882,8 @@ msgstr "Main navigation"
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: app/templates/base.html:38 app/templates/edit_product.html:7
-#: app/templates/landing.html:69
+#: app/templates/base.html:38 app/templates/dashboard.html:131
+#: app/templates/edit_product.html:7 app/templates/landing.html:69
 msgid "Inventario"
 msgstr "Inventory"
 
@@ -1044,49 +1044,85 @@ msgstr "Inventory value"
 msgid "Capital estimado"
 msgstr "Estimated capital"
 
-#: app/templates/dashboard.html:116 app/templates/landing.html:70
+#: app/templates/dashboard.html:120 app/templates/landing.html:70
 msgid "Stock bajo"
 msgstr "Low stock"
 
-#: app/templates/dashboard.html:120
-msgid "Requieren atención"
-msgstr "Needs attention"
+#: app/templates/dashboard.html:124
+msgid "Ver productos que requieren atención"
+msgstr "View products that need attention"
 
-#: app/templates/dashboard.html:128
+#: app/templates/dashboard.html:132
+msgid "Productos con stock bajo"
+msgstr "Products with low stock"
+
+#: app/templates/dashboard.html:133
+msgid "Revisa las existencias antes de que afecten una venta."
+msgstr "Review stock levels before they affect a sale."
+
+#: app/templates/dashboard.html:146
+#, python-format
+msgid "SKU: %(sku)s"
+msgstr "SKU: %(sku)s"
+
+#: app/templates/dashboard.html:152 app/templates/edit_product.html:46
+msgid "Stock actual"
+msgstr "Current stock"
+
+#: app/templates/dashboard.html:155
+msgid "Reabastecer"
+msgstr "Restock"
+
+#: app/templates/dashboard.html:159
+msgid "Ver producto"
+msgstr "View product"
+
+#: app/templates/dashboard.html:164
+msgid "Ver inventario filtrado"
+msgstr "View filtered inventory"
+
+#: app/templates/dashboard.html:169 app/templates/products.html:150
+#: app/templates/products.html:197
+msgid ""
+"Tu inventario está en orden. No hay productos que requieran "
+"reabastecimiento."
+msgstr "Your inventory is in order. No products need restocking."
+
+#: app/templates/dashboard.html:178
 msgid "Rendimiento"
 msgstr "Performance"
 
-#: app/templates/dashboard.html:129 app/templates/reports.html:132
+#: app/templates/dashboard.html:179 app/templates/reports.html:132
 msgid "Productos más vendidos"
 msgstr "Best-selling products"
 
-#: app/templates/dashboard.html:143
+#: app/templates/dashboard.html:193
 msgid "Aún no hay ventas para mostrar"
 msgstr "No sales to display yet"
 
-#: app/templates/dashboard.html:144
+#: app/templates/dashboard.html:194
 msgid ""
 "Cuando registres tus primeras ventas, aquí verás el rendimiento de tus "
 "productos."
 msgstr "Once you record your first sales, product performance will appear here."
 
-#: app/templates/dashboard.html:154
+#: app/templates/dashboard.html:204
 msgid "Inteligencia comercial"
 msgstr "Business intelligence"
 
-#: app/templates/dashboard.html:155
+#: app/templates/dashboard.html:205
 msgid "Copiloto PATIA"
 msgstr "Co-pilot PATIA"
 
-#: app/templates/dashboard.html:165
+#: app/templates/dashboard.html:215
 msgid "Basado en tus ventas e inventario registrados en PATIA."
 msgstr "Based on the sales and inventory recorded in PATIA."
 
-#: app/templates/dashboard.html:171
+#: app/templates/dashboard.html:221
 msgid "Necesitamos conocer un poco más tu negocio"
 msgstr "We need to learn a little more about your business"
 
-#: app/templates/dashboard.html:171
+#: app/templates/dashboard.html:221
 msgid ""
 "Agrega productos y registra ventas. Con esos datos PATIA podrá darte "
 "recomendaciones útiles y explicables."
@@ -1094,7 +1130,7 @@ msgstr ""
 "Add products and record sales so PATIA can provide useful, explainable "
 "recommendations."
 
-#: app/templates/dashboard.html:178
+#: app/templates/dashboard.html:228
 msgid ""
 "La utilidad estimada corresponde a las ventas de los últimos 7 días menos"
 " el costo registrado de las unidades vendidas."
@@ -1102,11 +1138,11 @@ msgstr ""
 "Estimated profit is calculated from sales over the last 7 days minus the "
 "recorded cost of the units sold."
 
-#: app/templates/dashboard.html:186
+#: app/templates/dashboard.html:236
 msgid "Predicción de inventario"
 msgstr "Inventory forecasting"
 
-#: app/templates/dashboard.html:190
+#: app/templates/dashboard.html:240
 msgid ""
 "PATIA analiza tus ventas para ayudarte a decidir qué reabastecer y qué "
 "productos requieren atención."
@@ -1114,23 +1150,23 @@ msgstr ""
 "PATIA analyzes your sales to help you decide what to restock and which "
 "products need attention."
 
-#: app/templates/dashboard.html:194 app/templates/subscription.html:75
+#: app/templates/dashboard.html:244 app/templates/subscription.html:75
 msgid "Conocer PATIA Pro"
 msgstr "Discover PATIA Pro"
 
-#: app/templates/dashboard.html:204
+#: app/templates/dashboard.html:254
 msgid "Operación"
 msgstr "Operations"
 
-#: app/templates/dashboard.html:205
+#: app/templates/dashboard.html:255
 msgid "Alertas que requieren atención"
 msgstr "Alerts that need attention"
 
-#: app/templates/dashboard.html:226
+#: app/templates/dashboard.html:276
 msgid "Todo bajo control"
 msgstr "Everything is under control"
 
-#: app/templates/dashboard.html:228
+#: app/templates/dashboard.html:278
 msgid "No hay productos con stock crítico en este momento."
 msgstr "No products have critical stock levels right now."
 
@@ -1165,10 +1201,6 @@ msgstr "If you capture it, it cannot belong to another product in your catalog."
 #: app/templates/edit_product.html:38 app/templates/products.html:42
 msgid "Precio de compra"
 msgstr "Purchase price"
-
-#: app/templates/edit_product.html:46
-msgid "Stock actual"
-msgstr "Current stock"
 
 #: app/templates/edit_product.html:48
 msgid ""
@@ -1264,8 +1296,8 @@ msgid ""
 "Administra inventario, ventas y reportes desde un solo lugar para tomar "
 "decisiones con información clara."
 msgstr ""
-"Manage inventory, sales, and reports in one place so you can make decisions "
-"with clear information."
+"Manage inventory, sales, and reports in one place so you can make "
+"decisions with clear information."
 
 #: app/templates/landing.html:36 app/templates/subscribe.html:11
 msgid "Condiciones de PATIA Pro"
@@ -1746,8 +1778,8 @@ msgstr ""
 msgid "Control operativo para PyMEs que quieren crecer con claridad."
 msgstr "Operational control for small businesses that want to grow with clarity."
 
-#: app/templates/landing.html:273 app/templates/products.html:147
-#: app/templates/products.html:155 app/templates/subscribe.html:85
+#: app/templates/landing.html:273 app/templates/products.html:170
+#: app/templates/products.html:178 app/templates/subscribe.html:85
 msgid "Precio"
 msgstr "Pricing"
 
@@ -2196,15 +2228,28 @@ msgstr "Search product"
 msgid "Buscar producto…"
 msgstr "Search product…"
 
-#: app/templates/products.html:127
+#: app/templates/products.html:128
 msgid "Busca por nombre, SKU o categoría."
 msgstr "Search by name, SKU or category."
 
-#: app/templates/products.html:132 app/templates/products.html:186
+#: app/templates/products.html:132
+msgid "Filtros de inventario"
+msgstr "Inventory filters"
+
+#: app/templates/products.html:137
+#, python-format
+msgid "Ver productos con stock bajo (%(count)s)"
+msgstr "View low-stock products (%(count)s)"
+
+#: app/templates/products.html:142
+msgid "Quitar filtro"
+msgstr "Remove filter"
+
+#: app/templates/products.html:155 app/templates/products.html:215
 msgid "Seleccionar productos"
 msgstr "Select products"
 
-#: app/templates/products.html:133
+#: app/templates/products.html:156
 msgid ""
 "¿Eliminar los productos sin ventas? Los productos que forman parte del "
 "historial se conservarán."
@@ -2212,38 +2257,38 @@ msgstr ""
 "Delete products without sales? Products included in sales history will be"
 " preserved."
 
-#: app/templates/products.html:135
+#: app/templates/products.html:158
 msgid "Borrar todo el catálogo"
 msgstr "Delete entire catalog"
 
-#: app/templates/products.html:140
+#: app/templates/products.html:163
 msgid "Eliminar seleccionados"
 msgstr "Delete selected"
 
-#: app/templates/products.html:147 app/templates/products.html:151
+#: app/templates/products.html:170 app/templates/products.html:174
 #: app/templates/reports.html:137 app/templates/reports.html:155
 #: app/templates/sell.html:68 app/templates/ticket.html:47
 msgid "Producto"
 msgstr "Product"
 
-#: app/templates/products.html:147 app/templates/products.html:154
+#: app/templates/products.html:170 app/templates/products.html:177
 msgid "Stock"
 msgstr "stock"
 
-#: app/templates/products.html:147 app/templates/products.html:156
+#: app/templates/products.html:170 app/templates/products.html:179
 #: app/templates/reports.html:79 app/templates/reports.html:155
 msgid "Margen"
 msgstr "Margin"
 
-#: app/templates/products.html:147 app/templates/products.html:157
+#: app/templates/products.html:170 app/templates/products.html:180
 msgid "Valor"
 msgstr "Worth"
 
-#: app/templates/products.html:159
+#: app/templates/products.html:182
 msgid "Editar"
 msgstr "Edit"
 
-#: app/templates/products.html:160
+#: app/templates/products.html:183
 msgid ""
 "¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su"
 " historial."
@@ -2251,28 +2296,37 @@ msgstr ""
 "Remove this product from the catalog? If it has sales, PATIA will "
 "preserve its history."
 
-#: app/templates/products.html:162 app/templates/sell.html:155
+#: app/templates/products.html:185 app/templates/sell.html:155
 #: app/templates/suppliers.html:66
 msgid "Eliminar"
 msgstr "Remove"
 
-#: app/templates/products.html:174
+#: app/templates/products.html:198
+msgid "Ver todos los productos"
+msgstr "View all products"
+
+#: app/templates/products.html:201
+#, python-format
+msgid "No encontramos productos para “%(query)s”"
+msgstr "We could not find products for “%(query)s”"
+
+#: app/templates/products.html:202
 msgid "Prueba con otro nombre, SKU o categoría."
 msgstr "Try another name, SKU or category."
 
-#: app/templates/products.html:175
+#: app/templates/products.html:203
 msgid "Limpiar búsqueda"
 msgstr "Clear search"
 
-#: app/templates/products.html:184
+#: app/templates/products.html:213
 msgid "Importando catálogo…"
 msgstr "Importing catalog?"
 
-#: app/templates/products.html:185
+#: app/templates/products.html:214
 msgid "Cancelar selección"
 msgstr "Cancel selection"
 
-#: app/templates/products.html:187
+#: app/templates/products.html:216
 #, python-format
 msgid "¿Eliminar %(count)s productos seleccionados?"
 msgstr "Delete %(count)s selected products?"

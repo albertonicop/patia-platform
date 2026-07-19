@@ -8603,6 +8603,268 @@ table {
     background: rgba(255, 255, 255, .64);
 }
 
+/* Actionable low-stock experience --------------------------------------- */
+
+.app-shell-v2 button.dashboard-v2__metric--action {
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.app-shell-v2 button.dashboard-v2__metric--action small::after {
+    margin-left: 6px;
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f061";
+}
+
+.app-shell-v2 button.dashboard-v2__metric--action:focus-visible {
+    border-color: #c7c0f5;
+    outline: 3px solid rgba(105, 86, 232, .2);
+    outline-offset: 3px;
+}
+
+.app-shell-v2 .dashboard-v2__stock-dialog {
+    width: min(760px, calc(100vw - 32px));
+    max-height: min(760px, calc(100vh - 32px));
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--v2-line);
+    border-radius: 20px;
+    background: var(--v2-surface);
+    color: var(--v2-ink);
+    box-shadow: 0 28px 80px rgba(20, 24, 42, .24);
+}
+
+.app-shell-v2 .dashboard-v2__stock-dialog::backdrop {
+    background: rgba(20, 24, 42, .48);
+    backdrop-filter: blur(3px);
+}
+
+.app-shell-v2 .dashboard-v2__stock-dialog-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 26px 20px;
+    border-bottom: 1px solid var(--v2-line);
+}
+
+.app-shell-v2 .dashboard-v2__stock-dialog-head h3 {
+    margin: 5px 0 6px;
+    font-size: clamp(20px, 3vw, 25px);
+}
+
+.app-shell-v2 .dashboard-v2__stock-dialog-head p {
+    margin: 0;
+    color: var(--v2-muted);
+    font-size: 13px;
+}
+
+.app-shell-v2 .dashboard-v2__dialog-close {
+    display: inline-grid;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid var(--v2-line);
+    border-radius: 12px;
+    background: #fff;
+    color: #555c70;
+    cursor: pointer;
+}
+
+.app-shell-v2 .dashboard-v2__dialog-close:hover,
+.app-shell-v2 .dashboard-v2__dialog-close:focus-visible {
+    border-color: #c7c0f5;
+    background: #f7f6ff;
+    color: var(--v2-violet);
+}
+
+.app-shell-v2 .dashboard-v2__stock-list {
+    display: grid;
+    gap: 10px;
+    max-height: min(510px, calc(100vh - 220px));
+    padding: 18px 26px;
+    overflow-y: auto;
+}
+
+.app-shell-v2 .dashboard-v2__stock-item {
+    display: grid;
+    grid-template-columns: minmax(150px, 1.3fr) minmax(260px, 1.7fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding: 15px 16px;
+    border: 1px solid #e5e6ee;
+    border-radius: 14px;
+    background: #fbfbfd;
+}
+
+.app-shell-v2 .dashboard-v2__stock-product strong,
+.app-shell-v2 .dashboard-v2__stock-product span,
+.app-shell-v2 .dashboard-v2__stock-product small {
+    display: block;
+}
+
+.app-shell-v2 .dashboard-v2__stock-product strong {
+    overflow-wrap: anywhere;
+    font-size: 14px;
+}
+
+.app-shell-v2 .dashboard-v2__stock-product span,
+.app-shell-v2 .dashboard-v2__stock-product small {
+    margin-top: 4px;
+    color: #62697c;
+    font-size: 11px;
+}
+
+.app-shell-v2 .dashboard-v2__stock-item dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.app-shell-v2 .dashboard-v2__stock-item dl div {
+    min-width: 0;
+}
+
+.app-shell-v2 .dashboard-v2__stock-item dt {
+    color: #656c7e;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.app-shell-v2 .dashboard-v2__stock-item dd {
+    margin: 4px 0 0;
+    color: var(--v2-ink);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.app-shell-v2 .dashboard-v2__stock-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 18px 26px 22px;
+    border-top: 1px solid var(--v2-line);
+}
+
+.app-shell-v2 .dashboard-v2__stock-empty {
+    margin: 24px 26px;
+    text-align: center;
+}
+
+.app-shell-v2 .dashboard-v2__stock-empty > i,
+.app-shell-v2 .inventory-v2__stock-ok > i {
+    color: var(--v2-green);
+    font-size: 22px;
+}
+
+.app-shell-v2 .inventory-v2__stock-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 4px;
+}
+
+.app-shell-v2 .inventory-v2__filter-chip,
+.app-shell-v2 .inventory-v2__clear-filter {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.app-shell-v2 .inventory-v2__filter-chip {
+    border: 1px solid #e1dfe9;
+    background: #faf9fd;
+    color: #575e70;
+}
+
+.app-shell-v2 .inventory-v2__filter-chip i {
+    color: var(--v2-coral);
+}
+
+.app-shell-v2 .inventory-v2__filter-chip:hover,
+.app-shell-v2 .inventory-v2__filter-chip:focus-visible,
+.app-shell-v2 .inventory-v2__filter-chip.is-active {
+    border-color: #d8c7c0;
+    background: #fff7f3;
+    color: #8c4935;
+}
+
+.app-shell-v2 .inventory-v2__clear-filter {
+    color: #5e6475;
+}
+
+.app-shell-v2 .inventory-v2__stock-ok {
+    display: flex;
+    min-height: 70px;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0 4px;
+    padding: 16px 18px;
+}
+
+.app-shell-v2 .inventory-v2__stock-ok p {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .app-shell-v2 .dashboard-v2__stock-item {
+        grid-template-columns: 1fr auto;
+    }
+
+    .app-shell-v2 .dashboard-v2__stock-item dl {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-shell-v2 .dashboard-v2__stock-dialog {
+        width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
+        border-radius: 16px;
+    }
+
+    .app-shell-v2 .dashboard-v2__stock-dialog-head,
+    .app-shell-v2 .dashboard-v2__stock-list,
+    .app-shell-v2 .dashboard-v2__stock-dialog-actions {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .app-shell-v2 .dashboard-v2__stock-item {
+        grid-template-columns: 1fr;
+        gap: 13px;
+    }
+
+    .app-shell-v2 .dashboard-v2__stock-item dl {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .app-shell-v2 .dashboard-v2__stock-item .btn {
+        width: 100%;
+    }
+
+    .app-shell-v2 .dashboard-v2__stock-dialog-actions .btn,
+    .app-shell-v2 .inventory-v2__filter-chip {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 .landing-v4 .landing-v3__product-stage {
     padding-bottom: 20px;
 }

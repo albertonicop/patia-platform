@@ -62,7 +62,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=111", self.template(name), name)
+            self.assertIn("styles.css') }}?v=112", self.template(name), name)
 
 
 if __name__ == "__main__":
