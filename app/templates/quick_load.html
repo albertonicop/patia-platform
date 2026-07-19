@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% block title %}{{ _("Carga rápida con escáner") }}{% endblock %}
+
+{% block content %}
+<div class="quick-load-v1">
+  <header class="quick-load-v1__header">
+    <div>
+      <a class="quick-load-v1__back" href="{{ url_for('main.products') }}">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        {{ _("Volver al inventario") }}
+      </a>
+      <p>{{ _("El lector USB funciona como teclado. Escanea un código y PATIA te llevará al siguiente paso.") }}</p>
+    </div>
+    <a class="btn ghost" href="{{ url_for('main.products') }}">{{ _("Terminar sesión") }}</a>
+  </header>
+
+  <section class="quick-load-v1__counter card" aria-label="{{ _('Resumen de esta sesión') }}">
+    <div><span>{{ _("Creados") }}</span><strong id="session-created">0</strong></div>
+    <div><span>{{ _("Reabastecidos") }}</span><strong id="session-restocked">0</strong></div>
+    <div><span>{{ _("Duplicados") }}</span><strong id="session-duplicates">0</strong></div>
+    <div><span>{{ _("Errores") }}</span><strong id="session-errors">0</strong></div>
+  </section>
+
+  <main class="quick-load-v1__workspace card" aria-labelledby="scanner-title">
+    <section id="scanner-stage" class="quick-load-v1__stage">
+      <span class="quick-load-v1__stage-icon" aria-hidden="true"><i class="fa-solid fa-barcode"></i></span>
+      <div>
+        <span class="quick-load-v1__step">{{ _("Paso 1") }}</span>
+        <h2 id="scanner-title">{{ _("Escanea o escribe el código de barras") }}</h2>
+        <p>{{ _("Mantén este campo seleccionado y usa el lector. También puedes escribir el código y presionar Enter.") }}</p>
+      </div>
+      <form id="barcode-form" class="quick-load-v1__scan-form">
+        <label class="sr-only" for="barcode-input">{{ _("Código de barras") }}</label>
+        <div class="quick-load-v1__scan-control">
+          <i class="fa-solid fa-barcode" aria-hidden="true"></i>
+          <input id="barcode-input"
+                 name="barcode"
+                 maxlength="64"
+                 autocomplete="off"
+                 autocapitalize="off"
+                 spellcheck="false"
+                 enterkeyhint="done"
+                 placeholder="{{ _('Escanea un código…') }}"
+                 required
+                 autofocus>
+          <button id="barcode-submit" class="btn" type="submit">{{ _("Buscar") }}</button>
+        </div>
+      </form>
+    </section>
+
+    <p id="quick-load-status" class="quick-load-v1__status" role="status" aria-live="polite"></p>
+
+    <section id="existing-stage" class="quick-load-v1__stage" hidden aria-labelledby="existing-title">
+      <div class="quick-load-v1__result-head">
+        <div>
+          <span class="quick-load-v1__step">{{ _("Producto encontrado") }}</span>
+          <h2 id="existing-title"></h2>
+        </div>
+        <span id="existing-state" class="quick-load-v1__badge"></span>
+      </div>
+      <dl class="quick-load-v1__product-data">
+        <div><dt>{{ _("SKU") }}</dt><dd id="existing-sku"></dd></div>
+        <div><dt>{{ _("Stock actual") }}</dt><dd id="existing-stock"></dd></div>
+        <div><dt>{{ _("Precio") }}</dt><dd id="existing-price"></dd></div>
+        <div><dt>{{ _("Proveedor") }}</dt><dd id="existing-supplier"></dd></div>
+      </dl>
+      <form id="restock-form" class="quick-load-v1__restock-form">
+        <div class="quick-load-v1__field">
+          <label for="restock-quantity">{{ _("Cantidad recibida") }} <span>*</span></label>
+          <input id="restock-quantity" name="quantity" type="number" min="1" step="1" inputmode="numeric" required>
+          <small id="restock-help">{{ _("Se sumará al stock actual y quedará registrada en el historial.") }}</small>
+        </div>
+        <div class="quick-load-v1__actions">
+          <button id="restock-submit" class="btn" type="submit">{{ _("Reabastecer") }}</button>
+          <a id="edit-product-link" class="btn ghost" href="#">{{ _("Editar producto") }}</a>
+          <button class="btn ghost" type="button" data-scan-next>{{ _("Escanear siguiente") }}</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="new-stage" class="quick-load-v1__stage" hidden aria-labelledby="new-title">
+      <div>
+        <span class="quick-load-v1__step">{{ _("Código nuevo") }}</span>
+        <h2 id="new-title">{{ _("Completa los datos del producto") }}</h2>
+        <p>{{ _("Guarda con el botón o presiona Ctrl + Enter. Después podrás escanear inmediatamente el siguiente.") }}</p>
+      </div>
+      <form id="quick-product-form" class="quick-load-v1__product-form">
+        <div class="quick-load-v1__field quick-load-v1__field--wide">
+          <label for="quick-barcode">{{ _("Código de barras") }}</label>
+          <input id="quick-barcode" name="barcode" readonly aria-readonly="true">
+          <small>{{ _("Se conserva exactamente como fue escaneado.") }}</small>
+        </div>
+        <div class="quick-load-v1__field quick-load-v1__field--wide">
+          <label for="quick-name">{{ _("Nombre") }} <span>*</span></label>
+          <input id="quick-name" name="name" maxlength="160" autocomplete="off" required>
+        </div>
+        <div class="quick-load-v1__field">
+          <label for="quick-sku">{{ _("SKU") }}</label>
+          <input id="quick-sku" name="sku" maxlength="64" autocomplete="off">
+          <small>{{ _("PATIA propone uno automático; puedes cambiarlo antes de guardar.") }}</small>
+        </div>
+        <div class="quick-load-v1__field">
+          <label for="quick-category">{{ _("Categoría") }}</label>
+          <input id="quick-category" name="category" maxlength="80" list="quick-categories" value="General">
+          <datalist id="quick-categories">
+            {% for category in categories %}<option value="{{ category }}">{% endfor %}
+          </datalist>
+        </div>
+        <div class="quick-load-v1__field">
+          <label for="quick-supplier">{{ _("Proveedor") }}</label>
+          <input id="quick-supplier" name="supplier" maxlength="120" list="quick-suppliers">
+          <datalist id="quick-suppliers">
+            {% for supplier in suppliers %}<option value="{{ supplier }}">{% endfor %}
+          </datalist>
+        </div>
+        <div class="quick-load-v1__field">
+          <label for="quick-cost">{{ _("Precio de costo") }}</label>
+          <input id="quick-cost" name="cost_price" type="number" min="0" step="0.01" inputmode="decimal" value="0">
+        </div>
+        <div class="quick-load-v1__field">
+          <label for="quick-price">{{ _("Precio de venta") }}</label>
+          <input id="quick-price" name="sale_price" type="number" min="0" step="0.01" inputmode="decimal" value="0">
+        </div>
+        <div class="quick-load-v1__field">
+          <label for="quick-stock">{{ _("Existencias iniciales") }}</label>
+          <input id="quick-stock" name="stock" type="number" min="0" step="1" inputmode="numeric" value="0">
+        </div>
+        <div class="quick-load-v1__field">
+          <label for="quick-min-stock">{{ _("Stock mínimo") }}</label>
+          <input id="quick-min-stock" name="min_stock" type="number" min="0" step="1" inputmode="numeric" value="5">
+        </div>
+        <div class="quick-load-v1__actions quick-load-v1__field--wide">
+          <button id="quick-product-submit" class="btn" type="submit">{{ _("Guardar y continuar") }}</button>
+          <button class="btn ghost" type="button" data-scan-next>{{ _("Cancelar y escanear siguiente") }}</button>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const endpoints = {
+    lookup: {{ url_for("main.quick_load_lookup")|tojson }},
+    create: {{ url_for("main.quick_load_create_product")|tojson }},
+    restockTemplate: {{ url_for("main.quick_load_restock_product", product_id=0)|tojson }}
+  };
+  const copy = {
+    searching: {{ _("Buscando código…")|tojson }},
+    saving: {{ _("Guardando producto…")|tojson }},
+    restocking: {{ _("Actualizando inventario…")|tojson }},
+    ready: {{ _("Listo para escanear el siguiente producto.")|tojson }},
+    active: {{ _("Activo")|tojson }},
+    archived: {{ _("Archivado")|tojson }},
+    restore: {{ _("Restaurar y reabastecer")|tojson }},
+    restock: {{ _("Reabastecer")|tojson }},
+    noSupplier: {{ _("Sin proveedor")|tojson }},
+    requestError: {{ _("No pudimos completar la operación. Inténtalo nuevamente.")|tojson }}
+  };
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  const barcodeForm = document.getElementById("barcode-form");
+  const barcodeInput = document.getElementById("barcode-input");
+  const barcodeSubmit = document.getElementById("barcode-submit");
+  const existingStage = document.getElementById("existing-stage");
+  const newStage = document.getElementById("new-stage");
+  const status = document.getElementById("quick-load-status");
+  const productForm = document.getElementById("quick-product-form");
+  const productSubmit = document.getElementById("quick-product-submit");
+  const restockForm = document.getElementById("restock-form");
+  const restockSubmit = document.getElementById("restock-submit");
+  const counters = {created: 0, restocked: 0, duplicates: 0, errors: 0};
+  let activeProduct = null;
+  let busy = false;
+
+  function setCounter(name) {
+    document.getElementById(`session-${name}`).textContent = String(counters[name]);
+  }
+
+  function setStatus(message, state = "") {
+    status.textContent = message;
+    status.dataset.state = state;
+  }
+
+  function showStage(stage) {
+    existingStage.hidden = stage !== "existing";
+    newStage.hidden = stage !== "new";
+  }
+
+  function resetScanner(message = "") {
+    activeProduct = null;
+    showStage("scanner");
+    barcodeForm.reset();
+    setStatus(message);
+    window.setTimeout(() => barcodeInput.focus(), 0);
+  }
+
+  function showProduct(product, duplicate = false) {
+    activeProduct = product;
+    showStage("existing");
+    document.getElementById("existing-title").textContent = product.name;
+    document.getElementById("existing-sku").textContent = product.sku;
+    document.getElementById("existing-stock").textContent = String(product.stock);
+    document.getElementById("existing-price").textContent = product.sale_price_display;
+    document.getElementById("existing-supplier").textContent = product.supplier || copy.noSupplier;
+    const state = document.getElementById("existing-state");
+    state.textContent = product.is_active ? copy.active : copy.archived;
+    state.dataset.state = product.is_active ? "active" : "archived";
+    restockSubmit.textContent = product.is_active ? copy.restock : copy.restore;
+    const editLink = document.getElementById("edit-product-link");
+    editLink.hidden = !product.edit_url;
+    if (product.edit_url) editLink.href = product.edit_url;
+    document.getElementById("restock-quantity").value = "";
+    if (duplicate) {
+      counters.duplicates += 1;
+      setCounter("duplicates");
+    }
+    window.setTimeout(() => document.getElementById("restock-quantity").focus(), 0);
+  }
+
+  async function requestJson(url, options = {}) {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        "Accept": "application/json",
+        ...(options.body ? {"Content-Type": "application/json", "X-CSRFToken": csrfToken} : {}),
+        ...(options.headers || {})
+      }
+    });
+    const data = await response.json();
+    return {response, data};
+  }
+
+  barcodeForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    const barcode = barcodeInput.value.trim();
+    if (!barcode) return;
+    busy = true;
+    barcodeSubmit.disabled = true;
+    setStatus(copy.searching);
+    try {
+      const {response, data} = await requestJson(`${endpoints.lookup}?barcode=${encodeURIComponent(barcode)}`);
+      if (!response.ok) throw new Error(data.error || copy.requestError);
+      if (data.found) {
+        showProduct(data.product, true);
+      } else {
+        showStage("new");
+        productForm.reset();
+        document.getElementById("quick-barcode").value = data.barcode;
+        document.getElementById("quick-sku").value = data.suggested_sku;
+        document.getElementById("quick-category").value = data.metadata?.category || "General";
+        document.getElementById("quick-name").value = data.metadata?.name || "";
+        document.getElementById("quick-cost").value = "0";
+        document.getElementById("quick-price").value = "0";
+        document.getElementById("quick-stock").value = "0";
+        document.getElementById("quick-min-stock").value = "5";
+        setStatus("");
+        window.setTimeout(() => document.getElementById("quick-name").focus(), 0);
+      }
+    } catch (error) {
+      counters.errors += 1;
+      setCounter("errors");
+      setStatus(error.message || copy.requestError, "error");
+      barcodeInput.focus();
+      barcodeInput.select();
+    } finally {
+      busy = false;
+      barcodeSubmit.disabled = false;
+    }
+  });
+
+  productForm.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      productForm.requestSubmit();
+    }
+  });
+
+  productForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy || !productForm.reportValidity()) return;
+    busy = true;
+    productSubmit.disabled = true;
+    setStatus(copy.saving);
+    const payload = Object.fromEntries(new FormData(productForm).entries());
+    try {
+      const {response, data} = await requestJson(endpoints.create, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      if (response.status === 409 && data.product) {
+        showProduct(data.product, true);
+        setStatus(data.error, "error");
+        return;
+      }
+      if (!response.ok) throw new Error(data.error || copy.requestError);
+      counters.created += 1;
+      setCounter("created");
+      resetScanner(`${data.message} ${copy.ready}`);
+    } catch (error) {
+      counters.errors += 1;
+      setCounter("errors");
+      setStatus(error.message || copy.requestError, "error");
+    } finally {
+      busy = false;
+      productSubmit.disabled = false;
+    }
+  });
+
+  restockForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy || !activeProduct || !restockForm.reportValidity()) return;
+    busy = true;
+    restockSubmit.disabled = true;
+    setStatus(copy.restocking);
+    try {
+      const endpoint = endpoints.restockTemplate.replace("/0/", `/${activeProduct.id}/`);
+      const {response, data} = await requestJson(endpoint, {
+        method: "POST",
+        body: JSON.stringify({quantity: document.getElementById("restock-quantity").value})
+      });
+      if (!response.ok) throw new Error(data.error || copy.requestError);
+      counters.restocked += 1;
+      setCounter("restocked");
+      resetScanner(`${data.message} ${copy.ready}`);
+    } catch (error) {
+      counters.errors += 1;
+      setCounter("errors");
+      setStatus(error.message || copy.requestError, "error");
+    } finally {
+      busy = false;
+      restockSubmit.disabled = false;
+    }
+  });
+
+  document.querySelectorAll("[data-scan-next]").forEach((button) => {
+    button.addEventListener("click", () => resetScanner(copy.ready));
+  });
+  window.addEventListener("pageshow", () => {
+    barcodeInput.focus({preventScroll: true});
+    if (window.innerWidth <= 768) {
+      document.getElementById("scanner-stage").scrollIntoView({block: "start"});
+    }
+  });
+})();
+</script>
+{% endblock %}

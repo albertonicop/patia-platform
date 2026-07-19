@@ -3,6 +3,19 @@
 
 {% block content %}
 <div class="inventory-v2">
+  <section class="card inventory-v2__quick-load-callout" aria-labelledby="quick-load-callout-title">
+    <span class="inventory-v2__quick-load-icon" aria-hidden="true"><i class="fa-solid fa-barcode"></i></span>
+    <div>
+      <span class="inventory-v2__eyebrow">{{ _("Captura consecutiva") }}</span>
+      <h2 id="quick-load-callout-title">{{ _("Carga rápida con escáner") }}</h2>
+      <p>{{ _("Conecta tu lector USB, escanea cada código y agrega productos sin recargar la página.") }}</p>
+    </div>
+    <a class="btn" href="{{ url_for('main.quick_load_products') }}">
+      {{ _("Iniciar carga rápida") }}
+      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+    </a>
+  </section>
+
   {% if catalog_count == 0 %}
     <section class="card inventory-v2__empty module-empty-v2" aria-labelledby="inventory-empty-title">
       <span class="inventory-v2__empty-icon" aria-hidden="true"><i class="fa-solid fa-box-open"></i></span>
@@ -13,6 +26,7 @@
         <div class="inventory-v2__empty-actions">
           <a class="btn" href="#agregar-producto">{{ _("Agregar primer producto") }}</a>
           <a class="btn ghost" href="#importar-catalogo">{{ _("Importar catálogo") }}</a>
+          <a class="btn ghost" href="{{ url_for('main.quick_load_products') }}">{{ _("Usar escáner") }}</a>
         </div>
       </div>
     </section>

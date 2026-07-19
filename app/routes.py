@@ -16,6 +16,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from urllib.parse import urljoin, urlparse
 from . import csrf, db, limiter
+from .barcodes import (
+    automatic_sku,
+    find_company_product_by_barcode,
+    lookup_barcode,
+    normalize_barcode,
+)
 from .models import (
     InventoryRestockEvent,
     Product,
@@ -1350,6 +1356,279 @@ def products():
     )
 
 
+def _quick_load_product_payload(product):
+    return {
+        "id": product.id,
+        "barcode": product.barcode,
+        "name": product.name,
+        "sku": product.sku,
+        "stock": product.stock,
+        "min_stock": product.min_stock,
+        "sale_price": product.sale_price,
+        "sale_price_display": money(product.sale_price),
+        "supplier": product.supplier,
+        "is_active": product.is_active,
+        "edit_url": (
+            url_for("main.edit_product", product_id=product.id)
+            if product.is_active
+            else None
+        ),
+    }
+
+
+@main.route("/products/quick-load")
+def quick_load_products():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    access_block = _trial_access_response(user)
+    if access_block:
+        return access_block
+
+    suppliers = {
+        name
+        for (name,) in db.session.query(Supplier.name)
+        .filter(Supplier.user_id == user.id)
+        .all()
+        if name
+    }
+    suppliers.update(
+        name
+        for (name,) in db.session.query(Product.supplier)
+        .filter(
+            Product.user_id == user.id,
+            Product.supplier.isnot(None),
+        )
+        .distinct()
+        .all()
+        if name
+    )
+    categories = [
+        name
+        for (name,) in db.session.query(Product.category)
+        .filter(
+            Product.user_id == user.id,
+            Product.category.isnot(None),
+        )
+        .distinct()
+        .order_by(Product.category)
+        .all()
+        if name
+    ]
+    return render_template(
+        "quick_load.html",
+        user=user,
+        suppliers=sorted(suppliers, key=str.casefold),
+        categories=categories,
+    )
+
+
+@main.route("/api/products/quick-load/lookup")
+def quick_load_lookup():
+    user = current_user()
+    if not user:
+        return jsonify({"ok": False, "error": gettext("Inicia sesión para continuar.")}), 401
+    access_block = _trial_access_response(user, json_response=True)
+    if access_block:
+        return access_block
+
+    try:
+        barcode = normalize_barcode(request.args.get("barcode"))
+    except ValueError:
+        return jsonify({
+            "ok": False,
+            "error": gettext("Escanea o escribe un código de barras válido."),
+        }), 400
+
+    product = find_company_product_by_barcode(user.id, barcode)
+    if product:
+        return jsonify({
+            "ok": True,
+            "found": True,
+            "product": _quick_load_product_payload(product),
+        })
+
+    metadata = lookup_barcode(barcode)
+    return jsonify({
+        "ok": True,
+        "found": False,
+        "barcode": barcode,
+        "suggested_sku": automatic_sku(user.id, barcode),
+        "metadata": (
+            {"name": metadata.name, "category": metadata.category}
+            if metadata
+            else None
+        ),
+    })
+
+
+@main.route("/api/products/quick-load", methods=["POST"])
+def quick_load_create_product():
+    user = current_user()
+    if not user:
+        return jsonify({"ok": False, "error": gettext("Inicia sesión para continuar.")}), 401
+    access_block = _trial_access_response(user, json_response=True)
+    if access_block:
+        return access_block
+
+    payload = request.get_json(silent=True) or {}
+    try:
+        barcode = normalize_barcode(payload.get("barcode"))
+        name = str(payload.get("name") or "").strip()
+        sku = str(payload.get("sku") or "").strip() or automatic_sku(user.id, barcode)
+        category = str(payload.get("category") or "").strip() or "General"
+        supplier = str(payload.get("supplier") or "").strip() or None
+        cost_price = float(payload.get("cost_price") or 0)
+        sale_price = float(payload.get("sale_price") or 0)
+        stock = int(payload.get("stock") or 0)
+        min_stock = int(payload.get("min_stock") or 0)
+    except (TypeError, ValueError, OverflowError):
+        return jsonify({
+            "ok": False,
+            "error": gettext("Revisa los datos del producto e inténtalo nuevamente."),
+        }), 400
+
+    if (
+        not name
+        or not sku
+        or len(name) > 160
+        or len(sku) > 64
+        or len(category) > 80
+        or (supplier and len(supplier) > 120)
+        or not math.isfinite(cost_price)
+        or not math.isfinite(sale_price)
+        or min(cost_price, sale_price, stock, min_stock) < 0
+    ):
+        return jsonify({
+            "ok": False,
+            "error": gettext("Revisa los datos del producto e inténtalo nuevamente."),
+        }), 400
+
+    existing = find_company_product_by_barcode(user.id, barcode)
+    if existing:
+        return jsonify({
+            "ok": False,
+            "duplicate": True,
+            "error": gettext("Ese código ya pertenece a un producto de tu inventario."),
+            "product": _quick_load_product_payload(existing),
+        }), 409
+    if Product.query.filter_by(user_id=user.id, sku=sku).first():
+        return jsonify({
+            "ok": False,
+            "error": gettext("Ese SKU ya está en uso. Escribe uno diferente."),
+        }), 409
+
+    product = Product(
+        user_id=user.id,
+        barcode=barcode,
+        sku=sku,
+        name=name,
+        category=category,
+        supplier=supplier,
+        cost_price=cost_price,
+        sale_price=sale_price,
+        stock=stock,
+        min_stock=min_stock,
+    )
+    db.session.add(product)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        existing = find_company_product_by_barcode(user.id, barcode)
+        current_app.logger.info(
+            "Carga rápida rechazada por identificador duplicado para user_id=%s",
+            user.id,
+        )
+        response = {
+            "ok": False,
+            "duplicate": bool(existing),
+            "error": gettext(
+                "El código o el SKU ya fue registrado. Escanéalo de nuevo para continuar."
+            ),
+        }
+        if existing:
+            response["product"] = _quick_load_product_payload(existing)
+        return jsonify(response), 409
+
+    return jsonify({
+        "ok": True,
+        "message": gettext("%(product)s se agregó al inventario.", product=product.name),
+        "product": _quick_load_product_payload(product),
+    }), 201
+
+
+@main.route("/api/products/<int:product_id>/quick-restock", methods=["POST"])
+def quick_load_restock_product(product_id):
+    user = current_user()
+    if not user:
+        return jsonify({"ok": False, "error": gettext("Inicia sesión para continuar.")}), 401
+    access_block = _trial_access_response(user, json_response=True)
+    if access_block:
+        return access_block
+
+    payload = request.get_json(silent=True) or {}
+    try:
+        quantity = int(payload.get("quantity"))
+    except (TypeError, ValueError, OverflowError):
+        quantity = 0
+    if quantity <= 0:
+        return jsonify({
+            "ok": False,
+            "error": gettext("La cantidad recibida debe ser mayor que cero."),
+        }), 400
+
+    product = (
+        Product.query.filter_by(id=product_id, user_id=user.id)
+        .with_for_update()
+        .first()
+    )
+    if not product:
+        return jsonify({
+            "ok": False,
+            "error": gettext("No encontramos ese producto en tu inventario."),
+        }), 404
+
+    try:
+        if product.stock > 2_147_483_647 - quantity:
+            return jsonify({
+                "ok": False,
+                "error": gettext("La cantidad recibida supera el límite permitido."),
+            }), 400
+        stock_before = product.stock
+        product.stock = stock_before + quantity
+        product.is_active = True
+        db.session.add(InventoryRestockEvent(
+            user_id=user.id,
+            product_id=product.id,
+            quantity=quantity,
+            stock_before=stock_before,
+            stock_after=product.stock,
+        ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "No se pudo reabastecer desde carga rápida para user_id=%s product_id=%s",
+            user.id,
+            product_id,
+        )
+        return jsonify({
+            "ok": False,
+            "error": gettext("No pudimos actualizar el inventario. Inténtalo nuevamente."),
+        }), 500
+
+    return jsonify({
+        "ok": True,
+        "message": gettext(
+            "Se agregaron %(quantity)s unidades a %(product)s.",
+            quantity=quantity,
+            product=product.name,
+        ),
+        "product": _quick_load_product_payload(product),
+    })
+
+
 @main.route("/download-template")
 def download_template():
     if not session.get("user_id"):
@@ -1550,6 +1829,14 @@ def import_products():
                     ).first()
 
                 if existing:
+                    if matched_by_sku and barcode:
+                        barcode_owner = Product.query.filter(
+                            Product.user_id == session["user_id"],
+                            Product.barcode == barcode,
+                            Product.id != existing.id,
+                        ).first()
+                        if barcode_owner:
+                            raise ValueError("barcode belongs to another product")
                     existing.is_active = True
                     # Política existente: SKU suma stock; código lo reemplaza.
                     existing.stock = existing.stock + stock if matched_by_sku else stock

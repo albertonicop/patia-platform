@@ -12,8 +12,13 @@ class Product(db.Model):
             "sku",
             name="uq_product_user_sku",
         ),
+        db.Index(
+            "uq_product_user_barcode",
+            "user_id",
+            "barcode",
+            unique=True,
+        ),
         db.Index("ix_product_user_name", "user_id", "name"),
-        db.Index("ix_product_user_barcode", "user_id", "barcode"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
