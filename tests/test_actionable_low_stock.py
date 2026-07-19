@@ -10,7 +10,7 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_patia")
 os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
-from app.models import Product, User
+from app.models import InventoryRestockEvent, Product, User
 from flask_babel import force_locale
 
 
@@ -35,6 +35,7 @@ class ActionableLowStockTests(unittest.TestCase):
 
     def setUp(self):
         db.session.rollback()
+        InventoryRestockEvent.query.delete()
         Product.query.delete()
         User.query.delete()
         db.session.commit()
@@ -156,8 +157,69 @@ class ActionableLowStockTests(unittest.TestCase):
 
         self.assertIn("View products that need attention", dashboard)
         self.assertIn("Products with low stock", dashboard)
+        self.assertIn("Restock inventory", dashboard)
+        self.assertIn("Quantity received", dashboard)
+        self.assertIn("New stock", dashboard)
         self.assertIn("View low-stock products (1)", inventory)
         self.assertIn("Remove filter", inventory)
+
+    def test_restock_increases_stock_and_records_audit_event(self):
+        product = self.add_product(
+            self.owner, "RESTOCK-1", "Producto recibido", 1, 3
+        )
+
+        response = self.client.post(
+            f"/products/{product.id}/restock",
+            data={"quantity": "3"},
+            follow_redirects=True,
+        )
+
+        db.session.refresh(product)
+        event = InventoryRestockEvent.query.one()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(product.stock, 4)
+        self.assertEqual(event.user_id, self.owner.id)
+        self.assertEqual(event.product_id, product.id)
+        self.assertEqual(event.quantity, 3)
+        self.assertEqual(event.stock_before, 1)
+        self.assertEqual(event.stock_after, 4)
+        self.assertIsNotNone(event.created_at)
+        self.assertNotIn("Producto recibido</strong>", response.get_data(as_text=True))
+
+    def test_restock_rejects_non_positive_quantity(self):
+        product = self.add_product(
+            self.owner, "RESTOCK-2", "Producto sin cambio", 1, 3
+        )
+
+        response = self.client.post(
+            f"/products/{product.id}/restock",
+            data={"quantity": "0"},
+            follow_redirects=True,
+        )
+
+        db.session.refresh(product)
+        self.assertEqual(product.stock, 1)
+        self.assertEqual(InventoryRestockEvent.query.count(), 0)
+        self.assertIn(
+            "La cantidad recibida debe ser mayor que cero.",
+            response.get_data(as_text=True),
+        )
+
+    def test_restock_cannot_access_another_company_product(self):
+        other = self.make_user("restock-other@patia.test", "Otra Tienda")
+        product = self.add_product(
+            other, "RESTOCK-OTHER", "Producto de otra empresa", 1, 3
+        )
+
+        response = self.client.post(
+            f"/products/{product.id}/restock",
+            data={"quantity": "5"},
+        )
+
+        db.session.refresh(product)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(product.stock, 1)
+        self.assertEqual(InventoryRestockEvent.query.count(), 0)
 
 
 if __name__ == "__main__":

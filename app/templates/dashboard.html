@@ -156,7 +156,17 @@
               <dd>{{ product.min_stock - product.stock if product.min_stock > product.stock else 0 }}</dd>
             </div>
           </dl>
-          <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=product.id) }}">{{ _("Ver producto") }}</a>
+          <div class="dashboard-v2__stock-item-actions">
+            <button class="btn dashboard-v2__restock-open"
+                    type="button"
+                    data-restock-product="{{ product.name }}"
+                    data-restock-stock="{{ product.stock }}"
+                    data-restock-action="{{ url_for('main.restock_product', product_id=product.id) }}">
+              <i class="fa-solid fa-boxes-packing" aria-hidden="true"></i>
+              {{ _("Reabastecer") }}
+            </button>
+            <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=product.id) }}">{{ _("Ver producto") }}</a>
+          </div>
         </article>
       {% endfor %}
     </div>
@@ -169,6 +179,56 @@
       <h4>{{ _("Tu inventario está en orden. No hay productos que requieran reabastecimiento.") }}</h4>
     </div>
   {% endif %}
+</dialog>
+
+<dialog class="dashboard-v2__restock-dialog" id="restock-dialog" aria-labelledby="restock-title">
+  <form id="restock-form" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="dashboard-v2__stock-dialog-head">
+      <div>
+        <span class="dashboard-v2__kicker">{{ _("Inventario") }}</span>
+        <h3 id="restock-title">{{ _("Reabastecer inventario") }}</h3>
+        <p>{{ _("Registra únicamente las unidades que acabas de recibir.") }}</p>
+      </div>
+      <button class="dashboard-v2__dialog-close" type="button" data-close-restock aria-label="{{ _('Cerrar') }}">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="dashboard-v2__restock-body">
+      <div class="dashboard-v2__restock-product">
+        <span>{{ _("Producto") }}</span>
+        <strong id="restock-product-name"></strong>
+      </div>
+      <dl class="dashboard-v2__restock-summary">
+        <div>
+          <dt>{{ _("Stock actual") }}</dt>
+          <dd id="restock-current-stock">0</dd>
+        </div>
+        <div>
+          <dt>{{ _("Nuevo stock") }}</dt>
+          <dd id="restock-new-stock">0</dd>
+        </div>
+      </dl>
+      <div class="dashboard-v2__restock-field">
+        <label for="restock-quantity">{{ _("Cantidad recibida") }}</label>
+        <input id="restock-quantity"
+               name="quantity"
+               type="number"
+               min="1"
+               step="1"
+               inputmode="numeric"
+               required
+               aria-describedby="restock-quantity-help">
+        <small id="restock-quantity-help">{{ _("Escribe cuántas unidades llegaron físicamente a tu negocio.") }}</small>
+      </div>
+    </div>
+
+    <div class="dashboard-v2__restock-actions">
+      <button class="btn ghost" type="button" data-close-restock>{{ _("Cancelar") }}</button>
+      <button class="btn" id="restock-submit" type="submit">{{ _("Confirmar reabastecimiento") }}</button>
+    </div>
+  </form>
 </dialog>
 
 <section class="dashboard-v2__workspace">
@@ -288,6 +348,15 @@
   const lowStockDialog = document.getElementById("low-stock-dialog");
   const lowStockOpen = document.getElementById("low-stock-open");
   const lowStockClose = lowStockDialog.querySelector("[data-close-low-stock]");
+  const restockDialog = document.getElementById("restock-dialog");
+  const restockForm = document.getElementById("restock-form");
+  const restockProductName = document.getElementById("restock-product-name");
+  const restockCurrentStock = document.getElementById("restock-current-stock");
+  const restockNewStock = document.getElementById("restock-new-stock");
+  const restockQuantity = document.getElementById("restock-quantity");
+  const restockSubmit = document.getElementById("restock-submit");
+  const restockSubmittingLabel = {{ _("Actualizando inventario…")|tojson }};
+  let restockBaseStock = 0;
 
   lowStockOpen.addEventListener("click", () => lowStockDialog.showModal());
   lowStockClose.addEventListener("click", () => lowStockDialog.close());
@@ -295,6 +364,41 @@
     if (event.target === lowStockDialog) {
       lowStockDialog.close();
     }
+  });
+
+  document.querySelectorAll("[data-restock-product]").forEach((button) => {
+    button.addEventListener("click", () => {
+      restockBaseStock = Number.parseInt(button.dataset.restockStock, 10) || 0;
+      restockForm.action = button.dataset.restockAction;
+      restockProductName.textContent = button.dataset.restockProduct;
+      restockCurrentStock.textContent = String(restockBaseStock);
+      restockNewStock.textContent = String(restockBaseStock);
+      restockQuantity.value = "";
+      lowStockDialog.close();
+      restockDialog.showModal();
+      restockQuantity.focus();
+    });
+  });
+
+  restockQuantity.addEventListener("input", () => {
+    const received = Number.parseInt(restockQuantity.value, 10);
+    restockNewStock.textContent = String(
+      restockBaseStock + (Number.isInteger(received) && received > 0 ? received : 0)
+    );
+  });
+
+  document.querySelectorAll("[data-close-restock]").forEach((button) => {
+    button.addEventListener("click", () => restockDialog.close());
+  });
+  restockDialog.addEventListener("click", (event) => {
+    if (event.target === restockDialog) {
+      restockDialog.close();
+    }
+  });
+  restockForm.addEventListener("submit", () => {
+    restockSubmit.disabled = true;
+    restockSubmit.textContent = restockSubmittingLabel;
+    restockForm.setAttribute("aria-busy", "true");
   });
 </script>
 

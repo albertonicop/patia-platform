@@ -16,7 +16,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from urllib.parse import urljoin, urlparse
 from . import csrf, db, limiter
-from .models import Product, Sale, SalesTicket, StripeWebhookEvent, Supplier, User
+from .models import (
+    InventoryRestockEvent,
+    Product,
+    Sale,
+    SalesTicket,
+    StripeWebhookEvent,
+    Supplier,
+    User,
+)
 from .timezones import (
     DEFAULT_TIMEZONE,
     TIMEZONE_CHOICES,
@@ -1763,6 +1771,75 @@ def edit_product(product_id):
 
     flash("Producto actualizado correctamente. Las ventas anteriores conservaron sus importes originales.", "success")
     return redirect(url_for("main.products") + "#catalogo")
+
+
+@main.route("/products/<int:product_id>/restock", methods=["POST"])
+def restock_product(product_id):
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    access_block = _trial_access_response(user)
+    if access_block:
+        return access_block
+
+    try:
+        quantity = int(request.form.get("quantity", ""))
+    except (TypeError, ValueError):
+        flash(gettext("Ingresa una cantidad recibida válida."), "danger")
+        return redirect(url_for("main.dashboard"))
+    if quantity <= 0:
+        flash(gettext("La cantidad recibida debe ser mayor que cero."), "danger")
+        return redirect(url_for("main.dashboard"))
+
+    product = (
+        Product.query.filter_by(
+            id=product_id,
+            user_id=user.id,
+            is_active=True,
+        )
+        .with_for_update()
+        .first_or_404()
+    )
+    try:
+        if product.stock > 2_147_483_647 - quantity:
+            flash(gettext("La cantidad recibida supera el límite permitido."), "danger")
+            db.session.rollback()
+            return redirect(url_for("main.dashboard"))
+
+        stock_before = product.stock
+        product.stock = stock_before + quantity
+        db.session.add(
+            InventoryRestockEvent(
+                user_id=user.id,
+                product_id=product.id,
+                quantity=quantity,
+                stock_before=stock_before,
+                stock_after=product.stock,
+            )
+        )
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "No se pudo registrar el reabastecimiento para user_id=%s product_id=%s",
+            user.id,
+            product_id,
+        )
+        flash(
+            gettext("No pudimos actualizar el inventario. Inténtalo nuevamente."),
+            "danger",
+        )
+        return redirect(url_for("main.dashboard"))
+
+    flash(
+        gettext(
+            "Se agregaron %(quantity)s unidades a %(product)s.",
+            quantity=quantity,
+            product=product.name,
+        ),
+        "success",
+    )
+    return redirect(url_for("main.dashboard"))
 
 
 @main.route("/sell", methods=["GET", "POST"])

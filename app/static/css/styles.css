@@ -8626,7 +8626,8 @@ table {
     outline-offset: 3px;
 }
 
-.app-shell-v2 .dashboard-v2__stock-dialog {
+.app-shell-v2 .dashboard-v2__stock-dialog,
+.app-shell-v2 .dashboard-v2__restock-dialog {
     width: min(760px, calc(100vw - 32px));
     max-height: min(760px, calc(100vh - 32px));
     margin: auto;
@@ -8639,7 +8640,8 @@ table {
     box-shadow: 0 28px 80px rgba(20, 24, 42, .24);
 }
 
-.app-shell-v2 .dashboard-v2__stock-dialog::backdrop {
+.app-shell-v2 .dashboard-v2__stock-dialog::backdrop,
+.app-shell-v2 .dashboard-v2__restock-dialog::backdrop {
     background: rgba(20, 24, 42, .48);
     backdrop-filter: blur(3px);
 }
@@ -8745,6 +8747,16 @@ table {
     font-weight: 800;
 }
 
+.app-shell-v2 .dashboard-v2__stock-item-actions {
+    display: grid;
+    gap: 7px;
+}
+
+.app-shell-v2 .dashboard-v2__stock-item-actions .btn {
+    min-height: 40px;
+    white-space: nowrap;
+}
+
 .app-shell-v2 .dashboard-v2__stock-dialog-actions {
     display: flex;
     justify-content: flex-end;
@@ -8819,6 +8831,101 @@ table {
     margin: 0;
 }
 
+.app-shell-v2 .dashboard-v2__restock-dialog form {
+    margin: 0;
+}
+
+.app-shell-v2 .dashboard-v2__restock-body {
+    display: grid;
+    gap: 18px;
+    padding: 22px 26px;
+}
+
+.app-shell-v2 .dashboard-v2__restock-product {
+    padding: 14px 16px;
+    border: 1px solid #e5e6ee;
+    border-radius: 13px;
+    background: #fbfbfd;
+}
+
+.app-shell-v2 .dashboard-v2__restock-product span {
+    display: block;
+    color: #656c7e;
+    font-size: 10px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.app-shell-v2 .dashboard-v2__restock-product strong {
+    display: block;
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+    font-size: 16px;
+}
+
+.app-shell-v2 .dashboard-v2__restock-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.app-shell-v2 .dashboard-v2__restock-summary div {
+    padding: 13px 15px;
+    border: 1px solid #e5e6ee;
+    border-radius: 12px;
+}
+
+.app-shell-v2 .dashboard-v2__restock-summary dt {
+    color: #656c7e;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.app-shell-v2 .dashboard-v2__restock-summary dd {
+    margin: 5px 0 0;
+    color: var(--v2-ink);
+    font-size: 21px;
+    font-weight: 850;
+}
+
+.app-shell-v2 .dashboard-v2__restock-summary div:last-child {
+    border-color: #d8d3f4;
+    background: #f7f6ff;
+}
+
+.app-shell-v2 .dashboard-v2__restock-field label,
+.app-shell-v2 .dashboard-v2__restock-field small {
+    display: block;
+}
+
+.app-shell-v2 .dashboard-v2__restock-field label {
+    margin-bottom: 7px;
+    color: var(--v2-ink);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.app-shell-v2 .dashboard-v2__restock-field input {
+    width: 100%;
+    min-height: 48px;
+}
+
+.app-shell-v2 .dashboard-v2__restock-field small {
+    margin-top: 6px;
+    color: #656c7e;
+    font-size: 10px;
+}
+
+.app-shell-v2 .dashboard-v2__restock-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 18px 26px 22px;
+    border-top: 1px solid var(--v2-line);
+}
+
 @media (max-width: 768px) {
     .app-shell-v2 .dashboard-v2__stock-item {
         grid-template-columns: 1fr auto;
@@ -8831,7 +8938,8 @@ table {
 }
 
 @media (max-width: 480px) {
-    .app-shell-v2 .dashboard-v2__stock-dialog {
+    .app-shell-v2 .dashboard-v2__stock-dialog,
+    .app-shell-v2 .dashboard-v2__restock-dialog {
         width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
         border-radius: 16px;
@@ -8839,7 +8947,9 @@ table {
 
     .app-shell-v2 .dashboard-v2__stock-dialog-head,
     .app-shell-v2 .dashboard-v2__stock-list,
-    .app-shell-v2 .dashboard-v2__stock-dialog-actions {
+    .app-shell-v2 .dashboard-v2__stock-dialog-actions,
+    .app-shell-v2 .dashboard-v2__restock-body,
+    .app-shell-v2 .dashboard-v2__restock-actions {
         padding-right: 16px;
         padding-left: 16px;
     }
@@ -8858,10 +8968,23 @@ table {
         width: 100%;
     }
 
+    .app-shell-v2 .dashboard-v2__stock-item-actions {
+        width: 100%;
+    }
+
     .app-shell-v2 .dashboard-v2__stock-dialog-actions .btn,
     .app-shell-v2 .inventory-v2__filter-chip {
         width: 100%;
         justify-content: center;
+    }
+
+    .app-shell-v2 .dashboard-v2__restock-actions {
+        flex-direction: column-reverse;
+    }
+
+    .app-shell-v2 .dashboard-v2__restock-actions .btn {
+        width: 100%;
+        min-height: 46px;
     }
 }
 

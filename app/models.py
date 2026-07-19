@@ -73,6 +73,12 @@ class Product(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    restock_events = db.relationship(
+        "InventoryRestockEvent",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     @property
     def margin(self):
@@ -91,6 +97,58 @@ class Product(db.Model):
     @property
     def inventory_value(self):
         return round(self.stock * self.cost_price, 2)
+
+
+class InventoryRestockEvent(db.Model):
+    __tablename__ = "inventory_restock_event"
+    __table_args__ = (
+        db.CheckConstraint("quantity > 0", name="ck_restock_quantity_positive"),
+        db.CheckConstraint(
+            "stock_before >= 0",
+            name="ck_restock_stock_before_nonnegative",
+        ),
+        db.CheckConstraint(
+            "stock_after >= stock_before",
+            name="ck_restock_stock_after_valid",
+        ),
+        db.Index(
+            "ix_restock_user_created_at",
+            "user_id",
+            "created_at",
+        ),
+        db.Index(
+            "ix_restock_product_created_at",
+            "product_id",
+            "created_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey("product.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    quantity = db.Column(db.Integer, nullable=False)
+    stock_before = db.Column(db.Integer, nullable=False)
+    stock_after = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+    )
+
+    product = db.relationship(
+        "Product",
+        back_populates="restock_events",
+    )
 
 
 class SalesTicket(db.Model):

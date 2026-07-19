@@ -318,7 +318,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260717_08",
+                "20260718_09",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -404,6 +404,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "sales_ticket",
                 "supplier",
                 "stripe_webhook_event",
+                "inventory_restock_event",
             }.issubset(inspector.get_table_names())
         )
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
@@ -420,7 +421,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260717_08",
+                "20260718_09",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
