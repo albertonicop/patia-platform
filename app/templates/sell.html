@@ -134,6 +134,11 @@
                       <span>{{ sale.product.name if sale.product else 'Producto' }} × {{ sale.quantity }}</span>
                       <button class="btn ghost" type="submit">{{ _("Cancelar línea") }}</button>
                     </form>
+                    <form method="POST" action="/sales/{{ sale.id }}/return" onsubmit="return confirm({{ _('¿Registrar la devolución de esta línea? Sus unidades regresarán al inventario.')|tojson }});">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <span>{{ sale.product.name if sale.product else 'Producto' }} × {{ sale.quantity }}</span>
+                      <button class="btn ghost" type="submit">{{ _("Registrar devolución") }}</button>
+                    </form>
                     {% endfor %}
                   </details>
                 </td>

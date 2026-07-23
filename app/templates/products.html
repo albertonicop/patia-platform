@@ -128,8 +128,16 @@
 
   {% if catalog_count > 0 %}
     <section class="card inventory-v2__summary" aria-label="{{ _('Resumen de inventario') }}">
-      <span>{{ _("Productos en catálogo") }}</span>
-      <strong>{{ catalog_count }}</strong>
+      <div>
+        <span>{{ _("Productos en catálogo") }}</span>
+        <strong>{{ catalog_count }}</strong>
+      </div>
+      {% if can_view_inventory_history %}
+        <a class="btn ghost" href="{{ url_for('inventory.index') }}">
+          <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+          {{ _("Ver Kardex") }}
+        </a>
+      {% endif %}
     </section>
 
     <section id="catalogo" class="card inventory-v2__catalog">
@@ -194,6 +202,9 @@
                 <td data-label="{{ _('Valor') }}">{{ p.inventory_value|money }}</td>
                 <td data-label="{{ _('Acciones') }}">
                   <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=p.id) }}">{{ _("Editar") }}</a>
+                  {% if can_view_inventory_history %}
+                    <a class="btn ghost" href="{{ url_for('inventory.index', product_id=p.id) }}">{{ _("Historial") }}</a>
+                  {% endif %}
                   <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm({{ _('¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su historial.')|tojson }});">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn ghost" type="submit">{{ _("Eliminar") }}</button>

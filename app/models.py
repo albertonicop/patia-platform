@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from sqlalchemy import event
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
@@ -222,6 +223,11 @@ class Product(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    inventory_movements = db.relationship(
+        "InventoryMovement",
+        back_populates="product",
+        passive_deletes=True,
+    )
 
     @property
     def margin(self):
@@ -303,6 +309,127 @@ class InventoryRestockEvent(db.Model):
         "Product",
         back_populates="restock_events",
     )
+
+
+class InventoryMovement(db.Model):
+    """Immutable stock ledger entry scoped to one organization."""
+
+    __tablename__ = "inventory_movement"
+    __table_args__ = (
+        db.CheckConstraint(
+            "movement_type IN "
+            "('OPENING_BALANCE', 'SALE', 'SALE_CANCELLATION', 'RETURN', "
+            "'RESTOCK', 'ADJUSTMENT_IN', 'ADJUSTMENT_OUT', 'WASTE', "
+            "'DAMAGE', 'INTERNAL_USE', 'PHYSICAL_COUNT', 'IMPORT')",
+            name="ck_inventory_movement_type",
+        ),
+        db.CheckConstraint(
+            "stock_before >= 0 AND stock_after >= 0",
+            name="ck_inventory_movement_stock_nonnegative",
+        ),
+        db.CheckConstraint(
+            "quantity_delta = stock_after - stock_before",
+            name="ck_inventory_movement_delta_matches_stock",
+        ),
+        db.Index(
+            "ix_inventory_movement_org_created",
+            "organization_id",
+            "created_at",
+        ),
+        db.Index(
+            "ix_inventory_movement_product_created",
+            "product_id",
+            "created_at",
+            "id",
+        ),
+        db.Index(
+            "ix_inventory_movement_org_type_created",
+            "organization_id",
+            "movement_type",
+            "created_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey("product.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    performed_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    sale_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sale.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    sales_ticket_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_ticket.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    restock_event_id = db.Column(
+        db.Integer,
+        db.ForeignKey("inventory_restock_event.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    movement_type = db.Column(db.String(30), nullable=False)
+    quantity_delta = db.Column(db.Integer, nullable=False)
+    stock_before = db.Column(db.Integer, nullable=False)
+    stock_after = db.Column(db.Integer, nullable=False)
+    reason = db.Column(db.String(255), nullable=True)
+    product_name = db.Column(db.String(160), nullable=False)
+    product_sku = db.Column(db.String(64), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    organization = db.relationship("Organization")
+    product = db.relationship("Product", back_populates="inventory_movements")
+    performed_by_member = db.relationship("OrganizationMember")
+    sale = db.relationship("Sale")
+    sales_ticket = db.relationship("SalesTicket")
+    restock_event = db.relationship("InventoryRestockEvent")
+
+    @property
+    def direction_class(self):
+        if self.quantity_delta > 0:
+            return "in"
+        if self.quantity_delta < 0:
+            return "out"
+        return "neutral"
+
+    @property
+    def quantity_class(self):
+        if self.quantity_delta > 0:
+            return "kardex-v1__positive"
+        if self.quantity_delta < 0:
+            return "kardex-v1__negative"
+        return ""
+
+    @property
+    def signed_quantity(self):
+        return f"{self.quantity_delta:+d}"
+
+
+def _prevent_inventory_movement_mutation(mapper, connection, target):
+    raise ValueError("Inventory movements are immutable.")
+
+
+event.listen(InventoryMovement, "before_update", _prevent_inventory_movement_mutation)
+event.listen(InventoryMovement, "before_delete", _prevent_inventory_movement_mutation)
 
 
 class SalesTicket(db.Model):

@@ -24,6 +24,7 @@ from .barcodes import (
 )
 from .models import (
     CashRegisterSession,
+    InventoryMovement,
     InventoryRestockEvent,
     Organization,
     Product,
@@ -37,6 +38,10 @@ from .cash.services import (
     expected_cash as cash_expected_amount,
     open_cash_session,
     record_cash_movement,
+)
+from .inventory.services import (
+    record_inventory_movement,
+    record_opening_balance,
 )
 from .money import MONEY_ZERO, money_decimal, money_json, money_sum
 from .timezones import (
@@ -1572,6 +1577,7 @@ def quick_load_create_product():
         return access_block
 
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     owner = current_organization_owner(user)
     payload = request.get_json(silent=True) or {}
     try:
@@ -1634,6 +1640,11 @@ def quick_load_create_product():
     )
     db.session.add(product)
     try:
+        record_opening_balance(
+            product,
+            membership,
+            reason=gettext("Alta mediante carga rápida"),
+        )
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
@@ -1671,6 +1682,7 @@ def quick_load_restock_product(product_id):
         return access_block
 
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     owner = current_organization_owner(user)
     payload = request.get_json(silent=True) or {}
     try:
@@ -1703,14 +1715,25 @@ def quick_load_restock_product(product_id):
         stock_before = product.stock
         product.stock = stock_before + quantity
         product.is_active = True
-        db.session.add(InventoryRestockEvent(
+        restock_event = InventoryRestockEvent(
             organization_id=organization_id,
             user_id=owner.id,
             product_id=product.id,
             quantity=quantity,
             stock_before=stock_before,
             stock_after=product.stock,
-        ))
+        )
+        db.session.add(restock_event)
+        db.session.flush()
+        record_inventory_movement(
+            product,
+            membership,
+            "RESTOCK",
+            stock_before,
+            product.stock,
+            reason=gettext("Reabastecimiento desde carga rápida"),
+            restock_event=restock_event,
+        )
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -1821,6 +1844,7 @@ def import_products():
         return access_block
 
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     owner = current_organization_owner(user)
 
     file = request.files.get("catalog_file")
@@ -1938,13 +1962,13 @@ def import_products():
                 if sku:
                     existing = Product.query.filter_by(
                         organization_id=organization_id, sku=sku
-                    ).first()
+                    ).with_for_update().first()
                     matched_by_sku = existing is not None
 
                 if not existing and barcode:
                     existing = Product.query.filter_by(
                         organization_id=organization_id, barcode=barcode
-                    ).first()
+                    ).with_for_update().first()
 
                 if existing:
                     if matched_by_sku and barcode:
@@ -1957,19 +1981,32 @@ def import_products():
                             raise ValueError("barcode belongs to another product")
                     existing.is_active = True
                     # Política existente: SKU suma stock; código lo reemplaza.
-                    existing.stock = existing.stock + stock if matched_by_sku else stock
+                    stock_before = existing.stock
+                    existing.stock = stock_before + stock if matched_by_sku else stock
                     existing.sale_price = sale_price
                     existing.cost_price = cost_price
                     existing.min_stock = min_stock
                     if matched_by_sku:
                         existing.barcode = barcode
+                    record_inventory_movement(
+                        existing,
+                        membership,
+                        "IMPORT",
+                        stock_before,
+                        existing.stock,
+                        reason=(
+                            gettext("Importación por coincidencia de SKU")
+                            if matched_by_sku
+                            else gettext("Importación por código de barras")
+                        ),
+                    )
                     summary["updated"] += 1
                     continue
 
                 if not sku or not name:
                     raise ValueError("missing product identity")
 
-                db.session.add(Product(
+                imported_product = Product(
                     organization_id=organization_id,
                     user_id=owner.id,
                     sku=sku,
@@ -1981,7 +2018,13 @@ def import_products():
                     sale_price=sale_price,
                     stock=stock,
                     min_stock=min_stock,
-                ))
+                )
+                db.session.add(imported_product)
+                record_opening_balance(
+                    imported_product,
+                    membership,
+                    reason=gettext("Alta mediante importación"),
+                )
                 summary["created"] += 1
             except (TypeError, ValueError, OverflowError):
                 summary["errors"] += 1
@@ -2019,6 +2062,7 @@ def add_product():
         return access_block
 
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     owner = current_organization_owner(user)
 
     name = request.form.get("name", "").strip()
@@ -2040,7 +2084,7 @@ def add_product():
         return redirect(url_for("main.products"))
     existing_sku = Product.query.filter_by(
         organization_id=organization_id, sku=sku
-    ).first()
+    ).with_for_update().first()
     if existing_sku and existing_sku.is_active:
         flash("Ya existe un producto con ese SKU. Usa un SKU diferente.", "danger")
         return redirect(url_for("main.products") + "#agregar-producto")
@@ -2048,7 +2092,7 @@ def add_product():
     existing_barcode = (
         Product.query.filter_by(
             organization_id=organization_id, barcode=barcode
-        ).first()
+        ).with_for_update().first()
         if barcode else None
     )
     if existing_barcode and existing_barcode.is_active:
@@ -2070,6 +2114,7 @@ def add_product():
         return redirect(url_for("main.products"))
 
     p = existing_sku or existing_barcode
+    stock_before = p.stock if p else 0
     if p:
         p.sku = sku
         p.barcode = barcode
@@ -2097,6 +2142,21 @@ def add_product():
         )
         db.session.add(p)
     try:
+        if p.id:
+            record_inventory_movement(
+                p,
+                membership,
+                "PHYSICAL_COUNT",
+                stock_before,
+                p.stock,
+                reason=gettext("Restauración de producto archivado"),
+            )
+        else:
+            record_opening_balance(
+                p,
+                membership,
+                reason=gettext("Alta manual de producto"),
+            )
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
@@ -2121,11 +2181,12 @@ def edit_product(product_id):
         return access_block
 
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     product = Product.query.filter_by(
         id=product_id,
         organization_id=organization_id,
         is_active=True,
-    ).first_or_404()
+    ).with_for_update().first_or_404()
     if request.method == "GET":
         return render_template("edit_product.html", product=product, user=user)
 
@@ -2176,6 +2237,7 @@ def edit_product(product_id):
             flash("Ya existe otro producto con ese código de barras.", "danger")
             return render_template("edit_product.html", product=product, user=user), 409
 
+    stock_before = product.stock
     product.name = name
     product.sku = sku
     product.barcode = barcode
@@ -2186,6 +2248,15 @@ def edit_product(product_id):
     product.stock = stock
     product.min_stock = min_stock
     try:
+        if stock_before != product.stock:
+            record_inventory_movement(
+                product,
+                membership,
+                "PHYSICAL_COUNT",
+                stock_before,
+                product.stock,
+                reason=gettext("Stock actualizado al editar el producto"),
+            )
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
@@ -2211,6 +2282,7 @@ def restock_product(product_id):
         return access_block
 
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     owner = current_organization_owner(user)
 
     try:
@@ -2239,15 +2311,24 @@ def restock_product(product_id):
 
         stock_before = product.stock
         product.stock = stock_before + quantity
-        db.session.add(
-            InventoryRestockEvent(
+        restock_event = InventoryRestockEvent(
                 organization_id=organization_id,
                 user_id=owner.id,
                 product_id=product.id,
                 quantity=quantity,
                 stock_before=stock_before,
                 stock_after=product.stock,
-            )
+        )
+        db.session.add(restock_event)
+        db.session.flush()
+        record_inventory_movement(
+            product,
+            membership,
+            "RESTOCK",
+            stock_before,
+            product.stock,
+            reason=gettext("Reabastecimiento de inventario"),
+            restock_event=restock_event,
         )
         db.session.commit()
     except Exception:
@@ -2324,6 +2405,7 @@ def sell():
             ticket.cash_register_session_id = (
                 cash_session.id if cash_session else None
             )
+            stock_before = product.stock
             product.stock -= qty
             sale = Sale(
                 organization_id=organization_id,
@@ -2340,6 +2422,16 @@ def sell():
             )
             db.session.add(sale)
             db.session.flush()
+            record_inventory_movement(
+                product,
+                membership,
+                "SALE",
+                stock_before,
+                product.stock,
+                reason=gettext("Venta registrada"),
+                sale=sale,
+                sales_ticket=ticket,
+            )
             if payment_method == "cash":
                 record_cash_movement(
                     cash_session,
@@ -2523,6 +2615,7 @@ def sell_cart():
         sales = []
         for product_id, quantity in requested_items.items():
             product = products[product_id]
+            stock_before = product.stock
             product.stock -= quantity
             sale = Sale(
                 organization_id=organization_id,
@@ -2538,6 +2631,17 @@ def sell_cart():
             )
             sale.ticket_id = ticket_id
             db.session.add(sale)
+            db.session.flush()
+            record_inventory_movement(
+                product,
+                membership,
+                "SALE",
+                stock_before,
+                product.stock,
+                reason=gettext("Venta registrada"),
+                sale=sale,
+                sales_ticket=ticket,
+            )
             sales.append(sale)
         db.session.flush()
         if payment_method == "cash":
@@ -2988,6 +3092,24 @@ def stripe_success():
 @main.route("/sales/<int:sale_id>/cancel", methods=["POST"])
 @require_permission("cancel_sales")
 def cancel_sale(sale_id):
+    return _reverse_sale(
+        sale_id,
+        movement_type="SALE_CANCELLATION",
+        success_message="Venta cancelada. Stock devuelto al inventario.",
+    )
+
+
+@main.route("/sales/<int:sale_id>/return", methods=["POST"])
+@require_permission("process_returns")
+def return_sale(sale_id):
+    return _reverse_sale(
+        sale_id,
+        movement_type="RETURN",
+        success_message="Devolución registrada. Stock devuelto al inventario.",
+    )
+
+
+def _reverse_sale(sale_id, *, movement_type, success_message):
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
@@ -3013,11 +3135,29 @@ def cancel_sale(sale_id):
                 "danger",
             )
             return redirect(url_for("cash.index"))
-    product = Product.query.filter_by(
-        id=sale.product_id, organization_id=organization_id
-    ).first()
+    product = (
+        Product.query.filter_by(
+            id=sale.product_id, organization_id=organization_id
+        )
+        .with_for_update()
+        .first()
+    )
     if product:
+        stock_before = product.stock
         product.stock += sale.quantity
+        record_inventory_movement(
+            product,
+            membership,
+            movement_type,
+            stock_before,
+            product.stock,
+            reason=(
+                gettext("Devolución de venta")
+                if movement_type == "RETURN"
+                else gettext("Cancelación de venta")
+            ),
+            sales_ticket=sale.sales_ticket,
+        )
     if payment_method == "cash":
         record_cash_movement(
             cash_session,
@@ -3030,9 +3170,17 @@ def cancel_sale(sale_id):
             ),
             sales_ticket=sale.sales_ticket,
         )
+    db.session.execute(
+        update(InventoryMovement)
+        .where(
+            InventoryMovement.organization_id == organization_id,
+            InventoryMovement.sale_id == sale.id,
+        )
+        .values(sale_id=None)
+    )
     db.session.delete(sale)
     db.session.commit()
-    flash("Venta cancelada. Stock devuelto al inventario.", "success")
+    flash(success_message, "success")
     return redirect(url_for("main.sell"))
 
 
@@ -3241,6 +3389,14 @@ def delete_product(product_id):
         db.session.commit()
         flash("Producto retirado del catálogo. Su historial de ventas se conserva.", "success")
         return redirect(url_for("main.products") + "#catalogo")
+    db.session.execute(
+        update(InventoryMovement)
+        .where(
+            InventoryMovement.organization_id == organization_id,
+            InventoryMovement.product_id == product.id,
+        )
+        .values(product_id=None)
+    )
     db.session.delete(product)
     db.session.commit()
     flash("Producto eliminado correctamente.", "success")
@@ -3272,13 +3428,24 @@ def delete_all_products():
     }
     deleted = 0
     protected = 0
+    deleted_ids = []
     for product in products:
         if product.id in product_ids_with_sales:
             product.is_active = False
             protected += 1
             continue
         db.session.delete(product)
+        deleted_ids.append(product.id)
         deleted += 1
+    if deleted_ids:
+        db.session.execute(
+            update(InventoryMovement)
+            .where(
+                InventoryMovement.organization_id == organization_id,
+                InventoryMovement.product_id.in_(deleted_ids),
+            )
+            .values(product_id=None)
+        )
     db.session.commit()
     if protected:
         flash(
@@ -3332,13 +3499,24 @@ def delete_selected_products():
     }
     deleted = 0
     protected = 0
+    deleted_ids = []
     for product in products:
         if product.id in product_ids_with_sales:
             product.is_active = False
             protected += 1
             continue
         db.session.delete(product)
+        deleted_ids.append(product.id)
         deleted += 1
+    if deleted_ids:
+        db.session.execute(
+            update(InventoryMovement)
+            .where(
+                InventoryMovement.organization_id == organization_id,
+                InventoryMovement.product_id.in_(deleted_ids),
+            )
+            .values(product_id=None)
+        )
     db.session.commit()
     if protected:
         flash(

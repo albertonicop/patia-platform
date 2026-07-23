@@ -9585,3 +9585,59 @@ table {
   .app-main-v2 { margin: 0 !important; padding: 0 !important; }
   .cash-cut-v1__sheet { box-shadow: none; border: 0; max-width: none; }
 }
+
+/* =========================================================
+   Kardex v1 — immutable inventory traceability
+   ========================================================= */
+.kardex-v1 { display: grid; gap: 20px; }
+.kardex-v1__hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 28px; color: #fff; background: linear-gradient(135deg, #171a2b, #27234c);
+}
+.kardex-v1__hero h2 { margin: 5px 0 8px; color: inherit; }
+.kardex-v1__hero p { margin: 0; color: #d9dbea; max-width: 680px; }
+.kardex-v1__hero .btn { flex: 0 0 auto; background: #fff; color: #20243a; border-color: #fff; }
+.kardex-v1__eyebrow { color: #6c55ef; font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.kardex-v1__hero .kardex-v1__eyebrow { color: #bcb3ff; }
+.kardex-v1__verified, .kardex-v1__warning { display: flex; gap: 12px; align-items: flex-start; padding: 16px 20px; border-radius: 14px; }
+.kardex-v1__verified { color: #176b4d; background: #edf9f4; border: 1px solid #c5ebdb; }
+.kardex-v1__warning { color: #713515; background: #fff7ed; border: 1px solid #fed7aa; }
+.kardex-v1__warning p { margin: 3px 0; color: inherit; }
+.kardex-v1__warning ul { margin: 8px 0 0; padding-left: 20px; }
+.kardex-v1__filters, .kardex-v1__adjustment, .kardex-v1__history { padding: 24px; }
+.kardex-v1__filters form { display: grid; grid-template-columns: minmax(190px, 1.2fr) minmax(180px, 1fr) repeat(2, minmax(145px, .7fr)) auto auto; gap: 12px; align-items: end; }
+.kardex-v1__filters form > div, .kardex-v1__adjustment form > div { display: grid; gap: 7px; }
+.kardex-v1__filters input, .kardex-v1__filters select, .kardex-v1__adjustment input, .kardex-v1__adjustment select { min-height: 46px; }
+.kardex-v1__adjustment { display: grid; grid-template-columns: minmax(220px, .6fr) minmax(0, 1.4fr); gap: 28px; }
+.kardex-v1__adjustment h3 { margin: 5px 0; }
+.kardex-v1__adjustment form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: end; }
+.kardex-v1__adjustment .kardex-v1__reason { grid-column: 1 / -1; }
+.kardex-v1__history header { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin-bottom: 18px; }
+.kardex-v1__history h3 { margin: 5px 0 0; }
+.kardex-v1__history td small, .kardex-v1__history td strong { display: block; }
+.kardex-v1__history td small { margin-top: 3px; color: #62697c; }
+.kardex-v1__type { display: inline-flex; padding: 5px 9px; border-radius: 999px; font-size: .78rem; font-weight: 750; white-space: nowrap; }
+.kardex-v1__type--in { color: #176b4d; background: #e8f7f0; }
+.kardex-v1__type--out { color: #9f3428; background: #fff0ee; }
+.kardex-v1__type--neutral { color: #5746b9; background: #f0edff; }
+.kardex-v1__positive { color: #176b4d; font-weight: 800; }
+.kardex-v1__negative { color: #b23a2e; font-weight: 800; }
+.kardex-v1__empty { min-height: 250px; }
+.inventory-v2__summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.inventory-v2__summary > div { display: grid; }
+@media (max-width: 1100px) {
+  .kardex-v1__filters form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kardex-v1__filters .btn { width: 100%; }
+}
+@media (max-width: 760px) {
+  .kardex-v1__hero, .kardex-v1__history header { align-items: flex-start; flex-direction: column; }
+  .kardex-v1__adjustment { grid-template-columns: 1fr; }
+  .kardex-v1__adjustment form { grid-template-columns: 1fr; }
+  .kardex-v1__adjustment .kardex-v1__reason { grid-column: auto; }
+}
+@media (max-width: 480px) {
+  .kardex-v1__filters form { grid-template-columns: 1fr; }
+  .kardex-v1__hero, .kardex-v1__filters, .kardex-v1__adjustment, .kardex-v1__history { padding: 18px; }
+  .inventory-v2__summary { align-items: flex-start; flex-direction: column; }
+  .inventory-v2__summary .btn { width: 100%; }
+}

@@ -28,6 +28,7 @@ ROLE_PERMISSIONS = {
             "operate_cash_register",
             "manage_cash_movements",
             "view_cash_history",
+            "view_inventory_history",
         }
     ),
     "MANAGER": frozenset(
@@ -47,6 +48,7 @@ ROLE_PERMISSIONS = {
             "operate_cash_register",
             "manage_cash_movements",
             "view_cash_history",
+            "view_inventory_history",
         }
     ),
     "CASHIER": frozenset(

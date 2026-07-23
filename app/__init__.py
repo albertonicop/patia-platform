@@ -137,6 +137,9 @@ def create_app():
     from .cash.routes import cash
 
     app.register_blueprint(cash)
+    from .inventory.routes import inventory
+
+    app.register_blueprint(inventory)
 
     @app.context_processor
     def inject_pro_access():
@@ -166,6 +169,9 @@ def create_app():
             "can_use_pos": has_permission(current_membership, "use_pos"),
             "can_operate_cash_register": has_permission(
                 current_membership, "operate_cash_register"
+            ),
+            "can_view_inventory_history": has_permission(
+                current_membership, "view_inventory_history"
             ),
         }
 
