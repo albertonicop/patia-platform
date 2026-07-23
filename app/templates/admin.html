@@ -1,182 +1,37 @@
 {% extends 'base.html' %}
-{% block title %}Panel Admin{% endblock %}
-
+{% block title %}{{ _("Administración PATIA") }}{% endblock %}
 {% block content %}
+<div class="admin-v2">
+  <header class="module-intro-v2">
+    <span>{{ _("Operación comercial") }}</span>
+    <h2>{{ _("Negocios y suscripciones") }}</h2>
+    <p>{{ _("Consulta el acceso y la actividad de cada negocio sin mostrar credenciales ni datos sensibles.") }}</p>
+  </header>
 
-<section class="card" style="margin-bottom:20px;">
-  <h2>{{ _("Centro de control PATIA") }}</h2>
-  <p style="opacity:.75;">{{ _("Clientes, pruebas, ventas procesadas y actividad general.") }}</p>
-</section>
+  <section class="admin-v2__metrics" aria-label="{{ _('Resumen de clientes') }}">
+    <article class="card"><span>{{ _("Negocios") }}</span><strong>{{ total_clients }}</strong></article>
+    <article class="card"><span>{{ _("En prueba") }}</span><strong>{{ trial_clients }}</strong></article>
+    <article class="card"><span>{{ _("Próximos a terminar prueba") }}</span><strong>{{ expiring_soon }}</strong></article>
+    <article class="card"><span>{{ _("Acceso vencido") }}</span><strong>{{ expired_clients }}</strong></article>
+  </section>
 
-<section class="grid three" style="margin-bottom:20px;">
-  <div class="card">
-    <h3>{{ _("Clientes registrados") }}</h3>
-    <h2>{{ total_clients }}</h2>
-  </div>
-
-  <div class="card">
-    <h3>{{ _("Productos totales") }}</h3>
-    <h2>{{ total_products }}</h2>
-  </div>
-
-  <div class="card">
-    <h3>{{ _("Ventas procesadas") }}</h3>
-    <h2>{{ total_sales_money|money }}</h2>
-  </div>
-</section>
-
-<section class="grid three" style="margin-bottom:20px;">
-  <div class="card">
-    <h3>{{ _("En prueba") }}</h3>
-    <h2>{{ trial_clients }}</h2>
-  </div>
-
-  <div class="card">
-    <h3>{{ _("Vencen esta semana") }}</h3>
-    <h2>{{ expiring_soon }}</h2>
-  </div>
-
-  <div class="card">
-    <h3>{{ _("Pruebas vencidas") }}</h3>
-    <h2>{{ expired_clients }}</h2>
-  </div>
-</section>
-
-<section class="grid two" style="margin-bottom:20px;">
-  <div class="card">
-    <h3>{{ _("Último cliente registrado") }}</h3>
-    {% if latest_client %}
-      <h2>{{ latest_client.user.company_name or _("Sin empresa") }}</h2>
-      <p>{{ latest_client.user.email }}</p>
-    {% else %}
-      <p>{{ _("No hay clientes todavía.") }}</p>
-    {% endif %}
-  </div>
-
-  <div class="card">
-    <h3>{{ _("Cliente con más productos") }}</h3>
-    {% if top_client %}
-      <h2>{{ top_client.user.company_name or _("Sin empresa") }}</h2>
-      <p>{{ top_client.products_count }} productos registrados</p>
-    {% else %}
-      <p>{{ _("No hay productos todavía.") }}</p>
-    {% endif %}
-  </div>
-</section>
-
-<section class="grid two" style="margin-bottom:20px;">
-  <div class="card">
-    <h3>{{ _("Nuevos esta semana") }}</h3>
-    <h2>{{ new_this_week }}</h2>
-  </div>
-
-  <div class="card">
-    <h3>{{ _("Nuevos este mes") }}</h3>
-    <h2>{{ new_this_month }}</h2>
-  </div>
-</section>
-
-<section class="card">
-  <div class="section-head">
-    <section id="clientes" class="card">
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>{{ _("Empresa") }}</th>
-          <th>{{ _("Contacto") }}</th>
-          <th>{{ _("Correo") }}</th>
-          <th>{{ _("Teléfono") }}</th>
-          <th>{{ _("Días en PATIA") }}</th>
-          <th>{{ _("Prueba") }}</th>
-          <th>{{ _("Productos") }}</th>
-          <th>{{ _("Ventas") }}</th>
-          <th>{{ _("Estado") }}</th>
-          <th>{{ _("WhatsApp") }}</th>
-          <th>{{ _("Acciones") }}</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for c in clients %}
-        <tr>
-          <td>
-            <b>{{ c.user.company_name or _("Sin empresa") }}</b>
-            <small>{{ c.user.business_type or _("Sin giro") }}</small>
-          </td>
-
-          <td>
-            {{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or _("Sin nombre") }}
-          </td>
-
-          <td>{{ c.user.email }}</td>
-
-          <td>{{ c.user.phone or "-" }}</td>
-
-          <td>{{ c.days_in_patia }} días</td>
-
-          <td>
-           {% if c.status == "Pro" %}
-    ∞
-{% elif c.trial_days_left > 0 %}
-    Quedan {{ c.trial_days_left }} días
-{% else %}
-    Finalizada
-{% endif %}
-          </td>
-
-          <td>{{ c.products_count }}</td>
-
-          <td>{{ c.sales_money|money }}</td>
-
-          <td>
-           {% if c.status == "Pro" %}
-    <b style="color:#00ff66;">{{ _("Pro") }}</b>
-
-{% elif c.status == "Prueba" %}
-    <b style="color:#00ffcc;">{{ _("Prueba") }}</b>
-
-{% else %}
-    <b style="color:#ff8a8a;">{{ _("Vencido") }}</b>
-{% endif %}
-          </td>
-
-          <td>
-            {% if c.user.phone %}
-              <a class="btn ghost" target="_blank"
-                 href="https://wa.me/{{ c.user.phone|replace(' ', '')|replace('-', '') }}?text=Hola%20{{ c.user.first_name or c.user.company_name }},%20soy%20Alberto%20de%20PATIA.">
-                Contactar
-              </a>
-            {% else %}
-              -
-            {% endif %}
-          </td>
-          <td>
-  <form method="POST"
-      action="/admin/delete-user/{{c.user.id}}#clientes"
-      onsubmit="return confirm({{ _('¿Eliminar este cliente?')|tojson }});">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button class="btn ghost" type="submit">
-        Eliminar
-    </button>
-</form>
-
-<form method="POST"
-      action="/admin/make-pro/{{c.user.id}}"
-      style="margin-top:8px;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button class="btn ghost" type="submit">
-        Marcar Pro
-    </button>
-</form>
-</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
-
+  <section class="card admin-v2__clients">
+    <header><h3>{{ _("Negocios registrados") }}</h3><span>{{ _("%(count)s en total", count=clients|length) }}</span></header>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">{{ _("Estado de negocios y suscripciones") }}</caption>
+        <thead><tr><th scope="col">{{ _("Negocio") }}</th><th scope="col">{{ _("Propietario") }}</th><th scope="col">{{ _("Plan") }}</th><th scope="col">{{ _("Estado") }}</th><th scope="col">{{ _("Próxima fecha") }}</th><th scope="col">{{ _("Acceso") }}</th><th scope="col">{{ _("Acciones") }}</th></tr></thead>
+        <tbody>{% for c in clients %}<tr>
+          <td data-label="{{ _('Negocio') }}"><strong>{{ c.organization.name }}</strong><small>#{{ c.organization.id }} · {{ c.products_count }} {{ _("productos") }}</small></td>
+          <td data-label="{{ _('Propietario') }}"><span>{{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or _("Sin nombre") }}</span><small>{{ c.user.email }}</small></td>
+          <td data-label="{{ _('Plan') }}"><strong>{{ c.plan_label }}</strong>{% if c.manual_access %}<small>{{ _("Acceso manual") }}</small>{% endif %}</td>
+          <td data-label="{{ _('Estado') }}"><span class="admin-v2__status admin-v2__status--{{ c.status|lower }}">{{ c.status }}</span>{% if c.scheduled_cancellation %}<small>{{ _("Cancelación programada") }}</small>{% elif c.in_grace %}<small>{{ _("Pago pendiente · periodo de gracia") }}</small>{% endif %}</td>
+          <td data-label="{{ _('Próxima fecha') }}">{% if c.renewal_date %}{{ c.renewal_date.strftime('%d/%m/%Y') }}{% elif c.trial_end %}{{ c.trial_end.strftime('%d/%m/%Y') }}{% else %}—{% endif %}</td>
+          <td data-label="{{ _('Acceso') }}">{{ _("Solo lectura") if c.read_only else _("Operación activa") }}</td>
+          <td data-label="{{ _('Acciones') }}"><details class="module-more-v2"><summary>{{ _("Administrar") }}</summary><a href="mailto:{{ c.user.email }}">{{ _("Contactar") }}</a>{% if not c.manual_access %}<form method="POST" action="/admin/make-pro/{{ c.user.id }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn ghost" type="submit">{{ _("Dar acceso manual") }}</button></form>{% endif %}</details></td>
+        </tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </section>
+</div>
 {% endblock %}

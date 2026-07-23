@@ -3,10 +3,15 @@
 
 {% block content %}
 <div class="subscription-v2 subscription-account-v1">
+  <nav class="settings-v2__tabs" aria-label="{{ _('Secciones de Configuración') }}">
+    <a href="{{ url_for('main.settings') }}">{{ _("Negocio") }}</a>
+    <a href="{{ url_for('team.index') }}">{{ _("Personal") }}</a>
+    <a href="{{ url_for('main.subscription') }}" class="is-active" aria-current="page">{{ _("Suscripción") }}</a>
+  </nav>
   <header class="module-intro-v2 subscription-v2__intro">
     <span>{{ _("Cuenta y facturación") }}</span>
     <h2>{{ _("Tu plan, tus cobros y el control de tu suscripción") }}</h2>
-    <p>{{ _("Consulta el estado de PATIA Pro, la siguiente fecha relevante y las opciones disponibles sin salir de tu cuenta.") }}</p>
+    <p>{{ _("Consulta qué plan tienes, cuándo se renueva y cómo administrar tus pagos.") }}</p>
   </header>
 
   <section class="subscription-v2__layout">
@@ -15,9 +20,7 @@
         <div>
           <span class="subscription-v2__eyebrow">{{ _("Plan actual") }}</span>
           <h3>
-            {% if user.manual_pro_access %}PATIA Pro
-            {% elif has_paid_access %}PATIA Pro
-            {% else %}{{ _("Prueba gratuita") }}{% endif %}
+            {{ current_plan_label }}
           </h3>
         </div>
         <span class="subscription-v2__badge{% if has_paid_access or user.manual_pro_access %} subscription-v2__badge--pro{% endif %}">
@@ -35,8 +38,8 @@
           <dd>{{ _("Sí, al terminar el periodo") if user.cancel_at_period_end else _("No") }}</dd>
         </div>
         <div>
-          <dt>{{ _("Precio de PATIA Pro") }}</dt>
-          <dd>{{ _("$199 MXN al mes") }}</dd>
+          <dt>{{ _("Precio actual") }}</dt>
+          <dd>{% if current_plan_code == "TRIAL" %}{{ _("$0 durante la prueba") }}{% else %}{{ _("$199 MXN al mes") }}{% endif %}</dd>
         </div>
       </dl>
 
@@ -72,14 +75,24 @@
         {% endif %}
 
         {% if not user.stripe_subscription_id and not user.manual_pro_access %}
-          <a class="btn" href="{{ url_for('main.subscribe') }}">{{ _("Conocer PATIA Pro") }}</a>
+          <a class="btn" href="{{ url_for('main.subscribe') }}">{{ _("Ver planes") }}</a>
         {% endif %}
       </div>
     </article>
 
     <aside class="card module-card-v2 subscription-v2__guide">
       <span class="subscription-v2__eyebrow">{{ _("Valor y condiciones claras") }}</span>
-      <h3>{{ _("Lo que mantienes activo con PATIA Pro") }}</h3>
+      <h3>
+        {% if current_plan_code == "TRIAL" %}
+          {{ _("Funciones incluidas durante tu prueba") }}
+        {% elif current_plan_code == "STARTER" %}
+          {{ _("Funciones incluidas en tu plan Starter") }}
+        {% elif current_plan_code == "PRO" %}
+          {{ _("Funciones incluidas en tu plan Pro") }}
+        {% else %}
+          {{ _("Funciones incluidas en tu acceso actual") }}
+        {% endif %}
+      </h3>
       <ul>
         <li><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span><strong>{{ _("Seguimiento completo") }}</strong> {{ _("Dashboard, reportes IA y recomendaciones basadas en tus datos.") }}</span></li>
         <li><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span><strong>{{ _("Operación conectada") }}</strong> {{ _("Inventario, ventas, proveedores, historial y tickets en una sola cuenta.") }}</span></li>
@@ -89,5 +102,6 @@
       </ul>
     </aside>
   </section>
+  <a class="btn ghost subscription-v2__plans-link" href="{{ url_for('main.subscribe') }}">{{ _("Comparar Starter y Pro") }}</a>
 </div>
 {% endblock %}

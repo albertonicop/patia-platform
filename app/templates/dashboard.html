@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}{{ _("Panel ejecutivo") }}{% endblock %}
+{% block title %}{{ _("Inicio") }}{% endblock %}
 
 {% block content %}
 
 <div class="dashboard-v2">
 <section class="dashboard-v2__intro">
   <div class="dashboard-v2__intro-copy">
-    <span class="dashboard-v2__kicker">{{ _("Resumen del negocio") }}</span>
-    <h2>{{ _("Lo importante de tu negocio, en una sola vista.") }}</h2>
-    <p>{{ _("Revisa ventas, inventario y acciones que necesitan tu atención.") }}</p>
+    <span class="dashboard-v2__kicker">{{ _("Resumen de hoy") }}</span>
+    <h2>{{ _("Esto es lo que necesita tu atención.") }}</h2>
+    <p>{{ _("Ventas, efectivo, productos por surtir y pagos pendientes en una sola vista.") }}</p>
 
     {% if has_pro_access %}
       <div class="plan-status pro dashboard-v2__plan">
@@ -83,7 +83,7 @@
 </section>
 {% endif %}
 
-<section class="dashboard-v2__metrics" aria-label="{{ _('Indicadores principales') }}">
+<section class="dashboard-v2__metrics dashboard-v2__metrics--daily" aria-label="{{ _('Lo importante de hoy') }}">
   <article class="dashboard-v2__metric dashboard-v2__metric--violet">
     <div class="dashboard-v2__metric-head">
       <span>{{ _("Ventas hoy") }}</span>
@@ -95,20 +95,25 @@
 
   <article class="dashboard-v2__metric dashboard-v2__metric--blue">
     <div class="dashboard-v2__metric-head">
-      <span>{{ _("Ventas 7 días") }}</span>
-      <i class="fa-solid fa-chart-simple" aria-hidden="true"></i>
+      <span>{{ _("En caja debería haber") }}</span>
+      <i class="fa-solid fa-vault" aria-hidden="true"></i>
     </div>
-    <strong>{{ week_sales|money }}</strong>
-    <small>{{ _("Rendimiento semanal") }}</small>
+    {% if cash_session %}
+      <strong>{{ cash_expected|money }}</strong>
+      <small>{{ _("Efectivo calculado durante el turno") }}</small>
+    {% else %}
+      <strong>—</strong>
+      <small>{{ _("Tu caja todavía no está abierta.") }}</small>
+    {% endif %}
   </article>
 
   <article class="dashboard-v2__metric dashboard-v2__metric--green">
     <div class="dashboard-v2__metric-head">
-      <span>{{ _("Valor inventario") }}</span>
-      <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+      <span>{{ _("Dinero por cobrar") }}</span>
+      <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>
     </div>
-    <strong>{{ inventory_value|money }}</strong>
-    <small>{{ _("Capital estimado") }}</small>
+    <strong>{{ total_credit_pending|money }}</strong>
+    <small>{{ _("Saldo pendiente de tus clientes") }}</small>
   </article>
 
   <button class="dashboard-v2__metric dashboard-v2__metric--coral dashboard-v2__metric--action"
@@ -121,24 +126,25 @@
       <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
     </div>
     <strong>{{ low_stock }}</strong>
-    <small>{{ _("Ver productos que requieren atención") }}</small>
+    <small>{{ _("Ver productos que requieren atención") }} · {{ _("Valor actual: %(value)s", value=inventory_value|money) }}</small>
   </button>
 </section>
 
-<section class="card cash-status-v1" aria-labelledby="cash-status-title">
+<section class="card cash-status-v1 dashboard-v2__next-action" aria-labelledby="cash-status-title">
   <div>
-    <span class="dashboard-v2__kicker">{{ _("Caja") }}</span>
+    <span class="dashboard-v2__kicker">{{ _("Qué hacer ahora") }}</span>
     <h3 id="cash-status-title">
-      {{ _("Turno abierto") if cash_session else _("Caja cerrada") }}
+      {% if total_products == 0 %}{{ _("Agrega productos para comenzar a vender.") }}
+      {% elif not cash_session %}{{ _("Tu caja todavía no está abierta.") }}
+      {% elif total_sales == 0 %}{{ _("Haz tu primera venta.") }}
+      {% elif low_stock %}{{ _("Revisa los productos que necesitas surtir.") }}
+      {% elif total_credit_pending > 0 %}{{ _("Revisa los pagos pendientes de tus clientes.") }}
+      {% else %}{{ _("Tu negocio está al día.") }}{% endif %}
     </h3>
-    {% if cash_session %}
-      <p>{{ _("Efectivo esperado: %(amount)s", amount=cash_expected|money) }}</p>
-    {% else %}
-      <p>{{ _("Abre un turno para controlar ventas y movimientos de efectivo.") }}</p>
-    {% endif %}
+    <p>{{ _("PATIA te muestra primero la acción más útil para continuar.") }}</p>
   </div>
-  <a class="btn{% if cash_session %} ghost{% endif %}" href="{{ url_for('cash.index') }}">
-    {{ _("Ver caja") if cash_session else _("Abrir caja") }}
+  <a class="btn" href="{% if total_products == 0 %}{{ url_for('main.products') }}{% elif not cash_session %}{{ url_for('cash.index') }}{% elif total_sales == 0 %}{{ url_for('main.sell') }}{% elif low_stock %}{{ url_for('main.products', low_stock=1) }}{% elif total_credit_pending > 0 %}{{ url_for('credit.index') }}{% else %}{{ url_for('main.sell') }}{% endif %}">
+    {% if total_products == 0 %}{{ _("Agregar productos") }}{% elif not cash_session %}{{ _("Abrir caja") }}{% elif total_sales == 0 %}{{ _("Vender ahora") }}{% elif low_stock %}{{ _("Ver productos") }}{% elif total_credit_pending > 0 %}{{ _("Ver saldos") }}{% else %}{{ _("Vender") }}{% endif %}
   </a>
 </section>
 

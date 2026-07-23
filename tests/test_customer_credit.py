@@ -476,10 +476,10 @@ class CustomerCreditTests(unittest.TestCase):
 
     def test_spanish_and_english_copy_and_whatsapp_reminder(self):
         en = self.client_for(self.owner, language="en").get("/credit")
-        self.assertIn("Credit and accounts receivable", en.get_data(as_text=True))
+        self.assertIn("Outstanding balances", en.get_data(as_text=True))
         account = self.client_for(self.owner, language="en").get(
             f"/credit/customers/{self.customer.id}"
         )
         html = account.get_data(as_text=True)
         self.assertIn("wa.me/522381234567", html)
-        self.assertIn("Prepare reminder", html)
+        self.assertIn("Remind via WhatsApp", html)

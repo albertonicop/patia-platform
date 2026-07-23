@@ -168,11 +168,17 @@ def detail(customer_id):
         }
         for ticket in tickets
     ]
+    from app.credit.services import customer_balance
+
+    credit_balance = customer_balance(
+        customer.id, membership.organization_id
+    )
     return render_template(
         "customer_detail.html",
         customer=customer,
         ticket_rows=ticket_rows,
         total_purchased=money_sum(row["total"] for row in ticket_rows),
+        credit_balance=credit_balance,
         whatsapp_number=whatsapp_number(customer),
         customer_created_local=utc_to_local(
             customer.created_at,

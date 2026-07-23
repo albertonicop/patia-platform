@@ -1,91 +1,45 @@
 {% extends "base.html" %}
-{% block title %}PATIA Pro{% endblock %}
-
+{% block title %}{{ _("Planes") }}{% endblock %}
 {% block content %}
-<div class="subscription-v2 subscription-premium-v1">
-  <header class="subscription-premium-v1__hero">
-    <div class="subscription-premium-v1__hero-copy">
-      <span class="subscription-v2__eyebrow">{{ _("PATIA Pro para negocios en operación") }}</span>
-      <h2>{{ _("Convierte la actividad diaria de tu negocio en decisiones más claras.") }}</h2>
-      <p>{{ _("Mantén inventario, ventas, tickets y seguimiento comercial en un solo sistema, sin perder acceso al terminar tu prueba.") }}</p>
-      <div class="subscription-premium-v1__hero-assurances" aria-label="{{ _('Condiciones de PATIA Pro') }}">
-        <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin plazo forzoso") }}</span>
-        <span><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Cancela desde tu cuenta") }}</span>
-        <span><i class="fa-solid fa-lock" aria-hidden="true"></i> {{ _("Pago seguro con Stripe") }}</span>
-      </div>
-    </div>
-    <div class="subscription-premium-v1__hero-price" aria-label="{{ _('$199 MXN al mes') }}">
-      <span>{{ _("Plan mensual") }}</span>
-      <strong>$199</strong>
-      <small>{{ _("MXN al mes") }}</small>
-    </div>
+<div class="plans-v2">
+  <nav class="settings-v2__tabs" aria-label="{{ _('Secciones de Configuración') }}">
+    <a href="{{ url_for('main.settings') }}">{{ _("Negocio") }}</a>
+    <a href="{{ url_for('team.index') }}">{{ _("Personal") }}</a>
+    <a href="{{ url_for('main.subscription') }}" class="is-active" aria-current="page">{{ _("Suscripción") }}</a>
+  </nav>
+
+  <header class="module-intro-v2 plans-v2__intro">
+    <span>{{ _("Planes simples") }}</span>
+    <h2>{{ _("Elige el control que necesita tu negocio") }}</h2>
+    <p>{{ _("Prueba de 14 días. Sin límites artificiales en productos, ventas o tickets. Puedes cancelar cuando quieras.") }}</p>
   </header>
 
-  <section class="subscription-premium-v1__outcomes" aria-label="{{ _('Beneficios principales de PATIA Pro') }}">
-    <article><i class="fa-solid fa-chart-line" aria-hidden="true"></i><div><strong>{{ _("Entiende qué está pasando") }}</strong><span>{{ _("Consulta ventas, utilidad estimada y productos con mayor movimiento.") }}</span></div></article>
-    <article><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><div><strong>{{ _("Anticipa faltantes") }}</strong><span>{{ _("Detecta existencias bajas antes de perder una venta o hacer tu siguiente compra.") }}</span></div></article>
-    <article><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><div><strong>{{ _("Recibe contexto útil") }}</strong><span>{{ _("Obtén recomendaciones explicadas a partir de tus ventas e inventario registrados.") }}</span></div></article>
+  <section class="plans-v2__grid" aria-label="{{ _('Planes disponibles') }}">
+    {% for plan in commercial_plans %}
+      <article class="card plans-v2__plan{% if plan.code == 'PRO' %} plans-v2__plan--pro{% endif %}">
+        {% if plan.code == "PRO" %}<span class="plans-v2__recommended">{{ _("Para trabajar en equipo") }}</span>{% endif %}
+        <header><h3>PATIA {{ plan.name }}</h3><p>{{ plan.description }}</p></header>
+        <div class="plans-v2__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN al mes") }}</span></div>
+        <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i>{{ feature }}</li>{% endfor %}</ul>
+        {% if plan.code == "STARTER" and plan.checkout_enabled %}
+          <form action="/create-checkout-session" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn" type="submit">{{ _("Elegir Starter por $199 al mes") }}</button>
+          </form>
+        {% elif not plan.configured %}
+          <button class="btn ghost" type="button" disabled>{{ _("Disponible próximamente") }}</button>
+          <small>{{ _("Este plan aparecerá para contratar cuando su precio esté configurado de forma segura.") }}</small>
+        {% else %}
+          <button class="btn ghost" type="button" disabled>{{ _("Cambio de plan próximamente") }}</button>
+          <small>{{ _("Tu plan actual no cambiará hasta que confirmes un cambio.") }}</small>
+        {% endif %}
+      </article>
+    {% endfor %}
   </section>
 
-  <section class="subscription-v2__offer-grid">
-    <article class="card module-card-v2 subscription-v2__offer-card subscription-premium-v1__plan">
-      <div class="subscription-v2__offer-head">
-        <div>
-          <span class="subscription-v2__eyebrow">{{ _("Todo PATIA, todos los días") }}</span>
-          <h3>{{ _("Una operación conectada de principio a fin") }}</h3>
-        </div>
-        <span class="subscription-premium-v1__recommended">{{ _("Plan completo") }}</span>
-      </div>
-      <p class="subscription-v2__billing-copy">{{ _("PATIA Pro conserva la continuidad de tu operación y desbloquea la lectura inteligente de los datos que ya generas al vender.") }}</p>
-      <ul class="subscription-v2__features subscription-premium-v1__features">
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>{{ _("Dashboard ejecutivo completo") }}</strong> {{ _("Ventas, valor del inventario, alertas y rendimiento en una sola vista.") }}</span></li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>{{ _("Reportes y recomendaciones IA") }}</strong> {{ _("Hallazgos comerciales basados en la información real de tu cuenta.") }}</span></li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>{{ _("Inventario profesional") }}</strong> {{ _("Productos, costos, precios, existencias, alertas e importación por Excel.") }}</span></li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>{{ _("Punto de venta y tickets") }}</strong> {{ _("Ventas conectadas al stock, métodos de pago e impresión profesional.") }}</span></li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>{{ _("Historial operativo") }}</strong> {{ _("Consulta ventas y reimprime tickets cuando lo necesites.") }}</span></li>
-        <li><i class="fa-solid fa-check" aria-hidden="true"></i><span><strong>{{ _("Proveedores y datos del negocio") }}</strong> {{ _("Información organizada para operar y emitir tickets consistentes.") }}</span></li>
-      </ul>
-
-      <form action="/create-checkout-session" method="POST" class="subscription-v2__checkout-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn subscription-premium-v1__cta" type="submit">{{ _("Activar PATIA Pro por $199 al mes") }}</button>
-      </form>
-      <p class="subscription-v2__secure"><i class="fa-solid fa-lock" aria-hidden="true"></i> {{ _("Stripe procesa el pago. PATIA no almacena los datos de tu tarjeta.") }}</p>
-    </article>
-
-    <aside class="card module-card-v2 subscription-v2__guide subscription-premium-v1__guide">
-      <span class="subscription-v2__eyebrow">{{ _("Control de tu suscripción") }}</span>
-      <h3>{{ _("Sin sorpresas ni procesos ocultos") }}</h3>
-      <ul>
-        <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><span><strong>{{ _("Cobro mensual claro") }}</strong> {{ _("Tu siguiente cobro ocurre un mes después de activar el plan.") }}</span></li>
-        <li><i class="fa-solid fa-credit-card" aria-hidden="true"></i><span><strong>{{ _("Portal de cliente") }}</strong> {{ _("Actualiza tu método de pago desde una sesión segura de Stripe.") }}</span></li>
-        <li><i class="fa-solid fa-ban" aria-hidden="true"></i><span><strong>{{ _("Cancelación administrable") }}</strong> {{ _("Puedes cancelar y conservar el acceso hasta terminar el periodo pagado.") }}</span></li>
-        <li><i class="fa-solid fa-headset" aria-hidden="true"></i><span><strong>{{ _("Soporte PATIA") }}</strong> {{ _("Si necesitas ayuda para continuar, puedes contactar al equipo desde la aplicación.") }}</span></li>
-      </ul>
-      <a href="{{ url_for('main.dashboard') }}" class="btn ghost subscription-v2__back">{{ _("Volver al panel") }}</a>
-    </aside>
-  </section>
-
-  <section class="subscription-premium-v1__comparison" aria-labelledby="plan-comparison-title">
-    <header>
-      <span class="subscription-v2__eyebrow">{{ _("Comparación transparente") }}</span>
-      <h3 id="plan-comparison-title">{{ _("Tu prueba te permite comenzar. Pro mantiene tu negocio avanzando.") }}</h3>
-      <p>{{ _("No pierdes lo aprendido durante la prueba: conservas tu operación y añades análisis para tomar mejores decisiones.") }}</p>
-    </header>
-    <div class="subscription-premium-v1__table-wrap">
-      <table>
-        <thead><tr><th>{{ _("Capacidad") }}</th><th>{{ _("Prueba de 14 días") }}</th><th>{{ _("PATIA Pro") }}</th></tr></thead>
-        <tbody>
-          <tr><td data-label="{{ _('Capacidad') }}">{{ _("Inventario, ventas y proveedores") }}</td><td data-label="{{ _('Prueba') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Incluido") }}</td><td data-label="{{ _('PATIA Pro') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Sin límite de tiempo") }}</td></tr>
-          <tr><td data-label="{{ _('Capacidad') }}">{{ _("Punto de venta y tickets profesionales") }}</td><td data-label="{{ _('Prueba') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Incluido") }}</td><td data-label="{{ _('PATIA Pro') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Incluido") }}</td></tr>
-          <tr><td data-label="{{ _('Capacidad') }}">{{ _("Dashboard operativo") }}</td><td data-label="{{ _('Prueba') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Indicadores esenciales") }}</td><td data-label="{{ _('PATIA Pro') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Seguimiento continuo") }}</td></tr>
-          <tr><td data-label="{{ _('Capacidad') }}">{{ _("Reportes y recomendaciones IA") }}</td><td data-label="{{ _('Prueba') }}"><span class="subscription-premium-v1__limited">{{ _("Disponible en Pro") }}</span></td><td data-label="{{ _('PATIA Pro') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Incluido") }}</td></tr>
-          <tr><td data-label="{{ _('Capacidad') }}">{{ _("Predicción y recomendaciones de inventario") }}</td><td data-label="{{ _('Prueba') }}"><span class="subscription-premium-v1__limited">{{ _("Disponible en Pro") }}</span></td><td data-label="{{ _('PATIA Pro') }}"><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Incluido") }}</td></tr>
-          <tr><td data-label="{{ _('Capacidad') }}">{{ _("Duración del acceso") }}</td><td data-label="{{ _('Prueba') }}">{{ _("14 días") }}</td><td data-label="{{ _('PATIA Pro') }}"><strong>{{ _("Mientras tu suscripción esté activa") }}</strong></td></tr>
-          <tr><td data-label="{{ _('Capacidad') }}">{{ _("Precio") }}</td><td data-label="{{ _('Prueba') }}">{{ _("$0 durante la prueba") }}</td><td data-label="{{ _('PATIA Pro') }}"><strong>{{ _("$199 MXN al mes") }}</strong></td></tr>
-        </tbody>
-      </table>
-    </div>
+  <section class="card plans-v2__protected">
+    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+    <div><h3>{{ _("Tus datos y tu acceso actual están protegidos") }}</h3><p>{{ _("Los clientes actuales conservan sus funciones. PATIA no cambiará tu plan ni eliminará información sin tu confirmación.") }}</p></div>
   </section>
 </div>
 {% endblock %}

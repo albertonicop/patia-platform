@@ -13,7 +13,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=115">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=117">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -34,23 +34,19 @@
     </div>
 
    <nav id="primary-navigation" class="sidebar-nav sidebar-v2__nav" aria-label="{{ _('Navegación principal') }}">
-    {% if can_view_dashboard %}<a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>{{ _("Dashboard") }}</span></a>{% endif %}
-    {% if can_manage_inventory %}<a href="/products"{% if request.path.startswith('/products') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>{{ _("Inventario") }}</span></a>{% endif %}
-    {% if can_view_inventory_history %}<a href="{{ url_for('inventory.index') }}"{% if request.path.startswith('/inventory/kardex') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>{{ _("Kardex") }}</span></a>{% endif %}
-    {% if can_use_pos %}<a href="/sell"{% if request.path.startswith('/sell') or request.path.startswith('/sales/') or request.path.startswith('/ticket/') or request.path.startswith('/receipt/') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>{{ _("Punto de venta") }}</span></a>{% endif %}
+    {% if can_view_dashboard %}<a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-house" aria-hidden="true"></i><span>{{ _("Inicio") }}</span></a>{% endif %}
+    {% if can_use_pos %}<a href="/sell"{% if request.path.startswith('/sell') or request.path.startswith('/sales/') or request.path.startswith('/ticket/') or request.path.startswith('/receipt/') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>{{ _("Vender") }}</span></a>{% endif %}
+    {% if can_manage_inventory %}<a href="/products"{% if request.path.startswith('/products') or request.path.startswith('/inventory/kardex') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>{{ _("Inventario") }}</span></a>{% endif %}
+    {% if can_operate_cash_register %}<a href="{{ url_for('cash.index') }}"{% if request.path.startswith('/cash-register') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-vault" aria-hidden="true"></i><span>{{ _("Caja del día") }}</span></a>{% endif %}
     {% if can_manage_customers %}<a href="{{ url_for('customers.index') }}"{% if request.path.startswith('/customers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-address-book" aria-hidden="true"></i><span>{{ _("Clientes") }}</span></a>{% endif %}
-    {% if can_manage_credit %}<a href="{{ url_for('credit.index') }}"{% if request.path.startswith('/credit') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i><span>{{ _("Crédito y cuentas por cobrar") }}</span></a>{% endif %}
-    {% if can_operate_cash_register %}<a href="{{ url_for('cash.index') }}"{% if request.path.startswith('/cash-register') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-vault" aria-hidden="true"></i><span>{{ _("Caja") }}</span></a>{% endif %}
+    {% if can_manage_credit %}<a href="{{ url_for('credit.index') }}"{% if request.path.startswith('/credit') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i><span>{{ _("Saldos pendientes") }}</span></a>{% endif %}
     {% if can_view_reports and user is defined and user and has_pro_access %}
-<a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes IA") }}</span></a>
+<a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes") }}</span></a>
 {% elif can_view_reports and can_manage_subscription and user is defined and user %}
-<a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes IA") }} <small>{{ _("PRO") }}</small></span></a>
+<a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes") }} <small>{{ _("PRO") }}</small></span></a>
 {% endif %}
     {% if can_manage_inventory %}<a href="/suppliers"{% if request.path.startswith('/suppliers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-truck" aria-hidden="true"></i><span>{{ _("Proveedores") }}</span></a>{% endif %}
-    {% if can_manage_subscription %}<a href="/settings"{% if request.path.startswith('/settings') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{{ _("Configuración") }}</span></a>{% endif %}
-    {% if can_manage_team %}
-    <a href="{{ url_for('team.index') }}"{% if request.path.startswith('/team') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-user-group" aria-hidden="true"></i><span>{{ _("Equipo") }}</span></a>
-    {% endif %}
+    {% if can_manage_subscription %}<a href="/settings"{% if request.path.startswith('/settings') or request.path.startswith('/team') or request.path.startswith('/subscription') or request.path.startswith('/subscribe') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{{ _("Configuración") }}</span></a>{% endif %}
 
 <form method="POST" action="{{ url_for('main.logout') }}" class="sidebar-v2__logout">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -90,7 +86,7 @@
   <main class="main app-main-v2">
     <header class="topbar app-topbar-v2">
       <div>
-        <span class="eyebrow">{{ _("Centro de control") }}</span>
+        <span class="eyebrow">{{ _("Tu negocio hoy") }}</span>
         <h1>{% block title %}{% endblock %}</h1>
       </div>
 

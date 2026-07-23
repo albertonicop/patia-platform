@@ -5,12 +5,12 @@
 <div class="customers-v1">
   <section class="card customers-v1__hero">
     <div>
-      <span class="customers-v1__eyebrow">{{ _("Relaciones simples, ventas claras") }}</span>
+      <span class="customers-v1__eyebrow">{{ _("Tus clientes") }}</span>
       <h2>{{ _("Conoce a quienes compran en tu negocio") }}</h2>
-      <p>{{ _("Guarda sus datos esenciales y consulta sus compras sin convertir PATIA en un CRM complicado.") }}</p>
+      <p>{{ _("Encuentra sus datos, compras y saldos pendientes en segundos.") }}</p>
     </div>
     <div class="customers-v1__hero-actions">
-      <a class="btn ghost" href="{{ url_for('customers.export_csv', q=query, status='all' if include_inactive else '') }}"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> {{ _("Exportar CSV") }}</a>
+      <details class="module-more-v2"><summary>{{ _("Más opciones") }}</summary><a href="{{ url_for('customers.export_csv', q=query, status='all' if include_inactive else '') }}"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> {{ _("Descargar clientes") }}</a></details>
       <a class="btn" href="{{ url_for('customers.new') }}"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> {{ _("Agregar cliente") }}</a>
     </div>
   </section>
@@ -40,18 +40,17 @@
     {% if summaries %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>{{ _("Cliente") }}</th><th>{{ _("Contacto") }}</th><th>{{ _("Compras") }}</th><th>{{ _("Total comprado") }}</th><th>{{ _("Última compra") }}</th><th>{{ _("Estado") }}</th><th>{{ _("Acciones") }}</th></tr></thead>
+          <caption class="sr-only">{{ _("Lista de clientes") }}</caption>
+          <thead><tr><th scope="col">{{ _("Cliente") }}</th><th scope="col">{{ _("Última compra") }}</th><th scope="col">{{ _("Total comprado") }}</th><th scope="col">{{ _("Saldo pendiente") }}</th><th scope="col">{{ _("Acción") }}</th></tr></thead>
           <tbody>
             {% for summary in summaries %}
               {% set customer = summary.customer %}
               <tr>
-                <td data-label="{{ _('Cliente') }}"><strong>{{ customer.name }}</strong>{% if customer.notes %}<small>{{ customer.notes|truncate(70) }}</small>{% endif %}</td>
-                <td data-label="{{ _('Contacto') }}"><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% if customer.email %}<small>{{ customer.email }}</small>{% endif %}</td>
-                <td data-label="{{ _('Compras') }}">{{ summary.ticket_count }}</td>
-                <td data-label="{{ _('Total comprado') }}"><strong>{{ summary.purchase_total|money }}</strong></td>
+                <td data-label="{{ _('Cliente') }}"><strong>{{ customer.name }}</strong><small><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a></small></td>
                 <td data-label="{{ _('Última compra') }}">{% if summary.last_purchase_at %}{{ local_purchase_dates[customer.id].strftime('%d/%m/%Y %H:%M') }}{% else %}{{ _("Sin compras") }}{% endif %}</td>
-                <td data-label="{{ _('Estado') }}"><span class="customers-v1__status customers-v1__status--{{ 'active' if customer.is_active else 'inactive' }}">{{ _("Activo") if customer.is_active else _("Inactivo") }}</span></td>
-                <td data-label="{{ _('Acciones') }}"><div class="customers-v1__row-actions"><a class="btn ghost" href="{{ url_for('customers.detail', customer_id=customer.id) }}">{{ _("Ver historial") }}</a><a class="customers-v1__whatsapp" href="https://wa.me/{{ whatsapp_numbers[customer.id] }}" target="_blank" rel="noopener noreferrer" aria-label="{{ _('Contactar a %(name)s por WhatsApp', name=customer.name) }}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a></div></td>
+                <td data-label="{{ _('Total comprado') }}"><strong>{{ summary.purchase_total|money }}</strong></td>
+                <td data-label="{{ _('Saldo pendiente') }}">{% if summary.credit_balance > 0 %}<strong class="customers-v2__balance">{{ summary.credit_balance|money }}</strong>{% else %}<span>—</span>{% endif %}</td>
+                <td data-label="{{ _('Acción') }}"><a class="btn ghost" href="{{ url_for('customers.detail', customer_id=customer.id) }}">{{ _("Ver cliente") }}</a></td>
               </tr>
             {% endfor %}
           </tbody>

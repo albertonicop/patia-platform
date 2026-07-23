@@ -595,7 +595,9 @@ class OrganizationMemberTests(unittest.TestCase):
         self.login_as(client, owner_user, owner)
 
         spanish = client.get("/team").get_data(as_text=True)
-        self.assertIn("Invitar integrante", spanish)
+        self.assertIn("Agregar persona", spanish)
+        self.assertIn("1 persona", spanish)
+        self.assertNotIn("1 personas", spanish)
 
     def test_team_interface_is_available_in_english(self):
         owner_user = self.add_user("team-language-en@patia.test", "Languages")
@@ -607,8 +609,10 @@ class OrganizationMemberTests(unittest.TestCase):
         with english_client.session_transaction() as language_session:
             language_session["language"] = "en"
         english = english_client.get("/team").get_data(as_text=True)
-        self.assertIn("Invite team member", english)
-        self.assertIn("Team members", english)
+        self.assertIn("Add person", english)
+        self.assertIn("People with access", english)
+        self.assertIn("1 person", english)
+        self.assertNotIn("1 people", english)
 
 
 if __name__ == "__main__":

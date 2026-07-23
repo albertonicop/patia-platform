@@ -25,6 +25,7 @@ from .barcodes import (
 from .models import (
     CashRegisterSession,
     Customer,
+    CustomerCreditMovement,
     InventoryMovement,
     InventoryRestockEvent,
     Organization,
@@ -952,6 +953,25 @@ def analytics(user=None):
     )
     low_stock = len(low_stock_products)
 
+    latest_credit_ids = (
+        db.session.query(
+            CustomerCreditMovement.customer_id,
+            func.max(CustomerCreditMovement.id).label("last_id"),
+        )
+        .filter(CustomerCreditMovement.organization_id == organization_id)
+        .group_by(CustomerCreditMovement.customer_id)
+        .subquery()
+    )
+    total_credit_pending = (
+        db.session.query(func.sum(CustomerCreditMovement.balance_after))
+        .join(
+            latest_credit_ids,
+            CustomerCreditMovement.id == latest_credit_ids.c.last_id,
+        )
+        .scalar()
+        or MONEY_ZERO
+    )
+
     today_sales = db.session.query(func.sum(Sale.total)).filter(
         Sale.organization_id == organization_id,
         Sale.created_at >= start,
@@ -1095,6 +1115,7 @@ def analytics(user=None):
         cash_expected=(
             cash_expected_amount(cash_session.id) if cash_session else None
         ),
+        total_credit_pending=total_credit_pending,
         top_products=top_products,
         category_sales=category_sales,
         alerts=alerts,
@@ -2912,7 +2933,13 @@ def subscribe():
         return redirect(url_for("main.verify_email"))
     if request.args.get("checkout") == "cancelled":
         flash("El pago fue cancelado. No se realizó ningún cargo.", "info")
-    return render_template("subscribe.html", user=user)
+    from .plans import commercial_plans
+
+    return render_template(
+        "subscribe.html",
+        user=user,
+        commercial_plans=commercial_plans(current_app.config),
+    )
 
 
 def _safe_stripe_error(error):
@@ -3380,11 +3407,17 @@ def subscription():
             db.session.rollback()
             current_app.logger.exception("No se pudo sincronizar la suscripción")
             flash("No pudimos actualizar el estado de tu suscripción.", "danger")
+    from .plans import current_plan_code, current_plan_label
+
+    paid_access = has_pro_access(user)
+    plan_code = current_plan_code(user, has_paid_access=paid_access)
     return render_template(
         "subscription.html",
         user=user,
         subscription_info=subscription_info,
-        has_paid_access=has_pro_access(user),
+        has_paid_access=paid_access,
+        current_plan_code=plan_code,
+        current_plan_label=current_plan_label(plan_code),
         subscription_status_label=_subscription_status_label(user.subscription_status),
         current_period_end_local=utc_to_local(
             user.current_period_end,
@@ -3504,6 +3537,8 @@ def admin():
         )
     }
     today = datetime.utcnow()
+    from .plans import current_plan_code, current_plan_label
+
     clients = []
     total_products = total_sales_count = total_sales_money = trial_clients = expired_clients = expiring_soon = new_this_week = new_this_month = 0
 
@@ -3514,7 +3549,8 @@ def admin():
         days_in_patia = (today - u.created_at).days if u.created_at else 0
         trial_days_left = max(0, 14 - days_in_patia)
 
-        if has_pro_access(u):
+        paid_access = has_pro_access(u)
+        if paid_access:
             status = "Pro"
             trial_days_left = "inf"
         elif trial_days_left > 0:
@@ -3534,7 +3570,30 @@ def admin():
         total_products += products_count
         total_sales_count += sales_count
         total_sales_money += sales_money
-        clients.append({"user": u, "products_count": products_count, "sales_count": sales_count, "sales_money": sales_money, "days_in_patia": days_in_patia, "trial_days_left": trial_days_left, "status": status})
+        plan_code = current_plan_code(u, has_paid_access=paid_access)
+        clients.append({
+            "organization": organization,
+            "user": u,
+            "products_count": products_count,
+            "sales_count": sales_count,
+            "sales_money": sales_money,
+            "days_in_patia": days_in_patia,
+            "trial_days_left": trial_days_left,
+            "trial_end": (
+                u.created_at + timedelta(days=14) if u.created_at else None
+            ),
+            "status": status,
+            "plan_code": plan_code,
+            "plan_label": current_plan_label(plan_code),
+            "subscription_status": u.subscription_status,
+            "renewal_date": utc_to_local(
+                u.current_period_end, u.timezone
+            ),
+            "scheduled_cancellation": u.cancel_at_period_end,
+            "in_grace": u.subscription_status == "past_due",
+            "manual_access": u.manual_pro_access,
+            "read_only": status == "Vencido",
+        })
 
     top_client = max(clients, key=lambda c: c["products_count"], default=None)
     latest_client = clients[0] if clients else None

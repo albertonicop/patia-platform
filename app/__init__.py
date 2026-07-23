@@ -62,10 +62,20 @@ def create_app():
     stripe_config = {
         "STRIPE_SECRET_KEY": os.environ.get("STRIPE_SECRET_KEY"),
         "STRIPE_PRICE_ID": os.environ.get("STRIPE_PRICE_ID"),
+        "STRIPE_STARTER_PRICE_ID": os.environ.get("STRIPE_STARTER_PRICE_ID"),
+        "STRIPE_PRO_PRICE_ID": os.environ.get("STRIPE_PRO_PRICE_ID"),
         "STRIPE_WEBHOOK_SECRET": os.environ.get("STRIPE_WEBHOOK_SECRET"),
     }
     if not stripe_disabled:
-        missing = [name for name, value in stripe_config.items() if not value]
+        missing = [
+            name
+            for name in (
+                "STRIPE_SECRET_KEY",
+                "STRIPE_PRICE_ID",
+                "STRIPE_WEBHOOK_SECRET",
+            )
+            if not stripe_config[name]
+        ]
         if missing:
             raise RuntimeError(
                 "Falta configurar Stripe: " + ", ".join(sorted(missing))

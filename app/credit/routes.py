@@ -55,7 +55,7 @@ def index():
         .subquery()
     )
     rows = (
-        db.session.query(Customer, CustomerCreditMovement.balance_after)
+        db.session.query(Customer, CustomerCreditMovement)
         .outerjoin(last_ids, last_ids.c.customer_id == Customer.id)
         .outerjoin(
             CustomerCreditMovement,
@@ -73,10 +73,26 @@ def index():
         accounts=[
             {
                 "customer": customer,
-                "balance": money_decimal(balance or 0),
+                "balance": money_decimal(
+                    movement.balance_after if movement else 0
+                ),
+                "last_activity": (
+                    utc_to_local(
+                        movement.created_at,
+                        membership.organization.timezone,
+                    )
+                    if movement else None
+                ),
             }
-            for customer, balance in rows
+            for customer, movement in rows
         ],
+        total_receivable=sum(
+            (
+                money_decimal(movement.balance_after if movement else 0)
+                for _, movement in rows
+            ),
+            money_decimal(0),
+        ),
     )
 
 
@@ -167,7 +183,7 @@ def payment(customer_id):
     _, membership = _context()
     customer = _customer(customer_id, membership.organization_id)
     try:
-        _, created = record_credit_payment(
+        movement, created = record_credit_payment(
             customer,
             membership,
             request.form.get("amount"),
@@ -177,9 +193,13 @@ def payment(customer_id):
         )
         db.session.commit()
         message = (
-            gettext("Abono registrado correctamente.")
+            gettext(
+                "Pago registrado. %(name)s ahora debe %(balance)s.",
+                name=customer.name,
+                balance=f"${movement.balance_after:,.2f}",
+            )
             if created
-            else gettext("Este abono ya había sido registrado.")
+            else gettext("Este pago ya había sido registrado.")
         )
         flash(message, "success")
     except IntegrityError:
@@ -196,7 +216,7 @@ def payment(customer_id):
             movement_type="PAYMENT",
         ).first()
         if existing:
-            flash(gettext("Este abono ya había sido registrado."), "success")
+            flash(gettext("Este pago ya había sido registrado."), "success")
         else:
             flash(
                 gettext(

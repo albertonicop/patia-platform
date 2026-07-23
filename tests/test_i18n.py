@@ -83,7 +83,7 @@ class InternationalizationTests(unittest.TestCase):
         )
         html = fresh_client.get("/").get_data(as_text=True)
         self.assertIn('lang="en"', html)
-        self.assertIn("Executive dashboard", html)
+        self.assertIn("Your business today", html)
 
     def test_unsupported_language_falls_back_to_spanish(self):
         response = self.client.post(

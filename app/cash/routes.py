@@ -22,9 +22,9 @@ cash = Blueprint("cash", __name__, url_prefix="/cash-register")
 
 def _movement_labels():
     return {
-        "OPENING": gettext("Fondo inicial"),
+        "OPENING": gettext("Efectivo inicial"),
         "SALE_CASH": gettext("Venta en efectivo"),
-        "CREDIT_PAYMENT": gettext("Abono de crédito en efectivo"),
+        "CREDIT_PAYMENT": gettext("Pago de cliente en efectivo"),
         "CASH_IN": gettext("Entrada de efectivo"),
         "WITHDRAWAL": gettext("Retiro"),
         "EXPENSE": gettext("Gasto"),
@@ -101,7 +101,7 @@ def open_register():
     try:
         opening_cash = money_decimal(request.form.get("opening_cash") or 0)
     except ValueError:
-        flash(gettext("Ingresa un fondo inicial válido."), "danger")
+        flash(gettext("Ingresa un efectivo inicial válido."), "danger")
         return redirect(url_for("cash.index"))
     if open_cash_session(membership.organization_id):
         flash(gettext("La caja principal ya tiene un turno abierto."), "danger")
@@ -123,7 +123,7 @@ def open_register():
             membership,
             "OPENING",
             opening_cash,
-            note=gettext("Fondo inicial"),
+            note=gettext("Efectivo inicial"),
         )
     try:
         db.session.commit()

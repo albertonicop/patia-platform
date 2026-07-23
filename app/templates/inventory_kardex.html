@@ -1,106 +1,99 @@
 {% extends 'base.html' %}
-{% block title %}{{ _("Kardex de inventario") }}{% endblock %}
+{% block title %}{{ _("Historial de inventario") }}{% endblock %}
 
 {% block content %}
-<div class="kardex-v1">
-  <section class="card kardex-v1__hero">
-    <div>
-      <span class="kardex-v1__eyebrow">{{ _("Trazabilidad de existencias") }}</span>
-      <h2>{{ _("Cada unidad, explicada") }}</h2>
-      <p>{{ _("Consulta ventas, reabastecimientos, cancelaciones y ajustes sin alterar el historial.") }}</p>
-    </div>
-    <a class="btn ghost" href="{{ url_for('inventory.export_csv', **request.args) }}">
-      <i class="fa-solid fa-file-csv" aria-hidden="true"></i> {{ _("Exportar CSV") }}
-    </a>
-  </section>
+<div class="inventory-history-v2">
+  <header class="module-intro-v2 inventory-history-v2__intro">
+    <a href="{{ url_for('main.products') }}" class="module-back-v2"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a Inventario") }}</a>
+    <span>{{ _("Cambios en existencias") }}</span>
+    <h2>{{ _("Historial de inventario") }}</h2>
+    <p>{{ _("Revisa cuándo y por qué aumentaron o disminuyeron las existencias.") }}</p>
+  </header>
 
   {% if inconsistencies %}
-    <section class="card kardex-v1__warning" role="alert">
+    <section class="card inventory-history-v2__warning" role="alert">
       <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
       <div>
-        <strong>{{ _("Se detectaron diferencias de inventario") }}</strong>
-        <p>{{ _("Revisa estos productos antes de continuar con nuevos ajustes.") }}</p>
-        <ul>{% for item in inconsistencies %}<li>{{ item.product_name }}: {{ _("stock actual %(current)s · Kardex %(ledger)s", current=item.current_stock, ledger=item.ledger_stock) }}</li>{% endfor %}</ul>
+        <h3>{{ _("Hay existencias que necesitan revisión") }}</h3>
+        {% for item in inconsistencies %}
+          <article>
+            <strong>{{ _("PATIA encontró una diferencia en %(product)s.", product=item.product_name) }}</strong>
+            <p>{{ _("El producto muestra %(current)s unidades, pero su historial termina en %(expected)s.", current=item.current_stock, expected=item.ledger_stock) }}</p>
+            <a class="btn ghost" href="{{ url_for('inventory.index', product_id=item.product_id, correct=1) }}">{{ _("Revisar producto") }}</a>
+          </article>
+        {% endfor %}
       </div>
     </section>
   {% else %}
-    <div class="kardex-v1__verified" role="status"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ _("El stock actual coincide con los movimientos registrados.") }}</div>
+    <div class="inventory-history-v2__verified" role="status">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      {{ _("Todo está en orden. Las existencias coinciden con su historial.") }}
+    </div>
   {% endif %}
 
-  <section class="card kardex-v1__filters">
+  <section class="card inventory-history-v2__filters">
     <form method="get" action="{{ url_for('inventory.index') }}">
-      <div>
-        <label for="kardex-product">{{ _("Producto") }}</label>
-        <select id="kardex-product" name="product_id">
-          <option value="">{{ _("Todos los productos") }}</option>
-          {% for product in products %}<option value="{{ product.id }}"{% if filters.product_id == product.id %} selected{% endif %}>{{ product.name }} · {{ product.sku }}</option>{% endfor %}
-        </select>
-      </div>
-      <div>
-        <label for="kardex-type">{{ _("Movimiento") }}</label>
-        <select id="kardex-type" name="type">
-          <option value="">{{ _("Todos los movimientos") }}</option>
-          {% for key, label in movement_labels.items() %}<option value="{{ key }}"{% if filters.movement_type == key %} selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </div>
-      <div><label for="kardex-from">{{ _("Desde") }}</label><input id="kardex-from" name="date_from" type="date" value="{{ filters.date_from }}"></div>
-      <div><label for="kardex-to">{{ _("Hasta") }}</label><input id="kardex-to" name="date_to" type="date" value="{{ filters.date_to }}"></div>
-      <button class="btn" type="submit">{{ _("Aplicar filtros") }}</button>
-      <a class="btn ghost" href="{{ url_for('inventory.index') }}">{{ _("Limpiar") }}</a>
+      <div><label for="history-product">{{ _("Producto") }}</label><select id="history-product" name="product_id"><option value="">{{ _("Todos los productos") }}</option>{% for product in products %}<option value="{{ product.id }}"{% if filters.product_id == product.id %} selected{% endif %}>{{ product.name }} · {{ product.sku }}</option>{% endfor %}</select></div>
+      <div><label for="history-type">{{ _("Qué ocurrió") }}</label><select id="history-type" name="type"><option value="">{{ _("Todos los cambios") }}</option>{% for key, label in movement_labels.items() %}<option value="{{ key }}"{% if filters.movement_type == key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+      <div><label for="history-from">{{ _("Desde") }}</label><input id="history-from" name="date_from" type="date" value="{{ filters.date_from }}"></div>
+      <div><label for="history-to">{{ _("Hasta") }}</label><input id="history-to" name="date_to" type="date" value="{{ filters.date_to }}"></div>
+      <button class="btn" type="submit">{{ _("Ver resultados") }}</button>
+      <a class="btn ghost" href="{{ url_for('inventory.index') }}">{{ _("Quitar filtros") }}</a>
     </form>
   </section>
 
-  {% if filters.product_id %}
+  {% if correction_mode and filters.product_id %}
     {% set selected_product = products|selectattr('id', 'equalto', filters.product_id)|first %}
     {% if selected_product %}
-      <section class="card kardex-v1__adjustment">
-        <div><span class="kardex-v1__eyebrow">{{ _("Ajuste controlado") }}</span><h3>{{ selected_product.name }}</h3><p>{{ _("Stock actual: %(stock)s unidades", stock=selected_product.stock) }}</p></div>
+      <section class="card inventory-history-v2__correction" aria-labelledby="correction-title">
+        <div><span>{{ _("Corregir existencias") }}</span><h3 id="correction-title">{{ selected_product.name }}</h3><p>{{ _("Actualmente aparecen %(stock)s unidades.", stock=selected_product.stock) }}</p></div>
         <form method="post" action="{{ url_for('inventory.adjust', product_id=selected_product.id) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <div>
-            <label for="movement-type">{{ _("Tipo de movimiento") }}</label>
-            <select id="movement-type" name="movement_type" required>
-              <option value="">{{ _("Selecciona una opción") }}</option>
-              <option value="ADJUSTMENT_IN">{{ _("Ajuste de entrada") }}</option>
-              <option value="ADJUSTMENT_OUT">{{ _("Ajuste de salida") }}</option>
-              <option value="WASTE">{{ _("Merma") }}</option>
-              <option value="DAMAGE">{{ _("Daño") }}</option>
-              <option value="INTERNAL_USE">{{ _("Uso interno") }}</option>
-              <option value="PHYSICAL_COUNT">{{ _("Conteo físico") }}</option>
-            </select>
-          </div>
-          <div><label for="movement-quantity">{{ _("Cantidad") }}</label><input id="movement-quantity" name="quantity" type="number" min="0" step="1" required><small>{{ _("En conteo físico, escribe el total contado. En los demás movimientos, escribe las unidades que entran o salen.") }}</small></div>
-          <div class="kardex-v1__reason"><label for="movement-reason">{{ _("Motivo") }}</label><input id="movement-reason" name="reason" maxlength="255" required placeholder="{{ _('Ej. producto dañado durante el traslado') }}"></div>
-          <button class="btn" type="submit">{{ _("Registrar movimiento") }}</button>
+          <div><label for="movement-type">{{ _("¿Qué ocurrió?") }}</label><select id="movement-type" name="movement_type" required>
+            <option value="">{{ _("Selecciona una opción") }}</option>
+            <option value="ADJUSTMENT_IN">{{ _("Recibí mercancía") }}</option>
+            <option value="DAMAGE">{{ _("Producto dañado") }}</option>
+            <option value="WASTE">{{ _("Producto perdido o vencido") }}</option>
+            <option value="INTERNAL_USE">{{ _("Uso interno") }}</option>
+            <option value="PHYSICAL_COUNT">{{ _("El conteo físico es diferente") }}</option>
+            <option value="ADJUSTMENT_OUT">{{ _("Otra salida") }}</option>
+          </select></div>
+          <div><label for="movement-quantity">{{ _("Cantidad") }}</label><input id="movement-quantity" name="quantity" type="number" min="0" step="1" required><small>{{ _("Si contaste las existencias, escribe el total que tienes. En otros casos, escribe las unidades que entraron o salieron.") }}</small></div>
+          <div><label for="movement-reason">{{ _("Cuéntanos brevemente qué pasó") }}</label><input id="movement-reason" name="reason" maxlength="255" required></div>
+          <button class="btn" type="submit">{{ _("Guardar corrección") }}</button>
+          <a class="btn ghost" href="{{ url_for('inventory.index', product_id=selected_product.id) }}">{{ _("Cancelar") }}</a>
         </form>
       </section>
     {% endif %}
   {% endif %}
 
-  <section class="card kardex-v1__history">
-    <header><div><span class="kardex-v1__eyebrow">{{ _("Historial inmutable") }}</span><h3>{{ _("Movimientos de inventario") }}</h3></div><span>{{ _("%(count)s movimientos mostrados", count=movements|length) }}</span></header>
+  <section class="card inventory-history-v2__history">
+    <header>
+      <div><span>{{ _("Actividad reciente") }}</span><h3>{{ _("Cambios de inventario") }}</h3></div>
+      <details class="module-more-v2"><summary>{{ _("Más opciones") }}</summary><a href="{{ url_for('inventory.export_csv', **request.args) }}"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> {{ _("Descargar CSV") }}</a></details>
+    </header>
     {% if movements %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>{{ _("Fecha") }}</th><th>{{ _("Producto") }}</th><th>{{ _("Movimiento") }}</th><th>{{ _("Cantidad") }}</th><th>{{ _("Antes") }}</th><th>{{ _("Después") }}</th><th>{{ _("Responsable") }}</th><th>{{ _("Referencia / motivo") }}</th></tr></thead>
-          <tbody>
-            {% for movement in movements %}
-              <tr>
-                <td data-label="{{ _('Fecha') }}">{{ movement.local_created_at.strftime("%d/%m/%Y %H:%M") }}</td>
-                <td data-label="{{ _('Producto') }}"><strong>{{ movement.product_name }}</strong><small>{{ movement.product_sku }}</small></td>
-                <td data-label="{{ _('Movimiento') }}"><span class="kardex-v1__type kardex-v1__type--{{ movement.direction_class }}">{{ movement_labels[movement.movement_type] }}</span></td>
-                <td data-label="{{ _('Cantidad') }}" class="{{ movement.quantity_class }}">{{ movement.signed_quantity }}</td>
-                <td data-label="{{ _('Antes') }}">{{ movement.stock_before }}</td>
-                <td data-label="{{ _('Después') }}"><strong>{{ movement.stock_after }}</strong></td>
-                <td data-label="{{ _('Responsable') }}">{{ movement.performed_by_member.user.email if movement.performed_by_member and movement.performed_by_member.user else _("Sistema / migración") }}</td>
-                <td data-label="{{ _('Referencia / motivo') }}">{% if movement.sales_ticket %}<strong>{{ movement.sales_ticket.folio }}</strong>{% endif %}<small>{{ movement.reason or "—" }}</small></td>
-              </tr>
-            {% endfor %}
-          </tbody>
+          <caption class="sr-only">{{ _("Cambios registrados en el inventario") }}</caption>
+          <thead><tr><th scope="col">{{ _("Fecha") }}</th><th scope="col">{{ _("Producto") }}</th><th scope="col">{{ _("Qué ocurrió") }}</th><th scope="col">{{ _("Cambio") }}</th><th scope="col">{{ _("Existencias después") }}</th><th scope="col">{{ _("Motivo") }}</th></tr></thead>
+          <tbody>{% for movement in movements %}<tr>
+            <td data-label="{{ _('Fecha') }}">{{ movement.local_created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+            <td data-label="{{ _('Producto') }}"><strong>{{ movement.product_name }}</strong><small>{{ movement.product_sku }}</small></td>
+            <td data-label="{{ _('Qué ocurrió') }}"><span class="kardex-v1__type kardex-v1__type--{{ movement.direction_class }}">{{ movement_labels[movement.movement_type] }}</span></td>
+            <td data-label="{{ _('Cambio') }}" class="{{ movement.quantity_class }}">{{ movement.signed_quantity }}</td>
+            <td data-label="{{ _('Existencias después') }}"><strong>{{ movement.stock_after }}</strong></td>
+            <td data-label="{{ _('Motivo') }}">
+              <span>{{ movement.reason or "—" }}</span>
+              <details class="inventory-history-v2__details"><summary>{{ _("Ver detalles") }}</summary>
+                <dl><div><dt>{{ _("Existencias antes") }}</dt><dd>{{ movement.stock_before }}</dd></div>{% if movement.sales_ticket %}<div><dt>{{ _("Ticket relacionado") }}</dt><dd>{{ movement.sales_ticket.folio }}</dd></div>{% endif %}</dl>
+              </details>
+            </td>
+          </tr>{% endfor %}</tbody>
         </table>
       </div>
     {% else %}
-      <div class="module-empty-v2 kardex-v1__empty"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><h4>{{ _("No hay movimientos con estos filtros") }}</h4><p>{{ _("Prueba otro producto, tipo de movimiento o periodo.") }}</p></div>
+      <div class="module-empty-v2"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><h4>{{ _("No hay cambios con estos filtros") }}</h4><p>{{ _("Prueba con otro producto o periodo.") }}</p></div>
     {% endif %}
   </section>
 </div>

@@ -224,9 +224,9 @@ class CashRegisterTests(unittest.TestCase):
         self.open_register(client, "20.00")
         cash_session = CashRegisterSession.query.one()
         dashboard = client.get("/").get_data(as_text=True)
-        self.assertIn("Turno abierto", dashboard)
+        self.assertIn("En caja debería haber", dashboard)
         index = client.get("/cash-register").get_data(as_text=True)
-        self.assertIn("Efectivo esperado", index)
+        self.assertIn("En caja debería haber", index)
         self.assertEqual(
             client.post(
                 "/cash-register/close",
@@ -293,8 +293,8 @@ class CashRegisterTests(unittest.TestCase):
         with client.session_transaction() as session:
             session["language"] = "en"
         html = client.get("/cash-register").get_data(as_text=True)
-        self.assertIn("Cash register", html)
-        self.assertIn("Open register", html)
+        self.assertIn("Daily cash", html)
+        self.assertIn("Start shift", html)
 
 
 if __name__ == "__main__":

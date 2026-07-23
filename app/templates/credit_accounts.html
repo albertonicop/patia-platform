@@ -1,39 +1,40 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Crédito y cuentas por cobrar") }}{% endblock %}
+{% block title %}{{ _("Saldos pendientes") }}{% endblock %}
 {% block content %}
-<div class="credit-v1">
-  <section class="card credit-v1__hero">
-    <div>
-      <span>{{ _("Control de saldos") }}</span>
-      <h2>{{ _("Crédito claro, cobros sin sorpresas") }}</h2>
-      <p>{{ _("Consulta cuánto debe cada cliente y registra abonos sin perder el historial.") }}</p>
-    </div>
+<div class="receivables-v2">
+  <header class="module-intro-v2 receivables-v2__intro">
+    <span>{{ _("Pagos de clientes") }}</span>
+    <h2>{{ _("Dinero por cobrar") }}</h2>
+    <p>{{ _("Consulta cuánto debe cada cliente y registra los pagos que recibas.") }}</p>
+  </header>
+
+  <section class="receivables-v2__total" aria-label="{{ _('Total por cobrar') }}">
+    <span>{{ _("Total por cobrar") }}</span>
+    <strong>{{ total_receivable|money }}</strong>
+    <small>{{ _("Suma de todos los saldos pendientes") }}</small>
   </section>
-  <section class="card credit-v1__accounts">
-    <header><h3>{{ _("Cuentas de clientes") }}</h3></header>
+
+  <section class="card receivables-v2__accounts" aria-labelledby="receivables-list-title">
+    <header><h3 id="receivables-list-title">{{ _("Clientes con pago pendiente") }}</h3></header>
     {% if accounts %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>{{ _("Cliente") }}</th><th>{{ _("Límite") }}</th><th>{{ _("Saldo pendiente") }}</th><th>{{ _("Disponible") }}</th><th>{{ _("Acción") }}</th></tr></thead>
-          <tbody>
-          {% for row in accounts %}
-            <tr>
-              <td data-label="{{ _('Cliente') }}"><strong>{{ row.customer.name }}</strong><small>{{ row.customer.phone }}</small></td>
-              <td data-label="{{ _('Límite') }}">{{ row.customer.credit_limit|money }}</td>
-              <td data-label="{{ _('Saldo pendiente') }}"><strong>{{ row.balance|money }}</strong></td>
-              <td data-label="{{ _('Disponible') }}">{{ ([row.customer.credit_limit - row.balance, 0]|max)|money }}</td>
-              <td><a class="btn ghost" href="{{ url_for('credit.account', customer_id=row.customer.id) }}">{{ _("Ver estado de cuenta") }}</a></td>
-            </tr>
-          {% endfor %}
-          </tbody>
+          <caption class="sr-only">{{ _("Saldos pendientes por cliente") }}</caption>
+          <thead><tr><th scope="col">{{ _("Cliente") }}</th><th scope="col">{{ _("Cuánto debe") }}</th><th scope="col">{{ _("Último movimiento") }}</th><th scope="col">{{ _("Acciones") }}</th></tr></thead>
+          <tbody>{% for row in accounts %}<tr>
+            <td data-label="{{ _('Cliente') }}"><strong>{{ row.customer.name }}</strong><small>{{ row.customer.phone }}</small></td>
+            <td data-label="{{ _('Cuánto debe') }}"><strong>{{ row.balance|money }}</strong></td>
+            <td data-label="{{ _('Último movimiento') }}">{% if row.last_activity %}{{ row.last_activity.strftime('%d/%m/%Y %H:%M') }}{% else %}—{% endif %}</td>
+            <td data-label="{{ _('Acciones') }}"><div class="receivables-v2__actions"><a class="btn" href="{{ url_for('credit.account', customer_id=row.customer.id) }}#registrar-pago">{{ _("Registrar pago") }}</a><a class="btn ghost" href="{{ url_for('credit.account', customer_id=row.customer.id) }}">{{ _("Ver saldo y pagos") }}</a></div></td>
+          </tr>{% endfor %}</tbody>
         </table>
       </div>
     {% else %}
       <div class="module-empty-v2">
-        <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>
-        <h3>{{ _("Aún no hay clientes con crédito habilitado") }}</h3>
-        <p>{{ _("Actívalo desde el perfil de un cliente y define un límite responsable.") }}</p>
-        <a class="btn" href="{{ url_for('customers.index') }}">{{ _("Ir a clientes") }}</a>
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <h3>{{ _("No tienes pagos pendientes.") }}</h3>
+        <p>{{ _("Cuando registres una venta a crédito, el saldo aparecerá aquí.") }}</p>
+        <a class="btn ghost" href="{{ url_for('customers.index') }}">{{ _("Ver clientes") }}</a>
       </div>
     {% endif %}
   </section>

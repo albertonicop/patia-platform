@@ -1,68 +1,65 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Estado de cuenta") }}{% endblock %}
+{% block title %}{{ _("Saldo y pagos") }}{% endblock %}
 {% block content %}
-<div class="credit-v1">
-  <section class="card credit-v1__hero">
+<div class="receivables-v2">
+  <section class="receivables-v2__customer">
     <div>
-      {% if can_manage_credit %}<a href="{{ url_for('credit.index') }}">{{ _("Volver a cuentas") }}</a>{% else %}<a href="{{ url_for('main.sell') }}">{{ _("Volver al punto de venta") }}</a>{% endif %}
-      <span>{{ _("Estado de cuenta") }}</span>
+      <a href="{{ url_for('credit.index') if can_manage_credit else url_for('main.sell') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver") }}</a>
+      <span>{{ _("Saldo de cliente") }}</span>
       <h2>{{ customer.name }}</h2>
       <p>{{ customer.phone }}</p>
     </div>
-    <div><small>{{ _("Saldo pendiente") }}</small><strong>{{ balance|money }}</strong></div>
+    <div><small>{{ _("Debe actualmente") }}</small><strong>{{ balance|money }}</strong></div>
   </section>
-  {% if not customer.credit_enabled %}
-    <section class="card credit-v1__notice"><p>{{ _("El crédito no está habilitado para este cliente.") }}</p></section>
-  {% endif %}
-  <section class="credit-v1__grid">
-    <article class="card credit-v1__payment">
-      <h3>{{ _("Registrar abono") }}</h3>
+
+  {% if not customer.credit_enabled %}<div class="flash warning">{{ _("Este cliente ya no puede hacer nuevas compras a crédito, pero aún puedes recibir sus pagos.") }}</div>{% endif %}
+
+  <section class="receivables-v2__grid">
+    <article class="card receivables-v2__payment" id="registrar-pago">
+      <span>{{ _("Cobro recibido") }}</span>
+      <h3>{{ _("Registrar pago") }}</h3>
       <form method="post" action="{{ url_for('credit.payment', customer_id=customer.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="request_id" value="{{ payment_request_id }}">
-        <label for="payment-amount">{{ _("Cantidad") }}</label>
+        <label for="payment-amount">{{ _("Cantidad recibida") }}</label>
         <input id="payment-amount" name="amount" type="number" min="0.01" max="{{ balance }}" step="0.01" required>
-        <label for="credit-payment-method">{{ _("Método de pago") }}</label>
+        <label for="credit-payment-method">{{ _("¿Cómo pagó?") }}</label>
         <select id="credit-payment-method" name="payment_method">
           <option value="cash">{{ _("Efectivo") }}</option>
           <option value="card">{{ _("Tarjeta") }}</option>
           <option value="transfer">{{ _("Transferencia") }}</option>
           <option value="other">{{ _("Otro") }}</option>
         </select>
-        <label for="payment-note">{{ _("Nota (opcional)") }}</label>
+        <label for="payment-note">{{ _("Nota") }} <small>{{ _("Opcional") }}</small></label>
         <input id="payment-note" name="note" maxlength="255">
-        <button class="btn" type="submit"{% if balance <= 0 %} disabled{% endif %}>{{ _("Registrar abono") }}</button>
+        <button class="btn" type="submit"{% if balance <= 0 %} disabled{% endif %}>{{ _("Guardar pago") }}</button>
       </form>
     </article>
-    <article class="card credit-v1__reminder">
-      <h3>{{ _("Recordatorio por WhatsApp") }}</h3>
-      <p>{{ _("Abre un mensaje preparado. PATIA no lo enviará sin tu confirmación.") }}</p>
-      <a class="btn ghost" href="{{ reminder_url }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ _("Preparar recordatorio") }}</a>
+    <article class="card receivables-v2__reminder">
+      <span>{{ _("Mensaje listo para revisar") }}</span>
+      <h3>{{ _("Recordar por WhatsApp") }}</h3>
+      <p>{{ _("PATIA preparará el mensaje. Tú podrás revisarlo antes de enviarlo.") }}</p>
+      <a class="btn ghost" href="{{ reminder_url }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ _("Recordar por WhatsApp") }}</a>
     </article>
   </section>
-  <section class="card credit-v1__history">
-    <header><h3>{{ _("Movimientos de la cuenta") }}</h3><span>{{ _("Historial inmutable") }}</span></header>
+
+  <section class="card receivables-v2__history">
+    <header><h3>{{ _("Pagos y compras a crédito") }}</h3></header>
     {% if movements %}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>{{ _("Fecha") }}</th><th>{{ _("Movimiento") }}</th><th>{{ _("Referencia") }}</th><th>{{ _("Cargo") }}</th><th>{{ _("Abono") }}</th><th>{{ _("Saldo") }}</th><th>{{ _("Responsable") }}</th></tr></thead>
-          <tbody>
-          {% for movement in movements %}
-            <tr>
-              <td>{{ movement.local_created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-              <td>{% if movement.movement_type == "CHARGE" %}{{ _("Venta a crédito") }}{% elif movement.movement_type == "REVERSAL" %}{{ _("Cancelación de venta") }}{% else %}{{ _("Abono") }}{% endif %}</td>
-              <td>{% if movement.sales_ticket %}<a href="{{ url_for('main.ticket', ticket_ref=movement.sales_ticket.public_id) }}">{{ movement.sales_ticket.folio }}</a>{% else %}{{ movement.note or "—" }}{% endif %}</td>
-              <td>{{ movement.amount|money if movement.movement_type == "CHARGE" else "—" }}</td>
-              <td>{{ movement.amount|money if movement.movement_type in ("PAYMENT", "REVERSAL") else "—" }}</td>
-              <td><strong>{{ movement.balance_after|money }}</strong></td>
-              <td>{{ movement.performed_by_member.user.email if movement.performed_by_member else _("Sistema") }}{% if movement.authorized_by_member %}<small>{{ _("Exceso autorizado") }}</small>{% endif %}</td>
-            </tr>
-          {% endfor %}
-          </tbody>
+          <caption class="sr-only">{{ _("Historial del saldo del cliente") }}</caption>
+          <thead><tr><th scope="col">{{ _("Fecha") }}</th><th scope="col">{{ _("Qué ocurrió") }}</th><th scope="col">{{ _("Cantidad") }}</th><th scope="col">{{ _("Saldo después") }}</th></tr></thead>
+          <tbody>{% for movement in movements %}<tr>
+            <td data-label="{{ _('Fecha') }}">{{ movement.local_created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td data-label="{{ _('Qué ocurrió') }}">{% if movement.movement_type == "CHARGE" %}{{ _("Compra a crédito") }}{% elif movement.movement_type == "REVERSAL" %}{{ _("Venta cancelada") }}{% else %}{{ _("Pago recibido") }}{% endif %}{% if movement.sales_ticket %}<small><a href="{{ url_for('main.ticket', ticket_ref=movement.sales_ticket.public_id) }}">{{ movement.sales_ticket.folio }}</a></small>{% endif %}</td>
+            <td data-label="{{ _('Cantidad') }}">{{ movement.amount|money }}</td>
+            <td data-label="{{ _('Saldo después') }}"><strong>{{ movement.balance_after|money }}</strong></td>
+          </tr>{% endfor %}</tbody>
         </table>
       </div>
     {% else %}
-      <div class="module-empty-v2"><h3>{{ _("Sin movimientos todavía") }}</h3><p>{{ _("Las ventas a crédito y sus abonos aparecerán aquí.") }}</p></div>
+      <div class="module-empty-v2"><h3>{{ _("Todavía no hay movimientos") }}</h3><p>{{ _("Las compras a crédito y sus pagos aparecerán aquí.") }}</p></div>
     {% endif %}
   </section>
 </div>

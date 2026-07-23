@@ -53,18 +53,18 @@ def _current_context():
 
 def _translated_labels():
     return {
-        "OPENING_BALANCE": gettext("Saldo inicial"),
+        "OPENING_BALANCE": gettext("Existencias registradas al comenzar"),
         "SALE": gettext("Venta"),
-        "SALE_CANCELLATION": gettext("Cancelación de venta"),
-        "RETURN": gettext("Devolución"),
-        "RESTOCK": gettext("Reabastecimiento"),
-        "ADJUSTMENT_IN": gettext("Ajuste de entrada"),
-        "ADJUSTMENT_OUT": gettext("Ajuste de salida"),
-        "WASTE": gettext("Merma"),
-        "DAMAGE": gettext("Daño"),
+        "SALE_CANCELLATION": gettext("Venta cancelada"),
+        "RETURN": gettext("Producto devuelto"),
+        "RESTOCK": gettext("Mercancía recibida"),
+        "ADJUSTMENT_IN": gettext("Otra entrada"),
+        "ADJUSTMENT_OUT": gettext("Otra salida"),
+        "WASTE": gettext("Producto perdido o vencido"),
+        "DAMAGE": gettext("Producto dañado"),
         "INTERNAL_USE": gettext("Uso interno"),
-        "PHYSICAL_COUNT": gettext("Conteo físico"),
-        "IMPORT": gettext("Importación"),
+        "PHYSICAL_COUNT": gettext("Conteo físico diferente"),
+        "IMPORT": gettext("Productos importados"),
     }
 
 
@@ -150,6 +150,7 @@ def index():
         movement_labels=_translated_labels(),
         inconsistencies=[item for item in consistency if not item.is_consistent],
         timezone_name=timezone_name,
+        correction_mode=request.args.get("correct") == "1",
     )
 
 
@@ -213,7 +214,7 @@ def export_csv():
         output.getvalue(),
         mimetype="text/csv; charset=utf-8",
         headers={
-            "Content-Disposition": "attachment; filename=kardex-patia.csv"
+            "Content-Disposition": "attachment; filename=historial-inventario-patia.csv"
         },
     )
 
@@ -230,15 +231,15 @@ def adjust(product_id):
     movement_type = request.form.get("movement_type", "").strip()
     reason = request.form.get("reason", "").strip()
     if movement_type not in MANUAL_MOVEMENT_TYPES or not reason:
-        flash(gettext("Selecciona un movimiento e indica el motivo."), "danger")
-        return redirect(url_for("inventory.index", product_id=product_id))
+        flash(gettext("Selecciona qué ocurrió y cuéntanos el motivo."), "danger")
+        return redirect(url_for("inventory.index", product_id=product_id, correct=1))
     try:
         quantity = int(request.form.get("quantity", ""))
     except (TypeError, ValueError):
         quantity = -1
     if quantity < 0 or (movement_type != "PHYSICAL_COUNT" and quantity == 0):
         flash(gettext("Ingresa una cantidad válida."), "danger")
-        return redirect(url_for("inventory.index", product_id=product_id))
+        return redirect(url_for("inventory.index", product_id=product_id, correct=1))
 
     product = (
         Product.query.filter_by(
@@ -270,11 +271,8 @@ def adjust(product_id):
         db.session.commit()
     except ValueError:
         db.session.rollback()
-        flash(
-            gettext("El movimiento dejaría existencias negativas."),
-            "danger",
-        )
-        return redirect(url_for("inventory.index", product_id=product_id))
+        flash(gettext("Ese cambio dejaría existencias negativas."), "danger")
+        return redirect(url_for("inventory.index", product_id=product_id, correct=1))
 
-    flash(gettext("Movimiento de inventario registrado."), "success")
+    flash(gettext("Existencias actualizadas correctamente."), "success")
     return redirect(url_for("inventory.index", product_id=product_id))

@@ -3,6 +3,11 @@
 {% block content %}
 
 <div class="settings-v2">
+  <nav class="settings-v2__tabs" aria-label="{{ _('Secciones de Configuración') }}">
+    <a href="{{ url_for('main.settings') }}" class="is-active" aria-current="page">{{ _("Negocio") }}</a>
+    <a href="{{ url_for('team.index') }}">{{ _("Personal") }}</a>
+    <a href="{{ url_for('main.subscription') }}">{{ _("Suscripción") }}</a>
+  </nav>
   <header class="module-intro-v2">
     <span>{{ _("Perfil del negocio") }}</span>
     <h2>{{ _("Configura la información de tu empresa") }}</h2>
@@ -106,6 +111,19 @@
       <button class="btn" type="submit">{{ _("Guardar cambios") }}</button>
     </div>
   </form>
+
+  <section class="settings-v2__shortcuts">
+    <article class="card">
+      <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+      <div><h3>{{ _("¿Alguien más trabaja contigo?") }}</h3><p>{{ _("Dale su propio acceso para no compartir tu contraseña.") }}</p></div>
+      <a class="btn ghost" href="{{ url_for('team.index') }}">{{ _("Agregar persona") }}</a>
+    </article>
+    <article class="card">
+      <i class="fa-solid fa-credit-card" aria-hidden="true"></i>
+      <div><h3>{{ _("Tu plan y pagos") }}</h3><p>{{ _("Consulta tu plan, próxima fecha y opciones de suscripción.") }}</p></div>
+      <a class="btn ghost" href="{{ url_for('main.subscription') }}">{{ _("Ver suscripción") }}</a>
+    </article>
+  </section>
 </div>
 
 {% endblock %}

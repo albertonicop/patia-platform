@@ -1,108 +1,134 @@
 {% extends 'base.html' %}
-{% block title %}{{ _("Caja y cortes") }}{% endblock %}
+{% block title %}{{ _("Caja del día") }}{% endblock %}
 {% block content %}
-<div class="cash-v1">
-  {% if cash_session %}
-  <section class="cash-v1__hero cash-v1__hero--open">
-    <div>
-      <span class="cash-v1__eyebrow">{{ _("Turno activo") }}</span>
-      <h2>{{ _("Caja principal abierta") }}</h2>
-      <p>{{ _("Abierta el %(date)s", date=cash_session.opened_at_local.strftime('%d/%m/%Y %H:%M')) }}</p>
-    </div>
-    <div class="cash-v1__expected">
-      <span>{{ _("Efectivo esperado") }}</span>
-      <strong>{{ expected_cash|money }}</strong>
-    </div>
-  </section>
+<div class="cash-v2">
+  <header class="module-intro-v2 cash-v2__intro">
+    <span>{{ _("Control del efectivo") }}</span>
+    <h2>{{ _("Caja del día") }}</h2>
+    <p>{{ _("Lleva el control del efectivo desde que abres hasta que cierras.") }}</p>
+  </header>
 
-  <section class="cash-v1__grid">
-    <article class="card cash-v1__summary">
-      <h3>{{ _("Resumen del turno") }}</h3>
+  {% if cash_session %}
+    <section class="cash-v2__balance" aria-labelledby="expected-cash-title">
+      <div>
+        <span class="cash-v2__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> {{ _("Caja abierta") }}</span>
+        <h3 id="expected-cash-title">{{ _("En caja debería haber") }}</h3>
+        <strong>{{ expected_cash|money }}</strong>
+        <p>{{ _("Incluye el efectivo inicial, las ventas, los pagos, las entradas y las salidas.") }}</p>
+      </div>
       <dl>
-        <div><dt>{{ _("Fondo inicial") }}</dt><dd>{{ cash_session.opening_cash|money }}</dd></div>
-        <div><dt>{{ _("Movimientos") }}</dt><dd>{{ cash_session.movements|length }}</dd></div>
-        <div><dt>{{ _("Responsable") }}</dt><dd>{{ cash_session.opened_by_member.user.email if cash_session.opened_by_member else _("No disponible") }}</dd></div>
+        <div><dt>{{ _("Efectivo inicial") }}</dt><dd>{{ cash_session.opening_cash|money }}</dd></div>
+        <div><dt>{{ _("Comenzaste") }}</dt><dd>{{ cash_session.opened_at_local.strftime('%d/%m/%Y · %H:%M') }}</dd></div>
       </dl>
-    </article>
+    </section>
 
     {% if can_manage_movements %}
-    <article class="card cash-v1__movement">
-      <h3>{{ _("Registrar movimiento") }}</h3>
-      <form method="POST" action="{{ url_for('cash.add_movement') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="movement-type">{{ _("Tipo") }}</label>
-        <select id="movement-type" name="movement_type" required>
-          <option value="CASH_IN">{{ _("Entrada de efectivo") }}</option>
-          <option value="WITHDRAWAL">{{ _("Retiro") }}</option>
-          <option value="EXPENSE">{{ _("Gasto") }}</option>
-        </select>
-        <label for="movement-amount">{{ _("Importe") }}</label>
-        <input id="movement-amount" name="amount" type="number" min="0.01" step="0.01" required>
-        <label for="movement-note">{{ _("Motivo") }}</label>
-        <input id="movement-note" name="note" maxlength="255" required>
-        <button class="btn" type="submit">{{ _("Guardar movimiento") }}</button>
-      </form>
-    </article>
+      <section class="cash-v2__actions" aria-label="{{ _('Acciones de caja') }}">
+        {% for action in [
+          ("CASH_IN", _("Agregar efectivo"), "fa-plus"),
+          ("WITHDRAWAL", _("Retirar efectivo"), "fa-arrow-up"),
+          ("EXPENSE", _("Registrar gasto"), "fa-receipt")
+        ] %}
+          <details class="card cash-v2__action">
+            <summary><i class="fa-solid {{ action[2] }}" aria-hidden="true"></i><span>{{ action[1] }}</span></summary>
+            <form method="POST" action="{{ url_for('cash.add_movement') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="movement_type" value="{{ action[0] }}">
+              <label for="amount-{{ action[0] }}">{{ _("Cantidad") }}</label>
+              <input id="amount-{{ action[0] }}" name="amount" type="number" min="0.01" step="0.01" required>
+              <label for="note-{{ action[0] }}">{{ _("¿Por qué?") }}</label>
+              <input id="note-{{ action[0] }}" name="note" maxlength="255" required>
+              <button class="btn" type="submit">{{ _("Guardar") }}</button>
+            </form>
+          </details>
+        {% endfor %}
+      </section>
     {% endif %}
-  </section>
 
-  <section class="card cash-v1__close">
-    <div>
-      <span class="cash-v1__eyebrow">{{ _("Cierre") }}</span>
-      <h3>{{ _("Realizar corte de caja") }}</h3>
-      <p>{{ _("Cuenta el efectivo físico. PATIA calculará la diferencia contra lo esperado.") }}</p>
-    </div>
-    <form method="POST" action="{{ url_for('cash.close_register') }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label for="counted-cash">{{ _("Efectivo contado") }}</label>
-      <input id="counted-cash" name="counted_cash" type="number" min="0" step="0.01" required>
-      <label for="closing-notes">{{ _("Notas de cierre") }} <small>{{ _("Opcional") }}</small></label>
-      <textarea id="closing-notes" name="closing_notes" maxlength="1000" rows="3"></textarea>
-      <button class="btn" type="submit">{{ _("Cerrar turno y guardar corte") }}</button>
-    </form>
-  </section>
+    <section class="card cash-v2__close" aria-labelledby="close-cash-title">
+      <div>
+        <span>{{ _("Final del turno") }}</span>
+        <h3 id="close-cash-title">{{ _("Cerrar caja") }}</h3>
+        <p>{{ _("Cuenta el dinero físico que quedó. PATIA lo comparará con la cantidad calculada.") }}</p>
+      </div>
+      <form method="POST" action="{{ url_for('cash.close_register') }}" data-cash-close data-expected="{{ expected_cash }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="counted-cash">{{ _("¿Cuánto efectivo contaste?") }}</label>
+        <input id="counted-cash" name="counted_cash" type="number" min="0" step="0.01" required>
+        <div class="cash-v2__reconciliation" aria-live="polite">
+          <div><span>{{ _("PATIA calculó") }}</span><strong>{{ expected_cash|money }}</strong></div>
+          <div><span>{{ _("Tú contaste") }}</span><strong data-counted-output>—</strong></div>
+          <div><span>{{ _("Diferencia") }}</span><strong data-difference-output>—</strong></div>
+        </div>
+        <label for="closing-notes">{{ _("¿Quieres dejar una nota?") }} <small>{{ _("Opcional") }}</small></label>
+        <textarea id="closing-notes" name="closing_notes" maxlength="1000" rows="3"></textarea>
+        <button class="btn" type="submit">{{ _("Revisar y cerrar") }}</button>
+      </form>
+    </section>
   {% else %}
-  <section class="card cash-v1__empty module-empty-v2">
-    <i class="fa-solid fa-vault" aria-hidden="true"></i>
-    <span class="cash-v1__eyebrow">{{ _("Caja cerrada") }}</span>
-    <h2>{{ _("Abre un turno para comenzar") }}</h2>
-    <p>{{ _("Registra el fondo disponible al iniciar. Las ventas en efectivo se sumarán automáticamente.") }}</p>
-    <form class="cash-v1__open-form" method="POST" action="{{ url_for('cash.open_register') }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label for="opening-cash">{{ _("Fondo inicial") }}</label>
-      <input id="opening-cash" name="opening_cash" type="number" min="0" step="0.01" value="0.00" required autofocus>
-      <button class="btn" type="submit">{{ _("Abrir caja") }}</button>
-    </form>
-  </section>
+    <section class="card cash-v2__start" aria-labelledby="start-cash-title">
+      <span class="cash-v2__start-icon" aria-hidden="true"><i class="fa-solid fa-vault"></i></span>
+      <div>
+        <span>{{ _("Caja cerrada") }}</span>
+        <h2 id="start-cash-title">{{ _("Comienza el día en caja") }}</h2>
+        <p>{{ _("Escribe cuánto efectivo tienes antes de la primera venta. PATIA sumará las ventas y pagos en efectivo para ayudarte a cuadrar al cerrar.") }}</p>
+      </div>
+      <form method="POST" action="{{ url_for('cash.open_register') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="opening-cash">{{ _("Efectivo inicial") }}</label>
+        <input id="opening-cash" name="opening_cash" type="number" min="0" step="0.01" value="0.00" required autofocus aria-describedby="opening-cash-help">
+        <small id="opening-cash-help">{{ _("Cuenta solo el dinero disponible para dar cambio.") }}</small>
+        <button class="btn" type="submit">{{ _("Comenzar turno") }}</button>
+      </form>
+    </section>
   {% endif %}
 
   {% if can_view_history %}
-  <section class="card cash-v1__history">
-    <header>
-      <span class="cash-v1__eyebrow">{{ _("Historial") }}</span>
-      <h3>{{ _("Cortes anteriores") }}</h3>
-    </header>
-    {% if history %}
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>{{ _("Fecha") }}</th><th>{{ _("Esperado") }}</th><th>{{ _("Contado") }}</th><th>{{ _("Diferencia") }}</th><th>{{ _("Acción") }}</th></tr></thead>
-        <tbody>
-        {% for item in history %}
-          <tr>
-            <td data-label="{{ _('Fecha') }}">{{ item.closed_at_local.strftime('%d/%m/%Y %H:%M') }}</td>
-            <td data-label="{{ _('Esperado') }}">{{ item.expected_cash_at_close|money }}</td>
-            <td data-label="{{ _('Contado') }}">{{ item.counted_cash|money }}</td>
-            <td data-label="{{ _('Diferencia') }}">{{ item.difference|money }}</td>
-            <td><a class="btn ghost" href="{{ url_for('cash.detail', session_id=item.id) }}">{{ _("Ver corte") }}</a></td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-      <div class="module-empty-v2"><p>{{ _("Todavía no hay cortes guardados.") }}</p></div>
-    {% endif %}
-  </section>
+    <details class="card cash-v2__history">
+      <summary>
+        <span><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> {{ _("Ver cierres anteriores") }}</span>
+        <small>{{ _("%(count)s cierres", count=history|length) }}</small>
+      </summary>
+      {% if history %}
+        <div class="table-wrap">
+          <table>
+            <caption class="sr-only">{{ _("Cierres anteriores de caja") }}</caption>
+            <thead><tr><th scope="col">{{ _("Fecha") }}</th><th scope="col">{{ _("PATIA calculó") }}</th><th scope="col">{{ _("Contaste") }}</th><th scope="col">{{ _("Diferencia") }}</th><th scope="col">{{ _("Acción") }}</th></tr></thead>
+            <tbody>{% for item in history %}<tr>
+              <td data-label="{{ _('Fecha') }}">{{ item.closed_at_local.strftime('%d/%m/%Y %H:%M') }}</td>
+              <td data-label="{{ _('PATIA calculó') }}">{{ item.expected_cash_at_close|money }}</td>
+              <td data-label="{{ _('Contaste') }}">{{ item.counted_cash|money }}</td>
+              <td data-label="{{ _('Diferencia') }}">{{ item.difference|money }}</td>
+              <td><a class="btn ghost" href="{{ url_for('cash.detail', session_id=item.id) }}">{{ _("Ver cierre") }}</a></td>
+            </tr>{% endfor %}</tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="module-empty-v2"><p>{{ _("Todavía no has cerrado una caja.") }}</p></div>
+      {% endif %}
+    </details>
   {% endif %}
 </div>
+
+<script>
+(() => {
+  const form = document.querySelector("[data-cash-close]");
+  if (!form) return;
+  const input = form.querySelector("#counted-cash");
+  const counted = form.querySelector("[data-counted-output]");
+  const difference = form.querySelector("[data-difference-output]");
+  const expected = Number(form.dataset.expected || 0);
+  const money = new Intl.NumberFormat(document.documentElement.lang === "en" ? "en-US" : "es-MX", { style: "currency", currency: "MXN" });
+  input.addEventListener("input", () => {
+    if (input.value === "") {
+      counted.textContent = "—";
+      difference.textContent = "—";
+      return;
+    }
+    const value = Number(input.value);
+    counted.textContent = money.format(value);
+    difference.textContent = money.format(value - expected);
+  });
+})();
+</script>
 {% endblock %}

@@ -22,10 +22,8 @@
 
   <section class="customer-detail-v1__metrics" aria-label="{{ _('Resumen de compras') }}">
     <article class="card"><span>{{ _("Total comprado") }}</span><strong>{{ total_purchased|money }}</strong></article>
-    <article class="card"><span>{{ _("Compras realizadas") }}</span><strong>{{ ticket_rows|length }}</strong></article>
     <article class="card"><span>{{ _("Última compra") }}</span><strong>{% if ticket_rows %}{{ ticket_rows[0].created_at_local.strftime('%d/%m/%Y') }}{% else %}—{% endif %}</strong></article>
-    <article class="card"><span>{{ _("Cliente desde") }}</span><strong>{{ customer_created_local.strftime('%d/%m/%Y') }}</strong></article>
-    <article class="card"><span>{{ _("Estado") }}</span><strong>{{ _("Activo") if customer.is_active else _("Inactivo") }}</strong></article>
+    <article class="card"><span>{{ _("Saldo pendiente") }}</span><strong>{{ credit_balance|money }}</strong></article>
   </section>
 
   {% if customer.notes %}
@@ -33,16 +31,42 @@
   {% endif %}
 
   <section class="card customer-detail-v1__notes">
-    <span class="customers-v1__eyebrow">{{ _("Crédito") }}</span>
-    <h3>{{ _("Crédito y cuentas por cobrar") }}</h3>
-    <p>{{ _("Activa crédito solo cuando hayas acordado un límite con este cliente.") }}</p>
-    <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}" class="customer-credit-settings-v1">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label><input type="checkbox" name="credit_enabled" value="1"{% if customer.credit_enabled %} checked{% endif %}> {{ _("Crédito habilitado") }}</label>
-      <div><label for="credit-limit">{{ _("Límite de crédito") }}</label><input id="credit-limit" name="credit_limit" type="number" min="0" step="0.01" value="{{ '%.2f'|format(customer.credit_limit) }}" required></div>
-      <button class="btn ghost" type="submit">{{ _("Guardar configuración") }}</button>
-      {% if customer.credit_enabled %}<a class="btn" href="{{ url_for('credit.account', customer_id=customer.id) }}">{{ _("Ver estado de cuenta") }}</a>{% endif %}
-    </form>
+    <span class="customers-v1__eyebrow">{{ _("Pagar después") }}</span>
+    {% if customer.credit_enabled %}
+      <h3>{{ _("Puede comprar hasta %(limit)s", limit=customer.credit_limit|money) }}</h3>
+      <p>{{ _("Debe actualmente %(balance)s.", balance=credit_balance|money) }}</p>
+    {% else %}
+      <h3>{{ _("¿Le permites pagar después?") }}</h3>
+      <p>{{ _("Actívalo solo si acordaste con este cliente cuánto puede quedar pendiente.") }}</p>
+    {% endif %}
+    {% if customer.credit_enabled %}
+      <div class="customer-credit-settings-v1">
+        <a class="btn" href="{{ url_for('credit.account', customer_id=customer.id) }}">{{ _("Ver saldo") }}</a>
+        <details class="module-more-v2">
+          <summary>{{ _("Cambiar límite") }}</summary>
+          <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="credit_enabled" value="1">
+            <label for="credit-limit">{{ _("Nuevo límite") }}</label>
+            <input id="credit-limit" name="credit_limit" type="number" min="0" step="0.01" value="{{ '%.2f'|format(customer.credit_limit) }}" required>
+            <button class="btn ghost" type="submit">{{ _("Guardar límite") }}</button>
+          </form>
+        </details>
+        <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="credit_enabled" value="0">
+          <input type="hidden" name="credit_limit" value="{{ '%.2f'|format(customer.credit_limit) }}">
+          <button class="btn ghost" type="submit">{{ _("Desactivar crédito") }}</button>
+        </form>
+      </div>
+    {% else %}
+      <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}" class="customer-credit-settings-v1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="credit_enabled" value="1">
+        <div><label for="credit-limit-new">{{ _("¿Hasta cuánto puede comprar?") }}</label><input id="credit-limit-new" name="credit_limit" type="number" min="0" step="0.01" value="0.00" required></div>
+        <button class="btn" type="submit">{{ _("Activar crédito") }}</button>
+      </form>
+    {% endif %}
   </section>
 
   <section class="card customer-detail-v1__history">

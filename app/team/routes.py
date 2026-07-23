@@ -116,7 +116,7 @@ def invite():
         flash(gettext("Escribe un correo válido."), "danger")
         return redirect(url_for("team.index"))
     if role not in {"MANAGER", "CASHIER"}:
-        flash(gettext("Selecciona un rol válido."), "danger")
+        flash(gettext("Selecciona un tipo de acceso válido."), "danger")
         return redirect(url_for("team.index"))
 
     existing_user = User.query.filter_by(email=email).first()
@@ -131,7 +131,7 @@ def invite():
     ).first():
         flash(
             gettext(
-                "Ese correo ya pertenece a otra empresa en PATIA. Usa un correo distinto para este integrante."
+                "Ese correo ya pertenece a otra empresa en PATIA. Usa un correo distinto para esta persona."
             ),
             "warning",
         )
@@ -320,11 +320,11 @@ def change_role(member_id):
     member = _managed_member(member_id, actor)
     role = request.form.get("role", "").upper()
     if not member or role not in {"MANAGER", "CASHIER"}:
-        flash(gettext("No se pudo cambiar ese rol."), "danger")
+        flash(gettext("No se pudo cambiar ese tipo de acceso."), "danger")
         return redirect(url_for("team.index"))
     member.role = role
     db.session.commit()
-    flash(gettext("Rol actualizado."), "success")
+    flash(gettext("Tipo de acceso actualizado."), "success")
     return redirect(url_for("team.index"))
 
 
@@ -336,11 +336,11 @@ def toggle_member(member_id):
     actor = active_membership(current_user())
     member = _managed_member(member_id, actor)
     if not member:
-        flash(gettext("No se pudo actualizar ese integrante."), "danger")
+        flash(gettext("No se pudo actualizar a esa persona."), "danger")
         return redirect(url_for("team.index"))
     member.is_active = not member.is_active
     db.session.commit()
-    flash(gettext("Acceso del integrante actualizado."), "success")
+    flash(gettext("Acceso de la persona actualizado."), "success")
     return redirect(url_for("team.index"))
 
 

@@ -30,12 +30,14 @@ class PremiumPresentationTests(unittest.TestCase):
 
     def test_pro_comparison_reflects_real_trial_boundaries(self):
         subscribe = self.template("subscribe.html")
+        plan_service = (PROJECT_ROOT / "app" / "plans.py").read_text(encoding="utf-8")
+        plan_experience = subscribe + plan_service
 
         self.assertIn("Prueba de 14 días", subscribe)
-        self.assertIn("Reportes y recomendaciones IA", subscribe)
-        self.assertIn("Disponible en Pro", subscribe)
-        self.assertIn("Inventario, ventas y proveedores", subscribe)
-        self.assertIn("$199 MXN al mes", subscribe)
+        self.assertIn("Reportes avanzados y soporte prioritario", plan_experience)
+        self.assertIn("Productos y ventas sin límites artificiales", plan_experience)
+        self.assertIn("Elegir Starter por $199 al mes", subscribe)
+        self.assertIn("STRIPE", (PROJECT_ROOT / "app" / "plans.py").read_text(encoding="utf-8"))
         self.assertNotIn("usuarios ilimitados", subscribe.lower())
         self.assertNotIn("sucursales ilimitadas", subscribe.lower())
 
@@ -55,6 +57,21 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertEqual(subscription.count('name="csrf_token"'), 3)
         self.assertNotIn("PATIA Pro manual", subscription)
         self.assertIn("Acceso activo", subscription)
+        self.assertIn('current_plan_code == "TRIAL"', subscription)
+        self.assertIn("Funciones incluidas durante tu prueba", subscription)
+        self.assertIn("Funciones incluidas en tu plan Starter", subscription)
+        self.assertIn("Funciones incluidas en tu plan Pro", subscription)
+        self.assertIn("Funciones incluidas en tu acceso actual", subscription)
+        self.assertNotIn("Lo que mantienes activo con PATIA Pro", subscription)
+
+    def test_tablet_header_keeps_language_and_menu_controls_separate(self):
+        styles = (PROJECT_ROOT / "app" / "static" / "css" / "styles.css").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("@media (min-width: 481px) and (max-width: 900px)", styles)
+        self.assertIn("top: 78px", styles)
+        self.assertIn("padding-bottom: 72px", styles)
 
     def test_all_css_consumers_use_the_same_cache_version(self):
         consumers = (
@@ -62,7 +79,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=115", self.template(name), name)
+            self.assertIn("styles.css') }}?v=117", self.template(name), name)
 
 
 if __name__ == "__main__":

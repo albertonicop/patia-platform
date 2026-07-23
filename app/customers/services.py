@@ -9,7 +9,7 @@ from flask_babel import gettext
 from sqlalchemy import func, or_
 
 from app import db
-from app.models import Customer, Sale, SalesTicket
+from app.models import Customer, CustomerCreditMovement, Sale, SalesTicket
 from app.money import MONEY_ZERO, money_decimal
 
 
@@ -23,6 +23,7 @@ class CustomerSummary:
     purchase_total: Decimal
     ticket_count: int
     last_purchase_at: object | None
+    credit_balance: Decimal
 
 
 def normalize_phone(value: str | None) -> str:
@@ -129,14 +130,29 @@ def customer_summaries(
     include_inactive: bool = False,
 ) -> list[CustomerSummary]:
     aggregates = customer_purchase_aggregates(organization_id)
+    latest_credit_ids = (
+        db.session.query(
+            CustomerCreditMovement.customer_id,
+            func.max(CustomerCreditMovement.id).label("last_id"),
+        )
+        .filter(CustomerCreditMovement.organization_id == organization_id)
+        .group_by(CustomerCreditMovement.customer_id)
+        .subquery()
+    )
     customer_query = (
         db.session.query(
             Customer,
             func.coalesce(aggregates.c.purchase_total, MONEY_ZERO),
             func.coalesce(aggregates.c.ticket_count, 0),
             aggregates.c.last_purchase_at,
+            func.coalesce(CustomerCreditMovement.balance_after, MONEY_ZERO),
         )
         .outerjoin(aggregates, aggregates.c.customer_id == Customer.id)
+        .outerjoin(latest_credit_ids, latest_credit_ids.c.customer_id == Customer.id)
+        .outerjoin(
+            CustomerCreditMovement,
+            CustomerCreditMovement.id == latest_credit_ids.c.last_id,
+        )
         .filter(Customer.organization_id == organization_id)
     )
     if not include_inactive:
@@ -165,6 +181,7 @@ def customer_summaries(
             purchase_total=money_decimal(row[1]),
             ticket_count=int(row[2] or 0),
             last_purchase_at=row[3],
+            credit_balance=money_decimal(row[4]),
         )
         for row in customer_query.order_by(
             Customer.is_active.desc(),
