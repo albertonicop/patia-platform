@@ -356,6 +356,12 @@ class SalesTicket(db.Model):
     number = db.Column(db.Integer, nullable=False)
     public_id = db.Column(db.String(36), nullable=False)
     payment_method = db.Column(db.String(20), nullable=True)
+    cash_register_session_id = db.Column(
+        db.Integer,
+        db.ForeignKey("cash_register_session.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -367,10 +373,138 @@ class SalesTicket(db.Model):
         back_populates="sales_ticket",
         passive_deletes=True,
     )
+    cash_register_session = db.relationship(
+        "CashRegisterSession",
+        back_populates="sales_tickets",
+    )
 
     @property
     def folio(self):
         return f"TKT-{self.number:06d}"
+
+
+class CashRegisterSession(db.Model):
+    __tablename__ = "cash_register_session"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id", "open_key",
+            name="uq_cash_register_session_open_register",
+        ),
+        db.CheckConstraint(
+            "status IN ('OPEN', 'CLOSED')",
+            name="ck_cash_register_session_status",
+        ),
+        db.CheckConstraint(
+            "opening_cash >= 0",
+            name="ck_cash_register_session_opening_cash_nonnegative",
+        ),
+        db.Index(
+            "ix_cash_register_session_organization_opened",
+            "organization_id", "opened_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    register_key = db.Column(db.String(40), nullable=False, default="MAIN")
+    open_key = db.Column(db.String(40), nullable=True)
+    status = db.Column(db.String(10), nullable=False, default="OPEN")
+    opened_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    closed_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    opening_cash = db.Column(
+        db.Numeric(14, 2), nullable=False, default=MONEY_ZERO
+    )
+    expected_cash_at_close = db.Column(db.Numeric(14, 2), nullable=True)
+    counted_cash = db.Column(db.Numeric(14, 2), nullable=True)
+    difference = db.Column(db.Numeric(14, 2), nullable=True)
+    closing_notes = db.Column(db.Text, nullable=True)
+    opened_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    closed_at = db.Column(db.DateTime, nullable=True)
+
+    organization = db.relationship("Organization")
+    opened_by_member = db.relationship(
+        "OrganizationMember", foreign_keys=[opened_by_member_id]
+    )
+    closed_by_member = db.relationship(
+        "OrganizationMember", foreign_keys=[closed_by_member_id]
+    )
+    movements = db.relationship(
+        "CashMovement",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="CashMovement.created_at",
+    )
+    sales_tickets = db.relationship(
+        "SalesTicket",
+        back_populates="cash_register_session",
+    )
+
+
+class CashMovement(db.Model):
+    __tablename__ = "cash_movement"
+    __table_args__ = (
+        db.CheckConstraint("amount > 0", name="ck_cash_movement_amount_positive"),
+        db.CheckConstraint(
+            "movement_type IN "
+            "('OPENING', 'SALE_CASH', 'CASH_IN', 'WITHDRAWAL', 'EXPENSE', 'REFUND')",
+            name="ck_cash_movement_type",
+        ),
+        db.Index(
+            "ix_cash_movement_session_created",
+            "cash_register_session_id", "created_at",
+        ),
+        db.Index(
+            "ix_cash_movement_organization_created",
+            "organization_id", "created_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    cash_register_session_id = db.Column(
+        db.Integer,
+        db.ForeignKey("cash_register_session.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    performed_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    sales_ticket_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_ticket.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    movement_type = db.Column(db.String(20), nullable=False)
+    amount = db.Column(db.Numeric(14, 2), nullable=False)
+    note = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    session = db.relationship("CashRegisterSession", back_populates="movements")
+    performed_by_member = db.relationship("OrganizationMember")
+    sales_ticket = db.relationship("SalesTicket")
 
 
 class Sale(db.Model):

@@ -125,6 +125,23 @@
   </button>
 </section>
 
+<section class="card cash-status-v1" aria-labelledby="cash-status-title">
+  <div>
+    <span class="dashboard-v2__kicker">{{ _("Caja") }}</span>
+    <h3 id="cash-status-title">
+      {{ _("Turno abierto") if cash_session else _("Caja cerrada") }}
+    </h3>
+    {% if cash_session %}
+      <p>{{ _("Efectivo esperado: %(amount)s", amount=cash_expected|money) }}</p>
+    {% else %}
+      <p>{{ _("Abre un turno para controlar ventas y movimientos de efectivo.") }}</p>
+    {% endif %}
+  </div>
+  <a class="btn{% if cash_session %} ghost{% endif %}" href="{{ url_for('cash.index') }}">
+    {{ _("Ver caja") if cash_session else _("Abrir caja") }}
+  </a>
+</section>
+
 <dialog class="dashboard-v2__stock-dialog" id="low-stock-dialog" aria-labelledby="low-stock-title">
   <div class="dashboard-v2__stock-dialog-head">
     <div>

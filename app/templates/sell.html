@@ -3,6 +3,19 @@
 {% block content %}
 
 <div class="pos-v2">
+  {% if cash_session %}
+    <div class="cash-pos-status cash-pos-status--open" role="status">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <span>{{ _("Caja abierta. Las ventas en efectivo se incluirán en el corte.") }}</span>
+      <a href="{{ url_for('cash.index') }}">{{ _("Ver caja") }}</a>
+    </div>
+  {% else %}
+    <div class="cash-pos-status cash-pos-status--closed" role="status">
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      <span>{{ _("Caja cerrada. Puedes cobrar con tarjeta o transferencia; para efectivo primero abre la caja.") }}</span>
+      <a href="{{ url_for('cash.index') }}">{{ _("Abrir caja") }}</a>
+    </div>
+  {% endif %}
   {% if not products %}
     <section class="card pos-v2__empty module-empty-v2" aria-labelledby="pos-empty-title">
       <span class="pos-v2__empty-icon" aria-hidden="true"><i class="fa-solid fa-cash-register"></i></span>

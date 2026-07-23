@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ _("Detalle de corte") }}{% endblock %}
+{% block content %}
+<div class="cash-v1 cash-cut-v1">
+  <div class="cash-cut-v1__actions">
+    <a class="btn ghost" href="{{ url_for('cash.index') }}">{{ _("Volver a caja") }}</a>
+    <button class="btn" type="button" onclick="window.print()"><i class="fa-solid fa-print" aria-hidden="true"></i> {{ _("Imprimir corte") }}</button>
+  </div>
+  <section class="card cash-cut-v1__sheet">
+    <header>
+      <span>{{ _("PATIA · Corte de caja") }}</span>
+      <h2>{{ cash_session.organization.name }}</h2>
+      <p>{{ _("Turno #%(number)s", number=cash_session.id) }}</p>
+    </header>
+    <dl class="cash-cut-v1__totals">
+      <div><dt>{{ _("Apertura") }}</dt><dd>{{ cash_session.opened_at_local.strftime('%d/%m/%Y %H:%M') }}</dd></div>
+      <div><dt>{{ _("Cierre") }}</dt><dd>{{ cash_session.closed_at_local.strftime('%d/%m/%Y %H:%M') if cash_session.closed_at_local else _("Turno activo") }}</dd></div>
+      <div><dt>{{ _("Fondo inicial") }}</dt><dd>{{ cash_session.opening_cash|money }}</dd></div>
+      <div><dt>{{ _("Efectivo esperado") }}</dt><dd>{{ expected_cash|money }}</dd></div>
+      <div><dt>{{ _("Efectivo contado") }}</dt><dd>{{ cash_session.counted_cash|money if cash_session.counted_cash is not none else "—" }}</dd></div>
+      <div class="cash-cut-v1__difference"><dt>{{ _("Diferencia") }}</dt><dd>{{ cash_session.difference|money if cash_session.difference is not none else "—" }}</dd></div>
+    </dl>
+    <h3>{{ _("Movimientos del turno") }}</h3>
+    <table>
+      <thead><tr><th>{{ _("Hora") }}</th><th>{{ _("Tipo") }}</th><th>{{ _("Detalle") }}</th><th>{{ _("Importe") }}</th></tr></thead>
+      <tbody>
+      {% for movement in cash_session.movements %}
+        <tr>
+          <td>{{ movement.created_at_local.strftime('%H:%M') }}</td>
+          <td>{{ movement_labels.get(movement.movement_type, movement.movement_type) }}</td>
+          <td>{{ movement.note or "—" }}</td>
+          <td>{{ movement.amount|money }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% if cash_session.closing_notes %}
+      <div class="cash-cut-v1__notes"><strong>{{ _("Notas de cierre") }}</strong><p>{{ cash_session.closing_notes }}</p></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

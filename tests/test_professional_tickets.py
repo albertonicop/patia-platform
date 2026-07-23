@@ -167,6 +167,7 @@ class ProfessionalTicketTests(unittest.TestCase):
         second = self.product(self.owner, "MODAL-2", "Otro producto", 30)
         response = self.client.post("/sell-cart", json={
             "request_id": str(uuid.uuid4()),
+            "payment_method": "card",
             "items": [{"product_id": first.id, "quantity": 1}, {"product_id": second.id, "quantity": 1}],
         })
         data = response.get_json()

@@ -197,7 +197,11 @@ class PosFirstSaleTests(unittest.TestCase):
     def test_repeated_request_id_does_not_charge_twice(self):
         product = self.add_product(stock=5)
         request_id = str(uuid.uuid4())
-        payload = {"request_id": request_id, "items": [{"product_id": product.id, "quantity": 2}]}
+        payload = {
+            "request_id": request_id,
+            "payment_method": "card",
+            "items": [{"product_id": product.id, "quantity": 2}],
+        }
 
         first = self.client.post("/sell-cart", json=payload)
         second = self.client.post("/sell-cart", json=payload)

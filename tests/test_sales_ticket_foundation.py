@@ -82,7 +82,7 @@ class SalesTicketFoundationTests(unittest.TestCase):
             flask_session["user_id"] = user.id
         return client
 
-    def sell(self, user, product, payment_method="cash", quantity=1):
+    def sell(self, user, product, payment_method="card", quantity=1):
         return self.client_for(user).post(
             "/sell-cart",
             json={
@@ -146,6 +146,7 @@ class SalesTicketFoundationTests(unittest.TestCase):
             price=Decimal("0.10"), stock=10,
         )
         client = self.client_for(user)
+        client.post("/cash-register/open", data={"opening_cash": "0.00"})
 
         response = client.post(
             "/sell-cart",
@@ -176,6 +177,9 @@ class SalesTicketFoundationTests(unittest.TestCase):
     def test_all_supported_payment_methods_are_stored_on_header_and_lines(self):
         user = self.add_user("payments@patia.test")
         product = self.add_product(user, stock=20)
+        self.client_for(user).post(
+            "/cash-register/open", data={"opening_cash": "0.00"}
+        )
 
         for method in ("cash", "card", "transfer", "other"):
             response = self.sell(user, product, payment_method=method)

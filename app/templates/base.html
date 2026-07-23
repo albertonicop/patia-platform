@@ -37,6 +37,7 @@
     {% if can_view_dashboard %}<a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>{{ _("Dashboard") }}</span></a>{% endif %}
     {% if can_manage_inventory %}<a href="/products"{% if request.path.startswith('/products') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>{{ _("Inventario") }}</span></a>{% endif %}
     {% if can_use_pos %}<a href="/sell"{% if request.path.startswith('/sell') or request.path.startswith('/sales/') or request.path.startswith('/ticket/') or request.path.startswith('/receipt/') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>{{ _("Punto de venta") }}</span></a>{% endif %}
+    {% if can_operate_cash_register %}<a href="{{ url_for('cash.index') }}"{% if request.path.startswith('/cash-register') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-vault" aria-hidden="true"></i><span>{{ _("Caja") }}</span></a>{% endif %}
     {% if can_view_reports and user is defined and user and has_pro_access %}
 <a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes IA") }}</span></a>
 {% elif can_view_reports and can_manage_subscription and user is defined and user %}

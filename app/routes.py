@@ -23,6 +23,7 @@ from .barcodes import (
     normalize_barcode,
 )
 from .models import (
+    CashRegisterSession,
     InventoryRestockEvent,
     Organization,
     Product,
@@ -31,6 +32,11 @@ from .models import (
     StripeWebhookEvent,
     Supplier,
     User,
+)
+from .cash.services import (
+    expected_cash as cash_expected_amount,
+    open_cash_session,
+    record_cash_movement,
 )
 from .money import MONEY_ZERO, money_decimal, money_json, money_sum
 from .timezones import (
@@ -842,6 +848,7 @@ def money_filter(value):
 def analytics(user=None):
     user = user or current_user()
     organization_id = current_organization_id(user)
+    cash_session = open_cash_session(organization_id)
     membership = active_membership(user)
     timezone_name = safe_timezone_name(
         membership.organization.timezone if membership else DEFAULT_TIMEZONE
@@ -1013,6 +1020,10 @@ def analytics(user=None):
         today_sales=today_sales,
         week_sales=week_sales,
         profit=profit,
+        cash_session=cash_session,
+        cash_expected=(
+            cash_expected_amount(cash_session.id) if cash_session else None
+        ),
         top_products=top_products,
         category_sales=category_sales,
         alerts=alerts,
@@ -2272,6 +2283,8 @@ def sell():
     if not user:
         return redirect(url_for("main.login"))
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
+    cash_session = open_cash_session(organization_id)
     owner = current_organization_owner(user)
     if trial_expired(user):
         return render_template("trial_expired.html")
@@ -2301,7 +2314,16 @@ def sell():
             if payment_method not in PAYMENT_METHOD_LABELS:
                 flash("Selecciona un método de pago válido.", "danger")
                 return redirect(url_for("main.sell"))
+            if payment_method == "cash" and not cash_session:
+                flash(
+                    "Abre la caja antes de registrar una venta en efectivo.",
+                    "danger",
+                )
+                return redirect(url_for("cash.index"))
             ticket = _create_sales_ticket(user, payment_method)
+            ticket.cash_register_session_id = (
+                cash_session.id if cash_session else None
+            )
             product.stock -= qty
             sale = Sale(
                 organization_id=organization_id,
@@ -2317,6 +2339,16 @@ def sell():
                 payment_method=payment_method,
             )
             db.session.add(sale)
+            db.session.flush()
+            if payment_method == "cash":
+                record_cash_movement(
+                    cash_session,
+                    membership,
+                    "SALE_CASH",
+                    sale.total,
+                    note=ticket.folio,
+                    sales_ticket=ticket,
+                )
             db.session.commit()
             flash(
                 gettext(
@@ -2353,6 +2385,7 @@ def sell():
         sale_groups=sale_groups,
         user=user,
         payment_method_labels=_translated_payment_method_labels(),
+        cash_session=cash_session,
     )
 
 
@@ -2366,6 +2399,7 @@ def sell_cart():
     if access_block:
         return access_block
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     owner = current_organization_owner(user)
 
     data = request.get_json(silent=True)
@@ -2379,6 +2413,15 @@ def sell_cart():
     payment_method = data.get("payment_method", "cash")
     if payment_method not in PAYMENT_METHOD_LABELS:
         return jsonify({"ok": False, "error": gettext("Selecciona un método de pago válido")}), 400
+    cash_session = open_cash_session(organization_id, lock=True)
+    if payment_method == "cash" and not cash_session:
+        return jsonify({
+            "ok": False,
+            "error": gettext(
+                "Abre la caja antes de registrar una venta en efectivo."
+            ),
+            "cash_register_url": url_for("cash.index"),
+        }), 409
 
     request_id = data.get("request_id")
     if request_id:
@@ -2473,6 +2516,9 @@ def sell_cart():
             payment_method,
             ticket_id=request_id,
         )
+        ticket.cash_register_session_id = (
+            cash_session.id if cash_session else None
+        )
         ticket_id = ticket.public_id
         sales = []
         for product_id, quantity in requested_items.items():
@@ -2493,6 +2539,16 @@ def sell_cart():
             sale.ticket_id = ticket_id
             db.session.add(sale)
             sales.append(sale)
+        db.session.flush()
+        if payment_method == "cash":
+            record_cash_movement(
+                cash_session,
+                membership,
+                "SALE_CASH",
+                money_sum(sale.total for sale in sales),
+                note=ticket.folio,
+                sales_ticket=ticket,
+            )
         db.session.commit()
         folio = _short_sale_folio(sales)
         return jsonify({
@@ -2939,14 +2995,41 @@ def cancel_sale(sale_id):
     if access_block:
         return access_block
     organization_id = current_organization_id(user)
+    membership = active_membership(user)
     sale = Sale.query.filter_by(
         id=sale_id, organization_id=organization_id
     ).first_or_404()
+    payment_method = (
+        sale.sales_ticket.payment_method
+        if sale.sales_ticket
+        else sale.payment_method
+    )
+    cash_session = None
+    if payment_method == "cash":
+        cash_session = open_cash_session(organization_id, lock=True)
+        if not cash_session:
+            flash(
+                "Abre la caja antes de devolver una venta en efectivo.",
+                "danger",
+            )
+            return redirect(url_for("cash.index"))
     product = Product.query.filter_by(
         id=sale.product_id, organization_id=organization_id
     ).first()
     if product:
         product.stock += sale.quantity
+    if payment_method == "cash":
+        record_cash_movement(
+            cash_session,
+            membership,
+            "REFUND",
+            sale.total,
+            note=gettext(
+                "Devolución de %(folio)s",
+                folio=_short_sale_folio([sale]),
+            ),
+            sales_ticket=sale.sales_ticket,
+        )
     db.session.delete(sale)
     db.session.commit()
     flash("Venta cancelada. Stock devuelto al inventario.", "success")

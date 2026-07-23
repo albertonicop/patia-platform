@@ -25,6 +25,9 @@ ROLE_PERMISSIONS = {
             "grant_credit",
             "manage_employees",
             "manage_subscription",
+            "operate_cash_register",
+            "manage_cash_movements",
+            "view_cash_history",
         }
     ),
     "MANAGER": frozenset(
@@ -41,9 +44,14 @@ ROLE_PERMISSIONS = {
             "view_reports",
             "manage_customers",
             "grant_credit",
+            "operate_cash_register",
+            "manage_cash_movements",
+            "view_cash_history",
         }
     ),
-    "CASHIER": frozenset({"use_pos", "manage_customers"}),
+    "CASHIER": frozenset(
+        {"use_pos", "manage_customers", "operate_cash_register"}
+    ),
 }
 
 

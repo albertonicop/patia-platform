@@ -9523,3 +9523,65 @@ table {
   .team-v1__actions { grid-template-columns: 1fr; }
   .team-v1__invitation { align-items: stretch; flex-direction: column; }
 }
+/* PATIA V1.5 · Caja y cortes */
+.cash-status-v1,
+.cash-pos-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.cash-status-v1 { padding: 22px 24px; }
+.cash-status-v1 h3 { margin: 4px 0; }
+.cash-status-v1 p { margin: 0; color: var(--v2-muted, #62697c); }
+.cash-pos-status {
+  margin-bottom: 18px;
+  padding: 13px 16px;
+  border: 1px solid #d9e2ef;
+  border-radius: 14px;
+  background: #fff;
+}
+.cash-pos-status--open i { color: #14845f; }
+.cash-pos-status--closed { background: #fff8ed; border-color: #f1d7ad; }
+.cash-pos-status a { font-weight: 700; margin-left: auto; }
+.cash-v1 { display: grid; gap: 22px; }
+.cash-v1__hero {
+  display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  padding: 28px; border-radius: 22px; color: #fff;
+  background: linear-gradient(135deg, #171a2b, #34305f);
+}
+.cash-v1__hero h2 { margin: 5px 0; color: inherit; }
+.cash-v1__hero p { margin: 0; color: #d9dbea; }
+.cash-v1__eyebrow { color: #6c55ef; font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.cash-v1__hero .cash-v1__eyebrow { color: #bcb3ff; }
+.cash-v1__expected { text-align: right; }
+.cash-v1__expected span { display: block; color: #d9dbea; }
+.cash-v1__expected strong { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.cash-v1__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .8fr); gap: 22px; }
+.cash-v1__summary, .cash-v1__movement, .cash-v1__close, .cash-v1__history { padding: 24px; }
+.cash-v1 dl { margin: 0; display: grid; gap: 12px; }
+.cash-v1 dl div { display: flex; justify-content: space-between; gap: 18px; padding: 12px 0; border-bottom: 1px solid #e5e8ef; }
+.cash-v1 form { display: grid; gap: 10px; }
+.cash-v1 input, .cash-v1 select, .cash-v1 textarea { min-height: 46px; }
+.cash-v1__close { display: grid; grid-template-columns: 1fr minmax(320px, .7fr); gap: 30px; }
+.cash-v1__empty { min-height: 350px; }
+.cash-v1__open-form { width: min(100%, 420px); margin-top: 12px; }
+.cash-v1__history header { margin-bottom: 18px; }
+.cash-cut-v1__actions { display: flex; justify-content: flex-end; gap: 10px; }
+.cash-cut-v1__sheet { max-width: 900px; margin: 0 auto; padding: 34px; }
+.cash-cut-v1__sheet > header { text-align: center; border-bottom: 1px dashed #b8bfcc; padding-bottom: 20px; margin-bottom: 24px; }
+.cash-cut-v1__totals { grid-template-columns: repeat(2, 1fr); }
+.cash-cut-v1__difference { font-weight: 800; }
+.cash-cut-v1__notes { margin-top: 22px; padding: 16px; background: #f6f7fb; border-radius: 12px; }
+@media (max-width: 768px) {
+  .cash-v1__grid, .cash-v1__close { grid-template-columns: 1fr; }
+  .cash-v1__hero, .cash-status-v1 { align-items: flex-start; flex-direction: column; }
+  .cash-v1__expected { text-align: left; }
+  .cash-cut-v1__sheet { padding: 20px; }
+}
+@media print {
+  .cash-cut-v1__actions, .sidebar-v2, .app-topbar-v2, .language-switcher,
+  .app-legal-footer-v1, .whatsapp-float { display: none !important; }
+  .app-main-v2 { margin: 0 !important; padding: 0 !important; }
+  .cash-cut-v1__sheet { box-shadow: none; border: 0; max-width: none; }
+}

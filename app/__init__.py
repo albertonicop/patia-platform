@@ -134,6 +134,9 @@ def create_app():
     from .team.routes import team
 
     app.register_blueprint(team)
+    from .cash.routes import cash
+
+    app.register_blueprint(cash)
 
     @app.context_processor
     def inject_pro_access():
@@ -161,6 +164,9 @@ def create_app():
             "can_manage_subscription": has_permission(current_membership, "manage_subscription"),
             "can_view_dashboard": has_permission(current_membership, "view_dashboard"),
             "can_use_pos": has_permission(current_membership, "use_pos"),
+            "can_operate_cash_register": has_permission(
+                current_membership, "operate_cash_register"
+            ),
         }
 
     @app.cli.command("audit-manual-pro-candidates")
