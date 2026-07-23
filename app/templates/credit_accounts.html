@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Crédito y cuentas por cobrar") }}{% endblock %}
+{% block content %}
+<div class="credit-v1">
+  <section class="card credit-v1__hero">
+    <div>
+      <span>{{ _("Control de saldos") }}</span>
+      <h2>{{ _("Crédito claro, cobros sin sorpresas") }}</h2>
+      <p>{{ _("Consulta cuánto debe cada cliente y registra abonos sin perder el historial.") }}</p>
+    </div>
+  </section>
+  <section class="card credit-v1__accounts">
+    <header><h3>{{ _("Cuentas de clientes") }}</h3></header>
+    {% if accounts %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>{{ _("Cliente") }}</th><th>{{ _("Límite") }}</th><th>{{ _("Saldo pendiente") }}</th><th>{{ _("Disponible") }}</th><th>{{ _("Acción") }}</th></tr></thead>
+          <tbody>
+          {% for row in accounts %}
+            <tr>
+              <td data-label="{{ _('Cliente') }}"><strong>{{ row.customer.name }}</strong><small>{{ row.customer.phone }}</small></td>
+              <td data-label="{{ _('Límite') }}">{{ row.customer.credit_limit|money }}</td>
+              <td data-label="{{ _('Saldo pendiente') }}"><strong>{{ row.balance|money }}</strong></td>
+              <td data-label="{{ _('Disponible') }}">{{ ([row.customer.credit_limit - row.balance, 0]|max)|money }}</td>
+              <td><a class="btn ghost" href="{{ url_for('credit.account', customer_id=row.customer.id) }}">{{ _("Ver estado de cuenta") }}</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="module-empty-v2">
+        <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>
+        <h3>{{ _("Aún no hay clientes con crédito habilitado") }}</h3>
+        <p>{{ _("Actívalo desde el perfil de un cliente y define un límite responsable.") }}</p>
+        <a class="btn" href="{{ url_for('customers.index') }}">{{ _("Ir a clientes") }}</a>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

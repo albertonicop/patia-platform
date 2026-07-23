@@ -476,6 +476,10 @@ class Customer(db.Model):
     phone_normalized = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), nullable=True)
     notes = db.Column(db.Text, nullable=True)
+    credit_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    credit_limit = db.Column(
+        db.Numeric(14, 2), nullable=False, default=MONEY_ZERO
+    )
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(
@@ -489,6 +493,11 @@ class Customer(db.Model):
     created_by_member = db.relationship("OrganizationMember")
     sales_tickets = db.relationship(
         "SalesTicket",
+        back_populates="customer",
+        passive_deletes=True,
+    )
+    credit_movements = db.relationship(
+        "CustomerCreditMovement",
         back_populates="customer",
         passive_deletes=True,
     )
@@ -656,7 +665,8 @@ class CashMovement(db.Model):
         db.CheckConstraint("amount > 0", name="ck_cash_movement_amount_positive"),
         db.CheckConstraint(
             "movement_type IN "
-            "('OPENING', 'SALE_CASH', 'CASH_IN', 'WITHDRAWAL', 'EXPENSE', 'REFUND')",
+            "('OPENING', 'SALE_CASH', 'CREDIT_PAYMENT', 'CASH_IN', "
+            "'WITHDRAWAL', 'EXPENSE', 'REFUND')",
             name="ck_cash_movement_type",
         ),
         db.Index(
@@ -701,6 +711,104 @@ class CashMovement(db.Model):
     session = db.relationship("CashRegisterSession", back_populates="movements")
     performed_by_member = db.relationship("OrganizationMember")
     sales_ticket = db.relationship("SalesTicket")
+
+
+class CustomerCreditMovement(db.Model):
+    """Immutable account receivable movement for one customer."""
+
+    __tablename__ = "customer_credit_movement"
+    __table_args__ = (
+        db.CheckConstraint(
+            "movement_type IN ('CHARGE', 'PAYMENT', 'REVERSAL')",
+            name="ck_customer_credit_movement_type",
+        ),
+        db.CheckConstraint(
+            "amount > 0 AND balance_before >= 0 AND balance_after >= 0",
+            name="ck_customer_credit_movement_amounts",
+        ),
+        db.CheckConstraint(
+            "(movement_type = 'CHARGE' AND balance_after = balance_before + amount) "
+            "OR (movement_type IN ('PAYMENT', 'REVERSAL') "
+            "AND balance_after = balance_before - amount)",
+            name="ck_customer_credit_movement_balance",
+        ),
+        db.Index(
+            "ix_customer_credit_org_created",
+            "organization_id",
+            "created_at",
+        ),
+        db.Index(
+            "ix_customer_credit_customer_created",
+            "customer_id",
+            "created_at",
+            "id",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    performed_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    authorized_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    sales_ticket_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_ticket.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    cash_register_session_id = db.Column(
+        db.Integer,
+        db.ForeignKey("cash_register_session.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    movement_type = db.Column(db.String(20), nullable=False)
+    amount = db.Column(db.Numeric(14, 2), nullable=False)
+    balance_before = db.Column(db.Numeric(14, 2), nullable=False)
+    balance_after = db.Column(db.Numeric(14, 2), nullable=False)
+    payment_method = db.Column(db.String(20), nullable=True)
+    note = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    organization = db.relationship("Organization")
+    customer = db.relationship("Customer", back_populates="credit_movements")
+    performed_by_member = db.relationship(
+        "OrganizationMember", foreign_keys=[performed_by_member_id]
+    )
+    authorized_by_member = db.relationship(
+        "OrganizationMember", foreign_keys=[authorized_by_member_id]
+    )
+    sales_ticket = db.relationship("SalesTicket")
+    cash_register_session = db.relationship("CashRegisterSession")
+
+
+def _prevent_credit_movement_mutation(mapper, connection, target):
+    raise ValueError("Customer credit movements are immutable.")
+
+
+event.listen(
+    CustomerCreditMovement, "before_update", _prevent_credit_movement_mutation
+)
+event.listen(
+    CustomerCreditMovement, "before_delete", _prevent_credit_movement_mutation
+)
 
 
 class Sale(db.Model):

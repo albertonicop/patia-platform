@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-from flask import Flask, render_template, session
+from flask import Flask, jsonify, render_template, request, session
 from flask_babel import Babel, gettext
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -143,6 +143,9 @@ def create_app():
     from .customers.routes import customers
 
     app.register_blueprint(customers)
+    from .credit.routes import credit
+
+    app.register_blueprint(credit)
 
     @app.context_processor
     def inject_pro_access():
@@ -181,6 +184,12 @@ def create_app():
             ),
             "can_lookup_customers": has_permission(
                 current_membership, "lookup_customers"
+            ),
+            "can_manage_credit": has_permission(
+                current_membership, "manage_customer_credit"
+            ),
+            "can_authorize_credit_override": has_permission(
+                current_membership, "authorize_credit_override"
             ),
         }
 
@@ -243,10 +252,24 @@ def create_app():
             error_message=gettext(message),
         ), status_code
 
+    def render_client_error(error, status_code):
+        if status_code == 429 and request.is_json:
+            limiter_response = error.get_response()
+            if limiter_response and limiter_response.is_json:
+                return limiter_response
+            return jsonify(
+                {
+                    "ok": False,
+                    "error": gettext("Demasiados intentos"),
+                    "error_code": "rate_limited",
+                }
+            ), 429
+        return render_error(status_code)
+
     for status_code in (400, 403, 404, 429):
         app.register_error_handler(
             status_code,
-            lambda error, code=status_code: render_error(code),
+            lambda error, code=status_code: render_client_error(error, code),
         )
 
     @app.errorhandler(500)

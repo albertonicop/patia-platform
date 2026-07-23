@@ -9,7 +9,7 @@ from app.models import CashMovement, CashRegisterSession
 from app.money import MONEY_ZERO, money_decimal
 
 
-POSITIVE_MOVEMENTS = ("OPENING", "SALE_CASH", "CASH_IN")
+POSITIVE_MOVEMENTS = ("OPENING", "SALE_CASH", "CREDIT_PAYMENT", "CASH_IN")
 NEGATIVE_MOVEMENTS = ("WITHDRAWAL", "EXPENSE", "REFUND")
 
 

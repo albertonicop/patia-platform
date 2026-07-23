@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Estado de cuenta") }}{% endblock %}
+{% block content %}
+<div class="credit-v1">
+  <section class="card credit-v1__hero">
+    <div>
+      {% if can_manage_credit %}<a href="{{ url_for('credit.index') }}">{{ _("Volver a cuentas") }}</a>{% else %}<a href="{{ url_for('main.sell') }}">{{ _("Volver al punto de venta") }}</a>{% endif %}
+      <span>{{ _("Estado de cuenta") }}</span>
+      <h2>{{ customer.name }}</h2>
+      <p>{{ customer.phone }}</p>
+    </div>
+    <div><small>{{ _("Saldo pendiente") }}</small><strong>{{ balance|money }}</strong></div>
+  </section>
+  {% if not customer.credit_enabled %}
+    <section class="card credit-v1__notice"><p>{{ _("El crédito no está habilitado para este cliente.") }}</p></section>
+  {% endif %}
+  <section class="credit-v1__grid">
+    <article class="card credit-v1__payment">
+      <h3>{{ _("Registrar abono") }}</h3>
+      <form method="post" action="{{ url_for('credit.payment', customer_id=customer.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="payment-amount">{{ _("Cantidad") }}</label>
+        <input id="payment-amount" name="amount" type="number" min="0.01" max="{{ balance }}" step="0.01" required>
+        <label for="credit-payment-method">{{ _("Método de pago") }}</label>
+        <select id="credit-payment-method" name="payment_method">
+          <option value="cash">{{ _("Efectivo") }}</option>
+          <option value="card">{{ _("Tarjeta") }}</option>
+          <option value="transfer">{{ _("Transferencia") }}</option>
+          <option value="other">{{ _("Otro") }}</option>
+        </select>
+        <label for="payment-note">{{ _("Nota (opcional)") }}</label>
+        <input id="payment-note" name="note" maxlength="255">
+        <button class="btn" type="submit"{% if balance <= 0 %} disabled{% endif %}>{{ _("Registrar abono") }}</button>
+      </form>
+    </article>
+    <article class="card credit-v1__reminder">
+      <h3>{{ _("Recordatorio por WhatsApp") }}</h3>
+      <p>{{ _("Abre un mensaje preparado. PATIA no lo enviará sin tu confirmación.") }}</p>
+      <a class="btn ghost" href="{{ reminder_url }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ _("Preparar recordatorio") }}</a>
+    </article>
+  </section>
+  <section class="card credit-v1__history">
+    <header><h3>{{ _("Movimientos de la cuenta") }}</h3><span>{{ _("Historial inmutable") }}</span></header>
+    {% if movements %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>{{ _("Fecha") }}</th><th>{{ _("Movimiento") }}</th><th>{{ _("Referencia") }}</th><th>{{ _("Cargo") }}</th><th>{{ _("Abono") }}</th><th>{{ _("Saldo") }}</th><th>{{ _("Responsable") }}</th></tr></thead>
+          <tbody>
+          {% for movement in movements %}
+            <tr>
+              <td>{{ movement.local_created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+              <td>{% if movement.movement_type == "CHARGE" %}{{ _("Venta a crédito") }}{% elif movement.movement_type == "REVERSAL" %}{{ _("Cancelación de venta") }}{% else %}{{ _("Abono") }}{% endif %}</td>
+              <td>{% if movement.sales_ticket %}<a href="{{ url_for('main.ticket', ticket_ref=movement.sales_ticket.public_id) }}">{{ movement.sales_ticket.folio }}</a>{% else %}{{ movement.note or "—" }}{% endif %}</td>
+              <td>{{ movement.amount|money if movement.movement_type == "CHARGE" else "—" }}</td>
+              <td>{{ movement.amount|money if movement.movement_type in ("PAYMENT", "REVERSAL") else "—" }}</td>
+              <td><strong>{{ movement.balance_after|money }}</strong></td>
+              <td>{{ movement.performed_by_member.user.email if movement.performed_by_member else _("Sistema") }}{% if movement.authorized_by_member %}<small>{{ _("Exceso autorizado") }}</small>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="module-empty-v2"><h3>{{ _("Sin movimientos todavía") }}</h3><p>{{ _("Las ventas a crédito y sus abonos aparecerán aquí.") }}</p></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

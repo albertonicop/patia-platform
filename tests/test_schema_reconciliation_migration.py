@@ -324,6 +324,9 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         self.assertIn("organization", inspector.get_table_names())
         self.assertIn("organization_member", inspector.get_table_names())
         self.assertIn("organization_invitation", inspector.get_table_names())
+        self.assertIn("customer_credit_movement", inspector.get_table_names())
+        self.assertIn("credit_enabled", self.columns(inspector, "customer"))
+        self.assertIn("credit_limit", self.columns(inspector, "customer"))
         self.assertEqual(
             self.columns(inspector, "stripe_webhook_event"),
             CURRENT_WEBHOOK_COLUMNS,
@@ -331,7 +334,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260723_15",
+                "20260723_16",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -445,6 +448,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "cash_movement",
                 "inventory_movement",
                 "customer",
+                "customer_credit_movement",
             }.issubset(inspector.get_table_names())
         )
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
@@ -468,6 +472,8 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "phone_normalized",
                 "email",
                 "notes",
+                "credit_enabled",
+                "credit_limit",
                 "is_active",
                 "created_at",
                 "updated_at",
@@ -481,7 +487,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260723_15",
+                "20260723_16",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),

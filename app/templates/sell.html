@@ -61,6 +61,7 @@
         <div id="selected-customer" class="pos-customer-v1__selected" hidden>
           <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
           <div><strong id="selected-customer-name"></strong><span id="selected-customer-phone"></span></div>
+          <a id="selected-customer-account" class="btn ghost" href="#">{{ _("Estado de cuenta") }}</a>
           <button id="clear-customer" type="button" class="btn ghost">{{ _("Quitar") }}</button>
         </div>
         <div id="customer-search-wrap" class="pos-customer-v1__search">
@@ -109,6 +110,7 @@
             <option value="card">{{ _("Tarjeta") }}</option>
             <option value="transfer">{{ _("Transferencia") }}</option>
             <option value="other">{{ _("Otro") }}</option>
+            <option value="credit">{{ _("Crédito") }}</option>
           </select>
           <small>{{ _("Selecciona cómo pagó el cliente. Este dato se usará para registrar la venta.") }}</small>
         </div>
@@ -216,6 +218,9 @@ const POS_I18N = {
   ,customerSelected: {{ _("%(name)s seleccionado para esta venta.", name="__NAME__")|tojson }}
   ,savingCustomer: {{ _("Guardando cliente…")|tojson }}
   ,saveCustomer: {{ _("Guardar y seleccionar")|tojson }}
+  ,creditOverride: {{ _("Esta venta supera el límite disponible. ¿Deseas solicitar autorización?")|tojson }}
+  ,overridePin: {{ _("PIN de propietario o encargado")|tojson }}
+  ,canAuthorizeCreditOverride: {{ can_authorize_credit_override|tojson }}
 };
 const PRODUCTS = [
   {% for product in products %}
@@ -378,6 +383,7 @@ const customerResults = document.getElementById("customer-results");
 const customerSearchStatus = document.getElementById("customer-search-status");
 const customerSearchWrap = document.getElementById("customer-search-wrap");
 const selectedCustomerBox = document.getElementById("selected-customer");
+const selectedCustomerAccount = document.getElementById("selected-customer-account");
 let customerSearchTimer = null;
 let customerMatches = [];
 let activeCustomerIndex = -1;
@@ -394,6 +400,7 @@ function chooseCustomer(customer) {
   selectedCustomer = customer;
   document.getElementById("selected-customer-name").textContent = customer.name;
   document.getElementById("selected-customer-phone").textContent = customer.phone;
+  selectedCustomerAccount.href = `/credit/customers/${encodeURIComponent(customer.id)}`;
   selectedCustomerBox.hidden = false;
   customerSearchWrap.hidden = true;
   customerSearchStatus.textContent = POS_I18N.customerSelected.replace("__NAME__", customer.name);
@@ -604,13 +611,7 @@ function newRequestId() {
   return crypto.randomUUID();
 }
 
-checkoutButton.addEventListener("click", async () => {
-  if (!cart.length || saleSubmitting) return;
-  saleSubmitting = true;
-  checkoutButton.disabled = true;
-  checkoutButton.textContent = POS_I18N.submitting;
-  checkoutError.hidden = true;
-  const requestId = newRequestId();
+async function submitCartSale(requestId, creditOverride = false, overridePin = "") {
   const items = cart.map(item => ({product_id: item.id, quantity: item.quantity}));
 
   try {
@@ -620,9 +621,16 @@ checkoutButton.addEventListener("click", async () => {
         "Content-Type": "application/json",
         "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
       },
-      body: JSON.stringify({items, request_id: requestId, payment_method: paymentMethod.value, customer_id: selectedCustomer ? selectedCustomer.id : null})
+      body: JSON.stringify({items, request_id: requestId, payment_method: paymentMethod.value, customer_id: selectedCustomer ? selectedCustomer.id : null, credit_override: creditOverride, override_pin: overridePin})
     });
     const data = await response.json();
+    if (!response.ok && data.error_code === "credit_limit_exceeded" && !creditOverride) {
+      if (!window.confirm(POS_I18N.creditOverride)) throw new Error(data.error);
+      const pin = POS_I18N.canAuthorizeCreditOverride
+        ? ""
+        : (window.prompt(POS_I18N.overridePin) || "");
+      return submitCartSale(requestId, true, pin);
+    }
     if (!response.ok || !data.ok) throw new Error(data.error || POS_I18N.saleError);
     sessionStorage.setItem("patia_sale_confirmation", JSON.stringify({
       folio: data.folio,
@@ -638,6 +646,15 @@ checkoutButton.addEventListener("click", async () => {
     checkoutError.textContent = error.message || POS_I18N.retryError;
     checkoutError.hidden = false;
   }
+}
+
+checkoutButton.addEventListener("click", async () => {
+  if (!cart.length || saleSubmitting) return;
+  saleSubmitting = true;
+  checkoutButton.disabled = true;
+  checkoutButton.textContent = POS_I18N.submitting;
+  checkoutError.hidden = true;
+  await submitCartSale(newRequestId());
 });
 
 const storedConfirmation = sessionStorage.getItem("patia_sale_confirmation");

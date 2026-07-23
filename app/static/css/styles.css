@@ -9727,3 +9727,20 @@ table {
   .pos-customer-v1__heading .btn { width: 100%; }
   .pos-customer-v1__selected { align-items: flex-start; flex-wrap: wrap; }
 }
+
+/* Crédito y cuentas por cobrar */
+.credit-v1 { display: grid; gap: 20px; }
+.credit-v1__hero { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 28px; color: #fff; background: linear-gradient(135deg,#171a2b,#30275e); }
+.credit-v1__hero h2 { margin: 5px 0 8px; color: inherit; }
+.credit-v1__hero p { margin: 0; color: #dfe1ef; }
+.credit-v1__hero span, .credit-v1__hero small { display: block; color: #bcb3ff; font-weight: 800; }
+.credit-v1__hero strong { display: block; font-size: clamp(1.8rem,4vw,2.7rem); }
+.credit-v1__accounts, .credit-v1__history, .credit-v1__payment, .credit-v1__reminder { padding: 24px; }
+.credit-v1__accounts header, .credit-v1__history header { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.credit-v1 td small { display: block; color: #62697c; }
+.credit-v1__grid { display: grid; grid-template-columns: minmax(300px,.8fr) minmax(0,1.2fr); gap: 20px; }
+.credit-v1__payment form, .customer-credit-settings-v1 { display: grid; gap: 10px; }
+.credit-v1__payment input, .credit-v1__payment select, .customer-credit-settings-v1 input { min-height: 46px; }
+.customer-credit-settings-v1 { grid-template-columns: minmax(180px,.8fr) minmax(180px,1fr) auto auto; align-items: end; margin-top: 16px; }
+.customer-credit-settings-v1 > div { display: grid; gap: 7px; }
+@media(max-width:760px){.credit-v1__hero{align-items:flex-start;flex-direction:column}.credit-v1__grid,.customer-credit-settings-v1{grid-template-columns:1fr}.credit-v1__accounts,.credit-v1__history,.credit-v1__payment,.credit-v1__reminder,.credit-v1__hero{padding:18px}}

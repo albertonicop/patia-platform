@@ -4935,5 +4935,195 @@ msgstr "The invitation expires in 48 hours."
 #~ msgid "InvitaciÃ³n reenviada."
 #~ msgstr ""
 
+# PATIA V1.5 - Credit and accounts receivable
+msgid "Selecciona un cliente para vender a crédito."
+msgstr "Select a customer for a credit sale."
+
+msgid "Venta cancelada. Stock devuelto al inventario."
+msgstr "Sale canceled. Stock returned to inventory."
+
+msgid "Devolución registrada. Stock devuelto al inventario."
+msgstr "Return recorded. Stock returned to inventory."
+
+msgid "Abre la caja antes de devolver una venta en efectivo."
+msgstr "Open the cash register before refunding a cash sale."
+
+msgid "La venta a crédito no tiene un cliente asociado."
+msgstr "The credit sale has no customer attached."
+
+msgid "Abono de crédito en efectivo"
+msgstr "Cash credit payment"
+
+#, python-format
+msgid "Hola %(name)s, te recordamos que tienes un saldo pendiente de %(balance)s en %(business)s."
+msgstr "Hello %(name)s, this is a reminder that your outstanding balance at %(business)s is %(balance)s."
+
+msgid "Escribe un límite de crédito válido."
+msgstr "Enter a valid credit limit."
+
+msgid "Liquida el saldo antes de desactivar el crédito."
+msgstr "Settle the balance before disabling credit."
+
+msgid "Configuración de crédito actualizada."
+msgstr "Credit settings updated."
+
+msgid "Abono registrado correctamente."
+msgstr "Payment recorded successfully."
+
+msgid "La venta supera el límite de crédito."
+msgstr "This sale exceeds the credit limit."
+
+msgid "Este cliente no tiene crédito habilitado."
+msgstr "Credit is not enabled for this customer."
+
+msgid "Se requiere autorización para exceder el límite."
+msgstr "Authorization is required to exceed the limit."
+
+msgid "Cliente no encontrado."
+msgstr "Customer not found."
+
+msgid "El abono debe ser mayor a cero."
+msgstr "The payment must be greater than zero."
+
+msgid "El abono no puede ser mayor al saldo pendiente."
+msgstr "The payment cannot exceed the outstanding balance."
+
+msgid "Selecciona un método de pago válido."
+msgstr "Select a valid payment method."
+
+msgid "Abre la caja antes de recibir un abono en efectivo."
+msgstr "Open the cash register before receiving a cash payment."
+
+#, python-format
+msgid "Abono de crédito: %(customer)s"
+msgstr "Credit payment: %(customer)s"
+
+msgid "No se puede cancelar esta venta porque parte de su saldo ya fue pagado."
+msgstr "This sale cannot be canceled because part of its balance has already been paid."
+
+#, python-format
+msgid "Cancelación de %(folio)s"
+msgstr "Cancellation of %(folio)s"
+
+msgid "Crédito y cuentas por cobrar"
+msgstr "Credit and accounts receivable"
+
+msgid "Estado de cuenta"
+msgstr "Account statement"
+
+msgid "Volver a cuentas"
+msgstr "Back to accounts"
+
+msgid "Volver al punto de venta"
+msgstr "Back to point of sale"
+
+msgid "Saldo pendiente"
+msgstr "Outstanding balance"
+
+msgid "El crédito no está habilitado para este cliente."
+msgstr "Credit is not enabled for this customer."
+
+msgid "Registrar abono"
+msgstr "Record payment"
+
+msgid "Nota (opcional)"
+msgstr "Note (optional)"
+
+msgid "Recordatorio por WhatsApp"
+msgstr "WhatsApp reminder"
+
+msgid "Abre un mensaje preparado. PATIA no lo enviará sin tu confirmación."
+msgstr "Open a prepared message. PATIA will not send it without your confirmation."
+
+msgid "Preparar recordatorio"
+msgstr "Prepare reminder"
+
+msgid "Movimientos de la cuenta"
+msgstr "Account activity"
+
+msgid "Referencia"
+msgstr "Reference"
+
+msgid "Cargo"
+msgstr "Charge"
+
+msgid "Abono"
+msgstr "Payment"
+
+msgid "Saldo"
+msgstr "Balance"
+
+msgid "Venta a crédito"
+msgstr "Credit sale"
+
+msgid "Sistema"
+msgstr "System"
+
+msgid "Exceso autorizado"
+msgstr "Over-limit authorization"
+
+msgid "Sin movimientos todavía"
+msgstr "No account activity yet"
+
+msgid "Las ventas a crédito y sus abonos aparecerán aquí."
+msgstr "Credit sales and their payments will appear here."
+
+msgid "Control de saldos"
+msgstr "Balance control"
+
+msgid "Crédito claro, cobros sin sorpresas"
+msgstr "Clear credit, predictable collections"
+
+msgid "Consulta cuánto debe cada cliente y registra abonos sin perder el historial."
+msgstr "See what each customer owes and record payments without losing the history."
+
+msgid "Cuentas de clientes"
+msgstr "Customer accounts"
+
+msgid "Límite"
+msgstr "Limit"
+
+msgid "Disponible"
+msgstr "Available"
+
+msgid "Ver estado de cuenta"
+msgstr "View account statement"
+
+msgid "Aún no hay clientes con crédito habilitado"
+msgstr "No customers have credit enabled yet"
+
+msgid "Actívalo desde el perfil de un cliente y define un límite responsable."
+msgstr "Enable it from a customer profile and set a responsible limit."
+
+msgid "Ir a clientes"
+msgstr "Go to customers"
+
+msgid "Crédito"
+msgstr "Credit"
+
+msgid "Activa crédito solo cuando hayas acordado un límite con este cliente."
+msgstr "Enable credit only after agreeing on a limit with this customer."
+
+msgid "Crédito habilitado"
+msgstr "Credit enabled"
+
+msgid "Límite de crédito"
+msgstr "Credit limit"
+
+msgid "Guardar configuración"
+msgstr "Save settings"
+
+msgid "Esta venta supera el límite disponible. ¿Deseas solicitar autorización?"
+msgstr "This sale exceeds the available limit. Would you like to request authorization?"
+
+msgid "PIN de propietario o encargado"
+msgstr "Owner or manager PIN"
+
+msgid "Demasiados intentos de autorización. Espera un minuto."
+msgstr "Too many authorization attempts. Wait one minute."
+
+msgid "Demasiados intentos"
+msgstr "Too many attempts"
+
 #~ msgid "InvitaciÃ³n cancelada."
 #~ msgstr ""

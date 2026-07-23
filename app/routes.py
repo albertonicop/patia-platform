@@ -44,6 +44,12 @@ from .inventory.services import (
     record_inventory_movement,
     record_opening_balance,
 )
+from .credit.services import (
+    CreditError,
+    CreditLimitExceeded,
+    record_credit_charge,
+    record_credit_reversal,
+)
 from .money import MONEY_ZERO, money_decimal, money_json, money_sum
 from .timezones import (
     DEFAULT_TIMEZONE,
@@ -218,6 +224,7 @@ PAYMENT_METHOD_LABELS = {
     "card": "Tarjeta",
     "transfer": "Transferencia",
     "other": "Otro",
+    "credit": "Crédito",
 }
 
 
@@ -242,6 +249,40 @@ def _selected_customer(organization_id, raw_customer_id):
             gettext("El cliente seleccionado no está disponible.")
         )
     return customer
+
+
+def _credit_override_rate_limit_key():
+    return ":".join(
+        (
+            request.remote_addr or "unknown",
+            str(session.get("user_id") or "anonymous"),
+            str(session.get("organization_id") or "no-organization"),
+        )
+    )
+
+
+def _credit_override_rate_limit_exempt():
+    payload = request.get_json(silent=True)
+    return not (
+        isinstance(payload, dict)
+        and payload.get("payment_method") == "credit"
+        and payload.get("credit_override")
+        and str(payload.get("override_pin") or "").strip()
+    )
+
+
+def _credit_override_rate_limit_response(_request_limit):
+    response = jsonify(
+        {
+            "ok": False,
+            "error": gettext(
+                "Demasiados intentos de autorización. Espera un minuto."
+            ),
+            "error_code": "credit_override_rate_limited",
+        }
+    )
+    response.status_code = 429
+    return response
 
 
 def _ticket_business_value(value):
@@ -2451,6 +2492,27 @@ def sell():
             )
             db.session.add(sale)
             db.session.flush()
+            if payment_method == "credit":
+                if not has_permission(membership, "use_customer_credit"):
+                    db.session.rollback()
+                    abort(403)
+                if not customer:
+                    db.session.rollback()
+                    flash("Selecciona un cliente para vender a crédito.", "danger")
+                    return redirect(url_for("main.sell"))
+                try:
+                    record_credit_charge(
+                        customer,
+                        membership,
+                        sale.total,
+                        ticket,
+                        allow_override=request.form.get("credit_override") == "1",
+                        override_pin=request.form.get("override_pin"),
+                    )
+                except CreditError as exc:
+                    db.session.rollback()
+                    flash(str(exc), "danger")
+                    return redirect(url_for("main.sell"))
             record_inventory_movement(
                 product,
                 membership,
@@ -2511,6 +2573,13 @@ def sell():
 
 
 @main.route("/sell-cart", methods=["POST"])
+@limiter.limit(
+    "5 per minute",
+    methods=["POST"],
+    key_func=_credit_override_rate_limit_key,
+    exempt_when=_credit_override_rate_limit_exempt,
+    on_breach=_credit_override_rate_limit_response,
+)
 @require_permission("use_pos")
 def sell_cart():
     user = current_user()
@@ -2681,6 +2750,24 @@ def sell_cart():
             )
             sales.append(sale)
         db.session.flush()
+        if payment_method == "credit":
+            if not has_permission(membership, "use_customer_credit"):
+                db.session.rollback()
+                return jsonify(
+                    {"ok": False, "error": gettext("Acceso no permitido.")}
+                ), 403
+            if not customer:
+                raise CreditError(
+                    gettext("Selecciona un cliente para vender a crédito.")
+                )
+            record_credit_charge(
+                customer,
+                membership,
+                money_sum(sale.total for sale in sales),
+                ticket,
+                allow_override=bool(data.get("credit_override")),
+                override_pin=data.get("override_pin"),
+            )
         if payment_method == "cash":
             record_cash_movement(
                 cash_session,
@@ -2701,6 +2788,18 @@ def sell_cart():
             "single_sale_id": sales[0].id if len(sales) == 1 else None,
             "payment_method": _payment_method_label(payment_method),
         })
+    except CreditLimitExceeded as exc:
+        db.session.rollback()
+        return jsonify({
+            "ok": False,
+            "error": str(exc),
+            "error_code": "credit_limit_exceeded",
+            "projected_balance": money_json(exc.balance),
+            "credit_limit": money_json(exc.limit),
+        }), 409
+    except CreditError as exc:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": str(exc)}), 409
     except Exception:
         db.session.rollback()
         current_app.logger.exception("Error al procesar el carrito")
@@ -3132,7 +3231,9 @@ def cancel_sale(sale_id):
     return _reverse_sale(
         sale_id,
         movement_type="SALE_CANCELLATION",
-        success_message="Venta cancelada. Stock devuelto al inventario.",
+        success_message=gettext(
+            "Venta cancelada. Stock devuelto al inventario."
+        ),
     )
 
 
@@ -3142,7 +3243,9 @@ def return_sale(sale_id):
     return _reverse_sale(
         sale_id,
         movement_type="RETURN",
-        success_message="Devolución registrada. Stock devuelto al inventario.",
+        success_message=gettext(
+            "Devolución registrada. Stock devuelto al inventario."
+        ),
     )
 
 
@@ -3168,10 +3271,29 @@ def _reverse_sale(sale_id, *, movement_type, success_message):
         cash_session = open_cash_session(organization_id, lock=True)
         if not cash_session:
             flash(
-                "Abre la caja antes de devolver una venta en efectivo.",
+                gettext("Abre la caja antes de devolver una venta en efectivo."),
                 "danger",
             )
             return redirect(url_for("cash.index"))
+    if payment_method == "credit" and sale.sales_ticket:
+        customer = sale.sales_ticket.customer
+        if not customer:
+            flash(
+                gettext("La venta a crédito no tiene un cliente asociado."),
+                "danger",
+            )
+            return redirect(url_for("main.sell"))
+        try:
+            record_credit_reversal(
+                customer,
+                membership,
+                sale.total,
+                sale.sales_ticket,
+            )
+        except CreditError as exc:
+            db.session.rollback()
+            flash(str(exc), "danger")
+            return redirect(url_for("main.sell"))
     product = (
         Product.query.filter_by(
             id=sale.product_id, organization_id=organization_id

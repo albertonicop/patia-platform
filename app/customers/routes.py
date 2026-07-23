@@ -183,6 +183,7 @@ def detail(customer_id):
             "card": gettext("Tarjeta"),
             "transfer": gettext("Transferencia"),
             "other": gettext("Otro"),
+            "credit": gettext("Crédito"),
         },
     )
 

@@ -24,6 +24,7 @@ def _movement_labels():
     return {
         "OPENING": gettext("Fondo inicial"),
         "SALE_CASH": gettext("Venta en efectivo"),
+        "CREDIT_PAYMENT": gettext("Abono de crédito en efectivo"),
         "CASH_IN": gettext("Entrada de efectivo"),
         "WITHDRAWAL": gettext("Retiro"),
         "EXPENSE": gettext("Gasto"),
