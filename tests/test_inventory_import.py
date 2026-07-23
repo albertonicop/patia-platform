@@ -13,6 +13,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Product, Sale, User
+from app.team.services import ensure_owner_organization
 
 
 CSV_HEADER = (
@@ -57,12 +58,15 @@ class InventoryImportTests(unittest.TestCase):
         )
         self.user.set_password("Password123")
         db.session.add(self.user)
+        db.session.flush()
+        ensure_owner_organization(self.user)
         db.session.commit()
         with self.client.session_transaction() as session:
             session["user_id"] = self.user.id
 
     def add_product(self, sku="EXISTE", barcode="7501", stock=5):
         product = Product(
+            organization_id=self.user.organization_memberships[0].organization_id,
             user_id=self.user.id,
             sku=sku,
             barcode=barcode,
@@ -166,7 +170,7 @@ class InventoryImportTests(unittest.TestCase):
 
     def test_product_edit_preserves_historical_sale_values(self):
         product = self.add_product()
-        sale = Sale(user_id=self.user.id, product_id=product.id, quantity=2, unit_price=20, total=40)
+        sale = Sale(organization_id=self.user.organization_memberships[0].organization_id, user_id=self.user.id, product_id=product.id, quantity=2, unit_price=20, total=40)
         db.session.add(sale)
         db.session.commit()
 
@@ -225,6 +229,7 @@ class InventoryImportTests(unittest.TestCase):
     def test_product_with_sales_is_archived_and_history_is_preserved(self):
         product = self.add_product()
         sale = Sale(
+            organization_id=self.user.organization_memberships[0].organization_id,
             user_id=self.user.id,
             product_id=product.id,
             quantity=1,
@@ -259,6 +264,7 @@ class InventoryImportTests(unittest.TestCase):
     def test_archived_product_disappears_from_search_pos_and_dashboard_metrics(self):
         product = self.add_product(stock=5)
         db.session.add(Sale(
+            organization_id=self.user.organization_memberships[0].organization_id,
             user_id=self.user.id,
             product_id=product.id,
             quantity=1,
@@ -278,7 +284,7 @@ class InventoryImportTests(unittest.TestCase):
 
     def test_adding_archived_sku_reactivates_record_without_losing_sales(self):
         product = self.add_product(sku="ARCHIVO", barcode="700", stock=5)
-        sale = Sale(user_id=self.user.id, product_id=product.id, quantity=1, unit_price=20, total=20)
+        sale = Sale(organization_id=self.user.organization_memberships[0].organization_id, user_id=self.user.id, product_id=product.id, quantity=1, unit_price=20, total=20)
         db.session.add(sale)
         db.session.commit()
         self.client.post(f"/products/{product.id}/delete")
@@ -302,6 +308,7 @@ class InventoryImportTests(unittest.TestCase):
         protected = self.add_product(sku="CON-VENTA")
         removable = self.add_product(sku="SIN-VENTA", barcode="7502")
         db.session.add(Sale(
+            organization_id=self.user.organization_memberships[0].organization_id,
             user_id=self.user.id,
             product_id=protected.id,
             quantity=1,

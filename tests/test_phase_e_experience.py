@@ -12,6 +12,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Product, Sale, Supplier, User
+from app.team.services import ensure_owner_organization
 
 
 class PhaseEExperienceTests(unittest.TestCase):
@@ -52,6 +53,8 @@ class PhaseEExperienceTests(unittest.TestCase):
         )
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         with self.client.session_transaction() as session:
             session["user_id"] = user.id
@@ -67,7 +70,7 @@ class PhaseEExperienceTests(unittest.TestCase):
 
     def test_suppliers_with_data_keep_list_whatsapp_and_actions(self):
         user = self.login_user()
-        db.session.add(Supplier(user_id=user.id, name="Distribuidora Uno", contact="Ana", phone="238 123-4567"))
+        db.session.add(Supplier(organization_id=user.organization_memberships[0].organization_id, user_id=user.id, name="Distribuidora Uno", contact="Ana", phone="238 123-4567"))
         db.session.commit()
         html = self.client.get("/suppliers").get_data(as_text=True)
 
@@ -87,10 +90,11 @@ class PhaseEExperienceTests(unittest.TestCase):
 
     def test_reports_with_sales_keep_chart_and_existing_data(self):
         user = self.login_user(pro=True)
-        product = Product(user_id=user.id, sku="REP-1", name="Producto reporte", category="Bebidas", cost_price=10, sale_price=20, stock=4, min_stock=1)
+        organization_id = user.organization_memberships[0].organization_id
+        product = Product(organization_id=organization_id, user_id=user.id, sku="REP-1", name="Producto reporte", category="Bebidas", cost_price=10, sale_price=20, stock=4, min_stock=1)
         db.session.add(product)
         db.session.flush()
-        db.session.add(Sale(user_id=user.id, product_id=product.id, quantity=2, unit_price=20, total=40))
+        db.session.add(Sale(organization_id=organization_id, user_id=user.id, product_id=product.id, quantity=2, unit_price=20, total=40))
         db.session.commit()
         html = self.client.get("/reports").get_data(as_text=True)
 

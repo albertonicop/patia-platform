@@ -85,7 +85,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         )
         return env
 
-    def run_upgrade(self, database_path, *, expect_success=True):
+    def run_upgrade(self, database_path, revision="head", *, expect_success=True):
         result = subprocess.run(
             [
                 sys.executable,
@@ -95,6 +95,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "run.py",
                 "db",
                 "upgrade",
+                revision,
             ],
             cwd=ROOT,
             env=self.environment(database_path),
@@ -302,6 +303,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         self.assertEqual(
             {
                 "id",
+                "organization_id",
                 "user_id",
                 "number",
                 "public_id",
@@ -311,6 +313,12 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
             self.columns(inspector, "sales_ticket"),
         )
         self.assertIn("is_active", self.columns(inspector, "product"))
+        self.assertIn("organization_id", self.columns(inspector, "product"))
+        self.assertIn("organization_id", self.columns(inspector, "sale"))
+        self.assertIn("organization_id", self.columns(inspector, "supplier"))
+        self.assertIn("organization", inspector.get_table_names())
+        self.assertIn("organization_member", inspector.get_table_names())
+        self.assertIn("organization_invitation", inspector.get_table_names())
         self.assertEqual(
             self.columns(inspector, "stripe_webhook_event"),
             CURRENT_WEBHOOK_COLUMNS,
@@ -318,7 +326,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260719_10",
+                "20260722_11",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -327,6 +335,26 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                     ).scalar_one(),
                     expected_count,
                 )
+            self.assertEqual(
+                connection.execute(sa.text("SELECT COUNT(*) FROM organization")).scalar_one(),
+                before["user"],
+            )
+            self.assertEqual(
+                connection.execute(sa.text("SELECT COUNT(*) FROM organization_member")).scalar_one(),
+                before["user"],
+            )
+            self.assertEqual(
+                connection.execute(
+                    sa.text("SELECT COUNT(*) FROM product WHERE organization_id IS NULL")
+                ).scalar_one(),
+                0,
+            )
+            self.assertEqual(
+                connection.execute(
+                    sa.text("SELECT COUNT(*) FROM sale WHERE organization_id IS NULL")
+                ).scalar_one(),
+                0,
+            )
             users = connection.execute(
                 sa.text(
                     'SELECT id, email, company_name, timezone '
@@ -405,6 +433,9 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "supplier",
                 "stripe_webhook_event",
                 "inventory_restock_event",
+            "organization",
+            "organization_member",
+            "organization_invitation",
             }.issubset(inspector.get_table_names())
         )
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
@@ -421,7 +452,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260719_10",
+                "20260722_11",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
@@ -431,7 +462,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
 
     def test_payment_method_revision_downgrades_without_losing_sales(self):
         database_path = self.database_path("payment-downgrade.db")
-        self.run_upgrade(database_path)
+        self.run_upgrade(database_path, "20260715_04")
         engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
         with engine.begin() as connection:
             connection.execute(sa.text(

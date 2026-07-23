@@ -1,0 +1,28 @@
+{% extends "base_clean.html" %}
+{% block content %}
+<main class="auth-v2 team-accept-v1">
+  <section class="auth-v2__card" aria-labelledby="invitation-title">
+    {% if not invitation %}
+      <h1 id="invitation-title">{{ _('Esta invitación ya no está disponible') }}</h1>
+      <p>{{ _('Pide al propietario que envíe una invitación nueva.') }}</p>
+      <a class="btn-primary" href="{{ url_for('main.login') }}">{{ _('Ir a iniciar sesión') }}</a>
+    {% else %}
+      <p class="auth-v2__eyebrow">{{ _('Invitación de equipo') }}</p>
+      <h1 id="invitation-title">{{ _('Únete a %(business)s', business=invitation.organization.name) }}</h1>
+      <p>{{ _('Usarás PATIA como %(role)s.', role=_('Cajero') if invitation.role == 'CASHIER' else _('Encargado')) }}</p>
+      <form method="POST" class="auth-v2__form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if not session.get('user_id') %}
+        <label for="first_name">{{ _('Nombre') }}</label>
+        <input id="first_name" name="first_name" required autocomplete="given-name">
+        <label for="last_name">{{ _('Apellido') }}</label>
+        <input id="last_name" name="last_name" required autocomplete="family-name">
+        <label for="password">{{ _('Contraseña') }}</label>
+        <input id="password" name="password" type="password" minlength="8" required autocomplete="new-password">
+        {% endif %}
+        <button type="submit" class="btn-primary">{{ _('Aceptar invitación') }}</button>
+      </form>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

@@ -14,6 +14,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Product, Sale, Supplier, User
+from app.team.services import ensure_owner_organization
 
 
 class ReleaseBlockerTests(unittest.TestCase):
@@ -54,6 +55,8 @@ class ReleaseBlockerTests(unittest.TestCase):
         )
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         return user
 
@@ -63,6 +66,7 @@ class ReleaseBlockerTests(unittest.TestCase):
 
     def sale(self, user):
         product = Product(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             sku="RC-1",
             name="Producto RC",
@@ -74,6 +78,7 @@ class ReleaseBlockerTests(unittest.TestCase):
         db.session.add(product)
         db.session.flush()
         sale = Sale(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             product_id=product.id,
             quantity=1,

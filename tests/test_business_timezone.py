@@ -19,6 +19,7 @@ from app.timezones import (
     safe_timezone_name,
     utc_to_local,
 )
+from app.team.services import ensure_owner_organization
 
 
 class BusinessTimezoneTests(unittest.TestCase):
@@ -47,7 +48,10 @@ class BusinessTimezoneTests(unittest.TestCase):
             self.user.set_password("Password123")
             db.session.add(self.user)
             db.session.flush()
+            membership = ensure_owner_organization(self.user)
+            organization_id = membership.organization_id
             product = Product(
+                organization_id=organization_id,
                 user_id=self.user.id,
                 sku="TZ-1",
                 name="Producto horario",
@@ -60,6 +64,7 @@ class BusinessTimezoneTests(unittest.TestCase):
             db.session.add(product)
             db.session.flush()
             ticket = SalesTicket(
+                organization_id=organization_id,
                 user_id=self.user.id,
                 number=1,
                 public_id="timezone-ticket",
@@ -69,6 +74,7 @@ class BusinessTimezoneTests(unittest.TestCase):
             db.session.add(ticket)
             db.session.flush()
             sale = Sale(
+                organization_id=organization_id,
                 user_id=self.user.id,
                 product_id=product.id,
                 sales_ticket_id=ticket.id,
@@ -83,6 +89,7 @@ class BusinessTimezoneTests(unittest.TestCase):
             db.session.add(sale)
             db.session.commit()
             self.user_id = self.user.id
+            self.organization_id = organization_id
 
     def tearDown(self):
         with self.app.app_context():
@@ -118,6 +125,7 @@ class BusinessTimezoneTests(unittest.TestCase):
         with self.app.app_context():
             product = Product.query.filter_by(user_id=self.user_id).first()
             late_local = Sale(
+                organization_id=self.organization_id,
                 user_id=self.user_id,
                 product_id=product.id,
                 quantity=1,
@@ -128,6 +136,7 @@ class BusinessTimezoneTests(unittest.TestCase):
                 created_at=datetime(2026, 7, 18, 5, 59),
             )
             next_local_day = Sale(
+                organization_id=self.organization_id,
                 user_id=self.user_id,
                 product_id=product.id,
                 quantity=1,
@@ -147,7 +156,7 @@ class BusinessTimezoneTests(unittest.TestCase):
             )
             with self.app.test_request_context("/reports?period=today"):
                 report = _report_analytics(
-                    self.user_id,
+                    self.organization_id,
                     period,
                     timezone_name=DEFAULT_TIMEZONE,
                 )

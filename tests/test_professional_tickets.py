@@ -12,6 +12,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Product, Sale, User
+from app.team.services import ensure_owner_organization
 
 
 class ProfessionalTicketTests(unittest.TestCase):
@@ -46,6 +47,8 @@ class ProfessionalTicketTests(unittest.TestCase):
         user = User(email=email, email_verified=True, **values)
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         return user
 
@@ -55,6 +58,7 @@ class ProfessionalTicketTests(unittest.TestCase):
 
     def product(self, owner, sku, name, price, stock=10):
         product = Product(
+            organization_id=owner.organization_memberships[0].organization_id,
             user_id=owner.id, sku=sku, name=name, category="General",
             cost_price=price / 2, sale_price=price, stock=stock, min_stock=1,
         )
@@ -68,8 +72,8 @@ class ProfessionalTicketTests(unittest.TestCase):
         second = self.product(owner, f"B-{owner.id}", "Pan artesanal largo", 15)
         ticket_id = str(uuid.uuid4())
         lines = [
-            Sale(user_id=owner.id, product_id=first.id, quantity=2, unit_price=25, total=50, ticket_id=ticket_id, payment_method="card"),
-            Sale(user_id=owner.id, product_id=second.id, quantity=3, unit_price=15, total=45, ticket_id=ticket_id, payment_method="card"),
+            Sale(organization_id=owner.organization_memberships[0].organization_id, user_id=owner.id, product_id=first.id, quantity=2, unit_price=25, total=50, ticket_id=ticket_id, payment_method="card"),
+            Sale(organization_id=owner.organization_memberships[0].organization_id, user_id=owner.id, product_id=second.id, quantity=3, unit_price=15, total=45, ticket_id=ticket_id, payment_method="card"),
         ]
         db.session.add_all(lines)
         db.session.commit()
@@ -189,7 +193,7 @@ class ProfessionalTicketTests(unittest.TestCase):
 
     def test_historical_sale_without_payment_method_remains_compatible(self):
         product = self.product(self.owner, "HIST", "Histórico", 10)
-        sale = Sale(user_id=self.owner.id, product_id=product.id, quantity=1, unit_price=10, total=10)
+        sale = Sale(organization_id=self.owner.organization_memberships[0].organization_id, user_id=self.owner.id, product_id=product.id, quantity=1, unit_price=10, total=10)
         db.session.add(sale)
         db.session.commit()
         html = self.client.get(f"/receipt/{sale.id}", follow_redirects=True).get_data(as_text=True)

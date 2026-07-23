@@ -13,6 +13,7 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_quick_load")
 from app import create_app, db
 from app.barcodes import lookup_barcode
 from app.models import InventoryRestockEvent, Product, User
+from app.team.services import ensure_owner_organization
 from sqlalchemy.exc import IntegrityError
 
 
@@ -48,6 +49,8 @@ class QuickLoadScannerTests(unittest.TestCase):
         )
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         return user
 
@@ -68,6 +71,7 @@ class QuickLoadScannerTests(unittest.TestCase):
         stock=3,
     ):
         product = Product(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             barcode=barcode,
             sku=sku,
@@ -196,6 +200,7 @@ class QuickLoadScannerTests(unittest.TestCase):
 
     def test_database_constraint_closes_concurrent_duplicate_race(self):
         first = Product(
+            organization_id=self.owner.organization_memberships[0].organization_id,
             user_id=self.owner.id,
             barcode="RACE-1",
             sku="RACE-A",
@@ -206,6 +211,7 @@ class QuickLoadScannerTests(unittest.TestCase):
             min_stock=0,
         )
         second = Product(
+            organization_id=self.owner.organization_memberships[0].organization_id,
             user_id=self.owner.id,
             barcode="RACE-1",
             sku="RACE-B",

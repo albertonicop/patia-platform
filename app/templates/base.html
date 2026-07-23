@@ -34,19 +34,19 @@
     </div>
 
    <nav id="primary-navigation" class="sidebar-nav sidebar-v2__nav" aria-label="{{ _('Navegación principal') }}">
-    <a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>{{ _("Dashboard") }}</span></a>
-    <a href="/products"{% if request.path.startswith('/products') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>{{ _("Inventario") }}</span></a>
-    <a href="/sell"{% if request.path.startswith('/sell') or request.path.startswith('/sales/') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>{{ _("Punto de venta") }}</span></a>
-    {% if user is defined and user and has_pro_access %}
+    {% if can_view_dashboard %}<a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>{{ _("Dashboard") }}</span></a>{% endif %}
+    {% if can_manage_inventory %}<a href="/products"{% if request.path.startswith('/products') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>{{ _("Inventario") }}</span></a>{% endif %}
+    {% if can_use_pos %}<a href="/sell"{% if request.path.startswith('/sell') or request.path.startswith('/sales/') or request.path.startswith('/ticket/') or request.path.startswith('/receipt/') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>{{ _("Punto de venta") }}</span></a>{% endif %}
+    {% if can_view_reports and user is defined and user and has_pro_access %}
 <a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes IA") }}</span></a>
-{% elif user is defined and user %}
-<a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes IA") }} <small>{{ _("PRO") }}</small></span></a>
-{% else %}
+{% elif can_view_reports and can_manage_subscription and user is defined and user %}
 <a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes IA") }} <small>{{ _("PRO") }}</small></span></a>
 {% endif %}
-    <a href="/suppliers"{% if request.path.startswith('/suppliers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-truck" aria-hidden="true"></i><span>{{ _("Proveedores") }}</span></a>
-    <a href="/settings"{% if request.path.startswith('/settings') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{{ _("Configuración") }}</span></a>
-
+    {% if can_manage_inventory %}<a href="/suppliers"{% if request.path.startswith('/suppliers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-truck" aria-hidden="true"></i><span>{{ _("Proveedores") }}</span></a>{% endif %}
+    {% if can_manage_subscription %}<a href="/settings"{% if request.path.startswith('/settings') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{{ _("Configuración") }}</span></a>{% endif %}
+    {% if can_manage_team %}
+    <a href="{{ url_for('team.index') }}"{% if request.path.startswith('/team') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-user-group" aria-hidden="true"></i><span>{{ _("Equipo") }}</span></a>
+    {% endif %}
 
 <form method="POST" action="{{ url_for('main.logout') }}" class="sidebar-v2__logout">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -77,7 +77,7 @@
         {% else %}
           <b>{{ _("Plan actual: Prueba") }}</b>
           <p>{{ _("%(days)s días restantes · $199 MXN/mes", days=trial_days_left if trial_days_left is not none else 0) }}</p>
-          <a href="/subscribe">{{ _("Activar PATIA Pro") }}</a>
+          {% if can_manage_subscription %}<a href="/subscribe">{{ _("Activar PATIA Pro") }}</a>{% endif %}
         {% endif %}
       </div>
     </div>

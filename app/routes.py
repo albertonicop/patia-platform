@@ -9,7 +9,7 @@ import stripe
 import secrets
 import uuid
 import re
-from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort, has_request_context
 from flask_babel import force_locale, gettext
 from sqlalchemy import case, func, update
 from sqlalchemy.exc import IntegrityError
@@ -24,6 +24,7 @@ from .barcodes import (
 )
 from .models import (
     InventoryRestockEvent,
+    Organization,
     Product,
     Sale,
     SalesTicket,
@@ -38,6 +39,15 @@ from .timezones import (
     local_today,
     safe_timezone_name,
     utc_to_local,
+)
+from .team.services import (
+    active_membership,
+    ensure_owner_organization,
+    has_permission,
+    membership_for_login,
+    organization_owner,
+    require_permission,
+    require_roles,
 )
 
 main = Blueprint("main", __name__)
@@ -60,8 +70,36 @@ def current_user():
         session.clear()
         session["kicked_out"] = True
         return None
-    sync_user_plan(user)
+    membership = membership_for_login(user)
+    if membership is None:
+        session.clear()
+        session["membership_disabled"] = True
+        return None
+    session["organization_id"] = membership.organization_id
+    sync_user_plan(membership.organization.owner)
     return user
+
+
+def current_organization_id(user):
+    """Resolve tenant membership without trusting an organization from input."""
+    if user is None:
+        return None
+    membership = active_membership(user)
+    if membership is None:
+        if not has_request_context():
+            return None
+        membership = membership_for_login(user)
+        if membership is None:
+            return None
+        session["organization_id"] = membership.organization_id
+    return membership.organization_id
+
+
+def current_organization_owner(user):
+    """Billing/legacy owner for the active tenant."""
+    if user is None:
+        return None
+    return organization_owner(user) or user
 
 
 def _safe_next_url(candidate):
@@ -90,9 +128,10 @@ def set_language():
 def trial_expired(user):
     if not user:
         return True
-    if has_pro_access(user):
+    access_user = current_organization_owner(user)
+    if has_pro_access(access_user):
         return False
-    days_used = (datetime.utcnow() - user.created_at).days
+    days_used = (datetime.utcnow() - access_user.created_at).days
     return days_used >= 14
 
 
@@ -138,17 +177,20 @@ def _short_sale_folio(sales):
     return f"V-{min(sale.id for sale in sales):06d}"
 
 
-def _create_sales_ticket(user_id, payment_method, *, ticket_id=None):
+def _create_sales_ticket(actor, payment_method, *, ticket_id=None):
     """Allocate a per-company ticket number atomically inside the sale transaction."""
+    owner = current_organization_owner(actor)
+    organization_id = current_organization_id(actor)
     next_number = db.session.execute(
         update(User)
-        .where(User.id == user_id)
+        .where(User.id == owner.id)
         .values(next_ticket_number=User.next_ticket_number + 1)
         .returning(User.next_ticket_number)
         .execution_options(synchronize_session=False)
     ).scalar_one()
     ticket = SalesTicket(
-        user_id=user_id,
+        organization_id=organization_id,
+        user_id=owner.id,
         number=next_number - 1,
         public_id=ticket_id or str(uuid.uuid4()),
         payment_method=payment_method,
@@ -530,6 +572,8 @@ def register():
 
         db.session.add(user)
         try:
+            db.session.flush()
+            membership = ensure_owner_organization(user)
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
@@ -546,6 +590,7 @@ def register():
         session.clear()
         session["language"] = user.preferred_language
         session["user_id"] = user.id
+        session["organization_id"] = membership.organization_id
         session["post_verify_destination"] = (
             "subscribe"
             if request.args.get("plan") == "pro" or request.form.get("plan") == "pro"
@@ -739,6 +784,11 @@ def login():
 
         token = secrets.token_hex(32)
         user.session_token = token
+        membership = membership_for_login(user)
+        if membership is None:
+            db.session.rollback()
+            flash(gettext("Tu acceso a esta empresa estÃ¡ desactivado. Contacta al propietario."), "danger")
+            return redirect(url_for("main.login"))
         db.session.commit()
         session.clear()
         session["language"] = (
@@ -747,28 +797,30 @@ def login():
             else "es"
         )
         session["user_id"] = user.id
+        session["organization_id"] = membership.organization_id
         session["session_token"] = token
-        days_used = (datetime.utcnow() - user.created_at).days
-        if days_used >= 12 and not user.trial_warning_sent and not has_pro_access(user):
-            with force_locale(user.preferred_language):
+        access_user = membership.organization.owner
+        days_used = (datetime.utcnow() - access_user.created_at).days
+        if days_used >= 12 and not access_user.trial_warning_sent and not has_pro_access(access_user):
+            with force_locale(access_user.preferred_language):
                 warning_sent = send_email(
-                    to=user.email,
+                    to=access_user.email,
                     subject=gettext("Tu prueba gratuita de PATIA termina en 2 días"),
                     html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
                     <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
                     <h1 style="color:#ff5c7a;">{gettext("Tu prueba termina en 2 días")}</h1>
-                    <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">{gettext("Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.", name=user.first_name or user.company_name)}</p>
+                    <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">{gettext("Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.", name=access_user.first_name or access_user.company_name)}</p>
                     <a href="{_public_url('/subscribe')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Activar PATIA Pro")}</a>
                 </div>
                 """,
-                    language=user.preferred_language,
+                    language=access_user.preferred_language,
                 )
             if warning_sent:
-                user.trial_warning_sent = True
+                access_user.trial_warning_sent = True
                 db.session.commit()
         flash(gettext("Sesión iniciada correctamente."), "success")
-        return redirect(url_for("main.dashboard"))
+        return redirect(_safe_next_url(request.args.get("next")))
 
     return render_template("auth.html", title=gettext("Iniciar sesión"), button=gettext("Entrar"), mode="login")
 
@@ -788,9 +840,10 @@ def money_filter(value):
 
 def analytics(user=None):
     user = user or current_user()
-    user_id = user.id if user else session.get("user_id")
+    organization_id = current_organization_id(user)
+    membership = active_membership(user)
     timezone_name = safe_timezone_name(
-        user.timezone if user else DEFAULT_TIMEZONE
+        membership.organization.timezone if membership else DEFAULT_TIMEZONE
     )
     today = local_today(timezone_name)
     start, tomorrow = local_date_bounds_utc(
@@ -804,13 +857,13 @@ def analytics(user=None):
         timezone_name,
     )
 
-    products = Product.query.filter_by(user_id=user_id, is_active=True).all()
+    products = Product.query.filter_by(organization_id=organization_id, is_active=True).all()
 
     total_products = len(products)
-    total_sales = Sale.query.filter_by(user_id=user_id).count()
+    total_sales = Sale.query.filter_by(organization_id=organization_id).count()
     inventory_value = (
         db.session.query(func.sum(Product.stock * Product.cost_price))
-        .filter(Product.user_id == user_id, Product.is_active.is_(True))
+        .filter(Product.organization_id == organization_id, Product.is_active.is_(True))
         .scalar()
         or 0
     )
@@ -821,13 +874,13 @@ def analytics(user=None):
     low_stock = len(low_stock_products)
 
     today_sales = db.session.query(func.sum(Sale.total)).filter(
-        Sale.user_id == user_id,
+        Sale.organization_id == organization_id,
         Sale.created_at >= start,
         Sale.created_at < tomorrow,
     ).scalar() or 0
 
     week_sales = db.session.query(func.sum(Sale.total)).filter(
-        Sale.user_id == user_id,
+        Sale.organization_id == organization_id,
         Sale.created_at >= week_start,
         Sale.created_at < week_end,
     ).scalar() or 0
@@ -845,7 +898,7 @@ def analytics(user=None):
             )
         )
         .filter(
-            Sale.user_id == user_id,
+            Sale.organization_id == organization_id,
             Sale.created_at >= week_start,
             Sale.created_at < week_end,
         )
@@ -855,7 +908,7 @@ def analytics(user=None):
     top_products = (
         db.session.query(Product.name, func.sum(Sale.quantity).label("qty"), func.sum(Sale.total).label("revenue"))
         .join(Sale)
-        .filter(Product.user_id == user_id)
+        .filter(Product.organization_id == organization_id)
         .group_by(Product.id)
         .order_by(func.sum(Sale.quantity).desc())
         .limit(5)
@@ -865,7 +918,7 @@ def analytics(user=None):
     category_sales = (
         db.session.query(Product.category, func.sum(Sale.total).label("revenue"))
         .join(Sale)
-        .filter(Product.user_id == user_id)
+        .filter(Product.organization_id == organization_id)
         .group_by(Product.category)
         .order_by(func.sum(Sale.total).desc())
         .all()
@@ -874,7 +927,7 @@ def analytics(user=None):
     sold_by_product = dict(
         db.session.query(Sale.product_id, func.sum(Sale.quantity))
         .filter(
-            Sale.user_id == user_id,
+            Sale.organization_id == organization_id,
             Sale.created_at >= week_start,
             Sale.created_at < week_end,
         )
@@ -1043,7 +1096,7 @@ def _parse_report_period(
 
 
 def _report_analytics(
-    user_id,
+    organization_id,
     period,
     *,
     timezone_name=DEFAULT_TIMEZONE,
@@ -1052,7 +1105,7 @@ def _report_analytics(
     start_at = period["start_at"]
     end_before = period["end_before"]
     sale_filters = (
-        Sale.user_id == user_id,
+        Sale.organization_id == organization_id,
         Sale.created_at >= start_at,
         Sale.created_at < end_before,
     )
@@ -1185,7 +1238,7 @@ def _report_analytics(
             func.sum(Sale.total).label("revenue"),
         )
         .join(Sale, Sale.product_id == Product.id)
-        .filter(*sale_filters, Product.user_id == user_id)
+        .filter(*sale_filters, Product.organization_id == organization_id)
         .group_by(Product.id, Product.name)
         .order_by(func.sum(Sale.quantity).desc(), Product.name)
         .limit(10)
@@ -1213,7 +1266,7 @@ def _report_analytics(
             unknown_lines.label("unknown_lines"),
         )
         .join(Sale, Sale.product_id == Product.id)
-        .filter(*sale_filters, Product.user_id == user_id)
+        .filter(*sale_filters, Product.organization_id == organization_id)
         .group_by(Product.id, Product.name)
         .order_by(unknown_lines, product_profit.desc(), Product.name)
         .limit(10)
@@ -1266,9 +1319,13 @@ def dashboard():
         session.clear()
         session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
         return render_template("landing.html")
+    membership = active_membership(user)
+    if not has_permission(membership, "view_dashboard"):
+        return redirect(url_for("main.sell"))
     dashboard_data = analytics(user)
+    owner = membership.organization.owner
     has_basic_data = all(
-        (user.company_name, user.phone, user.city, user.state)
+        (owner.company_name, owner.phone, owner.city, owner.state)
     )
     has_products = dashboard_data["total_products"] > 0
     has_sales = dashboard_data["total_sales"] > 0
@@ -1277,8 +1334,16 @@ def dashboard():
             "title": gettext("Completa los datos básicos"),
             "text": gettext("Confirma la información principal de tu negocio."),
             "completed": has_basic_data,
-            "action_label": gettext("Completar datos"),
-            "action_url": url_for("main.settings"),
+            "action_label": (
+                gettext("Completar datos")
+                if membership.role == "OWNER"
+                else None
+            ),
+            "action_url": (
+                url_for("main.settings")
+                if membership.role == "OWNER"
+                else None
+            ),
         },
         {
             "title": gettext("Agrega tu primer producto"),
@@ -1308,9 +1373,9 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
-        company_name=user.company_name,
+        company_name=membership.organization.name,
         user=user,
-        trial_days_left=max(0, 14 - (datetime.utcnow() - user.created_at).days) if user.created_at else 14,
+        trial_days_left=max(0, 14 - (datetime.utcnow() - owner.created_at).days) if owner.created_at else 14,
         onboarding_steps=onboarding_steps,
         onboarding_completed=onboarding_completed,
         onboarding_progress=onboarding_progress,
@@ -1320,16 +1385,18 @@ def dashboard():
 
 
 @main.route("/products")
+@require_permission("manage_inventory")
 def products():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
     user = current_user()
     if trial_expired(user):
         return render_template("trial_expired.html")
+    organization_id = current_organization_id(user)
     q = request.args.get("q", "").strip()
     low_stock_only = request.args.get("low_stock") == "1"
     catalog_query = Product.query.filter(
-        Product.user_id == session["user_id"],
+        Product.organization_id == organization_id,
         Product.is_active.is_(True),
     )
     catalog_count = catalog_query.count()
@@ -1377,6 +1444,7 @@ def _quick_load_product_payload(product):
 
 
 @main.route("/products/quick-load")
+@require_permission("manage_inventory")
 def quick_load_products():
     user = current_user()
     if not user:
@@ -1385,10 +1453,11 @@ def quick_load_products():
     if access_block:
         return access_block
 
+    organization_id = current_organization_id(user)
     suppliers = {
         name
         for (name,) in db.session.query(Supplier.name)
-        .filter(Supplier.user_id == user.id)
+        .filter(Supplier.organization_id == organization_id)
         .all()
         if name
     }
@@ -1396,7 +1465,7 @@ def quick_load_products():
         name
         for (name,) in db.session.query(Product.supplier)
         .filter(
-            Product.user_id == user.id,
+            Product.organization_id == organization_id,
             Product.supplier.isnot(None),
         )
         .distinct()
@@ -1407,7 +1476,7 @@ def quick_load_products():
         name
         for (name,) in db.session.query(Product.category)
         .filter(
-            Product.user_id == user.id,
+            Product.organization_id == organization_id,
             Product.category.isnot(None),
         )
         .distinct()
@@ -1424,6 +1493,7 @@ def quick_load_products():
 
 
 @main.route("/api/products/quick-load/lookup")
+@require_permission("manage_inventory")
 def quick_load_lookup():
     user = current_user()
     if not user:
@@ -1440,7 +1510,8 @@ def quick_load_lookup():
             "error": gettext("Escanea o escribe un código de barras válido."),
         }), 400
 
-    product = find_company_product_by_barcode(user.id, barcode)
+    organization_id = current_organization_id(user)
+    product = find_company_product_by_barcode(organization_id, barcode)
     if product:
         return jsonify({
             "ok": True,
@@ -1453,7 +1524,7 @@ def quick_load_lookup():
         "ok": True,
         "found": False,
         "barcode": barcode,
-        "suggested_sku": automatic_sku(user.id, barcode),
+        "suggested_sku": automatic_sku(organization_id, barcode),
         "metadata": (
             {"name": metadata.name, "category": metadata.category}
             if metadata
@@ -1463,6 +1534,7 @@ def quick_load_lookup():
 
 
 @main.route("/api/products/quick-load", methods=["POST"])
+@require_permission("manage_inventory")
 def quick_load_create_product():
     user = current_user()
     if not user:
@@ -1471,11 +1543,13 @@ def quick_load_create_product():
     if access_block:
         return access_block
 
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
     payload = request.get_json(silent=True) or {}
     try:
         barcode = normalize_barcode(payload.get("barcode"))
         name = str(payload.get("name") or "").strip()
-        sku = str(payload.get("sku") or "").strip() or automatic_sku(user.id, barcode)
+        sku = str(payload.get("sku") or "").strip() or automatic_sku(organization_id, barcode)
         category = str(payload.get("category") or "").strip() or "General"
         supplier = str(payload.get("supplier") or "").strip() or None
         cost_price = float(payload.get("cost_price") or 0)
@@ -1504,7 +1578,7 @@ def quick_load_create_product():
             "error": gettext("Revisa los datos del producto e inténtalo nuevamente."),
         }), 400
 
-    existing = find_company_product_by_barcode(user.id, barcode)
+    existing = find_company_product_by_barcode(organization_id, barcode)
     if existing:
         return jsonify({
             "ok": False,
@@ -1512,14 +1586,15 @@ def quick_load_create_product():
             "error": gettext("Ese código ya pertenece a un producto de tu inventario."),
             "product": _quick_load_product_payload(existing),
         }), 409
-    if Product.query.filter_by(user_id=user.id, sku=sku).first():
+    if Product.query.filter_by(organization_id=organization_id, sku=sku).first():
         return jsonify({
             "ok": False,
             "error": gettext("Ese SKU ya está en uso. Escribe uno diferente."),
         }), 409
 
     product = Product(
-        user_id=user.id,
+        organization_id=organization_id,
+        user_id=owner.id,
         barcode=barcode,
         sku=sku,
         name=name,
@@ -1535,10 +1610,10 @@ def quick_load_create_product():
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        existing = find_company_product_by_barcode(user.id, barcode)
+        existing = find_company_product_by_barcode(organization_id, barcode)
         current_app.logger.info(
-            "Carga rápida rechazada por identificador duplicado para user_id=%s",
-            user.id,
+            "Carga rápida rechazada por identificador duplicado para organization_id=%s",
+            organization_id,
         )
         response = {
             "ok": False,
@@ -1559,6 +1634,7 @@ def quick_load_create_product():
 
 
 @main.route("/api/products/<int:product_id>/quick-restock", methods=["POST"])
+@require_permission("make_inventory_adjustments")
 def quick_load_restock_product(product_id):
     user = current_user()
     if not user:
@@ -1567,6 +1643,8 @@ def quick_load_restock_product(product_id):
     if access_block:
         return access_block
 
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
     payload = request.get_json(silent=True) or {}
     try:
         quantity = int(payload.get("quantity"))
@@ -1579,7 +1657,7 @@ def quick_load_restock_product(product_id):
         }), 400
 
     product = (
-        Product.query.filter_by(id=product_id, user_id=user.id)
+        Product.query.filter_by(id=product_id, organization_id=organization_id)
         .with_for_update()
         .first()
     )
@@ -1599,7 +1677,8 @@ def quick_load_restock_product(product_id):
         product.stock = stock_before + quantity
         product.is_active = True
         db.session.add(InventoryRestockEvent(
-            user_id=user.id,
+            organization_id=organization_id,
+            user_id=owner.id,
             product_id=product.id,
             quantity=quantity,
             stock_before=stock_before,
@@ -1609,8 +1688,8 @@ def quick_load_restock_product(product_id):
     except Exception:
         db.session.rollback()
         current_app.logger.exception(
-            "No se pudo reabastecer desde carga rápida para user_id=%s product_id=%s",
-            user.id,
+            "No se pudo reabastecer desde carga rápida para organization_id=%s product_id=%s",
+            organization_id,
             product_id,
         )
         return jsonify({
@@ -1630,6 +1709,7 @@ def quick_load_restock_product(product_id):
 
 
 @main.route("/download-template")
+@require_permission("manage_inventory")
 def download_template():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
@@ -1703,6 +1783,7 @@ def download_template():
 
 
 @main.route("/import-products", methods=["POST"])
+@require_permission("manage_inventory")
 def import_products():
     import pandas as pd
     if not session.get("user_id"):
@@ -1711,6 +1792,9 @@ def import_products():
     access_block = _trial_access_response(user)
     if access_block:
         return access_block
+
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
 
     file = request.files.get("catalog_file")
     if not file:
@@ -1819,19 +1903,19 @@ def import_products():
                 matched_by_sku = False
                 if sku:
                     existing = Product.query.filter_by(
-                        user_id=session["user_id"], sku=sku
+                        organization_id=organization_id, sku=sku
                     ).first()
                     matched_by_sku = existing is not None
 
                 if not existing and barcode:
                     existing = Product.query.filter_by(
-                        user_id=session["user_id"], barcode=barcode
+                        organization_id=organization_id, barcode=barcode
                     ).first()
 
                 if existing:
                     if matched_by_sku and barcode:
                         barcode_owner = Product.query.filter(
-                            Product.user_id == session["user_id"],
+                            Product.organization_id == organization_id,
                             Product.barcode == barcode,
                             Product.id != existing.id,
                         ).first()
@@ -1852,7 +1936,8 @@ def import_products():
                     raise ValueError("missing product identity")
 
                 db.session.add(Product(
-                    user_id=session["user_id"],
+                    organization_id=organization_id,
+                    user_id=owner.id,
                     sku=sku,
                     barcode=barcode or None,
                     name=name,
@@ -1890,6 +1975,7 @@ def import_products():
 
 
 @main.route("/products/new", methods=["POST"])
+@require_permission("manage_inventory")
 def add_product():
     user = current_user()
     if not user:
@@ -1897,6 +1983,9 @@ def add_product():
     access_block = _trial_access_response(user)
     if access_block:
         return access_block
+
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
 
     name = request.form.get("name", "").strip()
     sku = request.form.get("sku", "").strip()
@@ -1911,13 +2000,17 @@ def add_product():
     if not name or not sku:
         flash("Nombre y SKU son obligatorios.", "danger")
         return redirect(url_for("main.products"))
-    existing_sku = Product.query.filter_by(user_id=user.id, sku=sku).first()
+    existing_sku = Product.query.filter_by(
+        organization_id=organization_id, sku=sku
+    ).first()
     if existing_sku and existing_sku.is_active:
         flash("Ya existe un producto con ese SKU. Usa un SKU diferente.", "danger")
         return redirect(url_for("main.products") + "#agregar-producto")
     barcode = request.form.get("barcode", "").strip() or None
     existing_barcode = (
-        Product.query.filter_by(user_id=user.id, barcode=barcode).first()
+        Product.query.filter_by(
+            organization_id=organization_id, barcode=barcode
+        ).first()
         if barcode else None
     )
     if existing_barcode and existing_barcode.is_active:
@@ -1951,7 +2044,8 @@ def add_product():
         p.is_active = True
     else:
         p = Product(
-            user_id=user.id,
+            organization_id=organization_id,
+            user_id=owner.id,
             sku=sku,
             barcode=barcode,
             name=name,
@@ -1968,8 +2062,8 @@ def add_product():
     except IntegrityError:
         db.session.rollback()
         current_app.logger.info(
-            "Alta de producto rechazada por identificador duplicado para user_id=%s",
-            user.id,
+            "Alta de producto rechazada por identificador duplicado para organization_id=%s",
+            organization_id,
         )
         flash("No pudimos guardar el producto porque el SKU ya está en uso.", "danger")
         return redirect(url_for("main.products") + "#agregar-producto")
@@ -1978,6 +2072,7 @@ def add_product():
 
 
 @main.route("/products/<int:product_id>/edit", methods=["GET", "POST"])
+@require_permission("manage_inventory")
 def edit_product(product_id):
     user = current_user()
     if not user:
@@ -1986,9 +2081,10 @@ def edit_product(product_id):
     if access_block:
         return access_block
 
+    organization_id = current_organization_id(user)
     product = Product.query.filter_by(
         id=product_id,
-        user_id=user.id,
+        organization_id=organization_id,
         is_active=True,
     ).first_or_404()
     if request.method == "GET":
@@ -2018,7 +2114,7 @@ def edit_product(product_id):
         return render_template("edit_product.html", product=product, user=user), 400
 
     duplicate_sku = Product.query.filter(
-        Product.user_id == user.id,
+        Product.organization_id == organization_id,
         Product.sku == sku,
         Product.id != product.id,
     ).first()
@@ -2028,7 +2124,7 @@ def edit_product(product_id):
 
     if barcode:
         duplicate_barcode = Product.query.filter(
-            Product.user_id == user.id,
+            Product.organization_id == organization_id,
             Product.barcode == barcode,
             Product.id != product.id,
         ).first()
@@ -2050,8 +2146,8 @@ def edit_product(product_id):
     except IntegrityError:
         db.session.rollback()
         current_app.logger.info(
-            "Edición de producto rechazada por identificador duplicado para user_id=%s",
-            user.id,
+            "Edición de producto rechazada por identificador duplicado para organization_id=%s",
+            organization_id,
         )
         flash("No pudimos guardar el producto porque el SKU ya está en uso.", "danger")
         return render_template("edit_product.html", product=product, user=user), 409
@@ -2061,6 +2157,7 @@ def edit_product(product_id):
 
 
 @main.route("/products/<int:product_id>/restock", methods=["POST"])
+@require_permission("make_inventory_adjustments")
 def restock_product(product_id):
     user = current_user()
     if not user:
@@ -2068,6 +2165,9 @@ def restock_product(product_id):
     access_block = _trial_access_response(user)
     if access_block:
         return access_block
+
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
 
     try:
         quantity = int(request.form.get("quantity", ""))
@@ -2081,7 +2181,7 @@ def restock_product(product_id):
     product = (
         Product.query.filter_by(
             id=product_id,
-            user_id=user.id,
+            organization_id=organization_id,
             is_active=True,
         )
         .with_for_update()
@@ -2097,7 +2197,8 @@ def restock_product(product_id):
         product.stock = stock_before + quantity
         db.session.add(
             InventoryRestockEvent(
-                user_id=user.id,
+                organization_id=organization_id,
+                user_id=owner.id,
                 product_id=product.id,
                 quantity=quantity,
                 stock_before=stock_before,
@@ -2108,8 +2209,8 @@ def restock_product(product_id):
     except Exception:
         db.session.rollback()
         current_app.logger.exception(
-            "No se pudo registrar el reabastecimiento para user_id=%s product_id=%s",
-            user.id,
+            "No se pudo registrar el reabastecimiento para organization_id=%s product_id=%s",
+            organization_id,
             product_id,
         )
         flash(
@@ -2130,10 +2231,15 @@ def restock_product(product_id):
 
 
 @main.route("/sell", methods=["GET", "POST"])
+@require_permission("use_pos")
 def sell():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
     user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
     if trial_expired(user):
         return render_template("trial_expired.html")
 
@@ -2147,7 +2253,7 @@ def sell():
         product = (
             Product.query.filter_by(
                 id=product_id,
-                user_id=session["user_id"],
+                organization_id=organization_id,
                 is_active=True,
             )
             .with_for_update()
@@ -2162,10 +2268,11 @@ def sell():
             if payment_method not in PAYMENT_METHOD_LABELS:
                 flash("Selecciona un método de pago válido.", "danger")
                 return redirect(url_for("main.sell"))
-            ticket = _create_sales_ticket(user.id, payment_method)
+            ticket = _create_sales_ticket(user, payment_method)
             product.stock -= qty
             sale = Sale(
-                user_id=user.id,
+                organization_id=organization_id,
+                user_id=owner.id,
                 product_id=product.id,
                 quantity=qty,
                 unit_price=product.sale_price,
@@ -2193,17 +2300,17 @@ def sell():
             selectinload(Sale.product),
             selectinload(Sale.sales_ticket),
         )
-        .filter_by(user_id=user.id)
+        .filter_by(organization_id=organization_id)
         .order_by(Sale.created_at.desc(), Sale.id.desc())
         .all()
     )
     sale_groups = _group_sales_by_ticket(
         sales,
         limit=12,
-        timezone_name=user.timezone,
+        timezone_name=active_membership(user).organization.timezone,
     )
     products = Product.query.filter_by(
-        user_id=session["user_id"],
+        organization_id=organization_id,
         is_active=True,
     ).order_by(Product.name).all()
     return render_template(
@@ -2217,6 +2324,7 @@ def sell():
 
 
 @main.route("/sell-cart", methods=["POST"])
+@require_permission("use_pos")
 def sell_cart():
     user = current_user()
     if not user:
@@ -2224,6 +2332,8 @@ def sell_cart():
     access_block = _trial_access_response(user, json_response=True)
     if access_block:
         return access_block
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
 
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
@@ -2263,7 +2373,7 @@ def sell_cart():
 
         if request_id:
             previous_sales = Sale.query.filter_by(
-                user_id=user.id,
+                organization_id=organization_id,
                 ticket_id=request_id,
             ).order_by(Sale.id).all()
             if previous_sales:
@@ -2284,7 +2394,7 @@ def sell_cart():
         products = {
             product.id: product
             for product in Product.query.filter(
-                Product.user_id == user.id,
+                Product.organization_id == organization_id,
                 Product.is_active.is_(True),
                 Product.id.in_(requested_items.keys()),
             )
@@ -2300,7 +2410,7 @@ def sell_cart():
         # procesen simultáneamente el mismo request_id.
         if request_id:
             previous_sales = Sale.query.filter_by(
-                user_id=user.id,
+                organization_id=organization_id,
                 ticket_id=request_id,
             ).order_by(Sale.id).all()
             if previous_sales:
@@ -2326,7 +2436,7 @@ def sell_cart():
                 }), 409
 
         ticket = _create_sales_ticket(
-            user.id,
+            user,
             payment_method,
             ticket_id=request_id,
         )
@@ -2336,7 +2446,8 @@ def sell_cart():
             product = products[product_id]
             product.stock -= quantity
             sale = Sale(
-                user_id=user.id,
+                organization_id=organization_id,
+                user_id=owner.id,
                 product_id=product.id,
                 quantity=quantity,
                 unit_price=product.sale_price,
@@ -2367,12 +2478,15 @@ def sell_cart():
 
 
 @main.route("/reports")
+@require_permission("view_reports")
 def reports():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
-    if user.email == "albertonicopat@gmail.com" or has_pro_access(user):
-        timezone_name = safe_timezone_name(user.timezone)
+    owner = current_organization_owner(user)
+    membership = active_membership(user)
+    if owner.email == "albertonicopat@gmail.com" or has_pro_access(owner):
+        timezone_name = safe_timezone_name(membership.organization.timezone)
         report_period = _parse_report_period(
             request.args,
             timezone_name=timezone_name,
@@ -2381,7 +2495,7 @@ def reports():
             "reports.html",
             user=user,
             **_report_analytics(
-                user.id,
+                membership.organization_id,
                 report_period,
                 timezone_name=timezone_name,
             ),
@@ -2390,12 +2504,19 @@ def reports():
 
 
 @main.route("/suppliers", methods=["GET", "POST"])
+@require_permission("manage_inventory")
 def suppliers():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
     user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
 
     if request.method == "POST":
+        if not has_permission(active_membership(user), "manage_inventory"):
+            abort(403)
         access_block = _trial_access_response(user)
         if access_block:
             return access_block
@@ -2403,11 +2524,20 @@ def suppliers():
         if not supplier_name:
             flash("Escribe el nombre del proveedor.", "danger")
             return redirect(url_for("main.suppliers"))
-        existing_supplier = Supplier.query.filter_by(user_id=session["user_id"], name=supplier_name).first()
+        existing_supplier = Supplier.query.filter_by(
+            organization_id=organization_id, name=supplier_name
+        ).first()
         if existing_supplier:
             flash("Ese proveedor ya existe.", "danger")
             return redirect(url_for("main.suppliers"))
-        s = Supplier(user_id=session["user_id"], name=supplier_name, contact=request.form.get("contact"), phone=request.form.get("phone"), notes=request.form.get("notes"))
+        s = Supplier(
+            organization_id=organization_id,
+            user_id=owner.id,
+            name=supplier_name,
+            contact=request.form.get("contact"),
+            phone=request.form.get("phone"),
+            notes=request.form.get("notes"),
+        )
         db.session.add(s)
         try:
             db.session.commit()
@@ -2418,11 +2548,14 @@ def suppliers():
         flash("Proveedor guardado.", "success")
         return redirect(url_for("main.suppliers"))
 
-    suppliers = Supplier.query.filter_by(user_id=session["user_id"]).order_by(Supplier.name).all()
+    suppliers = Supplier.query.filter_by(
+        organization_id=organization_id
+    ).order_by(Supplier.name).all()
     return render_template("suppliers.html", suppliers=suppliers, user=user)
 
 
 @main.route("/subscribe")
+@require_permission("manage_subscription")
 def subscribe():
     user = current_user()
     if not user:
@@ -2462,10 +2595,12 @@ def privacy():
 
 
 @main.route("/create-checkout-session", methods=["POST"])
+@require_permission("manage_subscription")
 def create_checkout_session():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    user = current_organization_owner(user)
     if not user.email_verified:
         session["post_verify_destination"] = "subscribe"
         flash("Verifica tu correo antes de activar PATIA Pro.", "info")
@@ -2725,10 +2860,12 @@ def stripe_webhook():
 
 
 @main.route("/stripe-success")
+@require_permission("manage_subscription")
 def stripe_success():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    user = current_organization_owner(user)
 
     checkout_session_id = request.args.get("session_id", "").strip()
     if not checkout_session_id:
@@ -2760,6 +2897,7 @@ def stripe_success():
 
 
 @main.route("/sales/<int:sale_id>/cancel", methods=["POST"])
+@require_permission("cancel_sales")
 def cancel_sale(sale_id):
     user = current_user()
     if not user:
@@ -2767,8 +2905,13 @@ def cancel_sale(sale_id):
     access_block = _trial_access_response(user)
     if access_block:
         return access_block
-    sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
-    product = Product.query.get(sale.product_id)
+    organization_id = current_organization_id(user)
+    sale = Sale.query.filter_by(
+        id=sale_id, organization_id=organization_id
+    ).first_or_404()
+    product = Product.query.filter_by(
+        id=sale.product_id, organization_id=organization_id
+    ).first()
     if product:
         product.stock += sale.quantity
     db.session.delete(sale)
@@ -2778,10 +2921,12 @@ def cancel_sale(sale_id):
 
 
 @main.route("/subscription")
+@require_permission("manage_subscription")
 def subscription():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    user = current_organization_owner(user)
     subscription_info = None
     if user.stripe_subscription_id and not current_app.config["STRIPE_DISABLED"]:
         stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
@@ -2813,8 +2958,10 @@ def subscription():
 
 
 @main.route("/cancel-subscription", methods=["POST"])
+@require_permission("manage_subscription")
 def cancel_subscription():
     user = current_user()
+    user = current_organization_owner(user) if user else None
     if not user or not user.stripe_subscription_id:
         return redirect(url_for("main.dashboard"))
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
@@ -2831,8 +2978,10 @@ def cancel_subscription():
 
 
 @main.route("/reactivate-subscription", methods=["POST"])
+@require_permission("manage_subscription")
 def reactivate_subscription():
     user = current_user()
+    user = current_organization_owner(user) if user else None
     if not user or not user.stripe_subscription_id:
         return redirect(url_for("main.dashboard"))
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
@@ -2849,8 +2998,10 @@ def reactivate_subscription():
 
 
 @main.route("/billing-portal", methods=["POST"])
+@require_permission("manage_subscription")
 def billing_portal():
     user = current_user()
+    user = current_organization_owner(user) if user else None
     if not user or not user.stripe_customer_id:
         return redirect(url_for("main.subscribe"))
     return _redirect_to_billing_portal(user)
@@ -2889,15 +3040,37 @@ def admin():
         flash("No autorizado.", "danger")
         return redirect(url_for("main.dashboard"))
 
-    users = User.query.order_by(User.created_at.desc()).all()
+    organizations = (
+        Organization.query.options(selectinload(Organization.owner))
+        .order_by(Organization.created_at.desc())
+        .all()
+    )
+    product_counts = dict(
+        db.session.query(Product.organization_id, func.count(Product.id))
+        .filter(Product.is_active.is_(True))
+        .group_by(Product.organization_id)
+        .all()
+    )
+    sale_totals = {
+        organization_id: (count, total or 0)
+        for organization_id, count, total in (
+            db.session.query(
+                Sale.organization_id,
+                func.count(Sale.id),
+                func.sum(Sale.total),
+            )
+            .group_by(Sale.organization_id)
+            .all()
+        )
+    }
     today = datetime.utcnow()
     clients = []
     total_products = total_sales_count = total_sales_money = trial_clients = expired_clients = expiring_soon = new_this_week = new_this_month = 0
 
-    for u in users:
-        products_count = Product.query.filter_by(user_id=u.id, is_active=True).count()
-        sales_count = Sale.query.filter_by(user_id=u.id).count()
-        sales_money = db.session.query(func.sum(Sale.total)).filter_by(user_id=u.id).scalar() or 0
+    for organization in organizations:
+        u = organization.owner
+        products_count = product_counts.get(organization.id, 0)
+        sales_count, sales_money = sale_totals.get(organization.id, (0, 0))
         days_in_patia = (today - u.created_at).days if u.created_at else 0
         trial_days_left = max(0, 14 - days_in_patia)
 
@@ -2926,25 +3099,28 @@ def admin():
     top_client = max(clients, key=lambda c: c["products_count"], default=None)
     latest_client = clients[0] if clients else None
 
-    return render_template("admin.html", clients=clients, total_clients=len(users), total_products=total_products,
+    return render_template("admin.html", clients=clients, total_clients=len(organizations), total_products=total_products,
         total_sales_count=total_sales_count, total_sales_money=total_sales_money, trial_clients=trial_clients,
         expired_clients=expired_clients, expiring_soon=expiring_soon, new_this_week=new_this_week,
         new_this_month=new_this_month, top_client=top_client, latest_client=latest_client)
 
 
 @main.route("/products/<int:product_id>/delete", methods=["POST"])
+@require_permission("manage_inventory")
 def delete_product(product_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-    access_block = _trial_access_response(current_user())
+    user = current_user()
+    organization_id = current_organization_id(user)
+    access_block = _trial_access_response(user)
     if access_block:
         return access_block
     product = Product.query.filter_by(
         id=product_id,
-        user_id=session["user_id"],
+        organization_id=organization_id,
         is_active=True,
     ).first_or_404()
-    if Sale.query.filter_by(product_id=product.id, user_id=session["user_id"]).first():
+    if Sale.query.filter_by(product_id=product.id, organization_id=organization_id).first():
         product.is_active = False
         db.session.commit()
         flash("Producto retirado del catálogo. Su historial de ventas se conserva.", "success")
@@ -2956,18 +3132,32 @@ def delete_product(product_id):
 
 
 @main.route("/products/delete-all", methods=["POST"])
+@require_permission("manage_inventory")
 def delete_all_products():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-    access_block = _trial_access_response(current_user())
+    user = current_user()
+    organization_id = current_organization_id(user)
+    access_block = _trial_access_response(user)
     if access_block:
         return access_block
-    user_id = session["user_id"]
-    products = Product.query.filter_by(user_id=user_id, is_active=True).all()
+    products = Product.query.filter_by(organization_id=organization_id, is_active=True).all()
+    product_ids_with_sales = {
+        product_id
+        for (product_id,) in (
+            db.session.query(Sale.product_id)
+            .filter(
+                Sale.organization_id == organization_id,
+                Sale.product_id.in_([product.id for product in products]),
+            )
+            .distinct()
+            .all()
+        )
+    }
     deleted = 0
     protected = 0
     for product in products:
-        if Sale.query.filter_by(user_id=user_id, product_id=product.id).first():
+        if product.id in product_ids_with_sales:
             product.is_active = False
             protected += 1
             continue
@@ -2992,30 +3182,47 @@ def delete_all_products():
 
 
 @main.route("/products/delete-selected", methods=["POST"])
+@require_permission("manage_inventory")
 def delete_selected_products():
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-    access_block = _trial_access_response(current_user())
+    user = current_user()
+    organization_id = current_organization_id(user)
+    access_block = _trial_access_response(user)
     if access_block:
         return access_block
-    user_id = session["user_id"]
     ids_raw = request.form.get("ids", "")
     ids = [int(i) for i in ids_raw.split(",") if i.strip().isdigit()]
+    products = (
+        Product.query.filter(
+            Product.id.in_(ids),
+            Product.organization_id == organization_id,
+            Product.is_active.is_(True),
+        ).all()
+        if ids
+        else []
+    )
+    product_ids_with_sales = {
+        product_id
+        for (product_id,) in (
+            db.session.query(Sale.product_id)
+            .filter(
+                Sale.organization_id == organization_id,
+                Sale.product_id.in_([product.id for product in products]),
+            )
+            .distinct()
+            .all()
+        )
+    }
     deleted = 0
     protected = 0
-    for product_id in ids:
-        product = Product.query.filter_by(
-            id=product_id,
-            user_id=user_id,
-            is_active=True,
-        ).first()
-        if product:
-            if Sale.query.filter_by(product_id=product.id, user_id=user_id).first():
-                product.is_active = False
-                protected += 1
-                continue
-            db.session.delete(product)
-            deleted += 1
+    for product in products:
+        if product.id in product_ids_with_sales:
+            product.is_active = False
+            protected += 1
+            continue
+        db.session.delete(product)
+        deleted += 1
     db.session.commit()
     if protected:
         flash(
@@ -3032,13 +3239,18 @@ def delete_selected_products():
 
 
 @main.route("/suppliers/<int:supplier_id>/delete", methods=["POST"])
+@require_permission("manage_inventory")
 def delete_supplier(supplier_id):
     if not session.get("user_id"):
         return redirect(url_for("main.login"))
-    access_block = _trial_access_response(current_user())
+    user = current_user()
+    organization_id = current_organization_id(user)
+    access_block = _trial_access_response(user)
     if access_block:
         return access_block
-    supplier = Supplier.query.filter_by(id=supplier_id, user_id=session["user_id"]).first_or_404()
+    supplier = Supplier.query.filter_by(
+        id=supplier_id, organization_id=organization_id
+    ).first_or_404()
     db.session.delete(supplier)
     db.session.commit()
     flash("Proveedor eliminado correctamente.", "success")
@@ -3060,6 +3272,13 @@ def admin_delete_user(user_id):
             "danger",
         )
         return redirect(url_for("main.admin"))
+    organization = Organization.query.filter_by(owner_user_id=user.id).first()
+    if organization:
+        flash(
+            "No puedes eliminar al propietario mientras su organizaciÃ³n conserve datos o integrantes.",
+            "danger",
+        )
+        return redirect(url_for("main.admin"))
     db.session.delete(user)
     db.session.commit()
     flash("Cliente eliminado correctamente.")
@@ -3072,6 +3291,9 @@ def admin_make_pro(user_id):
     if not admin_user or admin_user.email != "albertonicopat@gmail.com":
         return redirect(url_for("main.dashboard"))
     user = User.query.get_or_404(user_id)
+    if not Organization.query.filter_by(owner_user_id=user.id).first():
+        flash("El acceso Pro se administra en el propietario de la organización.", "danger")
+        return redirect(url_for("main.admin"))
     user.manual_pro_access = True
     sync_user_plan(user)
     db.session.commit()
@@ -3079,10 +3301,13 @@ def admin_make_pro(user_id):
     return redirect(url_for("main.admin"))
 
 @main.route("/settings", methods=["GET", "POST"])
+@require_roles("OWNER")
 def settings():
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    membership = active_membership(user)
+    user = membership.organization.owner
     if request.method == "POST":
         access_block = _trial_access_response(user)
         if access_block:
@@ -3100,6 +3325,8 @@ def settings():
         user.postal_code = request.form.get("postal_code", "").strip()
         user.phone = request.form.get("phone", "").strip()
         user.timezone = safe_timezone_name(request.form.get("timezone"))
+        membership.organization.name = company_name
+        membership.organization.timezone = user.timezone
         db.session.commit()
         flash("Configuración guardada.", "success")
         return redirect(url_for("main.settings"))
@@ -3111,20 +3338,27 @@ def settings():
 
 
 @main.route("/receipt/<int:sale_id>")
+@require_permission("use_pos")
 def receipt(sale_id):
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
 
-    sale = Sale.query.filter_by(id=sale_id, user_id=user.id).first_or_404()
+    organization_id = current_organization_id(user)
+    sale = Sale.query.filter_by(
+        id=sale_id, organization_id=organization_id
+    ).first_or_404()
     return redirect(url_for("main.ticket", ticket_ref=_sale_ticket_key(sale)))
 
 
 @main.route("/ticket/<ticket_ref>")
+@require_permission("use_pos")
 def ticket(ticket_ref):
     user = current_user()
     if not user:
         return redirect(url_for("main.login"))
+    organization_id = current_organization_id(user)
+    owner = current_organization_owner(user)
 
     if ticket_ref.startswith("sale-") and ticket_ref[5:].isdigit():
         sale = (
@@ -3132,7 +3366,7 @@ def ticket(ticket_ref):
                 selectinload(Sale.product),
                 selectinload(Sale.sales_ticket),
             )
-            .filter_by(id=int(ticket_ref[5:]), user_id=user.id)
+            .filter_by(id=int(ticket_ref[5:]), organization_id=organization_id)
             .first_or_404()
         )
         if sale.sales_ticket_id:
@@ -3141,7 +3375,7 @@ def ticket(ticket_ref):
                     selectinload(Sale.product),
                     selectinload(Sale.sales_ticket),
                 )
-                .filter_by(user_id=user.id, sales_ticket_id=sale.sales_ticket_id)
+                .filter_by(organization_id=organization_id, sales_ticket_id=sale.sales_ticket_id)
                 .order_by(Sale.id)
                 .all()
             )
@@ -3149,7 +3383,7 @@ def ticket(ticket_ref):
             sales = [sale]
     else:
         ticket_header = SalesTicket.query.filter_by(
-            user_id=user.id,
+            organization_id=organization_id,
             public_id=ticket_ref,
         ).first()
         sales = (
@@ -3158,7 +3392,7 @@ def ticket(ticket_ref):
                 selectinload(Sale.sales_ticket),
             )
             .filter(
-                Sale.user_id == user.id,
+                Sale.organization_id == organization_id,
                 (
                     Sale.sales_ticket_id == ticket_header.id
                     if ticket_header
@@ -3174,16 +3408,16 @@ def ticket(ticket_ref):
     address_parts = [
         cleaned
         for cleaned in (
-            _ticket_business_value(user.address),
-            _ticket_business_value(user.city),
-            _ticket_business_value(user.state),
-            _ticket_business_value(user.postal_code),
+            _ticket_business_value(owner.address),
+            _ticket_business_value(owner.city),
+            _ticket_business_value(owner.state),
+            _ticket_business_value(owner.postal_code),
         )
         if cleaned
     ]
     return render_template(
         "ticket.html",
-        user=user,
+        user=owner,
         sales=sales,
         ticket_id=_sale_ticket_key(sales[0]),
         folio=_short_sale_folio(sales),
@@ -3192,7 +3426,7 @@ def ticket(ticket_ref):
         item_count=sum(sale.quantity for sale in sales),
         ticket_created_at=utc_to_local(
             min(sale.created_at for sale in sales),
-            user.timezone,
+            active_membership(user).organization.timezone,
         ),
         payment_method=_payment_method_label(
             sales[0].sales_ticket.payment_method
@@ -3200,6 +3434,6 @@ def ticket(ticket_ref):
             else sales[0].payment_method
         ),
         business_address=", ".join(address_parts),
-        business_phone=_ticket_business_value(user.phone),
+        business_phone=_ticket_business_value(owner.phone),
         auto_print=request.args.get("print") == "1",
     )

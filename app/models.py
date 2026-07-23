@@ -5,8 +5,138 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from . import db
 
 
+class Organization(db.Model):
+    __tablename__ = "organization"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "owner_user_id", name="uq_organization_owner_user_id"
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    slug = db.Column(db.String(160), nullable=False, unique=True)
+    owner_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    timezone = db.Column(
+        db.String(64), nullable=False, default="America/Mexico_City"
+    )
+    currency = db.Column(db.String(3), nullable=False, default="MXN")
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+    members = db.relationship(
+        "OrganizationMember",
+        back_populates="organization",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    owner = db.relationship("User", foreign_keys=[owner_user_id])
+
+
+class OrganizationMember(db.Model):
+    __tablename__ = "organization_member"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id", "user_id", name="uq_organization_member_user"
+        ),
+        db.UniqueConstraint(
+            "user_id", name="uq_organization_member_single_tenant"
+        ),
+        db.CheckConstraint(
+            "role IN ('OWNER', 'MANAGER', 'CASHIER')",
+            name="ck_organization_member_role",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    role = db.Column(db.String(20), nullable=False, default="CASHIER")
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    pin_hash = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+    organization = db.relationship("Organization", back_populates="members")
+    user = db.relationship("User", back_populates="organization_memberships")
+
+    def set_pin(self, pin):
+        self.pin_hash = generate_password_hash(str(pin))
+
+    def check_pin(self, pin):
+        return bool(self.pin_hash) and check_password_hash(self.pin_hash, str(pin))
+
+
+class OrganizationInvitation(db.Model):
+    __tablename__ = "organization_invitation"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id",
+            "email",
+            name="uq_organization_invitation_email",
+        ),
+        db.CheckConstraint(
+            "role IN ('MANAGER', 'CASHIER')",
+            name="ck_organization_invitation_role",
+        ),
+        db.Index(
+            "ix_organization_invitation_pending",
+            "organization_id",
+            "accepted_at",
+            "created_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    invited_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    email = db.Column(db.String(120), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
+    token_hash = db.Column(db.String(64), nullable=False, unique=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    accepted_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    organization = db.relationship("Organization")
+    invited_by_member = db.relationship("OrganizationMember")
+
+
 class Product(db.Model):
     __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id", "sku", name="uq_product_organization_sku"
+        ),
+        db.UniqueConstraint(
+            "organization_id", "barcode", name="uq_product_organization_barcode"
+        ),
         db.UniqueConstraint(
             "user_id",
             "sku",
@@ -19,9 +149,16 @@ class Product(db.Model):
             unique=True,
         ),
         db.Index("ix_product_user_name", "user_id", "name"),
+        db.Index("ix_product_organization_name", "organization_id", "name"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     user_id = db.Column(
         db.Integer,
         db.ForeignKey("user.id"),
@@ -126,9 +263,20 @@ class InventoryRestockEvent(db.Model):
             "product_id",
             "created_at",
         ),
+        db.Index(
+            "ix_restock_organization_created_at",
+            "organization_id",
+            "created_at",
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     user_id = db.Column(
         db.Integer,
         db.ForeignKey("user.id", ondelete="CASCADE"),
@@ -165,6 +313,16 @@ class SalesTicket(db.Model):
             name="uq_sales_ticket_user_number",
         ),
         db.UniqueConstraint(
+            "organization_id",
+            "number",
+            name="uq_sales_ticket_organization_number",
+        ),
+        db.UniqueConstraint(
+            "organization_id",
+            "public_id",
+            name="uq_sales_ticket_organization_public_id",
+        ),
+        db.UniqueConstraint(
             "user_id",
             "public_id",
             name="uq_sales_ticket_user_public_id",
@@ -174,9 +332,20 @@ class SalesTicket(db.Model):
             "user_id",
             "created_at",
         ),
+        db.Index(
+            "ix_sales_ticket_organization_created_at",
+            "organization_id",
+            "created_at",
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     user_id = db.Column(
         db.Integer,
         db.ForeignKey("user.id", ondelete="CASCADE"),
@@ -215,9 +384,25 @@ class Sale(db.Model):
             "user_id",
             "ticket_id",
         ),
+        db.Index(
+            "ix_sale_organization_created_at",
+            "organization_id",
+            "created_at",
+        ),
+        db.Index(
+            "ix_sale_organization_ticket",
+            "organization_id",
+            "ticket_id",
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
     user_id = db.Column(
         db.Integer,
@@ -283,6 +468,9 @@ class Sale(db.Model):
 class Supplier(db.Model):
     __table_args__ = (
         db.UniqueConstraint(
+            "organization_id", "name", name="uq_supplier_organization_name"
+        ),
+        db.UniqueConstraint(
             "user_id",
             "name",
             name="uq_supplier_user_name",
@@ -292,9 +480,18 @@ class Supplier(db.Model):
             "user_id",
             "name",
         ),
+        db.Index(
+            "ix_supplier_organization_name", "organization_id", "name"
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
     user_id = db.Column(
         db.Integer,
@@ -470,6 +667,12 @@ class User(db.Model):
     suppliers = db.relationship(
         "Supplier",
         backref="owner",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    organization_memberships = db.relationship(
+        "OrganizationMember",
+        back_populates="user",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )

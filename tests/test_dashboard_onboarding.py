@@ -11,6 +11,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Product, Sale, User
+from app.team.services import ensure_owner_organization
 
 
 class DashboardOnboardingTests(unittest.TestCase):
@@ -51,6 +52,8 @@ class DashboardOnboardingTests(unittest.TestCase):
         )
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         with self.client.session_transaction() as session:
             session["user_id"] = user.id
@@ -58,6 +61,7 @@ class DashboardOnboardingTests(unittest.TestCase):
 
     def add_product(self, user):
         product = Product(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             sku="SKU-1",
             name="Producto inicial",
@@ -101,6 +105,7 @@ class DashboardOnboardingTests(unittest.TestCase):
         product = self.add_product(user)
         db.session.add(
             Sale(
+                organization_id=user.organization_memberships[0].organization_id,
                 user_id=user.id,
                 product_id=product.id,
                 quantity=1,
@@ -128,6 +133,7 @@ class DashboardOnboardingTests(unittest.TestCase):
         user = self.make_user()
         product = self.add_product(user)
         db.session.add(Sale(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             product_id=product.id,
             quantity=2,

@@ -11,6 +11,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import InventoryRestockEvent, Product, User
+from app.team.services import ensure_owner_organization
 from flask_babel import force_locale
 
 
@@ -55,11 +56,14 @@ class ActionableLowStockTests(unittest.TestCase):
         )
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         return user
 
     def add_product(self, user, sku, name, stock, minimum, supplier=None):
         product = Product(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             sku=sku,
             name=name,

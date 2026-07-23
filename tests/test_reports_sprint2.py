@@ -15,6 +15,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 from app import create_app, db
 from app.models import Product, Sale, SalesTicket, User
 from app.routes import _parse_report_period, _report_analytics
+from app.team.services import ensure_owner_organization
 
 
 class ReportSprint2Tests(unittest.TestCase):
@@ -56,11 +57,14 @@ class ReportSprint2Tests(unittest.TestCase):
         )
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         return user
 
     def product(self, user, name, sku, cost=10):
         product = Product(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             name=name,
             sku=sku,
@@ -87,6 +91,7 @@ class ReportSprint2Tests(unittest.TestCase):
         created_at,
     ):
         ticket = SalesTicket(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             number=number,
             public_id=str(uuid.uuid4()),
@@ -96,6 +101,7 @@ class ReportSprint2Tests(unittest.TestCase):
         db.session.add(ticket)
         db.session.flush()
         sale = Sale(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             product_id=product.id,
             quantity=quantity,
@@ -118,7 +124,11 @@ class ReportSprint2Tests(unittest.TestCase):
 
     def report_analytics(self, user_id, period):
         with self.app.test_request_context("/reports"):
-            return _report_analytics(user_id, period)
+            user = db.session.get(User, user_id)
+            return _report_analytics(
+                user.organization_memberships[0].organization_id,
+                period,
+            )
 
     def test_period_parser_supports_presets_custom_and_safe_fallbacks(self):
         today = date(2026, 7, 17)

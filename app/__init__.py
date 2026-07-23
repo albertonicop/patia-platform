@@ -131,18 +131,36 @@ def create_app():
     from .routes import current_user, has_pro_access, main
 
     app.register_blueprint(main)
+    from .team.routes import team
+
+    app.register_blueprint(team)
 
     @app.context_processor
     def inject_pro_access():
         user = current_user()
+        from .team.services import active_membership, has_permission
+
+        current_membership = active_membership(user) if user else None
+        access_user = (
+            current_membership.organization.owner
+            if current_membership
+            else user
+        )
         trial_days_left = None
-        if user and user.created_at:
-            trial_days_left = max(0, 14 - (datetime.utcnow() - user.created_at).days)
+        if access_user and access_user.created_at:
+            trial_days_left = max(0, 14 - (datetime.utcnow() - access_user.created_at).days)
         return {
-            "has_pro_access": has_pro_access(user),
+            "has_pro_access": has_pro_access(access_user),
             "trial_days_left": trial_days_left,
             "supported_languages": SUPPORTED_LANGUAGES,
             "current_language": select_locale(),
+            "current_membership": current_membership,
+            "can_manage_team": has_permission(current_membership, "manage_employees"),
+            "can_manage_inventory": has_permission(current_membership, "manage_inventory"),
+            "can_view_reports": has_permission(current_membership, "view_reports"),
+            "can_manage_subscription": has_permission(current_membership, "manage_subscription"),
+            "can_view_dashboard": has_permission(current_membership, "view_dashboard"),
+            "can_use_pos": has_permission(current_membership, "use_pos"),
         }
 
     @app.cli.command("audit-manual-pro-candidates")

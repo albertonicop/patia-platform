@@ -13,6 +13,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Product, Sale, SalesTicket, User
+from app.team.services import ensure_owner_organization
 
 
 class PosFirstSaleTests(unittest.TestCase):
@@ -52,12 +53,15 @@ class PosFirstSaleTests(unittest.TestCase):
         )
         self.user.set_password("Password123")
         db.session.add(self.user)
+        db.session.flush()
+        ensure_owner_organization(self.user)
         db.session.commit()
         with self.client.session_transaction() as session:
             session["user_id"] = self.user.id
 
     def add_product(self, name="Café Premium", sku="CAFE-1", barcode="750123", stock=5):
         product = Product(
+            organization_id=self.user.organization_memberships[0].organization_id,
             user_id=self.user.id,
             name=name,
             sku=sku,
@@ -246,6 +250,7 @@ class PosFirstSaleTests(unittest.TestCase):
         self.assertIn("Aún no hay ventas registradas", empty_html)
 
         db.session.add(Sale(
+            organization_id=product.organization_id,
             user_id=self.user.id,
             product_id=product.id,
             quantity=1,

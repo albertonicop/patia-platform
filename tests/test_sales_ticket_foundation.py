@@ -17,6 +17,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "http://127.0.0.1:5000")
 from app import create_app, db
 from app.models import Product, Sale, SalesTicket, User
 from app.routes import _create_sales_ticket
+from app.team.services import ensure_owner_organization
 
 
 class SalesTicketFoundationTests(unittest.TestCase):
@@ -53,11 +54,14 @@ class SalesTicketFoundationTests(unittest.TestCase):
         )
         user.set_password("Password123")
         db.session.add(user)
+        db.session.flush()
+        ensure_owner_organization(user)
         db.session.commit()
         return user
 
     def add_product(self, user, *, sku="SKU-1", cost=10, price=25, stock=20):
         product = Product(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             name=f"Producto {sku}",
             sku=sku,
@@ -179,6 +183,7 @@ class SalesTicketFoundationTests(unittest.TestCase):
         product = self.add_product(user)
         public_id = str(uuid.uuid4())
         legacy = Sale(
+            organization_id=user.organization_memberships[0].organization_id,
             user_id=user.id,
             product_id=product.id,
             quantity=1,
@@ -201,7 +206,7 @@ class SalesTicketFoundationTests(unittest.TestCase):
         def allocate():
             with self.app.app_context():
                 barrier.wait(timeout=10)
-                ticket = _create_sales_ticket(user.id, "cash")
+                ticket = _create_sales_ticket(db.session.get(User, user.id), "cash")
                 number = ticket.number
                 db.session.commit()
                 db.session.remove()

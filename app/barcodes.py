@@ -29,21 +29,21 @@ def normalize_barcode(value):
     return barcode
 
 
-def find_company_product_by_barcode(user_id, barcode, *, lock=False):
+def find_company_product_by_barcode(organization_id, barcode, *, lock=False):
     """Find active or archived inventory belonging only to one company."""
-    query = Product.query.filter_by(user_id=user_id, barcode=barcode)
+    query = Product.query.filter_by(organization_id=organization_id, barcode=barcode)
     if lock:
         query = query.with_for_update()
     return query.first()
 
 
-def automatic_sku(user_id, barcode):
+def automatic_sku(organization_id, barcode):
     """Generate an editable SKU without exposing identifiers from other users."""
     normalized = _SKU_CHARACTERS.sub("-", barcode.upper()).strip("-")
     base = f"BC-{normalized or 'PRODUCTO'}"[:64]
     candidate = base
     suffix = 2
-    while Product.query.filter_by(user_id=user_id, sku=candidate).first():
+    while Product.query.filter_by(organization_id=organization_id, sku=candidate).first():
         marker = f"-{suffix}"
         candidate = f"{base[:64 - len(marker)]}{marker}"
         suffix += 1

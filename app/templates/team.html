@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="team-v1" aria-labelledby="team-title">
+  <header class="team-v1__header">
+    <div>
+      <p class="dashboard-v2__eyebrow">{{ _('Equipo') }}</p>
+      <h1 id="team-title">{{ _('Personas con acceso a %(business)s', business=organization.name) }}</h1>
+      <p>{{ _('Asigna solo el acceso que cada persona necesita para trabajar.') }}</p>
+    </div>
+  </header>
+
+  <div class="team-v1__grid">
+    <section class="team-v1__panel" aria-labelledby="invite-title">
+      <h2 id="invite-title">{{ _('Invitar integrante') }}</h2>
+      <form method="POST" action="{{ url_for('team.invite') }}" class="team-v1__form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="team-email">{{ _('Correo electrónico') }}</label>
+        <input id="team-email" name="email" type="email" required autocomplete="email">
+        <label for="team-role">{{ _('Rol') }}</label>
+        <select id="team-role" name="role" required>
+          <option value="CASHIER">{{ _('Cajero') }}</option>
+          <option value="MANAGER">{{ _('Encargado') }}</option>
+        </select>
+        <button class="btn-primary" type="submit">{{ _('Enviar invitación') }}</button>
+      </form>
+    </section>
+
+    <section class="team-v1__panel team-v1__members" aria-labelledby="members-title">
+      <h2 id="members-title">{{ _('Integrantes') }}</h2>
+      {% for member in members %}
+        <article class="team-v1__member">
+          <div>
+            <strong>{{ member.user.first_name or member.user.email }}</strong>
+            <span>{{ member.user.email }}</span>
+            <span class="team-v1__status">{{ _('Activo') if member.is_active else _('Desactivado') }}</span>
+          </div>
+          {% if member.role == 'OWNER' %}
+            <span class="badge">{{ _('Propietario') }}</span>
+          {% else %}
+            <div class="team-v1__actions">
+              <form method="POST" action="{{ url_for('team.change_role', member_id=member.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label class="sr-only" for="role-{{ member.id }}">{{ _('Rol') }}</label>
+                <select id="role-{{ member.id }}" name="role">
+                  <option value="CASHIER" {% if member.role == 'CASHIER' %}selected{% endif %}>{{ _('Cajero') }}</option>
+                  <option value="MANAGER" {% if member.role == 'MANAGER' %}selected{% endif %}>{{ _('Encargado') }}</option>
+                </select>
+                <button type="submit" class="btn-secondary">{{ _('Guardar rol') }}</button>
+              </form>
+              <form method="POST" action="{{ url_for('team.reset_pin', member_id=member.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="pin-{{ member.id }}">{{ _('Nuevo PIN') }}</label>
+                <input id="pin-{{ member.id }}" name="pin" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" placeholder="{{ _('4 a 6 dígitos') }}">
+                <button type="submit" class="btn-secondary">{{ _('Restablecer PIN') }}</button>
+              </form>
+              <form method="POST" action="{{ url_for('team.toggle_member', member_id=member.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-secondary">
+                  {{ _('Desactivar') if member.is_active else _('Reactivar') }}
+                </button>
+              </form>
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </section>
+  </div>
+
+  {% if invitations %}
+    <section class="team-v1__panel" aria-labelledby="pending-title">
+      <h2 id="pending-title">{{ _('Invitaciones pendientes') }}</h2>
+      {% for invitation in invitations %}
+        <article class="team-v1__invitation">
+          <p>{{ invitation.email }} · {{ _('Cajero') if invitation.role == 'CASHIER' else _('Encargado') }} · {{ _('Expira pronto') if invitation.expires_at > now else _('Expirada') }}</p>
+          <div>
+            <form method="POST" action="{{ url_for('team.resend_invitation', invitation_id=invitation.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-secondary" type="submit">{{ _('Reenviar') }}</button></form>
+            <form method="POST" action="{{ url_for('team.revoke_invitation', invitation_id=invitation.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-secondary" type="submit">{{ _('Cancelar invitación') }}</button></form>
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+</section>
+{% endblock %}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-18 19:22-0600\n"
+"POT-Creation-Date: 2026-07-22 21:07-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,508 +17,647 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app/routes.py:99
+#: app/routes.py:144
 msgid "Tu periodo de prueba terminó. Activa PATIA Pro para continuar."
 msgstr ""
 
-#: app/routes.py:190
+#: app/routes.py:239
 msgid "Activa"
 msgstr ""
 
-#: app/routes.py:191 app/templates/admin.html:30
+#: app/routes.py:240 app/templates/admin.html:30
 msgid "En prueba"
 msgstr ""
 
-#: app/routes.py:192
+#: app/routes.py:241
 msgid "Pago pendiente"
 msgstr ""
 
-#: app/routes.py:193
+#: app/routes.py:242
 msgid "Sin pagar"
 msgstr ""
 
-#: app/routes.py:194
+#: app/routes.py:243
 msgid "Cancelada"
 msgstr ""
 
-#: app/routes.py:195
+#: app/routes.py:244
 msgid "Incompleta"
 msgstr ""
 
-#: app/routes.py:196
+#: app/routes.py:245
 msgid "Incompleta y vencida"
 msgstr ""
 
-#: app/routes.py:197
+#: app/routes.py:246
 msgid "Pausada"
 msgstr ""
 
-#: app/routes.py:199
+#: app/routes.py:248
 msgid "Sin suscripción"
 msgstr ""
 
-#: app/routes.py:208
+#: app/routes.py:257
 msgid "Ciudad de México"
 msgstr ""
 
-#: app/routes.py:209
+#: app/routes.py:258
 msgid "Cancún"
 msgstr ""
 
-#: app/routes.py:210
+#: app/routes.py:259
 msgid "Tijuana"
 msgstr ""
 
-#: app/routes.py:211
+#: app/routes.py:260
 msgid "Hermosillo"
 msgstr ""
 
-#: app/routes.py:212
+#: app/routes.py:261
 msgid "Chihuahua"
 msgstr ""
 
-#: app/routes.py:459
+#: app/routes.py:508
 msgid "Completa todos los campos obligatorios."
 msgstr ""
 
-#: app/routes.py:462 app/routes.py:463 app/routes.py:474 app/routes.py:475
-#: app/routes.py:485 app/routes.py:486 app/routes.py:506 app/routes.py:507
-#: app/routes.py:533 app/routes.py:534 app/routes.py:577
+#: app/routes.py:511 app/routes.py:512 app/routes.py:523 app/routes.py:524
+#: app/routes.py:534 app/routes.py:535 app/routes.py:555 app/routes.py:556
+#: app/routes.py:584 app/routes.py:585 app/routes.py:629
 msgid "Crear cuenta"
 msgstr ""
 
-#: app/routes.py:471
+#: app/routes.py:520
 msgid "El correo no es válido o no existe."
 msgstr ""
 
-#: app/routes.py:482 app/routes.py:711
+#: app/routes.py:531 app/routes.py:763
 msgid "La contraseña debe tener al menos 8 caracteres."
 msgstr ""
 
-#: app/routes.py:503 app/routes.py:530
+#: app/routes.py:552 app/routes.py:581
 msgid "Ese correo ya está registrado."
 msgstr ""
 
-#: app/routes.py:557
+#: app/routes.py:609
 msgid "Verifica tu correo en PATIA"
 msgstr ""
 
-#: app/routes.py:561 app/templates/verify_email.html:9
+#: app/routes.py:613 app/templates/verify_email.html:9
 msgid "Verifica tu correo"
 msgstr ""
 
-#: app/routes.py:562
+#: app/routes.py:614
 msgid "Tu código de verificación es:"
 msgstr ""
 
-#: app/routes.py:564 app/routes.py:653
+#: app/routes.py:616 app/routes.py:705
 msgid "Este código expira en 30 minutos."
 msgstr ""
 
-#: app/routes.py:594
+#: app/routes.py:646
 msgid "Código inválido."
 msgstr ""
 
-#: app/routes.py:598
+#: app/routes.py:650
 msgid "El código expiró. Solicita uno nuevo."
 msgstr ""
 
-#: app/routes.py:602
+#: app/routes.py:654
 msgid "Código incorrecto."
 msgstr ""
 
-#: app/routes.py:612
+#: app/routes.py:664
 msgid "¡Bienvenido a PATIA!"
 msgstr ""
 
-#: app/routes.py:616
+#: app/routes.py:668
 #, python-format
 msgid "Bienvenido a PATIA, %(name)s!"
 msgstr ""
 
-#: app/routes.py:617
+#: app/routes.py:669
 msgid "Tu cuenta está lista. Tienes 14 días gratis para explorar todo."
 msgstr ""
 
-#: app/routes.py:618
+#: app/routes.py:670
 msgid "Ir a mi inventario"
 msgstr ""
 
-#: app/routes.py:625
+#: app/routes.py:677
 msgid "¡Correo verificado! Bienvenido a PATIA."
 msgstr ""
 
-#: app/routes.py:648
+#: app/routes.py:700
 msgid "Nuevo código de verificación PATIA"
 msgstr ""
 
-#: app/routes.py:651
+#: app/routes.py:703
 msgid "Tu nuevo código"
 msgstr ""
 
-#: app/routes.py:659
+#: app/routes.py:711
 msgid "Te enviamos un nuevo código de verificación."
 msgstr ""
 
-#: app/routes.py:661
+#: app/routes.py:713
 msgid "No pudimos enviar el código. Inténtalo nuevamente en unos minutos."
 msgstr ""
 
-#: app/routes.py:680
+#: app/routes.py:732
 msgid "Recupera tu contraseña PATIA"
 msgstr ""
 
-#: app/routes.py:683
+#: app/routes.py:735
 msgid "Recuperar contraseña"
 msgstr ""
 
-#: app/routes.py:684
+#: app/routes.py:736
 msgid ""
 "Haz clic en el botón para crear una nueva contraseña. Expira en 30 "
 "minutos."
 msgstr ""
 
-#: app/routes.py:685
+#: app/routes.py:737
 msgid "Crear nueva contraseña"
 msgstr ""
 
-#: app/routes.py:693
+#: app/routes.py:745
 msgid "Si ese correo existe, te enviamos un enlace."
 msgstr ""
 
-#: app/routes.py:717
+#: app/routes.py:769
 msgid "Contraseña actualizada. Inicia sesión."
 msgstr ""
 
-#: app/routes.py:731
+#: app/routes.py:783
 msgid "Correo o contraseña incorrectos."
 msgstr ""
 
-#: app/routes.py:750
+#: app/routes.py:791
+msgid "Tu acceso a esta empresa estÃ¡ desactivado. Contacta al propietario."
+msgstr ""
+
+#: app/routes.py:809
 msgid "Tu prueba gratuita de PATIA termina en 2 días"
 msgstr ""
 
-#: app/routes.py:754
+#: app/routes.py:813
 msgid "Tu prueba termina en 2 días"
 msgstr ""
 
-#: app/routes.py:755
+#: app/routes.py:814
 #, python-format
 msgid ""
 "Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No "
 "pierdas el acceso a tu inventario y ventas."
 msgstr ""
 
-#: app/routes.py:756 app/templates/base.html:80
+#: app/routes.py:815 app/templates/base.html:80
 msgid "Activar PATIA Pro"
 msgstr ""
 
-#: app/routes.py:764
+#: app/routes.py:823
 msgid "Sesión iniciada correctamente."
 msgstr ""
 
-#: app/routes.py:767 app/templates/landing.html:23
+#: app/routes.py:826 app/templates/landing.html:23
 #: app/templates/landing.html:276
 msgid "Iniciar sesión"
 msgstr ""
 
-#: app/routes.py:767
+#: app/routes.py:826
 msgid "Entrar"
 msgstr ""
 
-#: app/routes.py:888
+#: app/routes.py:948
 #, python-format
 msgid "%(product)s agotado"
 msgstr ""
 
-#: app/routes.py:889
+#: app/routes.py:949
 msgid "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
 msgstr ""
 
-#: app/routes.py:894
+#: app/routes.py:954
 #, python-format
 msgid "Reordenar %(product)s"
 msgstr ""
 
-#: app/routes.py:896
+#: app/routes.py:956
 #, python-format
 msgid "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s."
 msgstr ""
 
-#: app/routes.py:904
+#: app/routes.py:964
 #, python-format
 msgid "%(product)s se agotará pronto"
 msgstr ""
 
-#: app/routes.py:906
+#: app/routes.py:966
 #, python-format
 msgid ""
 "Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s "
 "días."
 msgstr ""
 
-#: app/routes.py:913
+#: app/routes.py:973
 #, python-format
 msgid "Vigilar %(product)s"
 msgstr ""
 
-#: app/routes.py:914
+#: app/routes.py:974
 #, python-format
 msgid "Inventario estimado para %(days)s días."
 msgstr ""
 
-#: app/routes.py:920
+#: app/routes.py:980
 #, python-format
 msgid ""
 "%(product)s es el producto con más movimiento. Conviene revisar sus "
 "existencias antes de tu próxima compra."
 msgstr ""
 
-#: app/routes.py:925
+#: app/routes.py:985
 #, python-format
 msgid "En los últimos 7 días registraste $%(amount)s MXN en ventas."
 msgstr ""
 
-#: app/routes.py:930
+#: app/routes.py:990
 #, python-format
 msgid ""
 "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, "
 "considerando el costo registrado de los productos vendidos."
 msgstr ""
 
-#: app/routes.py:936
+#: app/routes.py:996
 #, python-format
 msgid ""
 "Tienes %(count)s producto con inventario bajo. Revísalo antes de que "
 "afecte una venta."
 msgstr ""
 
-#: app/routes.py:941
+#: app/routes.py:1001
 #, python-format
 msgid ""
 "Tienes %(count)s productos con inventario bajo. Revísalos antes de que "
 "afecten una venta."
 msgstr ""
 
-#: app/routes.py:990
+#: app/routes.py:1050
 msgid "El periodo solicitado no es válido. Mostramos los últimos 7 días."
 msgstr ""
 
-#: app/routes.py:1014
+#: app/routes.py:1074
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr ""
 
-#: app/routes.py:1016
+#: app/routes.py:1076
 msgid "El rango personalizado no puede superar 366 días."
 msgstr ""
 
-#: app/routes.py:1018
+#: app/routes.py:1078
 msgid "Escribe fechas válidas. Mostramos los últimos 7 días."
 msgstr ""
 
-#: app/routes.py:1271
+#: app/routes.py:1333
 msgid "Completa los datos básicos"
 msgstr ""
 
-#: app/routes.py:1272
+#: app/routes.py:1334
 msgid "Confirma la información principal de tu negocio."
 msgstr ""
 
-#: app/routes.py:1274
+#: app/routes.py:1336
 msgid "Completar datos"
 msgstr ""
 
-#: app/routes.py:1278 app/templates/products.html:11
-#: app/templates/products.html:25
+#: app/routes.py:1340 app/templates/products.html:24
+#: app/templates/products.html:39
 msgid "Agrega tu primer producto"
 msgstr ""
 
-#: app/routes.py:1279
+#: app/routes.py:1341
 msgid "Captura un producto o importa tu catálogo desde Excel."
 msgstr ""
 
-#: app/routes.py:1281 app/templates/products.html:14
+#: app/routes.py:1343 app/templates/products.html:27
 msgid "Agregar primer producto"
 msgstr ""
 
-#: app/routes.py:1285
+#: app/routes.py:1347
 msgid "Registra tu primera venta"
 msgstr ""
 
-#: app/routes.py:1286
+#: app/routes.py:1348
 msgid "Prueba el punto de venta con un producto de tu catálogo."
 msgstr ""
 
-#: app/routes.py:1288
+#: app/routes.py:1350
 msgid "Registrar primera venta"
 msgstr ""
 
-#: app/routes.py:1292
+#: app/routes.py:1354
 msgid "Revisa tus resultados"
 msgstr ""
 
-#: app/routes.py:1293
+#: app/routes.py:1355
 msgid "Consulta ventas, inventario y alertas en este panel."
 msgstr ""
 
-#: app/routes.py:1361 app/templates/edit_product.html:20
-#: app/templates/products.html:37 app/templates/products.html:95
+#: app/routes.py:1488 app/routes.py:1529 app/routes.py:1629
+msgid "Inicia sesión para continuar."
+msgstr ""
+
+#: app/routes.py:1498
+msgid "Escanea o escribe un código de barras válido."
+msgstr ""
+
+#: app/routes.py:1550 app/routes.py:1566
+msgid "Revisa los datos del producto e inténtalo nuevamente."
+msgstr ""
+
+#: app/routes.py:1574
+msgid "Ese código ya pertenece a un producto de tu inventario."
+msgstr ""
+
+#: app/routes.py:1580
+msgid "Ese SKU ya está en uso. Escribe uno diferente."
+msgstr ""
+
+#: app/routes.py:1610
+msgid "El código o el SKU ya fue registrado. Escanéalo de nuevo para continuar."
+msgstr ""
+
+#: app/routes.py:1619
+#, python-format
+msgid "%(product)s se agregó al inventario."
+msgstr ""
+
+#: app/routes.py:1644 app/routes.py:2165
+msgid "La cantidad recibida debe ser mayor que cero."
+msgstr ""
+
+#: app/routes.py:1655
+msgid "No encontramos ese producto en tu inventario."
+msgstr ""
+
+#: app/routes.py:1662 app/routes.py:2179
+msgid "La cantidad recibida supera el límite permitido."
+msgstr ""
+
+#: app/routes.py:1685 app/routes.py:2204
+msgid "No pudimos actualizar el inventario. Inténtalo nuevamente."
+msgstr ""
+
+#: app/routes.py:1691 app/routes.py:2211
+#, python-format
+msgid "Se agregaron %(quantity)s unidades a %(product)s."
+msgstr ""
+
+#: app/routes.py:1707 app/templates/edit_product.html:20
+#: app/templates/products.html:51 app/templates/products.html:109
+#: app/templates/quick_load.html:62 app/templates/quick_load.html:98
 msgid "SKU"
 msgstr ""
 
-#: app/routes.py:1362 app/templates/edit_product.html:25
-#: app/templates/products.html:61
+#: app/routes.py:1708 app/templates/edit_product.html:25
+#: app/templates/products.html:75 app/templates/quick_load.html:33
+#: app/templates/quick_load.html:89
 msgid "Código de barras"
 msgstr ""
 
-#: app/routes.py:1363 app/templates/edit_product.html:16
-#: app/templates/products.html:33
+#: app/routes.py:1709 app/templates/edit_product.html:16
+#: app/templates/products.html:47
 msgid "Nombre del producto"
 msgstr ""
 
-#: app/routes.py:1364 app/templates/edit_product.html:30
-#: app/templates/products.html:65 app/templates/products.html:170
-#: app/templates/products.html:175
+#: app/routes.py:1710 app/templates/edit_product.html:30
+#: app/templates/products.html:79 app/templates/products.html:184
+#: app/templates/products.html:189 app/templates/quick_load.html:103
 msgid "Categoría"
 msgstr ""
 
-#: app/routes.py:1365 app/templates/edit_product.html:34
-#: app/templates/products.html:69 app/templates/products.html:170
-#: app/templates/products.html:176 app/templates/suppliers.html:17
+#: app/routes.py:1711 app/templates/edit_product.html:34
+#: app/templates/products.html:83 app/templates/products.html:184
+#: app/templates/products.html:190 app/templates/quick_load.html:65
+#: app/templates/quick_load.html:110 app/templates/suppliers.html:17
 #: app/templates/suppliers.html:36 app/templates/suppliers.html:46
 msgid "Proveedor"
 msgstr ""
 
-#: app/routes.py:1366 app/templates/reports.html:155
+#: app/routes.py:1712 app/templates/reports.html:155
 msgid "Costo"
 msgstr ""
 
-#: app/routes.py:1367 app/templates/edit_product.html:42
-#: app/templates/products.html:47
+#: app/routes.py:1713 app/templates/edit_product.html:42
+#: app/templates/products.html:61 app/templates/quick_load.html:121
 msgid "Precio de venta"
 msgstr ""
 
-#: app/routes.py:1368
+#: app/routes.py:1714
 msgid "Stock inicial"
 msgstr ""
 
-#: app/routes.py:1369 app/templates/dashboard.html:153
-#: app/templates/edit_product.html:51 app/templates/products.html:73
+#: app/routes.py:1715 app/templates/dashboard.html:153
+#: app/templates/edit_product.html:51 app/templates/products.html:87
+#: app/templates/quick_load.html:129
 msgid "Stock mínimo"
 msgstr ""
 
-#: app/routes.py:1375
+#: app/routes.py:1721
 msgid "PRODUCTOS"
 msgstr ""
 
-#: app/routes.py:1380
+#: app/routes.py:1726
 msgid "PATIA - Plantilla oficial de productos"
 msgstr ""
 
-#: app/routes.py:1382
+#: app/routes.py:1728
 msgid ""
 "Llena esta tabla con tus productos. No cambies los nombres de las "
 "columnas."
 msgstr ""
 
-#: app/routes.py:1492
+#: app/routes.py:1842
 msgid ""
 "El archivo no contiene las columnas obligatorias. Descarga la plantilla "
 "PATIA e inténtalo de nuevo."
 msgstr ""
 
-#: app/routes.py:1590
+#: app/routes.py:1949
 #, python-format
 msgid ""
 "Importación terminada: %(created)s creados, %(updated)s actualizados, "
 "%(omitted)s omitidos y %(errors)s errores."
 msgstr ""
 
-#: app/routes.py:1788
+#: app/routes.py:2162
 msgid "Ingresa una cantidad recibida válida."
 msgstr ""
 
-#: app/routes.py:1791
-msgid "La cantidad recibida debe ser mayor que cero."
-msgstr ""
-
-#: app/routes.py:1805
-msgid "La cantidad recibida supera el límite permitido."
-msgstr ""
-
-#: app/routes.py:1829
-msgid "No pudimos actualizar el inventario. Inténtalo nuevamente."
-msgstr ""
-
-#: app/routes.py:1836
-#, python-format
-msgid "Se agregaron %(quantity)s unidades a %(product)s."
-msgstr ""
-
-#: app/routes.py:1896
+#: app/routes.py:2276
 #, python-format
 msgid "Venta registrada: %(product)s x%(quantity)s."
 msgstr ""
 
-#: app/routes.py:1936
+#: app/routes.py:2316
 msgid "No autenticado"
 msgstr ""
 
-#: app/routes.py:1943 app/routes.py:1958
+#: app/routes.py:2325 app/routes.py:2340
 msgid "Solicitud inválida"
 msgstr ""
 
-#: app/routes.py:1947
+#: app/routes.py:2329
 msgid "El carrito está vacío"
 msgstr ""
 
-#: app/routes.py:1951
+#: app/routes.py:2333
 msgid "Selecciona un método de pago válido"
 msgstr ""
 
-#: app/routes.py:1964 app/routes.py:1970
+#: app/routes.py:2346 app/routes.py:2352
 msgid "Artículo inválido"
 msgstr ""
 
-#: app/routes.py:1973
+#: app/routes.py:2355
 msgid "La cantidad debe ser mayor a cero"
 msgstr ""
 
-#: app/routes.py:2010
+#: app/routes.py:2392
 msgid "Producto no encontrado"
 msgstr ""
 
-#: app/routes.py:2038
+#: app/routes.py:2420
 #, python-format
 msgid "Stock insuficiente: %(product)s"
 msgstr ""
 
-#: app/routes.py:2079
+#: app/routes.py:2462
 msgid "No se pudo procesar la venta"
 msgstr ""
 
-#: app/routes.py:2693
+#: app/routes.py:3125
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del"
 " catálogo conservando su historial."
 msgstr ""
 
-#: app/routes.py:2701
+#: app/routes.py:3133
 #, python-format
 msgid "Eliminamos %(count)s productos del catálogo."
 msgstr ""
 
-#: app/routes.py:2736
+#: app/routes.py:3170
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s seleccionados y retiramos %(protected)s "
 "conservando su historial."
 msgstr ""
 
-#: app/routes.py:2743
+#: app/routes.py:3177
 #, python-format
 msgid "%(count)s productos eliminados."
+msgstr ""
+
+#: app/team/routes.py:60
+msgid "Te invitaron a trabajar en PATIA"
+msgstr ""
+
+#: app/team/routes.py:116
+msgid "Escribe un correo válido."
+msgstr ""
+
+#: app/team/routes.py:119
+msgid "Selecciona un rol válido."
+msgstr ""
+
+#: app/team/routes.py:127
+msgid "Esa persona ya pertenece al equipo."
+msgstr ""
+
+#: app/team/routes.py:134
+msgid ""
+"Ese correo ya pertenece a otra empresa en PATIA. Usa un correo distinto "
+"para este integrante."
+msgstr ""
+
+#: app/team/routes.py:160
+msgid "No pudimos crear la invitación."
+msgstr ""
+
+#: app/team/routes.py:165
+msgid "Invitación enviada."
+msgstr ""
+
+#: app/team/routes.py:168
+msgid ""
+"La invitación quedó creada, pero el correo no pudo enviarse. Intenta "
+"reenviarlo."
+msgstr ""
+
+#: app/team/routes.py:192
+msgid "Invitación reenviada."
+msgstr ""
+
+#: app/team/routes.py:194
+msgid "No pudimos enviar el correo. Intenta nuevamente."
+msgstr ""
+
+#: app/team/routes.py:211
+msgid "Invitación cancelada."
+msgstr ""
+
+#: app/team/routes.py:232
+msgid "Inicia sesión con el correo que recibió la invitación."
+msgstr ""
+
+#: app/team/routes.py:243
+msgid "Completa tu nombre y usa una contraseña de al menos 8 caracteres."
+msgstr ""
+
+#: app/team/routes.py:268
+msgid ""
+"Ese correo ya tiene acceso a otra empresa. Solicita una invitación para "
+"un correo diferente."
+msgstr ""
+
+#: app/team/routes.py:296
+msgid "La invitación ya no pudo aplicarse. Solicita una nueva."
+msgstr ""
+
+#: app/team/routes.py:304
+msgid "Tu acceso al equipo está listo."
+msgstr ""
+
+#: app/team/routes.py:319
+msgid "No se pudo cambiar ese rol."
+msgstr ""
+
+#: app/team/routes.py:323
+msgid "Rol actualizado."
+msgstr ""
+
+#: app/team/routes.py:335
+msgid "No se pudo actualizar ese integrante."
+msgstr ""
+
+#: app/team/routes.py:339
+msgid "Acceso del integrante actualizado."
+msgstr ""
+
+#: app/team/routes.py:352
+msgid "El PIN debe tener entre 4 y 6 dígitos."
+msgstr ""
+
+#: app/team/routes.py:358
+msgid "PIN actualizado."
+msgstr ""
+
+#: app/team/services.py:169
+msgid "Acceso no permitido."
 msgstr ""
 
 #: app/templates/_language_selector.html:1
@@ -640,8 +779,8 @@ msgstr ""
 msgid "WhatsApp"
 msgstr ""
 
-#: app/templates/admin.html:98 app/templates/products.html:170
-#: app/templates/products.html:181 app/templates/sell.html:101
+#: app/templates/admin.html:98 app/templates/products.html:184
+#: app/templates/products.html:195 app/templates/sell.html:101
 #: app/templates/sell.html:110 app/templates/suppliers.html:40
 #: app/templates/suppliers.html:59
 msgid "Acciones"
@@ -728,7 +867,8 @@ msgid ""
 "cuenta."
 msgstr ""
 
-#: app/templates/auth.html:71
+#: app/templates/auth.html:71 app/templates/quick_load.html:94
+#: app/templates/team_accept.html:16
 msgid "Nombre"
 msgstr ""
 
@@ -736,7 +876,7 @@ msgstr ""
 msgid "Tu nombre"
 msgstr ""
 
-#: app/templates/auth.html:75
+#: app/templates/auth.html:75 app/templates/team_accept.html:18
 msgid "Apellido"
 msgstr ""
 
@@ -813,7 +953,7 @@ msgstr ""
 msgid "correo@empresa.com"
 msgstr ""
 
-#: app/templates/auth.html:134
+#: app/templates/auth.html:134 app/templates/team_accept.html:20
 msgid "Contraseña"
 msgstr ""
 
@@ -894,20 +1034,24 @@ msgid "Punto de venta"
 msgstr ""
 
 #: app/templates/base.html:41 app/templates/base.html:43
-#: app/templates/base.html:45 app/templates/reports.html:2
+#: app/templates/reports.html:2
 msgid "Reportes IA"
 msgstr ""
 
-#: app/templates/base.html:43 app/templates/base.html:45
+#: app/templates/base.html:43
 msgid "PRO"
 msgstr ""
 
-#: app/templates/base.html:47 app/templates/suppliers.html:2
+#: app/templates/base.html:45 app/templates/suppliers.html:2
 msgid "Proveedores"
 msgstr ""
 
-#: app/templates/base.html:48 app/templates/settings.html:2
+#: app/templates/base.html:46 app/templates/settings.html:2
 msgid "Configuración"
+msgstr ""
+
+#: app/templates/base.html:48 app/templates/team.html:6
+msgid "Equipo"
 msgstr ""
 
 #: app/templates/base.html:54
@@ -1012,7 +1156,7 @@ msgstr ""
 msgid "¿Ya tienes un catálogo?"
 msgstr ""
 
-#: app/templates/dashboard.html:80 app/templates/products.html:15
+#: app/templates/dashboard.html:80 app/templates/products.html:28
 msgid "Importar catálogo"
 msgstr ""
 
@@ -1066,11 +1210,12 @@ msgid "SKU: %(sku)s"
 msgstr ""
 
 #: app/templates/dashboard.html:152 app/templates/dashboard.html:205
-#: app/templates/edit_product.html:46
+#: app/templates/edit_product.html:46 app/templates/quick_load.html:63
 msgid "Stock actual"
 msgstr ""
 
 #: app/templates/dashboard.html:155 app/templates/dashboard.html:166
+#: app/templates/quick_load.html:74 app/templates/quick_load.html:157
 msgid "Reabastecer"
 msgstr ""
 
@@ -1082,8 +1227,8 @@ msgstr ""
 msgid "Ver inventario filtrado"
 msgstr ""
 
-#: app/templates/dashboard.html:179 app/templates/products.html:150
-#: app/templates/products.html:197
+#: app/templates/dashboard.html:179 app/templates/products.html:164
+#: app/templates/products.html:211
 msgid ""
 "Tu inventario está en orden. No hay productos que requieran "
 "reabastecimiento."
@@ -1097,8 +1242,8 @@ msgstr ""
 msgid "Registra únicamente las unidades que acabas de recibir."
 msgstr ""
 
-#: app/templates/dashboard.html:200 app/templates/products.html:170
-#: app/templates/products.html:174 app/templates/reports.html:137
+#: app/templates/dashboard.html:200 app/templates/products.html:184
+#: app/templates/products.html:188 app/templates/reports.html:137
 #: app/templates/reports.html:155 app/templates/sell.html:68
 #: app/templates/ticket.html:47
 msgid "Producto"
@@ -1108,7 +1253,7 @@ msgstr ""
 msgid "Nuevo stock"
 msgstr ""
 
-#: app/templates/dashboard.html:214
+#: app/templates/dashboard.html:214 app/templates/quick_load.html:69
 msgid "Cantidad recibida"
 msgstr ""
 
@@ -1200,11 +1345,11 @@ msgstr ""
 msgid "No hay productos con stock crítico en este momento."
 msgstr ""
 
-#: app/templates/dashboard.html:358
+#: app/templates/dashboard.html:358 app/templates/quick_load.html:152
 msgid "Actualizando inventario…"
 msgstr ""
 
-#: app/templates/edit_product.html:8
+#: app/templates/edit_product.html:8 app/templates/quick_load.html:75
 msgid "Editar producto"
 msgstr ""
 
@@ -1219,8 +1364,8 @@ msgid "Debe ser único dentro de tu empresa."
 msgstr ""
 
 #: app/templates/edit_product.html:25 app/templates/edit_product.html:34
-#: app/templates/products.html:61 app/templates/products.html:65
-#: app/templates/products.html:69 app/templates/products.html:73
+#: app/templates/products.html:75 app/templates/products.html:79
+#: app/templates/products.html:83 app/templates/products.html:87
 #: app/templates/suppliers.html:19 app/templates/suppliers.html:21
 #: app/templates/suppliers.html:23
 msgid "Opcional"
@@ -1230,7 +1375,7 @@ msgstr ""
 msgid "Si lo capturas, no puede pertenecer a otro producto de tu catálogo."
 msgstr ""
 
-#: app/templates/edit_product.html:38 app/templates/products.html:42
+#: app/templates/edit_product.html:38 app/templates/products.html:56
 msgid "Precio de compra"
 msgstr ""
 
@@ -1780,8 +1925,9 @@ msgstr ""
 msgid "Control operativo para PyMEs que quieren crecer con claridad."
 msgstr ""
 
-#: app/templates/landing.html:273 app/templates/products.html:170
-#: app/templates/products.html:178 app/templates/subscribe.html:85
+#: app/templates/landing.html:273 app/templates/products.html:184
+#: app/templates/products.html:192 app/templates/quick_load.html:64
+#: app/templates/subscribe.html:85
 msgid "Precio"
 msgstr ""
 
@@ -2018,257 +2164,417 @@ msgstr ""
 msgid "Inventario inteligente"
 msgstr ""
 
-#: app/templates/products.html:10
+#: app/templates/products.html:9
+msgid "Captura consecutiva"
+msgstr ""
+
+#: app/templates/products.html:10 app/templates/quick_load.html:2
+msgid "Carga rápida con escáner"
+msgstr ""
+
+#: app/templates/products.html:11
+msgid ""
+"Conecta tu lector USB, escanea cada código y agrega productos sin "
+"recargar la página."
+msgstr ""
+
+#: app/templates/products.html:14
+msgid "Iniciar carga rápida"
+msgstr ""
+
+#: app/templates/products.html:23
 msgid "Tu catálogo empieza aquí"
 msgstr ""
 
-#: app/templates/products.html:12
+#: app/templates/products.html:25
 msgid ""
 "Captura un producto manualmente o importa tu catálogo desde Excel para "
 "comenzar a controlar existencias y ventas."
 msgstr ""
 
-#: app/templates/products.html:24
-msgid "Alta manual"
-msgstr ""
-
-#: app/templates/products.html:25
-msgid "Agregar producto"
-msgstr ""
-
-#: app/templates/products.html:26
-msgid "Los campos marcados con * son obligatorios."
-msgstr ""
-
-#: app/templates/products.html:34
-msgid "Ej. Café molido 500 g"
+#: app/templates/products.html:29
+msgid "Usar escáner"
 msgstr ""
 
 #: app/templates/products.html:38
-msgid "Ej. CAFE-500"
+msgid "Alta manual"
 msgstr ""
 
 #: app/templates/products.html:39
-msgid "Identificador único interno. Usa uno distinto para cada producto."
+msgid "Agregar producto"
 msgstr ""
 
-#: app/templates/products.html:44
-msgid "Lo que pagas por cada unidad."
+#: app/templates/products.html:40
+msgid "Los campos marcados con * son obligatorios."
 msgstr ""
 
-#: app/templates/products.html:49
-msgid "Precio que cobrarás al cliente."
+#: app/templates/products.html:48
+msgid "Ej. Café molido 500 g"
 msgstr ""
 
 #: app/templates/products.html:52
-msgid "Cantidad inicial"
+msgid "Ej. CAFE-500"
 msgstr ""
 
-#: app/templates/products.html:54
-msgid "Unidades disponibles actualmente."
-msgstr ""
-
-#: app/templates/products.html:58
-msgid "Opciones avanzadas"
+#: app/templates/products.html:53
+msgid "Identificador único interno. Usa uno distinto para cada producto."
 msgstr ""
 
 #: app/templates/products.html:58
-msgid "Código, categoría, proveedor y stock mínimo"
+msgid "Lo que pagas por cada unidad."
+msgstr ""
+
+#: app/templates/products.html:63
+msgid "Precio que cobrarás al cliente."
 msgstr ""
 
 #: app/templates/products.html:66
-msgid "Ej. Abarrotes"
+msgid "Cantidad inicial"
 msgstr ""
 
-#: app/templates/products.html:70
-msgid "Ej. Distribuidora Norte"
+#: app/templates/products.html:68
+msgid "Unidades disponibles actualmente."
 msgstr ""
 
-#: app/templates/products.html:75
-msgid "PATIA te alertará cuando llegues a esta cantidad."
+#: app/templates/products.html:72
+msgid "Opciones avanzadas"
+msgstr ""
+
+#: app/templates/products.html:72
+msgid "Código, categoría, proveedor y stock mínimo"
 msgstr ""
 
 #: app/templates/products.html:80
-msgid "Guardar producto"
+msgid "Ej. Abarrotes"
 msgstr ""
 
-#: app/templates/products.html:86
-msgid "Carga masiva"
+#: app/templates/products.html:84
+msgid "Ej. Distribuidora Norte"
 msgstr ""
 
-#: app/templates/products.html:87
-msgid "Importar desde Excel o CSV"
-msgstr ""
-
-#: app/templates/products.html:88
-msgid "Formatos aceptados: .xlsx y .csv, hasta 10 MB."
-msgstr ""
-
-#: app/templates/products.html:92
-msgid "Antes de importar"
+#: app/templates/products.html:89
+msgid "PATIA te alertará cuando llegues a esta cantidad."
 msgstr ""
 
 #: app/templates/products.html:94
+msgid "Guardar producto"
+msgstr ""
+
+#: app/templates/products.html:100
+msgid "Carga masiva"
+msgstr ""
+
+#: app/templates/products.html:101
+msgid "Importar desde Excel o CSV"
+msgstr ""
+
+#: app/templates/products.html:102
+msgid "Formatos aceptados: .xlsx y .csv, hasta 10 MB."
+msgstr ""
+
+#: app/templates/products.html:106
+msgid "Antes de importar"
+msgstr ""
+
+#: app/templates/products.html:108
 msgid ""
 "Columnas obligatorias: SKU, Nombre del producto, Costo, Precio de venta y"
 " Stock inicial."
 msgstr ""
 
-#: app/templates/products.html:95
+#: app/templates/products.html:109
 msgid "Si coincide el"
 msgstr ""
 
-#: app/templates/products.html:95
+#: app/templates/products.html:109
 msgid ""
 ", PATIA suma el stock importado y actualiza precios, stock mínimo y "
 "código."
 msgstr ""
 
-#: app/templates/products.html:96
+#: app/templates/products.html:110
 msgid "Si no coincide el SKU, busca el"
 msgstr ""
 
-#: app/templates/products.html:96
+#: app/templates/products.html:110
 msgid "código de barras"
 msgstr ""
 
-#: app/templates/products.html:96
+#: app/templates/products.html:110
 msgid ". Si coincide, reemplaza stock, precios y stock mínimo."
 msgstr ""
 
-#: app/templates/products.html:97
+#: app/templates/products.html:111
 msgid ""
 "Las filas vacías se omiten y las filas inválidas se cuentan como errores "
 "sin detener las demás."
 msgstr ""
 
-#: app/templates/products.html:102
+#: app/templates/products.html:116
 msgid "Descargar plantilla PATIA"
 msgstr ""
 
-#: app/templates/products.html:107
+#: app/templates/products.html:121
 msgid "Selecciona tu archivo"
 msgstr ""
 
-#: app/templates/products.html:109
+#: app/templates/products.html:123
 msgid "Importar archivo"
 msgstr ""
 
-#: app/templates/products.html:110
+#: app/templates/products.html:124
 msgid "Importando catálogo… No cierres esta ventana."
 msgstr ""
 
-#: app/templates/products.html:116
+#: app/templates/products.html:130
 msgid "Resumen de inventario"
 msgstr ""
 
-#: app/templates/products.html:117
+#: app/templates/products.html:131
 msgid "Productos en catálogo"
 msgstr ""
 
-#: app/templates/products.html:123
+#: app/templates/products.html:137
 msgid "Catálogo"
 msgstr ""
 
-#: app/templates/products.html:125 app/templates/sell.html:44
+#: app/templates/products.html:139 app/templates/sell.html:44
 msgid "Buscar producto"
 msgstr ""
 
-#: app/templates/products.html:126
+#: app/templates/products.html:140
 msgid "Buscar producto…"
 msgstr ""
 
-#: app/templates/products.html:128
+#: app/templates/products.html:142
 msgid "Busca por nombre, SKU o categoría."
 msgstr ""
 
-#: app/templates/products.html:132
+#: app/templates/products.html:146
 msgid "Filtros de inventario"
 msgstr ""
 
-#: app/templates/products.html:137
+#: app/templates/products.html:151
 #, python-format
 msgid "Ver productos con stock bajo (%(count)s)"
 msgstr ""
 
-#: app/templates/products.html:142
+#: app/templates/products.html:156
 msgid "Quitar filtro"
 msgstr ""
 
-#: app/templates/products.html:155 app/templates/products.html:215
+#: app/templates/products.html:169 app/templates/products.html:229
 msgid "Seleccionar productos"
 msgstr ""
 
-#: app/templates/products.html:156
+#: app/templates/products.html:170
 msgid ""
 "¿Eliminar los productos sin ventas? Los productos que forman parte del "
 "historial se conservarán."
 msgstr ""
 
-#: app/templates/products.html:158
+#: app/templates/products.html:172
 msgid "Borrar todo el catálogo"
 msgstr ""
 
-#: app/templates/products.html:163
+#: app/templates/products.html:177
 msgid "Eliminar seleccionados"
 msgstr ""
 
-#: app/templates/products.html:170 app/templates/products.html:177
+#: app/templates/products.html:184 app/templates/products.html:191
 msgid "Stock"
 msgstr ""
 
-#: app/templates/products.html:170 app/templates/products.html:179
+#: app/templates/products.html:184 app/templates/products.html:193
 #: app/templates/reports.html:79 app/templates/reports.html:155
 msgid "Margen"
 msgstr ""
 
-#: app/templates/products.html:170 app/templates/products.html:180
+#: app/templates/products.html:184 app/templates/products.html:194
 msgid "Valor"
 msgstr ""
 
-#: app/templates/products.html:182
+#: app/templates/products.html:196
 msgid "Editar"
 msgstr ""
 
-#: app/templates/products.html:183
+#: app/templates/products.html:197
 msgid ""
 "¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su"
 " historial."
 msgstr ""
 
-#: app/templates/products.html:185 app/templates/sell.html:155
+#: app/templates/products.html:199 app/templates/sell.html:155
 #: app/templates/suppliers.html:66
 msgid "Eliminar"
 msgstr ""
 
-#: app/templates/products.html:198
+#: app/templates/products.html:212
 msgid "Ver todos los productos"
 msgstr ""
 
-#: app/templates/products.html:201
+#: app/templates/products.html:215
 #, python-format
 msgid "No encontramos productos para “%(query)s”"
 msgstr ""
 
-#: app/templates/products.html:202
+#: app/templates/products.html:216
 msgid "Prueba con otro nombre, SKU o categoría."
 msgstr ""
 
-#: app/templates/products.html:203
+#: app/templates/products.html:217
 msgid "Limpiar búsqueda"
 msgstr ""
 
-#: app/templates/products.html:213
+#: app/templates/products.html:227
 msgid "Importando catálogo…"
 msgstr ""
 
-#: app/templates/products.html:214
+#: app/templates/products.html:228
 msgid "Cancelar selección"
 msgstr ""
 
-#: app/templates/products.html:216
+#: app/templates/products.html:230
 #, python-format
 msgid "¿Eliminar %(count)s productos seleccionados?"
+msgstr ""
+
+#: app/templates/quick_load.html:10
+msgid "Volver al inventario"
+msgstr ""
+
+#: app/templates/quick_load.html:12
+msgid ""
+"El lector USB funciona como teclado. Escanea un código y PATIA te llevará"
+" al siguiente paso."
+msgstr ""
+
+#: app/templates/quick_load.html:14
+msgid "Terminar sesión"
+msgstr ""
+
+#: app/templates/quick_load.html:17
+msgid "Resumen de esta sesión"
+msgstr ""
+
+#: app/templates/quick_load.html:18
+msgid "Creados"
+msgstr ""
+
+#: app/templates/quick_load.html:19
+msgid "Reabastecidos"
+msgstr ""
+
+#: app/templates/quick_load.html:20
+msgid "Duplicados"
+msgstr ""
+
+#: app/templates/quick_load.html:21
+msgid "Errores"
+msgstr ""
+
+#: app/templates/quick_load.html:28
+msgid "Paso 1"
+msgstr ""
+
+#: app/templates/quick_load.html:29
+msgid "Escanea o escribe el código de barras"
+msgstr ""
+
+#: app/templates/quick_load.html:30
+msgid ""
+"Mantén este campo seleccionado y usa el lector. También puedes escribir "
+"el código y presionar Enter."
+msgstr ""
+
+#: app/templates/quick_load.html:43
+msgid "Escanea un código…"
+msgstr ""
+
+#: app/templates/quick_load.html:46
+msgid "Buscar"
+msgstr ""
+
+#: app/templates/quick_load.html:56
+msgid "Producto encontrado"
+msgstr ""
+
+#: app/templates/quick_load.html:71
+msgid "Se sumará al stock actual y quedará registrada en el historial."
+msgstr ""
+
+#: app/templates/quick_load.html:76
+msgid "Escanear siguiente"
+msgstr ""
+
+#: app/templates/quick_load.html:83
+msgid "Código nuevo"
+msgstr ""
+
+#: app/templates/quick_load.html:84
+msgid "Completa los datos del producto"
+msgstr ""
+
+#: app/templates/quick_load.html:85
+msgid ""
+"Guarda con el botón o presiona Ctrl + Enter. Después podrás escanear "
+"inmediatamente el siguiente."
+msgstr ""
+
+#: app/templates/quick_load.html:91
+msgid "Se conserva exactamente como fue escaneado."
+msgstr ""
+
+#: app/templates/quick_load.html:100
+msgid "PATIA propone uno automático; puedes cambiarlo antes de guardar."
+msgstr ""
+
+#: app/templates/quick_load.html:117
+msgid "Precio de costo"
+msgstr ""
+
+#: app/templates/quick_load.html:125
+msgid "Existencias iniciales"
+msgstr ""
+
+#: app/templates/quick_load.html:133
+msgid "Guardar y continuar"
+msgstr ""
+
+#: app/templates/quick_load.html:134
+msgid "Cancelar y escanear siguiente"
+msgstr ""
+
+#: app/templates/quick_load.html:150
+msgid "Buscando código…"
+msgstr ""
+
+#: app/templates/quick_load.html:151
+msgid "Guardando producto…"
+msgstr ""
+
+#: app/templates/quick_load.html:153
+msgid "Listo para escanear el siguiente producto."
+msgstr ""
+
+#: app/templates/quick_load.html:154 app/templates/team.html:35
+msgid "Activo"
+msgstr ""
+
+#: app/templates/quick_load.html:155
+msgid "Archivado"
+msgstr ""
+
+#: app/templates/quick_load.html:156
+msgid "Restaurar y reabastecer"
+msgstr ""
+
+#: app/templates/quick_load.html:158
+msgid "Sin proveedor"
+msgstr ""
+
+#: app/templates/quick_load.html:159
+msgid "No pudimos completar la operación. Inténtalo nuevamente."
 msgstr ""
 
 #: app/templates/reports.html:8
@@ -3337,6 +3643,130 @@ msgstr ""
 msgid "Agregar primer proveedor"
 msgstr ""
 
+#: app/templates/team.html:7
+#, python-format
+msgid "Personas con acceso a %(business)s"
+msgstr ""
+
+#: app/templates/team.html:8
+msgid "Asigna solo el acceso que cada persona necesita para trabajar."
+msgstr ""
+
+#: app/templates/team.html:14
+msgid "Invitar integrante"
+msgstr ""
+
+#: app/templates/team.html:17
+msgid "Correo electrónico"
+msgstr ""
+
+#: app/templates/team.html:19 app/templates/team.html:43
+msgid "Rol"
+msgstr ""
+
+#: app/templates/emails/team_invitation.html:3 app/templates/team.html:21
+#: app/templates/team.html:45 app/templates/team.html:74
+#: app/templates/team_accept.html:12
+msgid "Cajero"
+msgstr ""
+
+#: app/templates/emails/team_invitation.html:3 app/templates/team.html:22
+#: app/templates/team.html:46 app/templates/team.html:74
+#: app/templates/team_accept.html:12
+msgid "Encargado"
+msgstr ""
+
+#: app/templates/team.html:24
+msgid "Enviar invitación"
+msgstr ""
+
+#: app/templates/team.html:29
+msgid "Integrantes"
+msgstr ""
+
+#: app/templates/team.html:35
+msgid "Desactivado"
+msgstr ""
+
+#: app/templates/team.html:38
+msgid "Propietario"
+msgstr ""
+
+#: app/templates/team.html:48
+msgid "Guardar rol"
+msgstr ""
+
+#: app/templates/team.html:52
+msgid "Nuevo PIN"
+msgstr ""
+
+#: app/templates/team.html:53
+msgid "4 a 6 dígitos"
+msgstr ""
+
+#: app/templates/team.html:54
+msgid "Restablecer PIN"
+msgstr ""
+
+#: app/templates/team.html:59
+msgid "Desactivar"
+msgstr ""
+
+#: app/templates/team.html:59
+msgid "Reactivar"
+msgstr ""
+
+#: app/templates/team.html:71
+msgid "Invitaciones pendientes"
+msgstr ""
+
+#: app/templates/team.html:74
+msgid "Expira pronto"
+msgstr ""
+
+#: app/templates/team.html:74
+msgid "Expirada"
+msgstr ""
+
+#: app/templates/team.html:76
+msgid "Reenviar"
+msgstr ""
+
+#: app/templates/team.html:77
+msgid "Cancelar invitación"
+msgstr ""
+
+#: app/templates/team_accept.html:6
+msgid "Esta invitación ya no está disponible"
+msgstr ""
+
+#: app/templates/team_accept.html:7
+msgid "Pide al propietario que envíe una invitación nueva."
+msgstr ""
+
+#: app/templates/team_accept.html:8
+msgid "Ir a iniciar sesión"
+msgstr ""
+
+#: app/templates/team_accept.html:10
+msgid "Invitación de equipo"
+msgstr ""
+
+#: app/templates/team_accept.html:11
+#, python-format
+msgid "Únete a %(business)s"
+msgstr ""
+
+#: app/templates/team_accept.html:12
+#, python-format
+msgid "Usarás PATIA como %(role)s."
+msgstr ""
+
+#: app/templates/emails/team_invitation.html:4
+#: app/templates/team_accept.html:23
+msgid "Aceptar invitación"
+msgstr ""
+
 #: app/templates/ticket.html:8
 msgid "Comprobante de venta"
 msgstr ""
@@ -3459,5 +3889,19 @@ msgstr ""
 
 #: app/templates/verify_email.html:36
 msgid "Reenviar código"
+msgstr ""
+
+#: app/templates/emails/team_invitation.html:2
+#, python-format
+msgid "Te invitaron a %(business)s"
+msgstr ""
+
+#: app/templates/emails/team_invitation.html:3
+#, python-format
+msgid "Tendrás acceso como %(role)s para trabajar en PATIA."
+msgstr ""
+
+#: app/templates/emails/team_invitation.html:5
+msgid "La invitación vence en 48 horas."
 msgstr ""
 
