@@ -142,7 +142,7 @@ class PosFirstSaleTests(unittest.TestCase):
         data = response.get_json()
         self.assertTrue(data["ok"])
         self.assertEqual(data["ticket_id"], request_id)
-        self.assertEqual(data["total"], 50)
+        self.assertEqual(data["total"], "50.00")
         self.assertEqual(data["payment_method"], "Transferencia")
         self.assertIsInstance(data["single_sale_id"], int)
         db.session.refresh(product)

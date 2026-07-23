@@ -3,6 +3,7 @@ from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
+from .money import MONEY_ZERO, money_decimal
 
 
 class Organization(db.Model):
@@ -177,14 +178,14 @@ class Product(db.Model):
     supplier = db.Column(db.String(120), nullable=True)
 
     cost_price = db.Column(
-        db.Float,
+        db.Numeric(14, 2),
         nullable=False,
-        default=0,
+        default=MONEY_ZERO,
     )
     sale_price = db.Column(
-        db.Float,
+        db.Numeric(14, 2),
         nullable=False,
-        default=0,
+        default=MONEY_ZERO,
     )
     stock = db.Column(
         db.Integer,
@@ -238,7 +239,7 @@ class Product(db.Model):
 
     @property
     def inventory_value(self):
-        return round(self.stock * self.cost_price, 2)
+        return money_decimal(self.stock * self.cost_price)
 
 
 class InventoryRestockEvent(db.Model):
@@ -424,14 +425,14 @@ class Sale(db.Model):
         default=1,
     )
     unit_price = db.Column(
-        db.Float,
+        db.Numeric(14, 2),
         nullable=False,
-        default=0,
+        default=MONEY_ZERO,
     )
     total = db.Column(
-        db.Float,
+        db.Numeric(14, 2),
         nullable=False,
-        default=0,
+        default=MONEY_ZERO,
     )
 
     created_at = db.Column(
@@ -448,7 +449,7 @@ class Sale(db.Model):
         nullable=True,
         index=True,
     )
-    unit_cost = db.Column(db.Float, nullable=True)
+    unit_cost = db.Column(db.Numeric(14, 2), nullable=True)
     cost_is_estimated = db.Column(
         db.Boolean,
         nullable=False,

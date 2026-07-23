@@ -326,7 +326,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260722_11",
+                "20260722_12",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -452,7 +452,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260722_11",
+                "20260722_12",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
@@ -486,6 +486,87 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         self.assertNotIn("payment_method", self.columns(inspector, "sale"))
         with engine.connect() as connection:
             self.assertEqual(connection.execute(sa.text("SELECT COUNT(*) FROM sale")).scalar_one(), 1)
+        engine.dispose()
+
+    def test_decimal_revision_rounds_money_and_preserves_business_rows(self):
+        database_path = self.database_path("decimal-existing.db")
+        self.run_upgrade(database_path, "20260722_11")
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        with engine.begin() as connection:
+            connection.execute(sa.text(
+                'INSERT INTO "user" (id, email, password, company_name, created_at) '
+                "VALUES (1, 'decimal@example.test', 'hash', 'Decimal Store', "
+                "'2026-07-22 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO organization "
+                "(id, name, slug, owner_user_id, timezone, currency, is_active, "
+                "created_at, updated_at) "
+                "VALUES (1, 'Decimal Store', 'decimal-store', 1, "
+                "'America/Mexico_City', 'MXN', 1, '2026-07-22 00:00:00', "
+                "'2026-07-22 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO organization_member "
+                "(id, organization_id, user_id, role, is_active, created_at, "
+                "updated_at) VALUES (1, 1, 1, 'OWNER', 1, "
+                "'2026-07-22 00:00:00', '2026-07-22 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO product "
+                "(id, organization_id, user_id, sku, name, category, cost_price, "
+                "sale_price, stock, min_stock, is_active, created_at) "
+                "VALUES (1, 1, 1, 'DEC-1', 'Decimal Product', 'General', "
+                "10.126, 20.125, 8, 1, 1, '2026-07-22 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO sale "
+                "(id, organization_id, user_id, product_id, quantity, unit_price, "
+                "total, unit_cost, cost_is_estimated, created_at) "
+                "VALUES (1, 1, 1, 1, 3, 20.125, 60.375, 10.126, 0, "
+                "'2026-07-22 00:00:00')"
+            ))
+        engine.dispose()
+
+        self.run_upgrade(database_path)
+
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        inspector = sa.inspect(engine)
+        for table_name, column_names in {
+            "product": {"cost_price", "sale_price"},
+            "sale": {"unit_price", "total", "unit_cost"},
+        }.items():
+            types = {
+                column["name"]: column["type"]
+                for column in inspector.get_columns(table_name)
+            }
+            for column_name in column_names:
+                self.assertIsInstance(types[column_name], sa.Numeric)
+                self.assertEqual(types[column_name].scale, 2)
+        with engine.connect() as connection:
+            self.assertEqual(
+                f"{connection.execute(sa.text(
+                    'SELECT cost_price FROM product WHERE id = 1'
+                )).scalar_one():.2f}",
+                "10.13",
+            )
+            self.assertEqual(
+                f"{connection.execute(sa.text(
+                    'SELECT total FROM sale WHERE id = 1'
+                )).scalar_one():.2f}",
+                "60.38",
+            )
+            for table_name in ("user", "product", "sale"):
+                self.assertEqual(
+                    connection.execute(
+                        sa.text(f'SELECT COUNT(*) FROM "{table_name}"')
+                    ).scalar_one(),
+                    1,
+                )
+            self.assertEqual(
+                connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
+                "ok",
+            )
         engine.dispose()
 
 

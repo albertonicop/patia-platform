@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import resend
 from email_validator import validate_email, EmailNotValidError
-import math
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -9,6 +8,7 @@ import stripe
 import secrets
 import uuid
 import re
+from decimal import Decimal, InvalidOperation
 from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort, has_request_context
 from flask_babel import force_locale, gettext
 from sqlalchemy import case, func, update
@@ -32,6 +32,7 @@ from .models import (
     Supplier,
     User,
 )
+from .money import MONEY_ZERO, money_decimal, money_json, money_sum
 from .timezones import (
     DEFAULT_TIMEZONE,
     TIMEZONE_CHOICES,
@@ -151,7 +152,7 @@ def _trial_access_response(user, *, json_response=False):
 
 
 def money(value):
-    return f"${value:,.2f} MXN"
+    return f"${money_decimal(value, nonnegative=False):,.2f} MXN"
 
 
 def _sale_ticket_key(sale):
@@ -1143,9 +1144,9 @@ def _report_analytics(
         .scalar()
         or 0
     )
-    total_sales = float(totals.sales or 0)
-    known_profit = float(totals.profit or 0)
-    known_revenue = float(totals.known_revenue or 0)
+    total_sales = money_decimal(totals.sales or 0)
+    known_profit = money_decimal(totals.profit or 0, nonnegative=False)
+    known_revenue = money_decimal(totals.known_revenue or 0)
 
     if db.session.get_bind().dialect.name == "postgresql":
         hour_value = func.date_trunc("hour", Sale.created_at)
@@ -1171,19 +1172,23 @@ def _report_analytics(
         if isinstance(hour, str):
             hour = datetime.fromisoformat(hour)
         day_key = utc_to_local(hour, timezone_name).date().isoformat()
-        sales_value, profit_value = daily_lookup.get(day_key, (0, 0))
+        sales_value, profit_value = daily_lookup.get(
+            day_key, (MONEY_ZERO, MONEY_ZERO)
+        )
         daily_lookup[day_key] = (
-            sales_value + float(row.sales or 0),
-            profit_value + float(row.profit or 0),
+            sales_value + money_decimal(row.sales or 0),
+            profit_value + money_decimal(row.profit or 0, nonnegative=False),
         )
     daily = []
     cursor = period["start_date"]
     while cursor <= period["end_date"]:
-        sales_value, profit_value = daily_lookup.get(cursor.isoformat(), (0, 0))
+        sales_value, profit_value = daily_lookup.get(
+            cursor.isoformat(), (MONEY_ZERO, MONEY_ZERO)
+        )
         daily.append({
             "date": cursor.isoformat(),
-            "sales": round(sales_value, 2),
-            "profit": round(profit_value, 2),
+            "sales": sales_value,
+            "profit": profit_value,
         })
         cursor += timedelta(days=1)
 
@@ -1212,18 +1217,20 @@ def _report_analytics(
     )
     payment_by_key = {
         row.method: {
-            "amount": float(row.amount or 0),
+            "amount": money_decimal(row.amount or 0),
             "tickets": int(row.tickets or 0),
         }
         for row in payment_rows
     }
     payments = []
     for method in PAYMENT_METHOD_LABELS:
-        item = payment_by_key.get(method, {"amount": 0, "tickets": 0})
+        item = payment_by_key.get(
+            method, {"amount": MONEY_ZERO, "tickets": 0}
+        )
         payments.append({
             "key": method,
             "label": _payment_method_label(method),
-            "amount": round(item["amount"], 2),
+            "amount": item["amount"],
             "tickets": item["tickets"],
             "percentage": round(
                 item["amount"] / total_sales * 100,
@@ -1274,14 +1281,22 @@ def _report_analytics(
     )
     profitable_products = []
     for row in profitable_rows:
-        revenue = float(row.revenue or 0)
+        revenue = money_decimal(row.revenue or 0)
         has_unknown_cost = bool(row.unknown_lines)
-        profit = None if has_unknown_cost else float(row.profit or 0)
+        profit = (
+            None
+            if has_unknown_cost
+            else money_decimal(row.profit or 0, nonnegative=False)
+        )
         profitable_products.append({
             "name": row.name,
             "units": int(row.units or 0),
             "revenue": revenue,
-            "cost": None if has_unknown_cost else float(row.cost or 0),
+            "cost": (
+                None
+                if has_unknown_cost
+                else money_decimal(row.cost or 0)
+            ),
             "profit": profit,
             "margin": (
                 round(profit / revenue * 100, 1)
@@ -1300,7 +1315,9 @@ def _report_analytics(
                 if known_revenue
                 else None
             ),
-            "average_ticket": total_sales / ticket_count if ticket_count else 0,
+            "average_ticket": money_decimal(
+                total_sales / ticket_count if ticket_count else MONEY_ZERO
+            ),
             "ticket_count": int(ticket_count),
         },
         "unknown_cost_lines": int(totals.unknown_cost_lines or 0),
@@ -1431,7 +1448,7 @@ def _quick_load_product_payload(product):
         "sku": product.sku,
         "stock": product.stock,
         "min_stock": product.min_stock,
-        "sale_price": product.sale_price,
+        "sale_price": money_json(product.sale_price),
         "sale_price_display": money(product.sale_price),
         "supplier": product.supplier,
         "is_active": product.is_active,
@@ -1552,8 +1569,8 @@ def quick_load_create_product():
         sku = str(payload.get("sku") or "").strip() or automatic_sku(organization_id, barcode)
         category = str(payload.get("category") or "").strip() or "General"
         supplier = str(payload.get("supplier") or "").strip() or None
-        cost_price = float(payload.get("cost_price") or 0)
-        sale_price = float(payload.get("sale_price") or 0)
+        cost_price = money_decimal(payload.get("cost_price") or 0)
+        sale_price = money_decimal(payload.get("sale_price") or 0)
         stock = int(payload.get("stock") or 0)
         min_stock = int(payload.get("min_stock") or 0)
     except (TypeError, ValueError, OverflowError):
@@ -1569,9 +1586,8 @@ def quick_load_create_product():
         or len(sku) > 64
         or len(category) > 80
         or (supplier and len(supplier) > 120)
-        or not math.isfinite(cost_price)
-        or not math.isfinite(sale_price)
-        or min(cost_price, sale_price, stock, min_stock) < 0
+        or stock < 0
+        or min_stock < 0
     ):
         return jsonify({
             "ok": False,
@@ -1868,13 +1884,20 @@ def import_products():
         def number_value(value, default=0, integer=False):
             if pd.isna(value) or str(value).strip() == "":
                 number = default
+            elif not integer:
+                return money_decimal(value)
             else:
-                number = float(value)
-            if not math.isfinite(number) or number < 0:
-                raise ValueError("negative value")
-            if integer and not number.is_integer():
-                raise ValueError("fractional integer value")
-            return int(number) if integer else number
+                try:
+                    number = Decimal(str(value))
+                except (InvalidOperation, ValueError, TypeError) as error:
+                    raise ValueError("invalid integer value") from error
+            if integer:
+                if not number.is_finite() or number < 0:
+                    raise ValueError("negative value")
+                if number != number.to_integral_value():
+                    raise ValueError("fractional integer value")
+                return int(number)
+            return money_decimal(number)
 
         for row_index, row in df.iterrows():
             if all(pd.isna(value) or str(value).strip() == "" for value in row.values):
@@ -1990,8 +2013,12 @@ def add_product():
     name = request.form.get("name", "").strip()
     sku = request.form.get("sku", "").strip()
     try:
-        cost_price = float(request.form.get("cost_price") or 0)
-        sale_price = float(request.form.get("sale_price") or 0)
+        cost_price = money_decimal(
+            request.form.get("cost_price") or 0, nonnegative=False
+        )
+        sale_price = money_decimal(
+            request.form.get("sale_price") or 0, nonnegative=False
+        )
         stock = int(request.form.get("stock") or 0)
         min_stock = int(request.form.get("min_stock") or 5)
     except (TypeError, ValueError):
@@ -2023,9 +2050,10 @@ def add_product():
         )
         return redirect(url_for("main.products") + "#agregar-producto")
     if (
-        not math.isfinite(cost_price)
-        or not math.isfinite(sale_price)
-        or min(cost_price, sale_price, stock, min_stock) < 0
+        cost_price < MONEY_ZERO
+        or sale_price < MONEY_ZERO
+        or stock < 0
+        or min_stock < 0
     ):
         flash("Precios y existencias no pueden ser negativos.", "danger")
         return redirect(url_for("main.products"))
@@ -2094,8 +2122,12 @@ def edit_product(product_id):
     sku = request.form.get("sku", "").strip()
     barcode = request.form.get("barcode", "").strip() or None
     try:
-        cost_price = float(request.form.get("cost_price") or 0)
-        sale_price = float(request.form.get("sale_price") or 0)
+        cost_price = money_decimal(
+            request.form.get("cost_price") or 0, nonnegative=False
+        )
+        sale_price = money_decimal(
+            request.form.get("sale_price") or 0, nonnegative=False
+        )
         stock = int(request.form.get("stock") or 0)
         min_stock = int(request.form.get("min_stock") or 0)
     except (TypeError, ValueError):
@@ -2106,9 +2138,10 @@ def edit_product(product_id):
         flash("Nombre y SKU son obligatorios.", "danger")
         return render_template("edit_product.html", product=product, user=user), 400
     if (
-        not math.isfinite(cost_price)
-        or not math.isfinite(sale_price)
-        or min(cost_price, sale_price, stock, min_stock) < 0
+        cost_price < MONEY_ZERO
+        or sale_price < MONEY_ZERO
+        or stock < 0
+        or min_stock < 0
     ):
         flash("Precios y existencias no pueden ser negativos.", "danger")
         return render_template("edit_product.html", product=product, user=user), 400
@@ -2384,7 +2417,7 @@ def sell_cart():
                     "ticket_id": request_id,
                     "folio": folio,
                     "ticket_url": url_for("main.ticket", ticket_ref=request_id),
-                    "total": sum(sale.total for sale in previous_sales),
+                    "total": money_json(money_sum(sale.total for sale in previous_sales)),
                     "payment_method": _payment_method_label(previous_sales[0].payment_method),
                     "single_sale_id": (
                         previous_sales[0].id if len(previous_sales) == 1 else None
@@ -2420,7 +2453,7 @@ def sell_cart():
                     "ticket_id": request_id,
                     "folio": _short_sale_folio(previous_sales),
                     "ticket_url": url_for("main.ticket", ticket_ref=request_id),
-                    "total": sum(sale.total for sale in previous_sales),
+                    "total": money_json(money_sum(sale.total for sale in previous_sales)),
                     "payment_method": _payment_method_label(previous_sales[0].payment_method),
                     "single_sale_id": (
                         previous_sales[0].id if len(previous_sales) == 1 else None
@@ -2467,7 +2500,7 @@ def sell_cart():
             "ticket_id": ticket_id,
             "folio": folio,
             "ticket_url": url_for("main.ticket", ticket_ref=ticket_id),
-            "total": sum(sale.total for sale in sales),
+            "total": money_json(money_sum(sale.total for sale in sales)),
             "single_sale_id": sales[0].id if len(sales) == 1 else None,
             "payment_method": _payment_method_label(payment_method),
         })
@@ -3421,8 +3454,8 @@ def ticket(ticket_ref):
         sales=sales,
         ticket_id=_sale_ticket_key(sales[0]),
         folio=_short_sale_folio(sales),
-        ticket_total=sum(sale.total for sale in sales),
-        ticket_subtotal=sum(sale.total for sale in sales),
+        ticket_total=money_sum(sale.total for sale in sales),
+        ticket_subtotal=money_sum(sale.total for sale in sales),
         item_count=sum(sale.quantity for sale in sales),
         ticket_created_at=utc_to_local(
             min(sale.created_at for sale in sales),

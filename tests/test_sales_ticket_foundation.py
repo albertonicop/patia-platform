@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 import tempfile
 import threading
 import unittest
@@ -137,6 +138,40 @@ class SalesTicketFoundationTests(unittest.TestCase):
             first_print.count("<strong>TKT-000001</strong>"),
             second_print.count("<strong>TKT-000001</strong>"),
         )
+
+    def test_cent_values_remain_exact_in_sale_ticket_and_cancellation(self):
+        user = self.add_user("cents@patia.test")
+        product = self.add_product(
+            user, sku="CENTS", cost=Decimal("0.05"),
+            price=Decimal("0.10"), stock=10,
+        )
+        client = self.client_for(user)
+
+        response = client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "cash",
+                "items": [{"product_id": product.id, "quantity": 3}],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["total"], "0.30")
+        line = Sale.query.one()
+        self.assertEqual(line.unit_price, Decimal("0.10"))
+        self.assertEqual(line.unit_cost, Decimal("0.05"))
+        self.assertEqual(line.total, Decimal("0.30"))
+        ticket_html = client.get(
+            response.get_json()["ticket_url"]
+        ).get_data(as_text=True)
+        self.assertIn("$0.30", ticket_html)
+
+        cancel = client.post(f"/sales/{line.id}/cancel")
+        self.assertEqual(cancel.status_code, 302)
+        db.session.refresh(product)
+        self.assertEqual(product.stock, 10)
+        self.assertEqual(Sale.query.count(), 0)
 
     def test_all_supported_payment_methods_are_stored_on_header_and_lines(self):
         user = self.add_user("payments@patia.test")
