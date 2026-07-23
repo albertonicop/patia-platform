@@ -61,6 +61,7 @@ from .timezones import (
 )
 from .team.services import (
     active_membership,
+    authentication_required_response,
     ensure_owner_organization,
     has_permission,
     membership_for_login,
@@ -84,6 +85,10 @@ def current_user():
         return None
     user = User.query.get(user_id)
     if not user:
+        language = session.get("language", "es")
+        session.clear()
+        session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
+        session["session_expired"] = True
         return None
     if user.session_token and user.session_token != session.get("session_token"):
         session.clear()
@@ -1409,6 +1414,15 @@ def _report_analytics(
 def dashboard():
     user = current_user()
     if not user:
+        if any(
+            session.get(flag)
+            for flag in (
+                "kicked_out",
+                "membership_disabled",
+                "session_expired",
+            )
+        ):
+            return authentication_required_response()
         language = session.get("language", "es")
         session.clear()
         session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
@@ -1416,6 +1430,9 @@ def dashboard():
     membership = active_membership(user)
     if not has_permission(membership, "view_dashboard"):
         return redirect(url_for("main.sell"))
+    access_block = _trial_access_response(user)
+    if access_block:
+        return access_block
     dashboard_data = analytics(user)
     owner = membership.organization.owner
     has_basic_data = all(

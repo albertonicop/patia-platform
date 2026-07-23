@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-23 08:50-0600\n"
+"POT-Creation-Date: 2026-07-23 11:01-0600\n"
 "PO-Revision-Date: 2026-07-17 11:53-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,204 +18,212 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app/routes.py:157
+#: app/__init__.py:263
+msgid "Demasiados intentos"
+msgstr "Too many attempts"
+
+#: app/routes.py:167
 msgid "Tu periodo de prueba terminó. Activa PATIA Pro para continuar."
 msgstr "Your trial period is over. Activate PATIA Pro to continue."
 
-#: app/routes.py:234
+#: app/routes.py:245
 msgid "Selecciona un cliente válido."
 msgstr "Select a valid customer."
 
-#: app/routes.py:242
+#: app/routes.py:253
 msgid "El cliente seleccionado no está disponible."
 msgstr "The selected customer is not available."
 
-#: app/routes.py:270
+#: app/routes.py:283
+msgid "Demasiados intentos de autorización. Espera un minuto."
+msgstr "Too many authorization attempts. Wait one minute."
+
+#: app/routes.py:315
 msgid "Activa"
 msgstr "Active"
 
-#: app/routes.py:271 app/templates/admin.html:30
+#: app/routes.py:316 app/templates/admin.html:30
 msgid "En prueba"
 msgstr "On test"
 
-#: app/routes.py:272
+#: app/routes.py:317
 msgid "Pago pendiente"
 msgstr "Payment pending"
 
-#: app/routes.py:273
+#: app/routes.py:318
 msgid "Sin pagar"
 msgstr "Unpaid"
 
-#: app/routes.py:274
+#: app/routes.py:319
 msgid "Cancelada"
 msgstr "Canceled"
 
-#: app/routes.py:275
+#: app/routes.py:320
 msgid "Incompleta"
 msgstr "Incomplete"
 
-#: app/routes.py:276
+#: app/routes.py:321
 msgid "Incompleta y vencida"
 msgstr "Incomplete and expired"
 
-#: app/routes.py:277
+#: app/routes.py:322
 msgid "Pausada"
 msgstr "Paused"
 
-#: app/routes.py:279
+#: app/routes.py:324
 msgid "Sin suscripción"
 msgstr "No subscription"
 
-#: app/routes.py:288
+#: app/routes.py:333
 msgid "Ciudad de México"
 msgstr "Mexico City"
 
-#: app/routes.py:289
+#: app/routes.py:334
 msgid "Cancún"
 msgstr "Cancun"
 
-#: app/routes.py:290
+#: app/routes.py:335
 msgid "Tijuana"
 msgstr "Tijuana"
 
-#: app/routes.py:291
+#: app/routes.py:336
 msgid "Hermosillo"
 msgstr "Hermosillo"
 
-#: app/routes.py:292
+#: app/routes.py:337
 msgid "Chihuahua"
 msgstr "Chihuahua"
 
-#: app/routes.py:539
+#: app/routes.py:584
 msgid "Completa todos los campos obligatorios."
 msgstr "Complete all required fields."
 
-#: app/routes.py:542 app/routes.py:543 app/routes.py:554 app/routes.py:555
-#: app/routes.py:565 app/routes.py:566 app/routes.py:586 app/routes.py:587
-#: app/routes.py:615 app/routes.py:616 app/routes.py:660
+#: app/routes.py:587 app/routes.py:588 app/routes.py:599 app/routes.py:600
+#: app/routes.py:610 app/routes.py:611 app/routes.py:631 app/routes.py:632
+#: app/routes.py:660 app/routes.py:661 app/routes.py:705
 msgid "Crear cuenta"
 msgstr "Create account"
 
-#: app/routes.py:551
+#: app/routes.py:596
 msgid "El correo no es válido o no existe."
 msgstr "The email address is invalid or does not exist."
 
-#: app/routes.py:562 app/routes.py:794
+#: app/routes.py:607 app/routes.py:839
 msgid "La contraseña debe tener al menos 8 caracteres."
 msgstr "The password must be at least 8 characters."
 
-#: app/routes.py:583 app/routes.py:612
+#: app/routes.py:628 app/routes.py:657
 msgid "Ese correo ya está registrado."
 msgstr "That email address is already registered."
 
-#: app/routes.py:640
+#: app/routes.py:685
 msgid "Verifica tu correo en PATIA"
 msgstr "Verify your email in PATIA"
 
-#: app/routes.py:644 app/templates/verify_email.html:9
+#: app/routes.py:689 app/templates/verify_email.html:9
 msgid "Verifica tu correo"
 msgstr "Verify your email"
 
-#: app/routes.py:645
+#: app/routes.py:690
 msgid "Tu código de verificación es:"
 msgstr "Your verification code is:"
 
-#: app/routes.py:647 app/routes.py:736
+#: app/routes.py:692 app/routes.py:781
 msgid "Este código expira en 30 minutos."
 msgstr "This code expires in 30 minutes."
 
-#: app/routes.py:677
+#: app/routes.py:722
 msgid "Código inválido."
 msgstr "Invalid code."
 
-#: app/routes.py:681
+#: app/routes.py:726
 msgid "El código expiró. Solicita uno nuevo."
 msgstr "The code expired. Request a new one."
 
-#: app/routes.py:685
+#: app/routes.py:730
 msgid "Código incorrecto."
 msgstr "Incorrect code."
 
-#: app/routes.py:695
+#: app/routes.py:740
 msgid "¡Bienvenido a PATIA!"
 msgstr "Welcome to PATIA!"
 
-#: app/routes.py:699
+#: app/routes.py:744
 #, python-format
 msgid "Bienvenido a PATIA, %(name)s!"
 msgstr "Welcome to PATIA, %(name)s!"
 
-#: app/routes.py:700
+#: app/routes.py:745
 msgid "Tu cuenta está lista. Tienes 14 días gratis para explorar todo."
 msgstr "Your account is ready. You have 14 days free to explore everything."
 
-#: app/routes.py:701
+#: app/routes.py:746
 msgid "Ir a mi inventario"
 msgstr "Go to my inventory"
 
-#: app/routes.py:708
+#: app/routes.py:753
 msgid "¡Correo verificado! Bienvenido a PATIA."
 msgstr "Email verified! Welcome to PATIA."
 
-#: app/routes.py:731
+#: app/routes.py:776
 msgid "Nuevo código de verificación PATIA"
 msgstr "New PATIA verification code"
 
-#: app/routes.py:734
+#: app/routes.py:779
 msgid "Tu nuevo código"
 msgstr "Your new code"
 
-#: app/routes.py:742
+#: app/routes.py:787
 msgid "Te enviamos un nuevo código de verificación."
 msgstr "We sent you a new verification code."
 
-#: app/routes.py:744
+#: app/routes.py:789
 msgid "No pudimos enviar el código. Inténtalo nuevamente en unos minutos."
 msgstr "We could not send the code. Try again in a few minutes."
 
-#: app/routes.py:763
+#: app/routes.py:808
 msgid "Recupera tu contraseña PATIA"
 msgstr "Recover your PATIA password"
 
-#: app/routes.py:766
+#: app/routes.py:811
 msgid "Recuperar contraseña"
 msgstr "Recover password"
 
-#: app/routes.py:767
+#: app/routes.py:812
 msgid ""
 "Haz clic en el botón para crear una nueva contraseña. Expira en 30 "
 "minutos."
 msgstr "Click the button to create a new password. Expires in 30 minutes."
 
-#: app/routes.py:768
+#: app/routes.py:813
 msgid "Crear nueva contraseña"
 msgstr "Create new password"
 
-#: app/routes.py:776
+#: app/routes.py:821
 msgid "Si ese correo existe, te enviamos un enlace."
 msgstr "If that email exists, we sent a link."
 
-#: app/routes.py:800
+#: app/routes.py:845
 msgid "Contraseña actualizada. Inicia sesión."
 msgstr "Password updated. Sign in."
 
-#: app/routes.py:814
+#: app/routes.py:859
 msgid "Correo o contraseña incorrectos."
 msgstr "Incorrect email or password."
 
-#: app/routes.py:822
+#: app/routes.py:867
 msgid "Tu acceso a esta empresa estÃ¡ desactivado. Contacta al propietario."
 msgstr "Your access to this business is deactivated. Contact the owner."
 
-#: app/routes.py:840
+#: app/routes.py:885
 msgid "Tu prueba gratuita de PATIA termina en 2 días"
 msgstr "Your free PATIA trial ends in 2 days"
 
-#: app/routes.py:844
+#: app/routes.py:889
 msgid "Tu prueba termina en 2 días"
 msgstr "Your trial ends in 2 days"
 
-#: app/routes.py:845
+#: app/routes.py:890
 #, python-format
 msgid ""
 "Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No "
@@ -224,65 +232,65 @@ msgstr ""
 "Hello %(name)s, your PATIA free trial period ends soon. Don't lose access"
 " to your inventory and sales."
 
-#: app/routes.py:846 app/templates/base.html:83
+#: app/routes.py:891 app/templates/base.html:84
 msgid "Activar PATIA Pro"
 msgstr "Activate PATIA Pro"
 
-#: app/routes.py:854
+#: app/routes.py:899
 msgid "Sesión iniciada correctamente."
 msgstr "Signed in successfully."
 
-#: app/routes.py:857 app/templates/landing.html:23
+#: app/routes.py:902 app/templates/landing.html:23
 #: app/templates/landing.html:276
 msgid "Iniciar sesión"
 msgstr "Sign in"
 
-#: app/routes.py:857
+#: app/routes.py:902
 msgid "Entrar"
 msgstr "Sign in"
 
-#: app/routes.py:980
+#: app/routes.py:1025
 #, python-format
 msgid "%(product)s agotado"
 msgstr "%(product)s sold out"
 
-#: app/routes.py:981
+#: app/routes.py:1026
 msgid "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
 msgstr "Current stock: 0. You need to restock immediately."
 
-#: app/routes.py:986
+#: app/routes.py:1031
 #, python-format
 msgid "Reordenar %(product)s"
 msgstr "Reorder %(product)s"
 
-#: app/routes.py:988
+#: app/routes.py:1033
 #, python-format
 msgid "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s."
 msgstr "Current stock: %(stock)s. Recommended minimum: %(minimum)s."
 
-#: app/routes.py:996
+#: app/routes.py:1041
 #, python-format
 msgid "%(product)s se agotará pronto"
 msgstr "%(product)s will be out of stock soon"
 
-#: app/routes.py:998
+#: app/routes.py:1043
 #, python-format
 msgid ""
 "Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s "
 "días."
 msgstr "At the current sales rate, it will be gone in approximately %(days)s days."
 
-#: app/routes.py:1005
+#: app/routes.py:1050
 #, python-format
 msgid "Vigilar %(product)s"
 msgstr "Monitor %(product)s"
 
-#: app/routes.py:1006
+#: app/routes.py:1051
 #, python-format
 msgid "Inventario estimado para %(days)s días."
 msgstr "Estimated inventory for %(days)s days."
 
-#: app/routes.py:1012
+#: app/routes.py:1057
 #, python-format
 msgid ""
 "%(product)s es el producto con más movimiento. Conviene revisar sus "
@@ -291,12 +299,12 @@ msgstr ""
 "%(product)s is the product with the most movement. It is a good idea to "
 "check their stock before your next purchase."
 
-#: app/routes.py:1017
+#: app/routes.py:1062
 #, python-format
 msgid "En los últimos 7 días registraste $%(amount)s MXN en ventas."
 msgstr "In the last 7 days you recorded $%(amount)s MXN in sales."
 
-#: app/routes.py:1022
+#: app/routes.py:1067
 #, python-format
 msgid ""
 "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, "
@@ -305,7 +313,7 @@ msgstr ""
 "Your estimated profit for the last 7 days is $%(amount)s MXN, considering"
 " the recorded cost of products sold."
 
-#: app/routes.py:1028
+#: app/routes.py:1073
 #, python-format
 msgid ""
 "Tienes %(count)s producto con inventario bajo. Revísalo antes de que "
@@ -314,7 +322,7 @@ msgstr ""
 "You have %(count)s product with low inventory. Review it before it "
 "affects a sale."
 
-#: app/routes.py:1033
+#: app/routes.py:1078
 #, python-format
 msgid ""
 "Tienes %(count)s productos con inventario bajo. Revísalos antes de que "
@@ -323,150 +331,151 @@ msgstr ""
 "You have %(count)s products with low inventory. Review them before they "
 "affect a sale."
 
-#: app/routes.py:1086
+#: app/routes.py:1131
 msgid "El periodo solicitado no es válido. Mostramos los últimos 7 días."
 msgstr "The requested period is invalid. We are showing the last 7 days."
 
-#: app/routes.py:1110
+#: app/routes.py:1155
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr "The start date cannot be later than the end date."
 
-#: app/routes.py:1112
+#: app/routes.py:1157
 msgid "El rango personalizado no puede superar 366 días."
 msgstr "The custom range cannot exceed 366 days."
 
-#: app/routes.py:1114
+#: app/routes.py:1159
 msgid "Escribe fechas válidas. Mostramos los últimos 7 días."
 msgstr "Enter valid dates. We are showing the last 7 days."
 
-#: app/routes.py:1387
+#: app/routes.py:1435
 msgid "Completa los datos básicos"
 msgstr "Complete the basic information"
 
-#: app/routes.py:1388
+#: app/routes.py:1436
 msgid "Confirma la información principal de tu negocio."
 msgstr "Confirm the main information of your business."
 
-#: app/routes.py:1391
+#: app/routes.py:1439
 msgid "Completar datos"
 msgstr "Complete data"
 
-#: app/routes.py:1402 app/templates/products.html:24
+#: app/routes.py:1450 app/templates/products.html:24
 #: app/templates/products.html:39
 msgid "Agrega tu primer producto"
 msgstr "Add your first product"
 
-#: app/routes.py:1403
+#: app/routes.py:1451
 msgid "Captura un producto o importa tu catálogo desde Excel."
 msgstr "Capture a product or import your catalog from Excel."
 
-#: app/routes.py:1405 app/templates/products.html:27
+#: app/routes.py:1453 app/templates/products.html:27
 msgid "Agregar primer producto"
 msgstr "Add first product"
 
-#: app/routes.py:1409
+#: app/routes.py:1457
 msgid "Registra tu primera venta"
 msgstr "Register your first sale"
 
-#: app/routes.py:1410
+#: app/routes.py:1458
 msgid "Prueba el punto de venta con un producto de tu catálogo."
 msgstr "Test the point of sale with a product from your catalog."
 
-#: app/routes.py:1412
+#: app/routes.py:1460
 msgid "Registrar primera venta"
 msgstr "Register first sale"
 
-#: app/routes.py:1416
+#: app/routes.py:1464
 msgid "Revisa tus resultados"
 msgstr "Check your results"
 
-#: app/routes.py:1417
+#: app/routes.py:1465
 msgid "Consulta ventas, inventario y alertas en este panel."
 msgstr "View sales, inventory, and alerts in this dashboard."
 
-#: app/routes.py:1553 app/routes.py:1594 app/routes.py:1699
+#: app/routes.py:1601 app/routes.py:1642 app/routes.py:1747
+#: app/team/services.py:186
 msgid "Inicia sesión para continuar."
 msgstr "Sign in to continue."
 
-#: app/routes.py:1563
+#: app/routes.py:1611
 msgid "Escanea o escribe un código de barras válido."
 msgstr "Scan or enter a valid barcode."
 
-#: app/routes.py:1616 app/routes.py:1631
+#: app/routes.py:1664 app/routes.py:1679
 msgid "Revisa los datos del producto e inténtalo nuevamente."
 msgstr "Review the product details and try again."
 
-#: app/routes.py:1639
+#: app/routes.py:1687
 msgid "Ese código ya pertenece a un producto de tu inventario."
 msgstr "That barcode already belongs to a product in your inventory."
 
-#: app/routes.py:1645
+#: app/routes.py:1693
 msgid "Ese SKU ya está en uso. Escribe uno diferente."
 msgstr "That SKU is already in use. Enter a different one."
 
-#: app/routes.py:1666
+#: app/routes.py:1714
 msgid "Alta mediante carga rápida"
 msgstr "Created through quick entry"
 
-#: app/routes.py:1680
+#: app/routes.py:1728
 msgid "El código o el SKU ya fue registrado. Escanéalo de nuevo para continuar."
 msgstr "The barcode or SKU was already registered. Scan it again to continue."
 
-#: app/routes.py:1689
+#: app/routes.py:1737
 #, python-format
 msgid "%(product)s se agregó al inventario."
 msgstr "%(product)s was added to inventory."
 
-#: app/routes.py:1715 app/routes.py:2314
+#: app/routes.py:1763 app/routes.py:2362
 msgid "La cantidad recibida debe ser mayor que cero."
 msgstr "The received quantity must be greater than zero."
 
-#: app/routes.py:1726
+#: app/routes.py:1774
 msgid "No encontramos ese producto en tu inventario."
 msgstr "We could not find that product in your inventory."
 
-#: app/routes.py:1733 app/routes.py:2328
+#: app/routes.py:1781 app/routes.py:2376
 msgid "La cantidad recibida supera el límite permitido."
 msgstr "The received quantity exceeds the allowed limit."
 
-#: app/routes.py:1754
+#: app/routes.py:1802
 msgid "Reabastecimiento desde carga rápida"
 msgstr "Restocked through quick entry"
 
-#: app/routes.py:1767 app/routes.py:2362
+#: app/routes.py:1815 app/routes.py:2410
 msgid "No pudimos actualizar el inventario. Inténtalo nuevamente."
 msgstr "We could not update the inventory. Please try again."
 
-#: app/routes.py:1773 app/routes.py:2369
+#: app/routes.py:1821 app/routes.py:2417
 #, python-format
 msgid "Se agregaron %(quantity)s unidades a %(product)s."
 msgstr "%(quantity)s units were added to %(product)s."
 
-#: app/inventory/routes.py:181 app/routes.py:1790
+#: app/inventory/routes.py:181 app/routes.py:1838
 #: app/templates/edit_product.html:20 app/templates/products.html:51
 #: app/templates/products.html:109 app/templates/quick_load.html:62
 #: app/templates/quick_load.html:98
 msgid "SKU"
 msgstr "SKU"
 
-#: app/routes.py:1791 app/templates/edit_product.html:25
+#: app/routes.py:1839 app/templates/edit_product.html:25
 #: app/templates/products.html:75 app/templates/quick_load.html:33
 #: app/templates/quick_load.html:89
 msgid "Código de barras"
 msgstr "Bar-code"
 
-#: app/routes.py:1792 app/templates/edit_product.html:16
+#: app/routes.py:1840 app/templates/edit_product.html:16
 #: app/templates/products.html:47
 msgid "Nombre del producto"
 msgstr "Product name"
 
-#: app/routes.py:1793 app/templates/edit_product.html:30
+#: app/routes.py:1841 app/templates/edit_product.html:30
 #: app/templates/products.html:79 app/templates/products.html:192
 #: app/templates/products.html:197 app/templates/quick_load.html:103
 msgid "Categoría"
 msgstr "Category"
 
-#: app/routes.py:1794 app/templates/edit_product.html:34
+#: app/routes.py:1842 app/templates/edit_product.html:34
 #: app/templates/products.html:83 app/templates/products.html:192
 #: app/templates/products.html:198 app/templates/quick_load.html:65
 #: app/templates/quick_load.html:110 app/templates/suppliers.html:17
@@ -474,40 +483,40 @@ msgstr "Category"
 msgid "Proveedor"
 msgstr "Supplier"
 
-#: app/routes.py:1795 app/templates/reports.html:155
+#: app/routes.py:1843 app/templates/reports.html:155
 msgid "Costo"
 msgstr "Cost"
 
-#: app/routes.py:1796 app/templates/edit_product.html:42
+#: app/routes.py:1844 app/templates/edit_product.html:42
 #: app/templates/products.html:61 app/templates/quick_load.html:121
 msgid "Precio de venta"
 msgstr "Sale price"
 
-#: app/routes.py:1797
+#: app/routes.py:1845
 msgid "Stock inicial"
 msgstr "Initial stock"
 
-#: app/routes.py:1798 app/templates/dashboard.html:170
+#: app/routes.py:1846 app/templates/dashboard.html:170
 #: app/templates/edit_product.html:51 app/templates/products.html:87
 #: app/templates/quick_load.html:129
 msgid "Stock mínimo"
 msgstr "Minimum stock"
 
-#: app/routes.py:1804
+#: app/routes.py:1852
 msgid "PRODUCTOS"
 msgstr "PRODUCTS"
 
-#: app/routes.py:1809
+#: app/routes.py:1857
 msgid "PATIA - Plantilla oficial de productos"
 msgstr "PATIA - Official product template"
 
-#: app/routes.py:1811
+#: app/routes.py:1859
 msgid ""
 "Llena esta tabla con tus productos. No cambies los nombres de las "
 "columnas."
 msgstr "Fill this table with your products. Do not change the column names."
 
-#: app/routes.py:1926
+#: app/routes.py:1974
 msgid ""
 "El archivo no contiene las columnas obligatorias. Descarga la plantilla "
 "PATIA e inténtalo de nuevo."
@@ -515,19 +524,19 @@ msgstr ""
 "The file does not contain the required columns. Download the PATIA "
 "template and try again."
 
-#: app/routes.py:2018
+#: app/routes.py:2066
 msgid "Importación por coincidencia de SKU"
 msgstr "Imported by matching SKU"
 
-#: app/routes.py:2020
+#: app/routes.py:2068
 msgid "Importación por código de barras"
 msgstr "Imported by matching barcode"
 
-#: app/routes.py:2046
+#: app/routes.py:2094
 msgid "Alta mediante importación"
 msgstr "Created through import"
 
-#: app/routes.py:2059
+#: app/routes.py:2107
 #, python-format
 msgid ""
 "Importación terminada: %(created)s creados, %(updated)s actualizados, "
@@ -536,90 +545,117 @@ msgstr ""
 "Import completed: %(created)s created, %(updated)s updated, %(omitted)s "
 "skipped, and %(errors)s errors."
 
-#: app/routes.py:2172
+#: app/routes.py:2220
 msgid "Restauración de producto archivado"
 msgstr "Archived product restored"
 
-#: app/routes.py:2178
+#: app/routes.py:2226
 msgid "Alta manual de producto"
 msgstr "Product created manually"
 
-#: app/routes.py:2278
+#: app/routes.py:2326
 msgid "Stock actualizado al editar el producto"
 msgstr "Stock updated while editing product"
 
-#: app/routes.py:2311
+#: app/routes.py:2359
 msgid "Ingresa una cantidad recibida válida."
 msgstr "Enter a valid received quantity."
 
-#: app/routes.py:2350
+#: app/routes.py:2398
 msgid "Reabastecimiento de inventario"
 msgstr "Inventory restock"
 
-#: app/routes.py:2460 app/routes.py:2678 app/templates/sell.html:37
+#: app/routes.py:2529 app/routes.py:2754 app/templates/sell.html:37
 msgid "Venta registrada"
 msgstr "Sale recorded"
 
-#: app/routes.py:2476
+#: app/routes.py:2545
 #, python-format
 msgid "Venta registrada: %(product)s x%(quantity)s."
 msgstr "Sale recorded: %(product)s x%(quantity)s."
 
-#: app/routes.py:2518
+#: app/routes.py:2594
 msgid "No autenticado"
 msgstr "Not authenticated"
 
-#: app/customers/routes.py:276 app/routes.py:2528 app/routes.py:2559
+#: app/customers/routes.py:282 app/routes.py:2604 app/routes.py:2635
 msgid "Solicitud inválida"
 msgstr "Invalid request"
 
-#: app/routes.py:2532
+#: app/routes.py:2608
 msgid "El carrito está vacío"
 msgstr "The cart is empty"
 
-#: app/routes.py:2536
+#: app/routes.py:2612
 msgid "Selecciona un método de pago válido"
 msgstr "Select a valid payment method"
 
-#: app/routes.py:2542
+#: app/routes.py:2618
 msgid "Abre la caja antes de registrar una venta en efectivo."
 msgstr "Open the cash register before recording a cash sale."
 
-#: app/routes.py:2565 app/routes.py:2571
+#: app/routes.py:2641 app/routes.py:2647
 msgid "Artículo inválido"
 msgstr "Invalid item"
 
-#: app/routes.py:2574
+#: app/routes.py:2650
 msgid "La cantidad debe ser mayor a cero"
 msgstr "The quantity must be greater than zero"
 
-#: app/routes.py:2611
+#: app/routes.py:2687
 msgid "Producto no encontrado"
 msgstr "Product not found"
 
-#: app/routes.py:2639
+#: app/routes.py:2715
 #, python-format
 msgid "Stock insuficiente: %(product)s"
 msgstr "Insufficient stock: %(product)s"
 
-#: app/routes.py:2707
+#: app/customers/services.py:86 app/customers/services.py:99 app/routes.py:2764
+#: app/team/services.py:217
+msgid "Acceso no permitido."
+msgstr "Access not allowed."
+
+# PATIA V1.5 - Credit and accounts receivable
+#: app/routes.py:2768
+msgid "Selecciona un cliente para vender a crédito."
+msgstr "Select a customer for a credit sale."
+
+#: app/routes.py:2813
 msgid "No se pudo procesar la venta"
 msgstr "The sale could not be processed"
 
-#: app/routes.py:3192
+#: app/routes.py:3242
+msgid "Venta cancelada. Stock devuelto al inventario."
+msgstr "Sale canceled. Stock returned to inventory."
+
+#: app/routes.py:3254
+msgid "Devolución registrada. Stock devuelto al inventario."
+msgstr "Return recorded. Stock returned to inventory."
+
+#: app/routes.py:3281
+msgid "Abre la caja antes de devolver una venta en efectivo."
+msgstr "Open the cash register before refunding a cash sale."
+
+#: app/routes.py:3289
+msgid "La venta a crédito no tiene un cliente asociado."
+msgstr "The credit sale has no customer attached."
+
+#: app/routes.py:3321
 msgid "Devolución de venta"
 msgstr "Sale return"
 
-#: app/inventory/routes.py:58 app/routes.py:3194
+#: app/inventory/routes.py:58 app/routes.py:3323
+#: app/templates/credit_account.html:53
 msgid "Cancelación de venta"
 msgstr "Sale cancellation"
 
-#: app/routes.py:3205
+#: app/routes.py:3334
 #, python-format
 msgid "Devolución de %(folio)s"
 msgstr "Refund for %(folio)s"
 
-#: app/routes.py:3490
+#: app/routes.py:3619
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del"
@@ -628,12 +664,12 @@ msgstr ""
 "We deleted %(deleted)s products without sales and removed %(protected)s "
 "from the catalog while preserving their history."
 
-#: app/routes.py:3498
+#: app/routes.py:3627
 #, python-format
 msgid "Eliminamos %(count)s productos del catálogo."
 msgstr "We deleted %(count)s products from the catalog."
 
-#: app/routes.py:3561
+#: app/routes.py:3690
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s seleccionados y retiramos %(protected)s "
@@ -642,12 +678,12 @@ msgstr ""
 "We deleted %(deleted)s selected products and removed %(protected)s while "
 "preserving their history."
 
-#: app/routes.py:3568
+#: app/routes.py:3697
 #, python-format
 msgid "%(count)s productos eliminados."
 msgstr "%(count)s products deleted."
 
-#: app/cash/routes.py:25 app/cash/routes.py:125
+#: app/cash/routes.py:25 app/cash/routes.py:126
 #: app/templates/cash_register.html:22 app/templates/cash_register.html:72
 #: app/templates/cash_register_detail.html:18
 msgid "Fondo inicial"
@@ -657,145 +693,242 @@ msgstr "Opening cash"
 msgid "Venta en efectivo"
 msgstr "Cash sale"
 
-#: app/cash/routes.py:27 app/templates/cash_register.html:35
+#: app/cash/routes.py:27
+msgid "Abono de crédito en efectivo"
+msgstr "Cash credit payment"
+
+#: app/cash/routes.py:28 app/templates/cash_register.html:35
 msgid "Entrada de efectivo"
 msgstr "Cash in"
 
-#: app/cash/routes.py:28 app/templates/cash_register.html:36
+#: app/cash/routes.py:29 app/templates/cash_register.html:36
 msgid "Retiro"
 msgstr "Withdrawal"
 
-#: app/cash/routes.py:29 app/templates/cash_register.html:37
+#: app/cash/routes.py:30 app/templates/cash_register.html:37
 msgid "Gasto"
 msgstr "Expense"
 
-#: app/cash/routes.py:30 app/inventory/routes.py:59
+#: app/cash/routes.py:31 app/inventory/routes.py:59
 msgid "Devolución"
 msgstr "Refund"
 
-#: app/cash/routes.py:103
+#: app/cash/routes.py:104
 msgid "Ingresa un fondo inicial válido."
 msgstr "Enter a valid opening cash amount."
 
-#: app/cash/routes.py:106 app/cash/routes.py:131
+#: app/cash/routes.py:107 app/cash/routes.py:132
 msgid "La caja principal ya tiene un turno abierto."
 msgstr "The main register already has an open shift."
 
-#: app/cash/routes.py:133
+#: app/cash/routes.py:134
 msgid "Caja abierta correctamente."
 msgstr "Cash register opened successfully."
 
-#: app/cash/routes.py:145
+#: app/cash/routes.py:146
 msgid "Abre la caja antes de registrar movimientos."
 msgstr "Open the cash register before recording movements."
 
-#: app/cash/routes.py:155
+#: app/cash/routes.py:156
 msgid "Ingresa un importe mayor a cero."
 msgstr "Enter an amount greater than zero."
 
-#: app/cash/routes.py:159
+#: app/cash/routes.py:160
 msgid "Describe brevemente el movimiento."
 msgstr "Briefly describe the movement."
 
-#: app/cash/routes.py:165
+#: app/cash/routes.py:166
 msgid "Movimiento de caja registrado."
 msgstr "Cash movement recorded."
 
-#: app/cash/routes.py:177
+#: app/cash/routes.py:178
 msgid "No hay una caja abierta para cerrar."
 msgstr "There is no open register to close."
 
-#: app/cash/routes.py:182
+#: app/cash/routes.py:183
 msgid "Ingresa el efectivo contado."
 msgstr "Enter the counted cash."
 
-#: app/cash/routes.py:196
+#: app/cash/routes.py:197
 msgid "Corte de caja guardado correctamente."
 msgstr "Cash register close saved successfully."
 
-#: app/customers/routes.py:97
+#: app/credit/routes.py:115
+#, python-format
+msgid ""
+"Hola %(name)s, te recordamos que tienes un saldo pendiente de %(balance)s"
+" en %(business)s."
+msgstr ""
+"Hello %(name)s, this is a reminder that your outstanding balance at "
+"%(business)s is %(balance)s."
+
+#: app/credit/routes.py:147
+msgid "Escribe un límite de crédito válido."
+msgstr "Enter a valid credit limit."
+
+#: app/credit/routes.py:153
+msgid "Liquida el saldo antes de desactivar el crédito."
+msgstr "Settle the balance before disabling credit."
+
+#: app/credit/routes.py:160
+msgid "Configuración de crédito actualizada."
+msgstr "Credit settings updated."
+
+#: app/credit/routes.py:180
+msgid "Abono registrado correctamente."
+msgstr "Payment recorded successfully."
+
+#: app/credit/routes.py:182 app/credit/routes.py:199
+msgid "Este abono ya había sido registrado."
+msgstr "This payment was already recorded."
+
+#: app/credit/routes.py:203
+msgid "No se pudo registrar el abono. Actualiza la página e inténtalo de nuevo."
+msgstr "The payment could not be recorded. Refresh the page and try again."
+
+#: app/credit/services.py:21
+msgid "La venta supera el límite de crédito."
+msgstr "This sale exceeds the credit limit."
+
+#: app/credit/services.py:71
+msgid "Este cliente no tiene crédito habilitado."
+msgstr "Credit is not enabled for this customer."
+
+#: app/credit/services.py:86
+msgid "Se requiere autorización para exceder el límite."
+msgstr "Authorization is required to exceed the limit."
+
+#: app/credit/services.py:118 app/credit/services.py:201
+msgid "Cliente no encontrado."
+msgstr "Customer not found."
+
+#: app/credit/services.py:121
+msgid "El abono debe ser mayor a cero."
+msgstr "The payment must be greater than zero."
+
+#: app/credit/services.py:123
+msgid "Selecciona un método de pago válido."
+msgstr "Select a valid payment method."
+
+#: app/credit/services.py:131 app/credit/services.py:148
+msgid "No se pudo verificar este abono. Actualiza la página e inténtalo de nuevo."
+msgstr "This payment could not be verified. Refresh the page and try again."
+
+#: app/credit/services.py:155
+msgid "El abono no puede ser mayor al saldo pendiente."
+msgstr "The payment cannot exceed the outstanding balance."
+
+#: app/credit/services.py:165
+msgid "Abre la caja antes de recibir un abono en efectivo."
+msgstr "Open the cash register before receiving a cash payment."
+
+#: app/credit/services.py:189
+#, python-format
+msgid "Abono de crédito: %(customer)s"
+msgstr "Credit payment: %(customer)s"
+
+#: app/credit/services.py:207
+msgid "No se puede cancelar esta venta porque parte de su saldo ya fue pagado."
+msgstr ""
+"This sale cannot be canceled because part of its balance has already been"
+" paid."
+
+#: app/credit/services.py:219
+#, python-format
+msgid "Cancelación de %(folio)s"
+msgstr "Cancellation of %(folio)s"
+
+#: app/customers/routes.py:102
 msgid "Cliente guardado correctamente."
 msgstr "Customer saved successfully."
 
-#: app/customers/routes.py:114
+#: app/customers/routes.py:119
 msgid "Cliente actualizado correctamente."
 msgstr "Customer updated successfully."
 
-#: app/customers/routes.py:130
+#: app/customers/routes.py:135
 msgid "Cliente reactivado."
 msgstr "Customer reactivated."
 
-#: app/customers/routes.py:132
+#: app/customers/routes.py:137
 msgid "Cliente desactivado."
 msgstr "Customer deactivated."
 
-#: app/customers/routes.py:177 app/templates/sell.html:108
+#: app/customers/routes.py:182 app/templates/credit_account.html:27
+#: app/templates/sell.html:109
 msgid "Efectivo"
 msgstr "Cash"
 
-#: app/customers/routes.py:178 app/templates/sell.html:109
+#: app/customers/routes.py:183 app/templates/credit_account.html:28
+#: app/templates/sell.html:110
 msgid "Tarjeta"
 msgstr "Card"
 
-#: app/customers/routes.py:179 app/templates/sell.html:110
+#: app/customers/routes.py:184 app/templates/credit_account.html:29
+#: app/templates/sell.html:111
 msgid "Transferencia"
 msgstr "Bank transfer"
 
-#: app/customers/routes.py:180 app/templates/auth.html:121
-#: app/templates/sell.html:111
+#: app/customers/routes.py:185 app/templates/auth.html:121
+#: app/templates/credit_account.html:30 app/templates/sell.html:112
 msgid "Otro"
 msgstr "Other"
 
-#: app/customers/routes.py:199 app/templates/auth.html:71
+#: app/customers/routes.py:186 app/templates/customer_detail.html:36
+#: app/templates/sell.html:113
+msgid "Crédito"
+msgstr "Credit"
+
+#: app/customers/routes.py:205 app/templates/auth.html:71
 #: app/templates/customer_form.html:15 app/templates/quick_load.html:94
-#: app/templates/sell.html:129 app/templates/team_accept.html:16
+#: app/templates/sell.html:131 app/templates/team_accept.html:16
 msgid "Nombre"
 msgstr "First name"
 
-#: app/customers/routes.py:200 app/templates/admin.html:91
+#: app/customers/routes.py:206 app/templates/admin.html:91
 #: app/templates/auth.html:86 app/templates/customer_form.html:19
-#: app/templates/sell.html:130 app/templates/settings.html:36
+#: app/templates/sell.html:132 app/templates/settings.html:36
 #: app/templates/suppliers.html:38 app/templates/suppliers.html:48
 msgid "Teléfono"
 msgstr "Phone"
 
-#: app/customers/routes.py:201
+#: app/customers/routes.py:207
 msgid "Email"
 msgstr "Email"
 
-#: app/customers/routes.py:202 app/templates/admin.html:96
+#: app/customers/routes.py:208 app/templates/admin.html:96
 #: app/templates/auth.html:101 app/templates/auth.html:102
 #: app/templates/customer_detail.html:28 app/templates/customers.html:43
 #: app/templates/customers.html:53 app/templates/settings.html:58
 msgid "Estado"
 msgstr "State"
 
-#: app/customers/routes.py:203
+#: app/customers/routes.py:209
 msgid "Fecha de creación"
 msgstr "Created on"
 
-#: app/customers/routes.py:204 app/templates/customer_detail.html:24
+#: app/customers/routes.py:210 app/templates/customer_detail.html:24
 #: app/templates/customers.html:43 app/templates/customers.html:51
 msgid "Total comprado"
 msgstr "Total purchased"
 
-#: app/customers/routes.py:205 app/templates/customer_detail.html:26
+#: app/customers/routes.py:211 app/templates/customer_detail.html:26
 #: app/templates/customers.html:43 app/templates/customers.html:52
 msgid "Última compra"
 msgstr "Last purchase"
 
-#: app/customers/routes.py:206 app/templates/customer_detail.html:32
+#: app/customers/routes.py:212 app/templates/customer_detail.html:32
 #: app/templates/customer_form.html:28 app/templates/suppliers.html:23
 msgid "Notas"
 msgstr "Notes"
 
-#: app/customers/routes.py:215 app/templates/customer_detail.html:28
+#: app/customers/routes.py:221 app/templates/customer_detail.html:28
 #: app/templates/customers.html:53 app/templates/quick_load.html:154
 #: app/templates/team.html:35
 msgid "Activo"
 msgstr "Active"
 
-#: app/customers/routes.py:217 app/templates/customer_detail.html:28
+#: app/customers/routes.py:223 app/templates/customer_detail.html:28
 #: app/templates/customers.html:53
 msgid "Inactivo"
 msgstr "Inactive"
@@ -823,11 +956,6 @@ msgstr "Enter a valid email address."
 #: app/customers/services.py:73
 msgid "Las notas no pueden superar 2000 caracteres."
 msgstr "Notes cannot exceed 2000 characters."
-
-#: app/customers/services.py:86 app/customers/services.py:99
-#: app/team/services.py:159
-msgid "Acceso no permitido."
-msgstr "Access not allowed."
 
 #: app/inventory/routes.py:56
 msgid "Saldo inicial"
@@ -878,20 +1006,22 @@ msgstr "Local date"
 #: app/templates/inventory_kardex.html:85
 #: app/templates/inventory_kardex.html:90 app/templates/products.html:192
 #: app/templates/products.html:196 app/templates/reports.html:137
-#: app/templates/reports.html:155 app/templates/sell.html:99
+#: app/templates/reports.html:155 app/templates/sell.html:100
 #: app/templates/ticket.html:47
 msgid "Producto"
 msgstr "Product"
 
-#: app/inventory/routes.py:182 app/templates/inventory_kardex.html:40
+#: app/inventory/routes.py:182 app/templates/credit_account.html:48
+#: app/templates/inventory_kardex.html:40
 #: app/templates/inventory_kardex.html:85
 #: app/templates/inventory_kardex.html:91
 msgid "Movimiento"
 msgstr "Movement"
 
-#: app/inventory/routes.py:183 app/templates/inventory_kardex.html:72
+#: app/inventory/routes.py:183 app/templates/credit_account.html:23
+#: app/templates/inventory_kardex.html:72
 #: app/templates/inventory_kardex.html:85
-#: app/templates/inventory_kardex.html:92 app/templates/sell.html:99
+#: app/templates/inventory_kardex.html:92 app/templates/sell.html:100
 msgid "Cantidad"
 msgstr "Amount"
 
@@ -904,7 +1034,7 @@ msgid "Stock posterior"
 msgstr "New stock"
 
 #: app/inventory/routes.py:186 app/templates/cash_register.html:24
-#: app/templates/inventory_kardex.html:85
+#: app/templates/credit_account.html:48 app/templates/inventory_kardex.html:85
 #: app/templates/inventory_kardex.html:95
 msgid "Responsable"
 msgstr "Responsible"
@@ -914,8 +1044,8 @@ msgstr "Responsible"
 msgid "Motivo"
 msgstr "Reason"
 
-#: app/inventory/routes.py:188 app/templates/customer_detail.html:40
-#: app/templates/customer_detail.html:42 app/templates/sell.html:39
+#: app/inventory/routes.py:188 app/templates/customer_detail.html:53
+#: app/templates/customer_detail.html:55 app/templates/sell.html:39
 #: app/templates/ticket.html:2 app/templates/ticket.html:9
 msgid "Ticket"
 msgstr "Receipt"
@@ -1036,6 +1166,18 @@ msgstr "The PIN must contain 4 to 6 digits."
 msgid "PIN actualizado."
 msgstr "PIN updated."
 
+#: app/team/services.py:174
+msgid "Tu acceso a esta empresa fue desactivado. Contacta al propietario."
+msgstr "Your access to this business is deactivated. Contact the owner."
+
+#: app/team/services.py:179
+msgid "Tu sesión terminó porque se inició sesión en otro dispositivo."
+msgstr "Your session ended because the account was used on another device."
+
+#: app/team/services.py:183
+msgid "Tu sesión expiró. Inicia sesión para continuar."
+msgstr "Your session expired. Sign in to continue."
+
 #: app/templates/_language_selector.html:1
 msgid "Idioma"
 msgstr "Language"
@@ -1147,8 +1289,8 @@ msgstr "WhatsApp"
 
 #: app/templates/admin.html:98 app/templates/customers.html:43
 #: app/templates/customers.html:54 app/templates/products.html:192
-#: app/templates/products.html:203 app/templates/sell.html:148
-#: app/templates/sell.html:157 app/templates/suppliers.html:40
+#: app/templates/products.html:203 app/templates/sell.html:150
+#: app/templates/sell.html:159 app/templates/suppliers.html:40
 #: app/templates/suppliers.html:59
 msgid "Acciones"
 msgstr "Actions"
@@ -1371,7 +1513,7 @@ msgid "Menú"
 msgstr "Menu"
 
 #: app/templates/base.html:30 app/templates/dashboard.html:152
-#: app/templates/dashboard.html:210 app/templates/sell.html:124
+#: app/templates/dashboard.html:210 app/templates/sell.html:126
 msgid "Cerrar"
 msgstr "Close"
 
@@ -1401,70 +1543,75 @@ msgstr "Point of sale"
 msgid "Clientes"
 msgstr "Customers"
 
-#: app/templates/base.html:42 app/templates/dashboard.html:130
+#: app/templates/base.html:42 app/templates/credit_accounts.html:2
+#: app/templates/customer_detail.html:37
+msgid "Crédito y cuentas por cobrar"
+msgstr "Credit and accounts receivable"
+
+#: app/templates/base.html:43 app/templates/dashboard.html:130
 msgid "Caja"
 msgstr "Cash register"
 
-#: app/templates/base.html:44 app/templates/base.html:46
+#: app/templates/base.html:45 app/templates/base.html:47
 #: app/templates/reports.html:2
 msgid "Reportes IA"
 msgstr "AI Reports"
 
-#: app/templates/base.html:46
+#: app/templates/base.html:47
 msgid "PRO"
 msgstr "PRO"
 
-#: app/templates/base.html:48 app/templates/suppliers.html:2
+#: app/templates/base.html:49 app/templates/suppliers.html:2
 msgid "Proveedores"
 msgstr "Suppliers"
 
-#: app/templates/base.html:49 app/templates/settings.html:2
+#: app/templates/base.html:50 app/templates/settings.html:2
 msgid "Configuración"
 msgstr "Settings"
 
-#: app/templates/base.html:51 app/templates/team.html:6
+#: app/templates/base.html:52 app/templates/team.html:6
 msgid "Equipo"
 msgstr "Team"
 
-#: app/templates/base.html:57
+#: app/templates/base.html:58
 msgid "Cerrar sesión"
 msgstr "Sign out"
 
-#: app/templates/base.html:68
+#: app/templates/base.html:69
 msgid "Contactar a PATIA por WhatsApp"
 msgstr "Contact PATIA by WhatsApp"
 
-#: app/templates/base.html:71
+#: app/templates/base.html:72
 msgid "Ayuda"
 msgstr "Help"
 
-#: app/templates/base.html:78
+#: app/templates/base.html:79
 msgid "Plan actual: PATIA Pro"
 msgstr "Current plan: PATIA Pro"
 
-#: app/templates/base.html:79
+#: app/templates/base.html:80
 msgid "Suscripción activa · $199 MXN/mes"
 msgstr "Active subscription ? $199 MXN/month"
 
-#: app/templates/base.html:81
+#: app/templates/base.html:82
 msgid "Plan actual: Prueba"
 msgstr "Current plan: Trial"
 
-#: app/templates/base.html:82
+#: app/templates/base.html:83
 #, python-format
 msgid "%(days)s días restantes · $199 MXN/mes"
 msgstr "%(days)s days remaining ? $199 MXN/month"
 
-#: app/templates/base.html:92
+#: app/templates/base.html:93
 msgid "Centro de control"
 msgstr "Control center"
 
-#: app/templates/base.html:110 app/templates/landing.html:274
+#: app/templates/base.html:111 app/templates/landing.html:274
 #: app/templates/legal.html:14 app/templates/legal.html:57
 msgid "Términos"
 msgstr "Terms"
 
-#: app/templates/base.html:111 app/templates/landing.html:275
+#: app/templates/base.html:112 app/templates/landing.html:275
 #: app/templates/legal.html:14 app/templates/legal.html:57
 msgid "Privacidad"
 msgstr "Privacy"
@@ -1590,7 +1737,7 @@ msgid "Cortes anteriores"
 msgstr "Previous shifts"
 
 #: app/templates/cash_register.html:88 app/templates/cash_register.html:92
-#: app/templates/inventory_kardex.html:85
+#: app/templates/credit_account.html:48 app/templates/inventory_kardex.html:85
 #: app/templates/inventory_kardex.html:89 app/templates/ticket.html:41
 msgid "Fecha"
 msgstr "Date"
@@ -1608,8 +1755,9 @@ msgstr "Counted"
 msgid "Diferencia"
 msgstr "Difference"
 
-#: app/templates/cash_register.html:88 app/templates/customer_detail.html:40
-#: app/templates/customer_detail.html:47 app/templates/sell.html:99
+#: app/templates/cash_register.html:88 app/templates/credit_accounts.html:17
+#: app/templates/customer_detail.html:53 app/templates/customer_detail.html:60
+#: app/templates/sell.html:100
 msgid "Acción"
 msgstr "Action"
 
@@ -1658,6 +1806,147 @@ msgstr "Time"
 msgid "Detalle"
 msgstr "Details"
 
+#: app/templates/credit_account.html:2 app/templates/credit_account.html:8
+#: app/templates/sell.html:64
+msgid "Estado de cuenta"
+msgstr "Account statement"
+
+#: app/templates/credit_account.html:7
+msgid "Volver a cuentas"
+msgstr "Back to accounts"
+
+#: app/templates/credit_account.html:7
+msgid "Volver al punto de venta"
+msgstr "Back to point of sale"
+
+#: app/templates/credit_account.html:12 app/templates/credit_accounts.html:17
+#: app/templates/credit_accounts.html:23
+msgid "Saldo pendiente"
+msgstr "Outstanding balance"
+
+#: app/templates/credit_account.html:15
+msgid "El crédito no está habilitado para este cliente."
+msgstr "Credit is not enabled for this customer."
+
+#: app/templates/credit_account.html:19 app/templates/credit_account.html:34
+msgid "Registrar abono"
+msgstr "Record payment"
+
+#: app/templates/credit_account.html:25 app/templates/sell.html:39
+#: app/templates/sell.html:107 app/templates/ticket.html:66
+msgid "Método de pago"
+msgstr "Payment method"
+
+#: app/templates/credit_account.html:32
+msgid "Nota (opcional)"
+msgstr "Note (optional)"
+
+#: app/templates/credit_account.html:38
+msgid "Recordatorio por WhatsApp"
+msgstr "WhatsApp reminder"
+
+#: app/templates/credit_account.html:39
+msgid "Abre un mensaje preparado. PATIA no lo enviará sin tu confirmación."
+msgstr "Open a prepared message. PATIA will not send it without your confirmation."
+
+#: app/templates/credit_account.html:40
+msgid "Preparar recordatorio"
+msgstr "Prepare reminder"
+
+#: app/templates/credit_account.html:44
+msgid "Movimientos de la cuenta"
+msgstr "Account activity"
+
+#: app/templates/credit_account.html:44 app/templates/inventory_kardex.html:81
+msgid "Historial inmutable"
+msgstr "Immutable history"
+
+#: app/templates/credit_account.html:48
+msgid "Referencia"
+msgstr "Reference"
+
+#: app/templates/credit_account.html:48
+msgid "Cargo"
+msgstr "Charge"
+
+#: app/templates/credit_account.html:48 app/templates/credit_account.html:53
+msgid "Abono"
+msgstr "Payment"
+
+#: app/templates/credit_account.html:48
+msgid "Saldo"
+msgstr "Balance"
+
+#: app/templates/credit_account.html:53
+msgid "Venta a crédito"
+msgstr "Credit sale"
+
+#: app/templates/credit_account.html:58
+msgid "Sistema"
+msgstr "System"
+
+#: app/templates/credit_account.html:58
+msgid "Exceso autorizado"
+msgstr "Over-limit authorization"
+
+#: app/templates/credit_account.html:65
+msgid "Sin movimientos todavía"
+msgstr "No account activity yet"
+
+#: app/templates/credit_account.html:65
+msgid "Las ventas a crédito y sus abonos aparecerán aquí."
+msgstr "Credit sales and their payments will appear here."
+
+#: app/templates/credit_accounts.html:7
+msgid "Control de saldos"
+msgstr "Balance control"
+
+#: app/templates/credit_accounts.html:8
+msgid "Crédito claro, cobros sin sorpresas"
+msgstr "Clear credit, predictable collections"
+
+#: app/templates/credit_accounts.html:9
+msgid ""
+"Consulta cuánto debe cada cliente y registra abonos sin perder el "
+"historial."
+msgstr ""
+"See what each customer owes and record payments without losing the "
+"history."
+
+#: app/templates/credit_accounts.html:13
+msgid "Cuentas de clientes"
+msgstr "Customer accounts"
+
+#: app/templates/credit_accounts.html:17 app/templates/credit_accounts.html:21
+#: app/templates/customer_detail.html:9 app/templates/customers.html:43
+#: app/templates/customers.html:48
+msgid "Cliente"
+msgstr "Customer"
+
+#: app/templates/credit_accounts.html:17 app/templates/credit_accounts.html:22
+msgid "Límite"
+msgstr "Limit"
+
+#: app/templates/credit_accounts.html:17 app/templates/credit_accounts.html:24
+msgid "Disponible"
+msgstr "Available"
+
+#: app/templates/credit_accounts.html:25 app/templates/customer_detail.html:44
+msgid "Ver estado de cuenta"
+msgstr "View account statement"
+
+#: app/templates/credit_accounts.html:34
+msgid "Aún no hay clientes con crédito habilitado"
+msgstr "No customers have credit enabled yet"
+
+#: app/templates/credit_accounts.html:35
+msgid "Actívalo desde el perfil de un cliente y define un límite responsable."
+msgstr "Enable it from a customer profile and set a responsible limit."
+
+#: app/templates/credit_accounts.html:36
+msgid "Ir a clientes"
+msgstr "Go to customers"
+
 #: app/templates/customer_detail.html:2
 msgid "Detalle del cliente"
 msgstr "Customer details"
@@ -1665,11 +1954,6 @@ msgstr "Customer details"
 #: app/templates/customer_detail.html:8
 msgid "Volver a clientes"
 msgstr "Back to customers"
-
-#: app/templates/customer_detail.html:9 app/templates/customers.html:43
-#: app/templates/customers.html:48
-msgid "Cliente"
-msgstr "Customer"
 
 #: app/templates/customer_detail.html:15 app/templates/products.html:204
 msgid "Editar"
@@ -1695,56 +1979,72 @@ msgstr "Completed purchases"
 msgid "Cliente desde"
 msgstr "Customer since"
 
-#: app/templates/customer_detail.html:36
+#: app/templates/customer_detail.html:38
+msgid "Activa crédito solo cuando hayas acordado un límite con este cliente."
+msgstr "Enable credit only after agreeing on a limit with this customer."
+
+#: app/templates/customer_detail.html:41
+msgid "Crédito habilitado"
+msgstr "Credit enabled"
+
+#: app/templates/customer_detail.html:42
+msgid "Límite de crédito"
+msgstr "Credit limit"
+
+#: app/templates/customer_detail.html:43
+msgid "Guardar configuración"
+msgstr "Save settings"
+
+#: app/templates/customer_detail.html:49
 msgid "Historial completo"
 msgstr "Complete history"
 
-#: app/templates/customer_detail.html:36
+#: app/templates/customer_detail.html:49
 msgid "Compras del cliente"
 msgstr "Customer purchases"
 
-#: app/templates/customer_detail.html:40 app/templates/customer_detail.html:43
-#: app/templates/sell.html:148 app/templates/sell.html:153
+#: app/templates/customer_detail.html:53 app/templates/customer_detail.html:56
+#: app/templates/sell.html:150 app/templates/sell.html:155
 msgid "Fecha y hora"
 msgstr "Date and time"
 
-#: app/templates/customer_detail.html:40 app/templates/customer_detail.html:44
-#: app/templates/sell.html:148 app/templates/sell.html:154
+#: app/templates/customer_detail.html:53 app/templates/customer_detail.html:57
+#: app/templates/sell.html:150 app/templates/sell.html:156
 msgid "Artículos"
 msgstr "Articles"
 
-#: app/templates/customer_detail.html:40 app/templates/customer_detail.html:45
-#: app/templates/sell.html:148 app/templates/sell.html:155
+#: app/templates/customer_detail.html:53 app/templates/customer_detail.html:58
+#: app/templates/sell.html:150 app/templates/sell.html:157
 msgid "Método"
 msgstr "Method"
 
-#: app/templates/customer_detail.html:40 app/templates/customer_detail.html:46
-#: app/templates/sell.html:39 app/templates/sell.html:148
-#: app/templates/sell.html:156 app/templates/ticket.html:63
+#: app/templates/customer_detail.html:53 app/templates/customer_detail.html:59
+#: app/templates/sell.html:39 app/templates/sell.html:150
+#: app/templates/sell.html:158 app/templates/ticket.html:63
 msgid "Total"
 msgstr "Total"
 
-#: app/templates/customer_detail.html:45 app/templates/sell.html:155
-#: app/templates/sell.html:213
+#: app/templates/customer_detail.html:58 app/templates/sell.html:157
+#: app/templates/sell.html:215
 msgid "No especificado"
 msgstr "Not specified"
 
-#: app/templates/customer_detail.html:47 app/templates/sell.html:42
-#: app/templates/sell.html:159
+#: app/templates/customer_detail.html:60 app/templates/sell.html:42
+#: app/templates/sell.html:161
 msgid "Ver ticket"
 msgstr "See ticket"
 
-#: app/templates/customer_detail.html:52
+#: app/templates/customer_detail.html:65
 msgid "Este cliente aún no tiene compras"
 msgstr "This customer has no purchases yet"
 
-#: app/templates/customer_detail.html:52
+#: app/templates/customer_detail.html:65
 msgid "Cuando lo selecciones en el punto de venta, sus tickets aparecerán aquí."
 msgstr ""
 "When you select this customer at the point of sale, their tickets will "
 "appear here."
 
-#: app/templates/customer_detail.html:52
+#: app/templates/customer_detail.html:65
 msgid "Ir al punto de venta"
 msgstr "Go to point of sale"
 
@@ -1781,7 +2081,7 @@ msgid "Ej. prefiere recibir avisos por WhatsApp"
 msgstr "E.g. prefers to receive updates through WhatsApp"
 
 #: app/templates/customer_form.html:32 app/templates/dashboard.html:245
-#: app/templates/edit_product.html:56 app/templates/sell.html:132
+#: app/templates/edit_product.html:56 app/templates/sell.html:134
 msgid "Cancelar"
 msgstr "Cancel"
 
@@ -2303,10 +2603,6 @@ msgstr ""
 #: app/templates/inventory_kardex.html:73
 msgid "Ej. producto dañado durante el traslado"
 msgstr "E.g. product damaged during transport"
-
-#: app/templates/inventory_kardex.html:81
-msgid "Historial inmutable"
-msgstr "Immutable history"
 
 #: app/templates/inventory_kardex.html:81
 msgid "Movimientos de inventario"
@@ -3339,7 +3635,7 @@ msgstr "View inventory ledger"
 msgid "Catálogo"
 msgstr "Catalog"
 
-#: app/templates/products.html:147 app/templates/sell.html:75
+#: app/templates/products.html:147 app/templates/sell.html:76
 msgid "Buscar producto"
 msgstr "Search product"
 
@@ -3405,7 +3701,7 @@ msgstr ""
 "Remove this product from the catalog? If it has sales, PATIA will "
 "preserve its history."
 
-#: app/templates/products.html:210 app/templates/sell.html:207
+#: app/templates/products.html:210 app/templates/sell.html:209
 #: app/templates/suppliers.html:66
 msgid "Eliminar"
 msgstr "Remove"
@@ -3821,11 +4117,6 @@ msgstr "Sale recorded successfully"
 msgid "El inventario y tus reportes ya están actualizados."
 msgstr "Your inventory and reports are now up to date."
 
-#: app/templates/sell.html:39 app/templates/sell.html:106
-#: app/templates/ticket.html:66
-msgid "Método de pago"
-msgstr "Payment method"
-
 #: app/templates/sell.html:43 app/templates/ticket.html:24
 msgid "Nueva venta"
 msgstr "New sale"
@@ -3858,55 +4149,55 @@ msgstr "Who is making this purchase?"
 msgid "Alta rápida"
 msgstr "Quick add"
 
-#: app/templates/sell.html:64
+#: app/templates/sell.html:65
 msgid "Quitar"
 msgstr "Remove"
 
-#: app/templates/sell.html:67
+#: app/templates/sell.html:68
 msgid "Buscar por nombre o teléfono"
 msgstr "Search by name or phone"
 
-#: app/templates/sell.html:68
+#: app/templates/sell.html:69
 msgid "Escribe al menos 2 caracteres"
 msgstr "Enter at least 2 characters"
 
-#: app/templates/sell.html:69
+#: app/templates/sell.html:70
 msgid "Clientes encontrados"
 msgstr "Customers found"
 
-#: app/templates/sell.html:79
+#: app/templates/sell.html:80
 msgid "Nombre, SKU o código de barras"
 msgstr "Name, SKU or barcode"
 
-#: app/templates/sell.html:83
+#: app/templates/sell.html:84
 msgid "Productos encontrados"
 msgstr "Products found"
 
-#: app/templates/sell.html:88
+#: app/templates/sell.html:89
 msgid "Carrito"
 msgstr "Cart"
 
-#: app/templates/sell.html:88
+#: app/templates/sell.html:89
 msgid "Productos de la venta"
 msgstr "Sale items"
 
-#: app/templates/sell.html:89
+#: app/templates/sell.html:90
 msgid "0 artículos"
 msgstr "0 items"
 
-#: app/templates/sell.html:94
+#: app/templates/sell.html:95
 msgid "Busca un producto para comenzar la venta."
 msgstr "Search for a product to start the sale."
 
-#: app/templates/sell.html:99
+#: app/templates/sell.html:100
 msgid "Precio unitario"
 msgstr "Unit price"
 
-#: app/templates/sell.html:99 app/templates/ticket.html:61
+#: app/templates/sell.html:100 app/templates/ticket.html:61
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: app/templates/sell.html:113
+#: app/templates/sell.html:115
 msgid ""
 "Selecciona cómo pagó el cliente. Este dato se usará para registrar la "
 "venta."
@@ -3914,43 +4205,43 @@ msgstr ""
 "Select how the customer paid. This information will be used to record the"
 " sale."
 
-#: app/templates/sell.html:115
+#: app/templates/sell.html:117
 msgid "Total de la venta"
 msgstr "Sale total"
 
-#: app/templates/sell.html:115
+#: app/templates/sell.html:117
 msgid "$0.00 MXN"
 msgstr "$0.00 MXN"
 
-#: app/templates/sell.html:116 app/templates/sell.html:210
+#: app/templates/sell.html:118 app/templates/sell.html:212
 msgid "Registrar venta"
 msgstr "Record sale"
 
-#: app/templates/sell.html:125
+#: app/templates/sell.html:127
 msgid "Sin salir de la venta"
 msgstr "Without leaving the sale"
 
-#: app/templates/sell.html:126
+#: app/templates/sell.html:128
 msgid "Agregar cliente rápido"
 msgstr "Quickly add customer"
 
-#: app/templates/sell.html:127
+#: app/templates/sell.html:129
 msgid "Guarda nombre y teléfono. Podrás completar sus datos después."
 msgstr "Save a name and phone number. You can complete their details later."
 
-#: app/templates/sell.html:132 app/templates/sell.html:218
+#: app/templates/sell.html:134 app/templates/sell.html:220
 msgid "Guardar y seleccionar"
 msgstr "Save and select"
 
-#: app/templates/sell.html:140
+#: app/templates/sell.html:142
 msgid "Historial inmediato"
 msgstr "Recent history"
 
-#: app/templates/sell.html:141
+#: app/templates/sell.html:143
 msgid "Ventas recientes"
 msgstr "Recent sales"
 
-#: app/templates/sell.html:142
+#: app/templates/sell.html:144
 msgid ""
 "Cada operación aparece en un solo ticket. La cancelación se mantiene por "
 "producto y devuelve sus unidades al inventario."
@@ -3958,140 +4249,150 @@ msgstr ""
 "Each operation appears on a single ticket. The cancellation is maintained"
 " per product and returns its units to inventory."
 
-#: app/templates/sell.html:148 app/templates/sell.html:152
+#: app/templates/sell.html:150 app/templates/sell.html:154
 #: app/templates/ticket.html:40
 msgid "Folio"
 msgstr "Reference"
 
-#: app/templates/sell.html:154 app/templates/sell.html:204
+#: app/templates/sell.html:156 app/templates/sell.html:206
 msgid "artículo"
 msgstr "item"
 
-#: app/templates/sell.html:154 app/templates/sell.html:205
+#: app/templates/sell.html:156 app/templates/sell.html:207
 msgid "artículos"
 msgstr "items"
 
-#: app/templates/sell.html:154
+#: app/templates/sell.html:156
 msgid "producto"
 msgstr "product"
 
-#: app/templates/sell.html:154
+#: app/templates/sell.html:156
 msgid "productos"
 msgstr "products"
 
-#: app/templates/sell.html:160
+#: app/templates/sell.html:162
 msgid "Reimprimir"
 msgstr "Reprint"
 
-#: app/templates/sell.html:163
+#: app/templates/sell.html:165
 msgid "Cancelar un producto"
 msgstr "Cancel a product"
 
-#: app/templates/sell.html:164
+#: app/templates/sell.html:166
 msgid ""
 "La cancelación se aplica solo a la línea seleccionada, no al ticket "
 "completo."
 msgstr "The cancellation applies only to the selected line, not the entire ticket."
 
-#: app/templates/sell.html:166
+#: app/templates/sell.html:168
 msgid "¿Cancelar esta línea? Sus unidades regresarán al inventario."
 msgstr "Record the return for this line? Its units will be restored to inventory."
 
-#: app/templates/sell.html:169
+#: app/templates/sell.html:171
 msgid "Cancelar línea"
 msgstr "Cancel line"
 
-#: app/templates/sell.html:171
+#: app/templates/sell.html:173
 msgid ""
 "¿Registrar la devolución de esta línea? Sus unidades regresarán al "
 "inventario."
 msgstr "Record the return for this line? Its units will be restored to inventory."
 
-#: app/templates/sell.html:174
+#: app/templates/sell.html:176
 msgid "Registrar devolución"
 msgstr "Record return"
 
-#: app/templates/sell.html:187
+#: app/templates/sell.html:189
 msgid "Aún no hay ventas registradas"
 msgstr "No sales recorded yet"
 
-#: app/templates/sell.html:188
+#: app/templates/sell.html:190
 msgid "Tu primera venta aparecerá aquí con su recibo y opciones de cancelación."
 msgstr ""
 "Your first sale will appear here with its receipt and cancellation "
 "options."
 
-#: app/templates/sell.html:197
+#: app/templates/sell.html:199
 msgid "No encontramos productos con esa búsqueda."
 msgstr "No products matched that search."
 
-#: app/templates/sell.html:198
+#: app/templates/sell.html:200
 #, python-format
 msgid "%(count)s disponibles"
 msgstr "%(count)s available"
 
-#: app/templates/sell.html:199
+#: app/templates/sell.html:201
 msgid "Sin existencias"
 msgstr "Out of stock"
 
-#: app/templates/sell.html:200
+#: app/templates/sell.html:202
 #, python-format
 msgid "%(count)s productos encontrados."
 msgstr "%(count)s products found."
 
-#: app/templates/sell.html:201
+#: app/templates/sell.html:203
 #, python-format
 msgid "%(name)s no tiene existencias disponibles."
 msgstr "%(name)s has no available stock."
 
-#: app/templates/sell.html:202
+#: app/templates/sell.html:204
 #, python-format
 msgid "Solo hay %(count)s unidades disponibles de %(name)s."
 msgstr "Only %(count)s units of %(name)s are available."
 
-#: app/templates/sell.html:203
+#: app/templates/sell.html:205
 #, python-format
 msgid "%(name)s agregado al carrito."
 msgstr "%(name)s added to the cart."
 
-#: app/templates/sell.html:206
+#: app/templates/sell.html:208
 #, python-format
 msgid "Cantidad de %(name)s"
 msgstr "Quantity of %(name)s"
 
-#: app/templates/sell.html:208
+#: app/templates/sell.html:210
 #, python-format
 msgid "Eliminar %(name)s del carrito"
 msgstr "Remove %(name)s from cart"
 
-#: app/templates/sell.html:209
+#: app/templates/sell.html:211
 msgid "Registrando venta…"
 msgstr "Recording sale?"
 
-#: app/templates/sell.html:211
+#: app/templates/sell.html:213
 msgid "No se pudo registrar la venta."
 msgstr "The sale could not be recorded."
 
-#: app/templates/sell.html:212
+#: app/templates/sell.html:214
 msgid "No se pudo registrar la venta. Inténtalo nuevamente."
 msgstr "The sale could not be recorded. Try again."
 
-#: app/templates/sell.html:214
+#: app/templates/sell.html:216
 msgid "No pudimos buscar clientes. Inténtalo nuevamente."
 msgstr "We could not search customers. Please try again."
 
-#: app/templates/sell.html:215
+#: app/templates/sell.html:217
 msgid "No encontramos clientes con esa búsqueda."
 msgstr "No customers matched that search."
 
-#: app/templates/sell.html:216
+#: app/templates/sell.html:218
 #, python-format
 msgid "%(name)s seleccionado para esta venta."
 msgstr "%(name)s selected for this sale."
 
-#: app/templates/sell.html:217
+#: app/templates/sell.html:219
 msgid "Guardando cliente…"
 msgstr "Saving customer…"
+
+#: app/templates/sell.html:221
+msgid "Esta venta supera el límite disponible. ¿Deseas solicitar autorización?"
+msgstr ""
+"This sale exceeds the available limit. Would you like to request "
+"authorization?"
+
+#: app/templates/sell.html:222
+msgid "PIN de propietario o encargado"
+msgstr "Owner or manager PIN"
 
 #: app/templates/settings.html:7
 msgid "Perfil del negocio"
@@ -4935,195 +5236,8 @@ msgstr "The invitation expires in 48 hours."
 #~ msgid "InvitaciÃ³n reenviada."
 #~ msgstr ""
 
-# PATIA V1.5 - Credit and accounts receivable
-msgid "Selecciona un cliente para vender a crédito."
-msgstr "Select a customer for a credit sale."
-
-msgid "Venta cancelada. Stock devuelto al inventario."
-msgstr "Sale canceled. Stock returned to inventory."
-
-msgid "Devolución registrada. Stock devuelto al inventario."
-msgstr "Return recorded. Stock returned to inventory."
-
-msgid "Abre la caja antes de devolver una venta en efectivo."
-msgstr "Open the cash register before refunding a cash sale."
-
-msgid "La venta a crédito no tiene un cliente asociado."
-msgstr "The credit sale has no customer attached."
-
-msgid "Abono de crédito en efectivo"
-msgstr "Cash credit payment"
-
-#, python-format
-msgid "Hola %(name)s, te recordamos que tienes un saldo pendiente de %(balance)s en %(business)s."
-msgstr "Hello %(name)s, this is a reminder that your outstanding balance at %(business)s is %(balance)s."
-
-msgid "Escribe un límite de crédito válido."
-msgstr "Enter a valid credit limit."
-
-msgid "Liquida el saldo antes de desactivar el crédito."
-msgstr "Settle the balance before disabling credit."
-
-msgid "Configuración de crédito actualizada."
-msgstr "Credit settings updated."
-
-msgid "Abono registrado correctamente."
-msgstr "Payment recorded successfully."
-
-msgid "La venta supera el límite de crédito."
-msgstr "This sale exceeds the credit limit."
-
-msgid "Este cliente no tiene crédito habilitado."
-msgstr "Credit is not enabled for this customer."
-
-msgid "Se requiere autorización para exceder el límite."
-msgstr "Authorization is required to exceed the limit."
-
-msgid "Cliente no encontrado."
-msgstr "Customer not found."
-
-msgid "El abono debe ser mayor a cero."
-msgstr "The payment must be greater than zero."
-
-msgid "El abono no puede ser mayor al saldo pendiente."
-msgstr "The payment cannot exceed the outstanding balance."
-
-msgid "Selecciona un método de pago válido."
-msgstr "Select a valid payment method."
-
-msgid "Abre la caja antes de recibir un abono en efectivo."
-msgstr "Open the cash register before receiving a cash payment."
-
-#, python-format
-msgid "Abono de crédito: %(customer)s"
-msgstr "Credit payment: %(customer)s"
-
-msgid "No se puede cancelar esta venta porque parte de su saldo ya fue pagado."
-msgstr "This sale cannot be canceled because part of its balance has already been paid."
-
-#, python-format
-msgid "Cancelación de %(folio)s"
-msgstr "Cancellation of %(folio)s"
-
-msgid "Crédito y cuentas por cobrar"
-msgstr "Credit and accounts receivable"
-
-msgid "Estado de cuenta"
-msgstr "Account statement"
-
-msgid "Volver a cuentas"
-msgstr "Back to accounts"
-
-msgid "Volver al punto de venta"
-msgstr "Back to point of sale"
-
-msgid "Saldo pendiente"
-msgstr "Outstanding balance"
-
-msgid "El crédito no está habilitado para este cliente."
-msgstr "Credit is not enabled for this customer."
-
-msgid "Registrar abono"
-msgstr "Record payment"
-
-msgid "Nota (opcional)"
-msgstr "Note (optional)"
-
-msgid "Recordatorio por WhatsApp"
-msgstr "WhatsApp reminder"
-
-msgid "Abre un mensaje preparado. PATIA no lo enviará sin tu confirmación."
-msgstr "Open a prepared message. PATIA will not send it without your confirmation."
-
-msgid "Preparar recordatorio"
-msgstr "Prepare reminder"
-
-msgid "Movimientos de la cuenta"
-msgstr "Account activity"
-
-msgid "Referencia"
-msgstr "Reference"
-
-msgid "Cargo"
-msgstr "Charge"
-
-msgid "Abono"
-msgstr "Payment"
-
-msgid "Saldo"
-msgstr "Balance"
-
-msgid "Venta a crédito"
-msgstr "Credit sale"
-
-msgid "Sistema"
-msgstr "System"
-
-msgid "Exceso autorizado"
-msgstr "Over-limit authorization"
-
-msgid "Sin movimientos todavía"
-msgstr "No account activity yet"
-
-msgid "Las ventas a crédito y sus abonos aparecerán aquí."
-msgstr "Credit sales and their payments will appear here."
-
-msgid "Control de saldos"
-msgstr "Balance control"
-
-msgid "Crédito claro, cobros sin sorpresas"
-msgstr "Clear credit, predictable collections"
-
-msgid "Consulta cuánto debe cada cliente y registra abonos sin perder el historial."
-msgstr "See what each customer owes and record payments without losing the history."
-
-msgid "Cuentas de clientes"
-msgstr "Customer accounts"
-
-msgid "Límite"
-msgstr "Limit"
-
-msgid "Disponible"
-msgstr "Available"
-
-msgid "Ver estado de cuenta"
-msgstr "View account statement"
-
-msgid "Aún no hay clientes con crédito habilitado"
-msgstr "No customers have credit enabled yet"
-
-msgid "Actívalo desde el perfil de un cliente y define un límite responsable."
-msgstr "Enable it from a customer profile and set a responsible limit."
-
-msgid "Ir a clientes"
-msgstr "Go to customers"
-
-msgid "Crédito"
-msgstr "Credit"
-
-msgid "Activa crédito solo cuando hayas acordado un límite con este cliente."
-msgstr "Enable credit only after agreeing on a limit with this customer."
-
-msgid "Crédito habilitado"
-msgstr "Credit enabled"
-
-msgid "Límite de crédito"
-msgstr "Credit limit"
-
-msgid "Guardar configuración"
-msgstr "Save settings"
-
-msgid "Esta venta supera el límite disponible. ¿Deseas solicitar autorización?"
-msgstr "This sale exceeds the available limit. Would you like to request authorization?"
-
-msgid "PIN de propietario o encargado"
-msgstr "Owner or manager PIN"
-
-msgid "Demasiados intentos de autorización. Espera un minuto."
-msgstr "Too many authorization attempts. Wait one minute."
-
-msgid "Demasiados intentos"
-msgstr "Too many attempts"
-
 #~ msgid "InvitaciÃ³n cancelada."
 #~ msgstr ""
+
+#~ msgid "Abono registrado correctamente.Este abono ya había sido registrado."
+#~ msgstr "Payment recorded successfully."

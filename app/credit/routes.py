@@ -1,8 +1,10 @@
 from urllib.parse import quote
+import uuid
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_babel import gettext
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app import db
@@ -125,6 +127,7 @@ def account(customer_id):
         reminder_url=(
             f"https://wa.me/{whatsapp_number(customer)}?text={quote(reminder)}"
         ),
+        payment_request_id=str(uuid.uuid4()),
     )
 
 
@@ -164,15 +167,43 @@ def payment(customer_id):
     _, membership = _context()
     customer = _customer(customer_id, membership.organization_id)
     try:
-        record_credit_payment(
+        _, created = record_credit_payment(
             customer,
             membership,
             request.form.get("amount"),
             request.form.get("payment_method"),
             note=request.form.get("note"),
+            request_id=request.form.get("request_id") or str(uuid.uuid4()),
         )
         db.session.commit()
-        flash(gettext("Abono registrado correctamente."), "success")
+        message = (
+            gettext("Abono registrado correctamente.")
+            if created
+            else gettext("Este abono ya había sido registrado.")
+        )
+        flash(message, "success")
+    except IntegrityError:
+        db.session.rollback()
+        request_id = (request.form.get("request_id") or "").strip()
+        try:
+            request_id = str(uuid.UUID(request_id))
+        except (ValueError, AttributeError):
+            request_id = ""
+        existing = CustomerCreditMovement.query.filter_by(
+            organization_id=membership.organization_id,
+            request_id=request_id,
+            customer_id=customer.id,
+            movement_type="PAYMENT",
+        ).first()
+        if existing:
+            flash(gettext("Este abono ya había sido registrado."), "success")
+        else:
+            flash(
+                gettext(
+                    "No se pudo registrar el abono. Actualiza la página e inténtalo de nuevo."
+                ),
+                "danger",
+            )
     except (CreditError, TypeError, ValueError) as exc:
         db.session.rollback()
         flash(str(exc), "danger")

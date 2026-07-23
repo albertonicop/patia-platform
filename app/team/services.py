@@ -2,7 +2,16 @@ from __future__ import annotations
 
 from functools import wraps
 
-from flask import abort, has_request_context, jsonify, request, session
+from flask import (
+    abort,
+    flash,
+    has_request_context,
+    jsonify,
+    redirect,
+    request,
+    session,
+    url_for,
+)
 from flask_babel import gettext
 from app import db
 from app.models import Organization, OrganizationMember, User
@@ -74,6 +83,8 @@ ROLE_PERMISSIONS = {
         }
     ),
 }
+
+ACCESS_EXEMPT_PERMISSIONS = frozenset({"manage_subscription"})
 
 
 def ensure_owner_organization(user: User) -> OrganizationMember:
@@ -153,7 +164,44 @@ def organization_owner(user: User) -> User | None:
     return db.session.get(User, membership.organization.owner_user_id)
 
 
-def require_permission(permission: str):
+def authentication_required_response():
+    """Recover cleanly when a login or organization session is no longer valid."""
+    disabled = session.pop("membership_disabled", False)
+    revoked = session.pop("kicked_out", False)
+    expired = session.pop("session_expired", False)
+    if disabled:
+        message = gettext(
+            "Tu acceso a esta empresa fue desactivado. Contacta al propietario."
+        )
+        reason = "membership_disabled"
+    elif revoked:
+        message = gettext(
+            "Tu sesión terminó porque se inició sesión en otro dispositivo."
+        )
+        reason = "session_revoked"
+    elif expired:
+        message = gettext("Tu sesión expiró. Inicia sesión para continuar.")
+        reason = "session_expired"
+    else:
+        message = gettext("Inicia sesión para continuar.")
+        reason = "authentication_required"
+    if request.is_json:
+        return jsonify({"ok": False, "error": message, "error_code": reason}), 401
+    flash(message, "warning")
+    next_url = request.full_path.rstrip("?")
+    return redirect(url_for("main.login", next=next_url))
+
+
+def _operational_access_response(user, permission):
+    """Apply the organization's single Trial/Pro policy to protected features."""
+    if permission in ACCESS_EXEMPT_PERMISSIONS:
+        return None
+    from app.routes import _trial_access_response
+
+    return _trial_access_response(user, json_response=request.is_json)
+
+
+def require_permission(permission: str, *, allow_expired: bool = False):
     """Authorize against the active tenant, never against a submitted ID."""
     def decorator(view):
         @wraps(view)
@@ -163,11 +211,15 @@ def require_permission(permission: str):
             user = current_user()
             membership = active_membership(user) if user else None
             if not user:
-                abort(401)
+                return authentication_required_response()
             if not has_permission(membership, permission):
                 if request.is_json:
                     return jsonify({"ok": False, "error": gettext("Acceso no permitido.")}), 403
                 abort(403)
+            if not allow_expired:
+                access_block = _operational_access_response(user, permission)
+                if access_block:
+                    return access_block
             return view(*args, **kwargs)
 
         return wrapped
@@ -186,7 +238,7 @@ def require_roles(*roles: str):
             user = current_user()
             membership = active_membership(user) if user else None
             if not user:
-                abort(401)
+                return authentication_required_response()
             if not membership or membership.role not in allowed:
                 abort(403)
             return view(*args, **kwargs)

@@ -80,6 +80,62 @@ class OrganizationMemberTests(unittest.TestCase):
         self.assertEqual(Organization.query.count(), 1)
         self.assertEqual(OrganizationMember.query.count(), 1)
 
+    def test_missing_session_user_redirects_to_login_with_safe_next(self):
+        client = self.app.test_client()
+        with client.session_transaction() as flask_session:
+            flask_session["user_id"] = 999999
+            flask_session["language"] = "es"
+
+        response = client.get("/customers")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login?next=/customers", response.location)
+        login = client.get(response.location)
+        self.assertIn(
+            "Tu sesión expiró. Inicia sesión para continuar.",
+            login.get_data(as_text=True),
+        )
+
+    def test_revoked_json_session_returns_structured_401(self):
+        user = self.add_user("revoked@patia.test", "Revocada")
+        membership = ensure_owner_organization(user)
+        user.session_token = "current-token"
+        db.session.commit()
+        client = self.app.test_client()
+        with client.session_transaction() as flask_session:
+            flask_session["user_id"] = user.id
+            flask_session["organization_id"] = membership.organization_id
+            flask_session["session_token"] = "old-token"
+
+        response = client.post("/sell-cart", json={"items": []})
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            response.get_json()["error_code"],
+            "session_revoked",
+        )
+
+    def test_revoked_dashboard_session_recovers_through_login(self):
+        user = self.add_user("dashboard-revoked@patia.test", "Revocada")
+        membership = ensure_owner_organization(user)
+        user.session_token = "current-token"
+        db.session.commit()
+        client = self.app.test_client()
+        with client.session_transaction() as flask_session:
+            flask_session["user_id"] = user.id
+            flask_session["organization_id"] = membership.organization_id
+            flask_session["session_token"] = "old-token"
+
+        response = client.get("/")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login?next=/", response.location)
+        login = client.get(response.location)
+        self.assertIn(
+            "se inició sesión en otro dispositivo",
+            login.get_data(as_text=True),
+        )
+
     def test_memberships_are_isolated_between_organizations(self):
         first_user = self.add_user("first@patia.test", "Primera")
         second_user = self.add_user("second@patia.test", "Segunda")

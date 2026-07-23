@@ -271,6 +271,23 @@ class CashRegisterTests(unittest.TestCase):
             404,
         )
 
+    def test_cashier_close_redirects_to_accessible_register_screen(self):
+        cashier, _ = self.add_member("CASHIER", "close@cash.test")
+        client = self.client_for(cashier)
+        self.open_register(client, "25.00")
+
+        response = client.post(
+            "/cash-register/close",
+            data={"counted_cash": "25.00", "closing_notes": ""},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/cash-register"))
+        destination = client.get(response.location)
+        self.assertEqual(destination.status_code, 200)
+        self.assertNotIn("Acceso no permitido", destination.get_data(as_text=True))
+        self.assertEqual(CashRegisterSession.query.one().status, "CLOSED")
+
     def test_english_cash_register_copy(self):
         client = self.client_for(self.owner)
         with client.session_transaction() as session:

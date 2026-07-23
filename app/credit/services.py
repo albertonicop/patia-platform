@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import uuid
+
 from flask_babel import gettext
 
 from app import db
@@ -106,6 +108,7 @@ def record_credit_payment(
     payment_method,
     *,
     note=None,
+    request_id=None,
 ):
     locked = Customer.query.filter_by(
         id=customer.id,
@@ -113,16 +116,44 @@ def record_credit_payment(
     ).with_for_update().first()
     if not locked:
         raise CreditError(gettext("Cliente no encontrado."))
-    before = customer_balance(locked.id, membership.organization_id)
     amount = money_decimal(amount)
     if amount <= MONEY_ZERO:
         raise CreditError(gettext("El abono debe ser mayor a cero."))
+    if payment_method not in {"cash", "card", "transfer", "other"}:
+        raise CreditError(gettext("Selecciona un método de pago válido."))
+    request_id = (request_id or "").strip() or None
+    if request_id:
+        try:
+            request_id = str(uuid.UUID(request_id))
+        except (ValueError, AttributeError):
+            raise CreditError(
+                gettext(
+                    "No se pudo verificar este abono. Actualiza la página e inténtalo de nuevo."
+                )
+            )
+        existing = CustomerCreditMovement.query.filter_by(
+            organization_id=membership.organization_id,
+            request_id=request_id,
+        ).first()
+        if existing:
+            same_payment = (
+                existing.movement_type == "PAYMENT"
+                and existing.customer_id == locked.id
+                and money_decimal(existing.amount) == amount
+                and existing.payment_method == payment_method
+            )
+            if not same_payment:
+                raise CreditError(
+                    gettext(
+                        "No se pudo verificar este abono. Actualiza la página e inténtalo de nuevo."
+                    )
+                )
+            return existing, False
+    before = customer_balance(locked.id, membership.organization_id)
     if amount > before:
         raise CreditError(
             gettext("El abono no puede ser mayor al saldo pendiente.")
         )
-    if payment_method not in {"cash", "card", "transfer", "other"}:
-        raise CreditError(gettext("Selecciona un método de pago válido."))
     cash_session = None
     if payment_method == "cash":
         cash_session = open_cash_session(
@@ -144,6 +175,7 @@ def record_credit_payment(
         balance_before=before,
         balance_after=after,
         payment_method=payment_method,
+        request_id=request_id,
         note=(note or "").strip()[:255] or None,
     )
     db.session.add(movement)
@@ -156,7 +188,7 @@ def record_credit_payment(
             amount,
             note=gettext("Abono de crédito: %(customer)s", customer=locked.name),
         )
-    return movement
+    return movement, True
 
 
 def record_credit_reversal(customer, membership, amount, sales_ticket):

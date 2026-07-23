@@ -141,6 +141,52 @@ class ReleaseBlockerTests(unittest.TestCase):
         self.assertFalse(cart_response.json["ok"])
         self.assertEqual(Product.query.filter_by(user_id=user.id).count(), 0)
 
+    def test_expired_trial_uses_one_policy_for_new_operational_modules(self):
+        user = self.user(expired=True)
+        self.login(user)
+
+        responses = (
+            self.client.post(
+                "/cash-register/open",
+                data={"opening_cash": "100.00"},
+            ),
+            self.client.post(
+                "/customers/new",
+                data={"name": "Cliente bloqueado", "phone": "5551234567"},
+            ),
+            self.client.get("/credit"),
+            self.client.get("/inventory/kardex"),
+        )
+
+        self.assertTrue(all(response.status_code == 403 for response in responses))
+
+    def test_expired_trial_can_still_open_subscription_management(self):
+        user = self.user(expired=True)
+        self.login(user)
+
+        response = self.client.get("/subscribe")
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_pro_access_allows_new_operational_modules(self):
+        user = self.user(expired=True)
+        user.manual_pro_access = True
+        db.session.commit()
+        self.login(user)
+
+        self.assertEqual(self.client.get("/cash-register").status_code, 200)
+        self.assertEqual(self.client.get("/customers").status_code, 200)
+
+    def test_expired_json_request_has_consistent_access_error(self):
+        user = self.user(expired=True)
+        self.login(user)
+
+        response = self.client.post("/sell-cart", json={"items": []})
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(response.get_json()["ok"])
+        self.assertIn("prueba", response.get_json()["error"])
+
     def test_negative_product_values_are_rejected_server_side(self):
         user = self.user()
         self.login(user)

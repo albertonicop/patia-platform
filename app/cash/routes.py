@@ -168,7 +168,7 @@ def add_movement():
 
 
 @cash.post("/close")
-@require_permission("operate_cash_register")
+@require_permission("operate_cash_register", allow_expired=True)
 def close_register():
     _, membership = _current_context()
     cash_session = open_cash_session(
@@ -195,7 +195,9 @@ def close_register():
     cash_session.open_key = None
     db.session.commit()
     flash(gettext("Corte de caja guardado correctamente."), "success")
-    return redirect(url_for("cash.detail", session_id=cash_session.id))
+    if has_permission(membership, "view_cash_history"):
+        return redirect(url_for("cash.detail", session_id=cash_session.id))
+    return redirect(url_for("cash.index"))
 
 
 @cash.get("/<int:session_id>")

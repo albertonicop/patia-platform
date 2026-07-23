@@ -194,6 +194,81 @@ class CustomerCreditTests(unittest.TestCase):
             ["CHARGE", "PAYMENT", "PAYMENT"],
         )
 
+    def test_payment_request_id_is_persistently_idempotent(self):
+        client = self.client_for(self.owner)
+        self.assertEqual(self.credit_sale(client, quantity=2).status_code, 200)
+        request_id = str(uuid.uuid4())
+        payload = {
+            "amount": "30.25",
+            "payment_method": "card",
+            "request_id": request_id,
+        }
+
+        first = client.post(
+            f"/credit/customers/{self.customer.id}/payments",
+            data=payload,
+        )
+        second = client.post(
+            f"/credit/customers/{self.customer.id}/payments",
+            data=payload,
+            follow_redirects=True,
+        )
+
+        self.assertEqual(first.status_code, 302)
+        self.assertEqual(second.status_code, 200)
+        self.assertIn("ya había sido registrado", second.get_data(as_text=True))
+        payments = CustomerCreditMovement.query.filter_by(
+            movement_type="PAYMENT"
+        ).all()
+        self.assertEqual(len(payments), 1)
+        self.assertEqual(payments[0].request_id, request_id)
+        self.assertEqual(
+            customer_balance(
+                self.customer.id,
+                self.owner_member.organization_id,
+            ),
+            Decimal("49.75"),
+        )
+
+    def test_duplicate_cash_payment_does_not_duplicate_cash_movement(self):
+        client = self.client_for(self.owner)
+        self.assertEqual(self.credit_sale(client).status_code, 200)
+        self.open_register(client)
+        request_id = str(uuid.uuid4())
+        payload = {
+            "amount": "10.00",
+            "payment_method": "cash",
+            "request_id": request_id,
+        }
+
+        client.post(
+            f"/credit/customers/{self.customer.id}/payments",
+            data=payload,
+        )
+        client.post(
+            f"/credit/customers/{self.customer.id}/payments",
+            data=payload,
+        )
+
+        cash_session = CashRegisterSession.query.one()
+        self.assertEqual(expected_cash(cash_session.id), Decimal("60.00"))
+        self.assertEqual(
+            CashMovement.query.filter_by(
+                movement_type="CREDIT_PAYMENT"
+            ).count(),
+            1,
+        )
+
+    def test_payment_form_contains_persistent_request_id(self):
+        client = self.client_for(self.owner)
+        self.assertEqual(self.credit_sale(client).status_code, 200)
+
+        html = client.get(
+            f"/credit/customers/{self.customer.id}"
+        ).get_data(as_text=True)
+
+        self.assertIn('name="request_id"', html)
+
     def test_cash_payment_requires_open_register_and_updates_expected_cash(self):
         client = self.client_for(self.owner)
         self.assertEqual(self.credit_sale(client).status_code, 200)

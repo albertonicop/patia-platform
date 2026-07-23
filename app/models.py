@@ -743,6 +743,11 @@ class CustomerCreditMovement(db.Model):
             "created_at",
             "id",
         ),
+        db.UniqueConstraint(
+            "organization_id",
+            "request_id",
+            name="uq_customer_credit_org_request",
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -784,6 +789,7 @@ class CustomerCreditMovement(db.Model):
     balance_before = db.Column(db.Numeric(14, 2), nullable=False)
     balance_after = db.Column(db.Numeric(14, 2), nullable=False)
     payment_method = db.Column(db.String(20), nullable=True)
+    request_id = db.Column(db.String(36), nullable=True)
     note = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 

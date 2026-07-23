@@ -19,6 +19,7 @@
       <h3>{{ _("Registrar abono") }}</h3>
       <form method="post" action="{{ url_for('credit.payment', customer_id=customer.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="request_id" value="{{ payment_request_id }}">
         <label for="payment-amount">{{ _("Cantidad") }}</label>
         <input id="payment-amount" name="amount" type="number" min="0.01" max="{{ balance }}" step="0.01" required>
         <label for="credit-payment-method">{{ _("Método de pago") }}</label>
