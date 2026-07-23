@@ -22,6 +22,8 @@ ROLE_PERMISSIONS = {
             "make_inventory_adjustments",
             "view_reports",
             "manage_customers",
+            "lookup_customers",
+            "create_customers",
             "grant_credit",
             "manage_employees",
             "manage_subscription",
@@ -44,6 +46,8 @@ ROLE_PERMISSIONS = {
             "make_inventory_adjustments",
             "view_reports",
             "manage_customers",
+            "lookup_customers",
+            "create_customers",
             "grant_credit",
             "operate_cash_register",
             "manage_cash_movements",
@@ -52,7 +56,12 @@ ROLE_PERMISSIONS = {
         }
     ),
     "CASHIER": frozenset(
-        {"use_pos", "manage_customers", "operate_cash_register"}
+        {
+            "use_pos",
+            "lookup_customers",
+            "create_customers",
+            "operate_cash_register",
+        }
     ),
 }
 

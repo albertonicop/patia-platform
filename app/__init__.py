@@ -140,6 +140,9 @@ def create_app():
     from .inventory.routes import inventory
 
     app.register_blueprint(inventory)
+    from .customers.routes import customers
+
+    app.register_blueprint(customers)
 
     @app.context_processor
     def inject_pro_access():
@@ -172,6 +175,12 @@ def create_app():
             ),
             "can_view_inventory_history": has_permission(
                 current_membership, "view_inventory_history"
+            ),
+            "can_manage_customers": has_permission(
+                current_membership, "manage_customers"
+            ),
+            "can_lookup_customers": has_permission(
+                current_membership, "lookup_customers"
             ),
         }
 

@@ -8,6 +8,8 @@ import unittest
 
 import sqlalchemy as sa
 
+from tests.migration_safety import safe_temporary_database_url
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -77,7 +79,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
     def environment(self, database_path):
         env = os.environ.copy()
         env.update(
-            DATABASE_URL=f"sqlite:///{database_path.as_posix()}",
+            DATABASE_URL=safe_temporary_database_url(database_path),
             SECRET_KEY="schema-reconciliation-tests-only",
             STRIPE_DISABLED="1",
             PUBLIC_BASE_URL="http://127.0.0.1:5000",
@@ -114,6 +116,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         return result
 
     def run_downgrade(self, database_path, revision):
+        safe_temporary_database_url(database_path)
         result = subprocess.run(
             [sys.executable, "-m", "flask", "--app", "run.py", "db", "downgrade", revision],
             cwd=ROOT,
@@ -308,6 +311,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "number",
                 "public_id",
                 "payment_method",
+                "customer_id",
                 "cash_register_session_id",
                 "created_at",
             },
@@ -327,7 +331,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260722_14",
+                "20260723_15",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -440,6 +444,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "cash_register_session",
                 "cash_movement",
                 "inventory_movement",
+                "customer",
             }.issubset(inspector.get_table_names())
         )
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
@@ -452,6 +457,22 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
             "cash_register_session_id",
             self.columns(inspector, "sales_ticket"),
         )
+        self.assertIn("customer_id", self.columns(inspector, "sales_ticket"))
+        self.assertTrue(
+            {
+                "id",
+                "organization_id",
+                "created_by_member_id",
+                "name",
+                "phone",
+                "phone_normalized",
+                "email",
+                "notes",
+                "is_active",
+                "created_at",
+                "updated_at",
+            }.issubset(self.columns(inspector, "customer"))
+        )
         self.assertIn("is_active", self.columns(inspector, "product"))
         self.assertEqual(
             self.columns(inspector, "stripe_webhook_event"),
@@ -460,7 +481,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260722_14",
+                "20260723_15",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),

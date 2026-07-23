@@ -24,6 +24,7 @@ from .barcodes import (
 )
 from .models import (
     CashRegisterSession,
+    Customer,
     InventoryMovement,
     InventoryRestockEvent,
     Organization,
@@ -222,6 +223,25 @@ PAYMENT_METHOD_LABELS = {
 
 def _payment_method_label(value):
     return gettext(PAYMENT_METHOD_LABELS.get(value, "No especificado"))
+
+
+def _selected_customer(organization_id, raw_customer_id):
+    if raw_customer_id in (None, ""):
+        return None
+    try:
+        customer_id = int(raw_customer_id)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(gettext("Selecciona un cliente válido.")) from exc
+    customer = Customer.query.filter_by(
+        id=customer_id,
+        organization_id=organization_id,
+        is_active=True,
+    ).first()
+    if not customer:
+        raise ValueError(
+            gettext("El cliente seleccionado no está disponible.")
+        )
+    return customer
 
 
 def _ticket_business_value(value):
@@ -2401,7 +2421,16 @@ def sell():
                     "danger",
                 )
                 return redirect(url_for("cash.index"))
+            try:
+                customer = _selected_customer(
+                    organization_id,
+                    request.form.get("customer_id"),
+                )
+            except ValueError as exc:
+                flash(str(exc), "danger")
+                return redirect(url_for("main.sell"))
             ticket = _create_sales_ticket(user, payment_method)
+            ticket.customer_id = customer.id if customer else None
             ticket.cash_register_session_id = (
                 cash_session.id if cash_session else None
             )
@@ -2514,6 +2543,13 @@ def sell_cart():
             ),
             "cash_register_url": url_for("cash.index"),
         }), 409
+    try:
+        customer = _selected_customer(
+            organization_id,
+            data.get("customer_id"),
+        )
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": gettext(str(exc))}), 400
 
     request_id = data.get("request_id")
     if request_id:
@@ -2611,6 +2647,7 @@ def sell_cart():
         ticket.cash_register_session_id = (
             cash_session.id if cash_session else None
         )
+        ticket.customer_id = customer.id if customer else None
         ticket_id = ticket.public_id
         sales = []
         for product_id, quantity in requested_items.items():

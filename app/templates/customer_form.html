@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Editar cliente") if customer else _("Nuevo cliente") }}{% endblock %}
+
+{% block content %}
+<div class="customer-form-v1">
+  <section class="card customer-form-v1__panel">
+    <header>
+      <span class="customers-v1__eyebrow">{{ _("Datos esenciales") }}</span>
+      <h2>{{ _("Editar cliente") if customer else _("Agregar cliente") }}</h2>
+      <p>{{ _("Solo pide lo necesario para reconocerlo y mantener el contacto.") }}</p>
+    </header>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div>
+        <label for="customer-name">{{ _("Nombre") }} <span aria-hidden="true">*</span></label>
+        <input id="customer-name" name="name" maxlength="160" required autocomplete="name" value="{{ request.form.get('name', customer.name if customer else '') }}">
+      </div>
+      <div>
+        <label for="customer-phone">{{ _("Teléfono") }} <span aria-hidden="true">*</span></label>
+        <input id="customer-phone" name="phone" type="tel" maxlength="30" required autocomplete="tel" inputmode="tel" value="{{ request.form.get('phone', customer.phone if customer else '') }}">
+        <small>{{ _("Incluye la clave de país si el número no es de México.") }}</small>
+      </div>
+      <div>
+        <label for="customer-email">{{ _("Email (opcional)") }}</label>
+        <input id="customer-email" name="email" type="email" maxlength="120" autocomplete="email" value="{{ request.form.get('email', customer.email if customer and customer.email else '') }}">
+      </div>
+      <div class="customer-form-v1__notes">
+        <label for="customer-notes">{{ _("Notas") }}</label>
+        <textarea id="customer-notes" name="notes" maxlength="2000" rows="4" placeholder="{{ _('Ej. prefiere recibir avisos por WhatsApp') }}">{{ request.form.get('notes', customer.notes if customer and customer.notes else '') }}</textarea>
+      </div>
+      <footer>
+        <a class="btn ghost" href="{{ url_for('customers.detail', customer_id=customer.id) if customer else url_for('customers.index') }}">{{ _("Cancelar") }}</a>
+        <button class="btn" type="submit">{{ _("Guardar cambios") if customer else _("Guardar cliente") }}</button>
+      </footer>
+    </form>
+  </section>
+</div>
+{% endblock %}

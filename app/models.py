@@ -432,6 +432,68 @@ event.listen(InventoryMovement, "before_update", _prevent_inventory_movement_mut
 event.listen(InventoryMovement, "before_delete", _prevent_inventory_movement_mutation)
 
 
+class Customer(db.Model):
+    """A lightweight customer record owned by one organization."""
+
+    __tablename__ = "customer"
+    __table_args__ = (
+        db.Index(
+            "ix_customer_org_active_name",
+            "organization_id",
+            "is_active",
+            "name",
+        ),
+        db.Index(
+            "ix_customer_org_phone",
+            "organization_id",
+            "phone_normalized",
+        ),
+        db.CheckConstraint(
+            "length(trim(name)) > 0",
+            name="ck_customer_name_not_blank",
+        ),
+        db.CheckConstraint(
+            "length(trim(phone_normalized)) > 0",
+            name="ck_customer_phone_not_blank",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    created_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    name = db.Column(db.String(160), nullable=False)
+    phone = db.Column(db.String(30), nullable=False)
+    phone_normalized = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(120), nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    organization = db.relationship("Organization")
+    created_by_member = db.relationship("OrganizationMember")
+    sales_tickets = db.relationship(
+        "SalesTicket",
+        back_populates="customer",
+        passive_deletes=True,
+    )
+
+
 class SalesTicket(db.Model):
     __tablename__ = "sales_ticket"
     __table_args__ = (
@@ -483,6 +545,12 @@ class SalesTicket(db.Model):
     number = db.Column(db.Integer, nullable=False)
     public_id = db.Column(db.String(36), nullable=False)
     payment_method = db.Column(db.String(20), nullable=True)
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     cash_register_session_id = db.Column(
         db.Integer,
         db.ForeignKey("cash_register_session.id", ondelete="SET NULL"),
@@ -504,6 +572,7 @@ class SalesTicket(db.Model):
         "CashRegisterSession",
         back_populates="sales_tickets",
     )
+    customer = db.relationship("Customer", back_populates="sales_tickets")
 
     @property
     def folio(self):

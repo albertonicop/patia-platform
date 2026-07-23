@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Clientes") }}{% endblock %}
+
+{% block content %}
+<div class="customers-v1">
+  <section class="card customers-v1__hero">
+    <div>
+      <span class="customers-v1__eyebrow">{{ _("Relaciones simples, ventas claras") }}</span>
+      <h2>{{ _("Conoce a quienes compran en tu negocio") }}</h2>
+      <p>{{ _("Guarda sus datos esenciales y consulta sus compras sin convertir PATIA en un CRM complicado.") }}</p>
+    </div>
+    <div class="customers-v1__hero-actions">
+      <a class="btn ghost" href="{{ url_for('customers.export_csv', q=query, status='all' if include_inactive else '') }}"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> {{ _("Exportar CSV") }}</a>
+      <a class="btn" href="{{ url_for('customers.new') }}"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> {{ _("Agregar cliente") }}</a>
+    </div>
+  </section>
+
+  <section class="card customers-v1__filters" aria-label="{{ _('Buscar clientes') }}">
+    <form method="get" action="{{ url_for('customers.index') }}">
+      <div>
+        <label for="customer-search">{{ _("Nombre o teléfono") }}</label>
+        <input id="customer-search" name="q" type="search" value="{{ query }}" placeholder="{{ _('Ej. Ana o 238 123 4567') }}">
+      </div>
+      <label class="customers-v1__check">
+        <input type="checkbox" name="status" value="all"{% if include_inactive %} checked{% endif %}>
+        <span>{{ _("Mostrar inactivos") }}</span>
+      </label>
+      <button class="btn" type="submit">{{ _("Buscar") }}</button>
+      {% if query or include_inactive %}<a class="btn ghost" href="{{ url_for('customers.index') }}">{{ _("Limpiar") }}</a>{% endif %}
+    </form>
+  </section>
+
+  <section class="card customers-v1__list" aria-labelledby="customers-list-title">
+    <header>
+      <div>
+        <span class="customers-v1__eyebrow">{{ _("Directorio") }}</span>
+        <h3 id="customers-list-title">{{ _("%(count)s clientes encontrados", count=summaries|length) }}</h3>
+      </div>
+    </header>
+    {% if summaries %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>{{ _("Cliente") }}</th><th>{{ _("Contacto") }}</th><th>{{ _("Compras") }}</th><th>{{ _("Total comprado") }}</th><th>{{ _("Última compra") }}</th><th>{{ _("Estado") }}</th><th>{{ _("Acciones") }}</th></tr></thead>
+          <tbody>
+            {% for summary in summaries %}
+              {% set customer = summary.customer %}
+              <tr>
+                <td data-label="{{ _('Cliente') }}"><strong>{{ customer.name }}</strong>{% if customer.notes %}<small>{{ customer.notes|truncate(70) }}</small>{% endif %}</td>
+                <td data-label="{{ _('Contacto') }}"><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% if customer.email %}<small>{{ customer.email }}</small>{% endif %}</td>
+                <td data-label="{{ _('Compras') }}">{{ summary.ticket_count }}</td>
+                <td data-label="{{ _('Total comprado') }}"><strong>{{ summary.purchase_total|money }}</strong></td>
+                <td data-label="{{ _('Última compra') }}">{% if summary.last_purchase_at %}{{ local_purchase_dates[customer.id].strftime('%d/%m/%Y %H:%M') }}{% else %}{{ _("Sin compras") }}{% endif %}</td>
+                <td data-label="{{ _('Estado') }}"><span class="customers-v1__status customers-v1__status--{{ 'active' if customer.is_active else 'inactive' }}">{{ _("Activo") if customer.is_active else _("Inactivo") }}</span></td>
+                <td data-label="{{ _('Acciones') }}"><div class="customers-v1__row-actions"><a class="btn ghost" href="{{ url_for('customers.detail', customer_id=customer.id) }}">{{ _("Ver historial") }}</a><a class="customers-v1__whatsapp" href="https://wa.me/{{ whatsapp_numbers[customer.id] }}" target="_blank" rel="noopener noreferrer" aria-label="{{ _('Contactar a %(name)s por WhatsApp', name=customer.name) }}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a></div></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="module-empty-v2 customers-v1__empty">
+        <i class="fa-solid fa-address-book" aria-hidden="true"></i>
+        {% if query %}
+          <h3>{{ _("No encontramos clientes con esa búsqueda") }}</h3>
+          <p>{{ _("Prueba otro nombre o teléfono, o agrega un cliente nuevo.") }}</p>
+          <a class="btn ghost" href="{{ url_for('customers.index') }}">{{ _("Ver todos") }}</a>
+        {% else %}
+          <h3>{{ _("Tu directorio de clientes está listo") }}</h3>
+          <p>{{ _("Agrega el primero aquí o créalo rápidamente durante una venta.") }}</p>
+          <a class="btn" href="{{ url_for('customers.new') }}">{{ _("Agregar primer cliente") }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

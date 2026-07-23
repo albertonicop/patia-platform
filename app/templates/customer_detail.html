@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Detalle del cliente") }}{% endblock %}
+
+{% block content %}
+<div class="customer-detail-v1">
+  <section class="card customer-detail-v1__hero">
+    <div>
+      <a class="customer-detail-v1__back" href="{{ url_for('customers.index') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a clientes") }}</a>
+      <span class="customers-v1__eyebrow">{{ _("Cliente") }}</span>
+      <h2>{{ customer.name }}</h2>
+      <p><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% if customer.email %} · <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% endif %}</p>
+    </div>
+    <div class="customer-detail-v1__actions">
+      <a class="btn ghost" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ _("WhatsApp") }}</a>
+      <a class="btn ghost" href="{{ url_for('customers.edit', customer_id=customer.id) }}"><i class="fa-solid fa-pen" aria-hidden="true"></i> {{ _("Editar") }}</a>
+      <form method="post" action="{{ url_for('customers.toggle', customer_id=customer.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn ghost" type="submit">{{ _("Reactivar") if not customer.is_active else _("Desactivar") }}</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="customer-detail-v1__metrics" aria-label="{{ _('Resumen de compras') }}">
+    <article class="card"><span>{{ _("Total comprado") }}</span><strong>{{ total_purchased|money }}</strong></article>
+    <article class="card"><span>{{ _("Compras realizadas") }}</span><strong>{{ ticket_rows|length }}</strong></article>
+    <article class="card"><span>{{ _("Última compra") }}</span><strong>{% if ticket_rows %}{{ ticket_rows[0].created_at_local.strftime('%d/%m/%Y') }}{% else %}—{% endif %}</strong></article>
+    <article class="card"><span>{{ _("Cliente desde") }}</span><strong>{{ customer_created_local.strftime('%d/%m/%Y') }}</strong></article>
+    <article class="card"><span>{{ _("Estado") }}</span><strong>{{ _("Activo") if customer.is_active else _("Inactivo") }}</strong></article>
+  </section>
+
+  {% if customer.notes %}
+    <section class="card customer-detail-v1__notes"><span class="customers-v1__eyebrow">{{ _("Notas") }}</span><p>{{ customer.notes }}</p></section>
+  {% endif %}
+
+  <section class="card customer-detail-v1__history">
+    <header><div><span class="customers-v1__eyebrow">{{ _("Historial completo") }}</span><h3>{{ _("Compras del cliente") }}</h3></div></header>
+    {% if ticket_rows %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>{{ _("Ticket") }}</th><th>{{ _("Fecha y hora") }}</th><th>{{ _("Artículos") }}</th><th>{{ _("Método") }}</th><th>{{ _("Total") }}</th><th>{{ _("Acción") }}</th></tr></thead>
+          <tbody>{% for row in ticket_rows %}<tr>
+            <td data-label="{{ _('Ticket') }}"><strong>{{ row.ticket.folio }}</strong></td>
+            <td data-label="{{ _('Fecha y hora') }}">{{ row.created_at_local.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td data-label="{{ _('Artículos') }}">{{ row.items }}</td>
+            <td data-label="{{ _('Método') }}">{{ payment_method_labels.get(row.ticket.payment_method, _("No especificado")) }}</td>
+            <td data-label="{{ _('Total') }}"><strong>{{ row.total|money }}</strong></td>
+            <td data-label="{{ _('Acción') }}"><a class="btn ghost" href="{{ url_for('main.ticket', ticket_ref=row.ticket.public_id) }}" target="_blank" rel="noopener">{{ _("Ver ticket") }}</a></td>
+          </tr>{% endfor %}</tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="module-empty-v2 customer-detail-v1__empty"><i class="fa-solid fa-receipt" aria-hidden="true"></i><h3>{{ _("Este cliente aún no tiene compras") }}</h3><p>{{ _("Cuando lo selecciones en el punto de venta, sus tickets aparecerán aquí.") }}</p><a class="btn" href="{{ url_for('main.sell') }}">{{ _("Ir al punto de venta") }}</a></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
