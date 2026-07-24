@@ -7,7 +7,7 @@
     <div>
       <a class="customer-detail-v1__back" href="{{ url_for('customers.index') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a clientes") }}</a>
       <h2>{{ customer.name }}</h2>
-      <p><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% if customer.email %} · <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% endif %}</p>
+      {% if customer.phone or customer.email %}<p>{% if customer.phone %}<a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% endif %}{% if customer.phone and customer.email %} · {% endif %}{% if customer.email %}<a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% endif %}</p>{% endif %}
     </div>
     <div class="customer-detail-v1__actions">
       {% if credit_balance > 0 %}
@@ -15,7 +15,7 @@
         <a class="btn ghost" href="{{ url_for('credit.account', customer_id=customer.id) }}">{{ _("Ver saldo y pagos") }}</a>
       {% endif %}
       <a class="btn{% if credit_balance > 0 %} ghost{% endif %}" href="{{ url_for('main.sell') }}">{{ _("Nueva venta") }}</a>
-      <a class="btn ghost" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ _("WhatsApp") }}</a>
+      {% if whatsapp_number %}<a class="btn ghost" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ _("WhatsApp") }}</a>{% endif %}
       <a class="btn ghost" href="{{ url_for('customers.edit', customer_id=customer.id) }}"><i class="fa-solid fa-pen" aria-hidden="true"></i> {{ _("Editar cliente") }}</a>
       <form method="post" action="{{ url_for('customers.toggle', customer_id=customer.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -35,26 +35,25 @@
   {% endif %}
 
   <section class="card customer-detail-v1__notes">
-    <span class="customers-v1__eyebrow">{{ _("Compras a crédito") }}</span>
+    <span class="customers-v1__eyebrow">{{ _("Ventas a crédito") }}</span>
     {% if customer.credit_enabled %}
-      <h3>{{ _("Este cliente puede pagar después") }}</h3>
       <div class="customer-detail-simple-v1__credit">
-        <div><span>{{ _("Límite acordado") }}</span><strong>{{ customer.credit_limit|money }}</strong></div>
-        <div><span>{{ _("Saldo actual") }}</span><strong>{{ credit_balance|money }}</strong></div>
-        <div><span>{{ _("Todavía puede comprar") }}</span><strong>{{ ([customer.credit_limit - credit_balance, 0]|max)|money }}</strong></div>
+        <div><span>{{ _("Límite") }}</span><strong>{{ customer.credit_limit|money }}</strong></div>
+        <div><span>{{ _("Debe actualmente") }}</span><strong>{{ credit_balance|money }}</strong></div>
+        <div><span>{{ _("Disponible") }}</span><strong>{{ ([customer.credit_limit - credit_balance, 0]|max)|money }}</strong></div>
       </div>
     {% else %}
-      <h3>{{ _("¿Este cliente puede pagar después?") }}</h3>
-      <p>{{ _("Actívalo solo si acordaste con esta persona un límite de compras pendientes.") }}</p>
+      <h3>{{ _("Este cliente no tiene crédito habilitado.") }}</h3>
     {% endif %}
     {% if customer.credit_enabled %}
       <div class="customer-credit-settings-v1">
-        <a class="btn ghost" href="{{ url_for('credit.account', customer_id=customer.id) }}">{{ _("Ver saldo y pagos") }}</a>
+        <a class="btn" href="{{ url_for('credit.account', customer_id=customer.id) }}#registrar-pago">{{ _("Registrar pago") }}</a>
         <details class="module-more-v2">
           <summary>{{ _("Cambiar límite") }}</summary>
           <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="credit_enabled" value="1">
+            <input type="hidden" name="next" value="customer">
             <label for="credit-limit">{{ _("Nuevo límite") }}</label>
             <input id="credit-limit" name="credit_limit" type="number" min="0" step="0.01" value="{{ '%.2f'|format(customer.credit_limit) }}" required>
             <button class="btn ghost" type="submit">{{ _("Guardar límite") }}</button>
@@ -64,16 +63,12 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="credit_enabled" value="0">
           <input type="hidden" name="credit_limit" value="{{ '%.2f'|format(customer.credit_limit) }}">
+          <input type="hidden" name="next" value="customer">
           <button class="btn ghost" type="submit">{{ _("Desactivar crédito") }}</button>
         </form>
       </div>
     {% else %}
-      <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}" class="customer-credit-settings-v1">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="credit_enabled" value="1">
-        <div><label for="credit-limit-new">{{ _("¿Hasta cuánto puede comprar?") }}</label><input id="credit-limit-new" name="credit_limit" type="number" min="0" step="0.01" value="0.00" required></div>
-        <button class="btn" type="submit">{{ _("Permitir ventas a crédito") }}</button>
-      </form>
+      <button id="activate-customer-credit" class="btn" type="button">{{ _("Activar ventas a crédito") }}</button>
     {% endif %}
   </section>
 
@@ -98,4 +93,45 @@
     {% endif %}
   </section>
 </div>
+
+{% if not customer.credit_enabled %}
+<dialog id="customer-credit-modal" class="customer-credit-modal-v1" aria-labelledby="customer-credit-modal-title">
+  <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="credit_enabled" value="1">
+    <input type="hidden" name="next" value="customer">
+    <span class="customers-v1__eyebrow">{{ _("Ventas a crédito") }}</span>
+    <h3 id="customer-credit-modal-title">{{ _("Activar ventas a crédito") }}</h3>
+    <div>
+      <label for="credit-limit-new">{{ _("¿Cuál será el límite de crédito?") }}</label>
+      <input id="credit-limit-new" name="credit_limit" type="number" min="0" step="0.01" inputmode="decimal" required>
+    </div>
+    <footer>
+      <button id="cancel-customer-credit" class="btn ghost" type="button">{{ _("Cancelar") }}</button>
+      <button class="btn" type="submit">{{ _("Guardar") }}</button>
+    </footer>
+  </form>
+</dialog>
+<script>
+(() => {
+  const trigger = document.getElementById("activate-customer-credit");
+  const modal = document.getElementById("customer-credit-modal");
+  const cancel = document.getElementById("cancel-customer-credit");
+  const limit = document.getElementById("credit-limit-new");
+  const closeModal = () => {
+    modal.close();
+    trigger.focus();
+  };
+  trigger.addEventListener("click", () => {
+    modal.showModal();
+    limit.focus();
+  });
+  cancel.addEventListener("click", closeModal);
+  modal.addEventListener("click", event => {
+    if (event.target === modal) closeModal();
+  });
+  modal.addEventListener("close", () => trigger.focus());
+})();
+</script>
+{% endif %}
 {% endblock %}

@@ -1,7 +1,16 @@
 from urllib.parse import quote
 import uuid
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_babel import gettext
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -180,15 +189,32 @@ def settings(customer_id):
         membership.organization_id,
         lock=True,
     )
-    enabled = request.form.get("credit_enabled") == "1"
+    payload = request.get_json(silent=True) if request.is_json else request.form
+    if not isinstance(payload, dict) and request.is_json:
+        return jsonify(
+            {"ok": False, "error": gettext("Solicitud inválida")}
+        ), 400
+    enabled = str(payload.get("credit_enabled") or "") == "1"
     try:
-        limit = money_decimal(request.form.get("credit_limit") or 0)
+        limit = money_decimal(payload.get("credit_limit") or 0)
     except (TypeError, ValueError):
+        if request.is_json:
+            return jsonify({
+                "ok": False,
+                "error": gettext("Escribe un límite de crédito válido."),
+            }), 400
         flash(gettext("Escribe un límite de crédito válido."), "danger")
         return redirect(url_for("customers.detail", customer_id=customer.id))
     if not enabled and customer_balance(
         customer.id, membership.organization_id
     ) > 0:
+        if request.is_json:
+            return jsonify({
+                "ok": False,
+                "error": gettext(
+                    "Liquida el saldo antes de desactivar el crédito."
+                ),
+            }), 409
         flash(
             gettext("Liquida el saldo antes de desactivar el crédito."),
             "danger",
@@ -197,8 +223,22 @@ def settings(customer_id):
     customer.credit_enabled = enabled
     customer.credit_limit = limit
     db.session.commit()
+    if request.is_json:
+        return jsonify({
+            "ok": True,
+            "customer": {
+                "id": customer.id,
+                "credit_enabled": customer.credit_enabled,
+                "credit_limit": str(customer.credit_limit),
+            },
+        })
     flash(gettext("Configuración de crédito actualizada."), "success")
-    return redirect(url_for("credit.account", customer_id=customer.id))
+    destination = (
+        "customers.detail"
+        if request.form.get("next") == "customer"
+        else "credit.account"
+    )
+    return redirect(url_for(destination, customer_id=customer.id))
 
 
 @credit.post("/customers/<int:customer_id>/payments")

@@ -183,6 +183,30 @@ class CustomerModuleTests(unittest.TestCase):
             client.get("/customers?status=all").get_data(as_text=True),
         )
 
+    def test_customer_can_be_created_with_only_a_name(self):
+        client = self.client_for(self.owner)
+        form = client.get("/customers/new").get_data(as_text=True)
+        self.assertIn("Teléfono (opcional)", form)
+        self.assertNotIn('name="phone" type="tel" maxlength="30" required', form)
+        self.assertNotIn("¿Este cliente puede pagar después?", form)
+        self.assertNotIn("Límite de crédito", form)
+
+        created = client.post(
+            "/customers/new",
+            data={"name": "Cliente sin teléfono"},
+        )
+        self.assertEqual(created.status_code, 302)
+        customer = Customer.query.one()
+        self.assertIsNone(customer.phone)
+        self.assertIsNone(customer.phone_normalized)
+        self.assertFalse(customer.credit_enabled)
+        self.assertEqual(customer.credit_limit, Decimal("0.00"))
+
+        detail = client.get(f"/customers/{customer.id}").get_data(as_text=True)
+        self.assertIn("Este cliente no tiene crédito habilitado.", detail)
+        self.assertIn("Activar ventas a crédito", detail)
+        self.assertNotIn('href="https://wa.me/"', detail)
+
     def test_cashier_can_search_and_quick_create_but_not_manage_module(self):
         self.create_customer()
         cashier, _ = self.add_member("CASHIER", "cashier@customers.test")
@@ -204,6 +228,21 @@ class CustomerModuleTests(unittest.TestCase):
             ).status_code,
             403,
         )
+
+    def test_quick_customer_phone_is_optional(self):
+        cashier, _ = self.add_member("CASHIER", "fast@customers.test")
+        client = self.client_for(cashier)
+        created = client.post(
+            "/customers/api/quick",
+            json={"name": "Cliente rápido"},
+        )
+        self.assertEqual(created.status_code, 201)
+        payload = created.get_json()["customer"]
+        self.assertEqual(payload["phone"], "")
+        self.assertFalse(payload["credit_enabled"])
+        customer = Customer.query.one()
+        self.assertIsNone(customer.phone)
+        self.assertIsNone(customer.phone_normalized)
 
     def test_manager_has_complete_access(self):
         manager, _ = self.add_member("MANAGER", "manager@customers.test")
@@ -295,7 +334,7 @@ class CustomerModuleTests(unittest.TestCase):
         client = self.client_for(self.owner)
         invalid = client.post(
             "/customers/api/quick",
-            json={"name": "", "phone": "12"},
+            json={"name": "Teléfono inválido", "phone": "12"},
         )
         self.assertEqual(invalid.status_code, 400)
         self.assertEqual(Customer.query.count(), 0)
@@ -307,8 +346,12 @@ class CustomerModuleTests(unittest.TestCase):
         client = self.client_for(self.owner, language="en")
         en = client.get("/customers").get_data(as_text=True)
         self.assertIn("Customers", en)
+        form = client.get("/customers/new").get_data(as_text=True)
+        self.assertIn("Phone (optional)", form)
+        self.assertIn("Notes (optional)", form)
         pos = client.get("/sell").get_data(as_text=True)
         self.assertIn("Quick add", pos)
+        self.assertIn("Phone (optional)", pos)
 
     def test_simplified_customer_list_has_clear_toolbar_and_zero_balance_copy(self):
         self.create_customer()

@@ -270,7 +270,8 @@ def api_search():
                 {
                     "id": row.customer.id,
                     "name": row.customer.name,
-                    "phone": row.customer.phone,
+                    "phone": row.customer.phone or "",
+                    "credit_enabled": row.customer.credit_enabled,
                 }
                 for row in summaries
             ],
@@ -300,7 +301,8 @@ def api_quick_create():
                 "customer": {
                     "id": customer.id,
                     "name": customer.name,
-                    "phone": customer.phone,
+                    "phone": customer.phone or "",
+                    "credit_enabled": customer.credit_enabled,
                 },
             }
         ), 201

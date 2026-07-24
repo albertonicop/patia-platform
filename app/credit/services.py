@@ -14,6 +14,10 @@ class CreditError(ValueError):
     pass
 
 
+class CreditNotEnabled(CreditError):
+    pass
+
+
 class CreditLimitExceeded(CreditError):
     def __init__(self, balance, limit):
         self.balance = balance
@@ -68,7 +72,9 @@ def record_credit_charge(
         is_active=True,
     ).with_for_update().first()
     if not locked or not locked.credit_enabled:
-        raise CreditError(gettext("Este cliente no tiene crédito habilitado."))
+        raise CreditNotEnabled(
+            gettext("Este cliente todavía no tiene crédito habilitado.")
+        )
     before = customer_balance(locked.id, membership.organization_id)
     amount = money_decimal(amount)
     after = money_decimal(before + amount)

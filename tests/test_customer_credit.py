@@ -174,6 +174,108 @@ class CustomerCreditTests(unittest.TestCase):
         self.assertEqual(CustomerCreditMovement.query.count(), 1)
         self.assertEqual(customer_balance(self.customer.id, self.owner_member.organization_id), Decimal("40.00"))
 
+    def test_owner_enables_credit_from_pos_and_retries_same_sale(self):
+        self.customer.credit_enabled = False
+        self.customer.credit_limit = Decimal("0.00")
+        db.session.commit()
+        client = self.client_for(self.owner)
+        request_id = str(uuid.uuid4())
+        payload = {
+            "request_id": request_id,
+            "payment_method": "credit",
+            "customer_id": self.customer.id,
+            "items": [{"product_id": self.product.id, "quantity": 1}],
+        }
+
+        blocked = client.post("/sell-cart", json=payload)
+        self.assertEqual(blocked.status_code, 409)
+        self.assertEqual(
+            blocked.get_json()["error_code"],
+            "credit_not_enabled",
+        )
+        self.assertEqual(SalesTicket.query.count(), 0)
+        self.assertEqual(Sale.query.count(), 0)
+
+        enabled = client.post(
+            f"/credit/customers/{self.customer.id}/settings",
+            json={"credit_enabled": "1", "credit_limit": "100.00"},
+        )
+        self.assertEqual(enabled.status_code, 200)
+        self.assertTrue(enabled.get_json()["customer"]["credit_enabled"])
+
+        completed = client.post("/sell-cart", json=payload)
+        self.assertEqual(completed.status_code, 200)
+        self.assertEqual(SalesTicket.query.count(), 1)
+        self.assertEqual(Sale.query.count(), 1)
+        self.assertEqual(CustomerCreditMovement.query.count(), 1)
+
+    def test_cashier_cannot_enable_credit_during_sale(self):
+        self.customer.credit_enabled = False
+        db.session.commit()
+        cashier, _ = self.add_member("CASHIER", "activate@credit.test")
+        response = self.client_for(cashier).post(
+            f"/credit/customers/{self.customer.id}/settings",
+            json={"credit_enabled": "1", "credit_limit": "100.00"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(db.session.get(Customer, self.customer.id).credit_enabled)
+
+    def test_owner_enables_credit_from_customer_profile(self):
+        self.customer.credit_enabled = False
+        self.customer.credit_limit = Decimal("0.00")
+        db.session.commit()
+        response = self.client_for(self.owner).post(
+            f"/credit/customers/{self.customer.id}/settings",
+            data={
+                "credit_enabled": "1",
+                "credit_limit": "250.00",
+                "next": "customer",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            response.headers["Location"].endswith(
+                f"/customers/{self.customer.id}"
+            )
+        )
+        updated = db.session.get(Customer, self.customer.id)
+        self.assertTrue(updated.credit_enabled)
+        self.assertEqual(updated.credit_limit, Decimal("250.00"))
+
+    def test_customer_profile_and_pos_explain_deferred_credit_activation(self):
+        self.customer.credit_enabled = False
+        db.session.commit()
+        client = self.client_for(self.owner)
+        profile = client.get(
+            f"/customers/{self.customer.id}"
+        ).get_data(as_text=True)
+        self.assertIn("Este cliente no tiene crédito habilitado.", profile)
+        self.assertIn("Activar ventas a crédito", profile)
+        self.assertIn("¿Cuál será el límite de crédito?", profile)
+
+        pos = client.get("/sell").get_data(as_text=True)
+        self.assertIn("¿Deseas permitir ventas a crédito?", pos)
+        self.assertIn("Guardar y continuar", pos)
+        self.assertIn('error_code === "credit_not_enabled"', pos)
+
+    def test_credit_activation_copy_is_available_in_english(self):
+        self.customer.credit_enabled = False
+        db.session.commit()
+        english = self.client_for(self.owner, language="en")
+        english_profile = english.get(
+            f"/customers/{self.customer.id}"
+        ).get_data(as_text=True)
+        self.assertIn(
+            "Credit is not enabled for this customer.",
+            english_profile,
+        )
+        self.assertIn("Enable credit sales", english_profile)
+        english_pos = english.get("/sell").get_data(as_text=True)
+        self.assertIn(
+            "Would you like to enable credit sales?",
+            english_pos,
+        )
+
     def test_partial_and_full_payments_keep_exact_balance(self):
         client = self.client_for(self.owner)
         self.assertEqual(self.credit_sale(client, quantity=2).status_code, 200)

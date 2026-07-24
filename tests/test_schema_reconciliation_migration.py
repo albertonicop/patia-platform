@@ -338,7 +338,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260723_17",
+                "20260724_18",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -495,7 +495,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260723_17",
+                "20260724_18",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
@@ -608,6 +608,91 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
+                "ok",
+            )
+        engine.dispose()
+
+    def test_optional_customer_phone_migration_preserves_existing_customers(self):
+        database_path = self.database_path("optional-customer-phone.db")
+        self.run_upgrade(database_path, "20260723_17")
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        with engine.begin() as connection:
+            connection.execute(sa.text(
+                'INSERT INTO "user" (id, email, password, company_name, created_at) '
+                "VALUES (1, 'customer@example.test', 'hash', 'Customer Store', "
+                "'2026-07-24 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO organization "
+                "(id, name, slug, owner_user_id, timezone, currency, is_active, "
+                "created_at, updated_at) "
+                "VALUES (1, 'Customer Store', 'customer-store', 1, "
+                "'America/Mexico_City', 'MXN', 1, '2026-07-24 00:00:00', "
+                "'2026-07-24 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO organization_member "
+                "(id, organization_id, user_id, role, is_active, created_at, "
+                "updated_at) VALUES (1, 1, 1, 'OWNER', 1, "
+                "'2026-07-24 00:00:00', '2026-07-24 00:00:00')"
+            ))
+            connection.execute(sa.text(
+                "INSERT INTO customer "
+                "(id, organization_id, created_by_member_id, name, phone, "
+                "phone_normalized, is_active, created_at, updated_at) "
+                "VALUES (1, 1, 1, 'Existing Customer', '2381234567', "
+                "'2381234567', 1, '2026-07-24 00:00:00', "
+                "'2026-07-24 00:00:00')"
+            ))
+        engine.dispose()
+
+        self.run_upgrade(database_path)
+
+        engine = sa.create_engine(f"sqlite:///{database_path.as_posix()}")
+        inspector = sa.inspect(engine)
+        columns = {
+            column["name"]: column
+            for column in inspector.get_columns("customer")
+        }
+        self.assertTrue(columns["phone"]["nullable"])
+        self.assertTrue(columns["phone_normalized"]["nullable"])
+        self.assertNotIn(
+            "ck_customer_phone_not_blank",
+            {
+                constraint.get("name")
+                for constraint in inspector.get_check_constraints("customer")
+            },
+        )
+        with engine.begin() as connection:
+            self.assertEqual(
+                connection.execute(
+                    sa.text("SELECT name FROM customer WHERE id = 1")
+                ).scalar_one(),
+                "Existing Customer",
+            )
+            connection.execute(sa.text(
+                "INSERT INTO customer "
+                "(id, organization_id, created_by_member_id, name, phone, "
+                "phone_normalized, is_active, created_at, updated_at) "
+                "VALUES (2, 1, 1, 'Name Only', NULL, NULL, 1, "
+                "'2026-07-24 01:00:00', '2026-07-24 01:00:00')"
+            ))
+            self.assertEqual(
+                connection.execute(
+                    sa.text("SELECT COUNT(*) FROM customer")
+                ).scalar_one(),
+                2,
+            )
+            self.assertEqual(
+                connection.execute(
+                    sa.text("SELECT version_num FROM alembic_version")
+                ).scalar_one(),
+                "20260724_18",
+            )
+            self.assertEqual(
+                connection.execute(
+                    sa.text("PRAGMA integrity_check")
+                ).scalar_one(),
                 "ok",
             )
         engine.dispose()

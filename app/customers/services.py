@@ -39,7 +39,7 @@ def _like_value(value: str) -> str:
 
 
 def whatsapp_number(customer: Customer) -> str:
-    digits = customer.phone_normalized
+    digits = customer.phone_normalized or ""
     return f"52{digits}" if len(digits) == 10 else digits
 
 
@@ -54,7 +54,7 @@ def validate_customer_data(data) -> dict:
         raise CustomerValidationError(gettext("Escribe el nombre del cliente."))
     if len(name) > 160:
         raise CustomerValidationError(gettext("El nombre es demasiado largo."))
-    if not 7 <= len(phone_normalized) <= 15:
+    if phone_normalized and not 7 <= len(phone_normalized) <= 15:
         raise CustomerValidationError(
             gettext("Escribe un teléfono válido de 7 a 15 dígitos.")
         )
@@ -75,8 +75,8 @@ def validate_customer_data(data) -> dict:
         )
     return {
         "name": name,
-        "phone": phone,
-        "phone_normalized": phone_normalized,
+        "phone": phone or None,
+        "phone_normalized": phone_normalized or None,
         "email": email or None,
         "notes": notes or None,
     }

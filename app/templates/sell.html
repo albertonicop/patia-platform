@@ -126,12 +126,40 @@
         <button id="quick-customer-close" class="pos-v2__modal-close" type="button" aria-label="{{ _('Cerrar') }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
         <span class="pos-v2__eyebrow">{{ _("Sin salir de la venta") }}</span>
         <h3 id="quick-customer-title">{{ _("Agregar cliente rápido") }}</h3>
-        <p>{{ _("Guarda nombre y teléfono. Podrás completar sus datos después.") }}</p>
+        <p>{{ _("Guarda el nombre. El teléfono es opcional y podrás completar sus datos después.") }}</p>
         <form id="quick-customer-form">
           <div><label for="quick-customer-name">{{ _("Nombre") }}</label><input id="quick-customer-name" name="name" maxlength="160" required autocomplete="name"></div>
-          <div><label for="quick-customer-phone">{{ _("Teléfono") }}</label><input id="quick-customer-phone" name="phone" type="tel" maxlength="30" required inputmode="tel" autocomplete="tel"></div>
+          <div><label for="quick-customer-phone">{{ _("Teléfono (opcional)") }}</label><input id="quick-customer-phone" name="phone" type="tel" maxlength="30" inputmode="tel" autocomplete="tel"></div>
           <p id="quick-customer-error" class="pos-v2__checkout-error" role="alert" hidden></p>
           <div class="pos-customer-v1__modal-actions"><button id="quick-customer-cancel" class="btn ghost" type="button">{{ _("Cancelar") }}</button><button id="quick-customer-submit" class="btn" type="submit">{{ _("Guardar y seleccionar") }}</button></div>
+        </form>
+      </section>
+    </div>
+
+    <div id="credit-activation-modal" class="pos-v2__modal" role="dialog" aria-modal="true" aria-labelledby="credit-activation-title" hidden>
+      <div class="pos-v2__modal-backdrop" data-close-credit-modal></div>
+      <section class="pos-v2__confirmation pos-credit-v1__modal" role="document">
+        <button id="credit-activation-close" class="pos-v2__modal-close" type="button" aria-label="{{ _('Cerrar') }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <span class="pos-v2__eyebrow">{{ _("Ventas a crédito") }}</span>
+        <div id="credit-activation-intro">
+          <h3 id="credit-activation-title">{{ _("Este cliente todavía no tiene crédito habilitado.") }}</h3>
+          <p>{{ _("¿Deseas permitir ventas a crédito?") }}</p>
+          <div class="pos-customer-v1__modal-actions">
+            <button id="credit-activation-cancel" class="btn ghost" type="button">{{ _("Cancelar") }}</button>
+            <button id="credit-activation-next" class="btn" type="button">{{ _("Activar crédito") }}</button>
+          </div>
+        </div>
+        <form id="credit-activation-form" hidden>
+          <h3>{{ _("Activar ventas a crédito") }}</h3>
+          <div>
+            <label for="pos-credit-limit">{{ _("¿Cuál será el límite de crédito?") }}</label>
+            <input id="pos-credit-limit" name="credit_limit" type="number" min="0" step="0.01" inputmode="decimal" required>
+          </div>
+          <p id="credit-activation-error" class="pos-v2__checkout-error" role="alert" hidden></p>
+          <div class="pos-customer-v1__modal-actions">
+            <button id="credit-activation-back" class="btn ghost" type="button">{{ _("Volver") }}</button>
+            <button id="credit-activation-submit" class="btn" type="submit">{{ _("Guardar y continuar") }}</button>
+          </div>
         </form>
       </section>
     </div>
@@ -221,6 +249,9 @@ const POS_I18N = {
   ,creditOverride: {{ _("Esta venta supera el límite disponible. ¿Deseas solicitar autorización?")|tojson }}
   ,overridePin: {{ _("PIN de propietario o encargado")|tojson }}
   ,canAuthorizeCreditOverride: {{ can_authorize_credit_override|tojson }}
+  ,savingCredit: {{ _("Guardando crédito…")|tojson }}
+  ,saveCredit: {{ _("Guardar y continuar")|tojson }}
+  ,creditActivationError: {{ _("No se pudo activar el crédito. Inténtalo nuevamente.")|tojson }}
 };
 const PRODUCTS = [
   {% for product in products %}
@@ -544,6 +575,108 @@ quickCustomerForm.addEventListener("submit", async event => {
   }
 });
 
+const creditActivationModal = document.getElementById("credit-activation-modal");
+const creditActivationIntro = document.getElementById("credit-activation-intro");
+const creditActivationForm = document.getElementById("credit-activation-form");
+const creditActivationLimit = document.getElementById("pos-credit-limit");
+const creditActivationError = document.getElementById("credit-activation-error");
+const creditActivationSubmit = document.getElementById("credit-activation-submit");
+let pendingCreditRequestId = null;
+
+function resetCheckoutAfterCreditCancel() {
+  saleSubmitting = false;
+  checkoutButton.disabled = cart.length === 0;
+  checkoutButton.textContent = POS_I18N.submit;
+}
+
+function showCreditActivationIntro() {
+  creditActivationIntro.hidden = false;
+  creditActivationForm.hidden = true;
+  creditActivationError.hidden = true;
+  document.getElementById("credit-activation-next").focus();
+}
+
+function openCreditActivation(requestId) {
+  pendingCreditRequestId = requestId;
+  creditActivationModal.hidden = false;
+  document.body.classList.add("has-open-modal");
+  showCreditActivationIntro();
+}
+
+function closeCreditActivation({resumeSale = false} = {}) {
+  creditActivationModal.hidden = true;
+  document.body.classList.remove("has-open-modal");
+  creditActivationForm.reset();
+  creditActivationError.hidden = true;
+  if (!resumeSale) {
+    pendingCreditRequestId = null;
+    resetCheckoutAfterCreditCancel();
+    checkoutButton.focus();
+  }
+}
+
+document.getElementById("credit-activation-close").addEventListener("click", () => closeCreditActivation());
+document.getElementById("credit-activation-cancel").addEventListener("click", () => closeCreditActivation());
+document.querySelector("[data-close-credit-modal]").addEventListener("click", () => closeCreditActivation());
+document.getElementById("credit-activation-next").addEventListener("click", () => {
+  creditActivationIntro.hidden = true;
+  creditActivationForm.hidden = false;
+  creditActivationLimit.focus();
+});
+document.getElementById("credit-activation-back").addEventListener("click", showCreditActivationIntro);
+creditActivationModal.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeCreditActivation();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const focusable = [...creditActivationModal.querySelectorAll('button:not([disabled]):not([hidden]), input:not([disabled]):not([hidden])')]
+    .filter(element => element.offsetParent !== null);
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+creditActivationForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!selectedCustomer || creditActivationSubmit.disabled) return;
+  creditActivationSubmit.disabled = true;
+  creditActivationSubmit.textContent = POS_I18N.savingCredit;
+  creditActivationError.hidden = true;
+  try {
+    const response = await fetch(`/credit/customers/${encodeURIComponent(selectedCustomer.id)}/settings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        credit_enabled: "1",
+        credit_limit: creditActivationLimit.value
+      })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || POS_I18N.creditActivationError);
+    selectedCustomer.credit_enabled = true;
+    const requestId = pendingCreditRequestId;
+    pendingCreditRequestId = null;
+    closeCreditActivation({resumeSale: true});
+    await submitCartSale(requestId);
+  } catch (error) {
+    creditActivationError.textContent = error.message || POS_I18N.creditActivationError;
+    creditActivationError.hidden = false;
+  } finally {
+    creditActivationSubmit.disabled = false;
+    creditActivationSubmit.textContent = POS_I18N.saveCredit;
+  }
+});
+
 function updateQuantity(productId, value) {
   const item = cart.find(product => product.id === productId);
   if (!item) return;
@@ -624,6 +757,10 @@ async function submitCartSale(requestId, creditOverride = false, overridePin = "
       body: JSON.stringify({items, request_id: requestId, payment_method: paymentMethod.value, customer_id: selectedCustomer ? selectedCustomer.id : null, credit_override: creditOverride, override_pin: overridePin})
     });
     const data = await response.json();
+    if (!response.ok && data.error_code === "credit_not_enabled") {
+      openCreditActivation(requestId);
+      return;
+    }
     if (!response.ok && data.error_code === "credit_limit_exceeded" && !creditOverride) {
       if (!window.confirm(POS_I18N.creditOverride)) throw new Error(data.error);
       const pin = POS_I18N.canAuthorizeCreditOverride
@@ -654,7 +791,16 @@ checkoutButton.addEventListener("click", async () => {
   checkoutButton.disabled = true;
   checkoutButton.textContent = POS_I18N.submitting;
   checkoutError.hidden = true;
-  await submitCartSale(newRequestId());
+  const requestId = newRequestId();
+  if (
+    paymentMethod.value === "credit"
+    && selectedCustomer
+    && !selectedCustomer.credit_enabled
+  ) {
+    openCreditActivation(requestId);
+    return;
+  }
+  await submitCartSale(requestId);
 });
 
 const storedConfirmation = sessionStorage.getItem("patia_sale_confirmation");

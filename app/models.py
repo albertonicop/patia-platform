@@ -452,10 +452,6 @@ class Customer(db.Model):
             "length(trim(name)) > 0",
             name="ck_customer_name_not_blank",
         ),
-        db.CheckConstraint(
-            "length(trim(phone_normalized)) > 0",
-            name="ck_customer_phone_not_blank",
-        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -472,8 +468,8 @@ class Customer(db.Model):
         index=True,
     )
     name = db.Column(db.String(160), nullable=False)
-    phone = db.Column(db.String(30), nullable=False)
-    phone_normalized = db.Column(db.String(20), nullable=False)
+    phone = db.Column(db.String(30), nullable=True)
+    phone_normalized = db.Column(db.String(20), nullable=True)
     email = db.Column(db.String(120), nullable=True)
     notes = db.Column(db.Text, nullable=True)
     credit_enabled = db.Column(db.Boolean, nullable=False, default=False)

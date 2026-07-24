@@ -16,8 +16,8 @@
         <input id="customer-name" name="name" maxlength="160" required autocomplete="name" value="{{ request.form.get('name', customer.name if customer else '') }}">
       </div>
       <div>
-        <label for="customer-phone">{{ _("Teléfono") }} <span aria-hidden="true">*</span></label>
-        <input id="customer-phone" name="phone" type="tel" maxlength="30" required autocomplete="tel" inputmode="tel" value="{{ request.form.get('phone', customer.phone if customer else '') }}">
+        <label for="customer-phone">{{ _("Teléfono (opcional)") }}</label>
+        <input id="customer-phone" name="phone" type="tel" maxlength="30" autocomplete="tel" inputmode="tel" value="{{ request.form.get('phone', customer.phone if customer and customer.phone else '') }}">
         <small>{{ _("Incluye la clave de país si el número no es de México.") }}</small>
       </div>
       <div>
@@ -25,7 +25,7 @@
         <input id="customer-email" name="email" type="email" maxlength="120" autocomplete="email" value="{{ request.form.get('email', customer.email if customer and customer.email else '') }}">
       </div>
       <div class="customer-form-v1__notes">
-        <label for="customer-notes">{{ _("Notas") }}</label>
+        <label for="customer-notes">{{ _("Notas (opcional)") }}</label>
         <textarea id="customer-notes" name="notes" maxlength="2000" rows="4" placeholder="{{ _('Ej. prefiere recibir avisos por WhatsApp') }}">{{ request.form.get('notes', customer.notes if customer and customer.notes else '') }}</textarea>
       </div>
       <footer>

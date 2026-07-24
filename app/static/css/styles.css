@@ -3333,6 +3333,59 @@ table {
   margin-top: 5px;
 }
 
+.app-shell-v2 .customer-credit-modal-v1 {
+  width: min(92vw, 440px);
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  color: var(--v2-ink);
+  background: #fff;
+  box-shadow: 0 28px 80px rgba(20, 24, 44, 0.24);
+}
+
+.app-shell-v2 .customer-credit-modal-v1::backdrop {
+  background: rgba(20, 24, 44, 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.app-shell-v2 .customer-credit-modal-v1 form {
+  display: grid;
+  gap: 18px;
+  padding: 28px;
+}
+
+.app-shell-v2 .customer-credit-modal-v1 h3 {
+  margin: 0;
+}
+
+.app-shell-v2 .customer-credit-modal-v1 form > div {
+  display: grid;
+  gap: 8px;
+}
+
+.app-shell-v2 .customer-credit-modal-v1 footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.app-shell-v2 .pos-credit-v1__modal,
+.app-shell-v2 .pos-credit-v1__modal form,
+.app-shell-v2 #credit-activation-intro {
+  display: grid;
+  gap: 16px;
+}
+
+.app-shell-v2 .pos-credit-v1__modal h3,
+.app-shell-v2 .pos-credit-v1__modal p {
+  margin: 0;
+}
+
+.app-shell-v2 .pos-credit-v1__modal form > div:not(.pos-customer-v1__modal-actions) {
+  display: grid;
+  gap: 8px;
+}
+
 .app-shell-v2 .receivables-simple-v1__empty {
   min-height: 360px;
 }

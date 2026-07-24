@@ -43,7 +43,7 @@
             {% for summary in summaries %}
               {% set customer = summary.customer %}
               <tr>
-                <td data-label="{{ _('Cliente') }}"><strong>{{ customer.name }}</strong><small><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a></small></td>
+                <td data-label="{{ _('Cliente') }}"><strong>{{ customer.name }}</strong>{% if customer.phone %}<small><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a></small>{% endif %}</td>
                 <td data-label="{{ _('Última compra') }}">{% if summary.last_purchase_at %}{{ local_purchase_dates[customer.id].strftime('%d/%m/%Y') }}{% else %}{{ _("Sin compras") }}{% endif %}</td>
                 <td data-label="{{ _('Saldo') }}">
                   {% if summary.credit_balance > 0 %}

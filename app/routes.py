@@ -48,6 +48,7 @@ from .inventory.services import (
 from .credit.services import (
     CreditError,
     CreditLimitExceeded,
+    CreditNotEnabled,
     record_credit_charge,
     record_credit_reversal,
 )
@@ -2826,6 +2827,13 @@ def sell_cart():
             "single_sale_id": sales[0].id if len(sales) == 1 else None,
             "payment_method": _payment_method_label(payment_method),
         })
+    except CreditNotEnabled as exc:
+        db.session.rollback()
+        return jsonify({
+            "ok": False,
+            "error": str(exc),
+            "error_code": "credit_not_enabled",
+        }), 409
     except CreditLimitExceeded as exc:
         db.session.rollback()
         return jsonify({
