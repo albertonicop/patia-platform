@@ -3,9 +3,7 @@
 {% block content %}
 <div class="cash-v2">
   <header class="module-intro-v2 cash-v2__intro">
-    <span>{{ _("Control del efectivo") }}</span>
-    <h2>{{ _("Caja del día") }}</h2>
-    <p>{{ _("Lleva el control del efectivo desde que abres hasta que cierras.") }}</p>
+    <p>{{ _("Controla el efectivo que entra y sale durante el día.") }}</p>
   </header>
 
   {% if cash_session %}
@@ -14,12 +12,17 @@
         <span class="cash-v2__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> {{ _("Caja abierta") }}</span>
         <h3 id="expected-cash-title">{{ _("En caja debería haber") }}</h3>
         <strong>{{ expected_cash|money }}</strong>
-        <p>{{ _("Incluye el efectivo inicial, las ventas, los pagos, las entradas y las salidas.") }}</p>
+        <p>{{ _("PATIA calcula esta cantidad con el efectivo inicial, las ventas, los pagos, los gastos y los retiros.") }}</p>
       </div>
       <dl>
-        <div><dt>{{ _("Efectivo inicial") }}</dt><dd>{{ cash_session.opening_cash|money }}</dd></div>
         <div><dt>{{ _("Comenzaste") }}</dt><dd>{{ cash_session.opened_at_local.strftime('%d/%m/%Y · %H:%M') }}</dd></div>
       </dl>
+    </section>
+
+    <section class="cash-v2__summary" aria-label="{{ _('Resumen de caja') }}">
+      {% for item in cash_summary.values() %}
+        <div><span>{{ item.label }}</span><strong>{{ item.amount|money }}</strong></div>
+      {% endfor %}
     </section>
 
     {% if can_manage_movements %}
@@ -34,10 +37,17 @@
             <form method="POST" action="{{ url_for('cash.add_movement') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input type="hidden" name="movement_type" value="{{ action[0] }}">
-              <label for="amount-{{ action[0] }}">{{ _("Cantidad") }}</label>
+              <label for="amount-{{ action[0] }}">{{ _("Cantidad de efectivo") }}</label>
               <input id="amount-{{ action[0] }}" name="amount" type="number" min="0.01" step="0.01" required>
-              <label for="note-{{ action[0] }}">{{ _("¿Por qué?") }}</label>
+              <label for="note-{{ action[0] }}">
+                {% if action[0] == "EXPENSE" %}{{ _("¿En qué se gastó?") }}
+                {% elif action[0] == "WITHDRAWAL" %}{{ _("¿Por qué retiraste el efectivo?") }}
+                {% else %}{{ _("¿De dónde viene este efectivo?") }}{% endif %}
+              </label>
               <input id="note-{{ action[0] }}" name="note" maxlength="255" required>
+              {% if action[0] == "EXPENSE" %}<small>{{ _("Ejemplos: compra de bolsas, pago a proveedor, transporte o limpieza.") }}</small>
+              {% elif action[0] == "CASH_IN" %}<small>{{ _("Usa esta opción cuando pongas más dinero físico en la caja.") }}</small>
+              {% elif action[0] == "WITHDRAWAL" %}<small>{{ _("Usa esta opción cuando saques dinero que no sea un gasto.") }}</small>{% endif %}
               <button class="btn" type="submit">{{ _("Guardar") }}</button>
             </form>
           </details>
@@ -62,7 +72,8 @@
         </div>
         <label for="closing-notes">{{ _("¿Quieres dejar una nota?") }} <small>{{ _("Opcional") }}</small></label>
         <textarea id="closing-notes" name="closing_notes" maxlength="1000" rows="3"></textarea>
-        <button class="btn" type="submit">{{ _("Revisar y cerrar") }}</button>
+        <p class="cash-v2__difference-message" data-difference-message aria-live="polite">{{ _("Escribe cuánto contaste para comparar ambas cantidades.") }}</p>
+        <button class="btn" type="submit">{{ _("Cerrar caja") }}</button>
       </form>
     </section>
   {% else %}
@@ -70,20 +81,20 @@
       <span class="cash-v2__start-icon" aria-hidden="true"><i class="fa-solid fa-vault"></i></span>
       <div>
         <span>{{ _("Caja cerrada") }}</span>
-        <h2 id="start-cash-title">{{ _("Comienza el día en caja") }}</h2>
-        <p>{{ _("Escribe cuánto efectivo tienes antes de la primera venta. PATIA sumará las ventas y pagos en efectivo para ayudarte a cuadrar al cerrar.") }}</p>
+        <h2 id="start-cash-title">{{ _("Abre la caja para comenzar") }}</h2>
+        <p>{{ _("Escribe cuánto efectivo tienes disponible antes de la primera venta.") }}</p>
       </div>
       <form method="POST" action="{{ url_for('cash.open_register') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="opening-cash">{{ _("Efectivo inicial") }}</label>
         <input id="opening-cash" name="opening_cash" type="number" min="0" step="0.01" value="0.00" required autofocus aria-describedby="opening-cash-help">
-        <small id="opening-cash-help">{{ _("Cuenta solo el dinero disponible para dar cambio.") }}</small>
-        <button class="btn" type="submit">{{ _("Comenzar turno") }}</button>
+        <small id="opening-cash-help">{{ _("Cuenta el dinero que usarás para dar cambio.") }}</small>
+        <button class="btn" type="submit">{{ _("Abrir caja") }}</button>
       </form>
     </section>
   {% endif %}
 
-  {% if can_view_history %}
+  {% if cash_session and can_view_history and history %}
     <details class="card cash-v2__history">
       <summary>
         <span><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> {{ _("Ver cierres anteriores") }}</span>
@@ -103,8 +114,6 @@
             </tr>{% endfor %}</tbody>
           </table>
         </div>
-      {% else %}
-        <div class="module-empty-v2"><p>{{ _("Todavía no has cerrado una caja.") }}</p></div>
       {% endif %}
     </details>
   {% endif %}
@@ -117,17 +126,27 @@
   const input = form.querySelector("#counted-cash");
   const counted = form.querySelector("[data-counted-output]");
   const difference = form.querySelector("[data-difference-output]");
+  const message = form.querySelector("[data-difference-message]");
   const expected = Number(form.dataset.expected || 0);
   const money = new Intl.NumberFormat(document.documentElement.lang === "en" ? "en-US" : "es-MX", { style: "currency", currency: "MXN" });
+  const balancedMessage = {{ _("Todo cuadra.")|tojson }};
+  const overMessage = {{ _("Sobran %(amount)s en caja.", amount="__AMOUNT__")|tojson }};
+  const shortMessage = {{ _("Faltan %(amount)s en caja.", amount="__AMOUNT__")|tojson }};
+  const emptyMessage = {{ _("Escribe cuánto contaste para comparar ambas cantidades.")|tojson }};
   input.addEventListener("input", () => {
     if (input.value === "") {
       counted.textContent = "—";
       difference.textContent = "—";
+      message.textContent = emptyMessage;
       return;
     }
     const value = Number(input.value);
+    const delta = value - expected;
     counted.textContent = money.format(value);
-    difference.textContent = money.format(value - expected);
+    difference.textContent = money.format(delta);
+    message.textContent = Math.abs(delta) < 0.005
+      ? balancedMessage
+      : (delta > 0 ? overMessage : shortMessage).replace("__AMOUNT__", money.format(Math.abs(delta)));
   });
 })();
 </script>

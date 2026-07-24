@@ -304,6 +304,8 @@ class InventoryKardexTests(unittest.TestCase):
         self.assertIn("Producto Kardex", html)
         self.assertIn("Venta", html)
         self.assertIn("Todo está en orden", html)
+        self.assertNotIn(">Kardex<", html)
+        self.assertIn("Aquí puedes ver por qué aumentaron", html)
 
         csv_response = client.get(
             f"/inventory/kardex/export.csv?product_id={self.product.id}&type=SALE"

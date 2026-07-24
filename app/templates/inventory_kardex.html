@@ -5,9 +5,7 @@
 <div class="inventory-history-v2">
   <header class="module-intro-v2 inventory-history-v2__intro">
     <a href="{{ url_for('main.products') }}" class="module-back-v2"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a Inventario") }}</a>
-    <span>{{ _("Cambios en existencias") }}</span>
-    <h2>{{ _("Historial de inventario") }}</h2>
-    <p>{{ _("Revisa cuándo y por qué aumentaron o disminuyeron las existencias.") }}</p>
+    <p>{{ _("Aquí puedes ver por qué aumentaron o disminuyeron las existencias.") }}</p>
   </header>
 
   {% if inconsistencies %}
@@ -76,15 +74,15 @@
       <div class="table-wrap">
         <table>
           <caption class="sr-only">{{ _("Cambios registrados en el inventario") }}</caption>
-          <thead><tr><th scope="col">{{ _("Fecha") }}</th><th scope="col">{{ _("Producto") }}</th><th scope="col">{{ _("Qué ocurrió") }}</th><th scope="col">{{ _("Cambio") }}</th><th scope="col">{{ _("Existencias después") }}</th><th scope="col">{{ _("Motivo") }}</th></tr></thead>
+          <thead><tr><th scope="col">{{ _("Fecha") }}</th><th scope="col">{{ _("Producto") }}</th><th scope="col">{{ _("Qué ocurrió") }}</th><th scope="col">{{ _("Cambio") }}</th><th scope="col">{{ _("Existencias después") }}</th><th scope="col"><span class="sr-only">{{ _("Detalles") }}</span></th></tr></thead>
           <tbody>{% for movement in movements %}<tr>
             <td data-label="{{ _('Fecha') }}">{{ movement.local_created_at.strftime("%d/%m/%Y %H:%M") }}</td>
             <td data-label="{{ _('Producto') }}"><strong>{{ movement.product_name }}</strong><small>{{ movement.product_sku }}</small></td>
             <td data-label="{{ _('Qué ocurrió') }}"><span class="kardex-v1__type kardex-v1__type--{{ movement.direction_class }}">{{ movement_labels[movement.movement_type] }}</span></td>
             <td data-label="{{ _('Cambio') }}" class="{{ movement.quantity_class }}">{{ movement.signed_quantity }}</td>
             <td data-label="{{ _('Existencias después') }}"><strong>{{ movement.stock_after }}</strong></td>
-            <td data-label="{{ _('Motivo') }}">
-              <span>{{ movement.reason or "—" }}</span>
+            <td data-label="{{ _('Detalles') }}">
+              {% if movement.reason %}<span>{{ movement.reason }}</span>{% endif %}
               <details class="inventory-history-v2__details"><summary>{{ _("Ver detalles") }}</summary>
                 <dl><div><dt>{{ _("Existencias antes") }}</dt><dd>{{ movement.stock_before }}</dd></div>{% if movement.sales_ticket %}<div><dt>{{ _("Ticket relacionado") }}</dt><dd>{{ movement.sales_ticket.folio }}</dd></div>{% endif %}</dl>
               </details>
@@ -93,7 +91,13 @@
         </table>
       </div>
     {% else %}
-      <div class="module-empty-v2"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><h4>{{ _("No hay cambios con estos filtros") }}</h4><p>{{ _("Prueba con otro producto o periodo.") }}</p></div>
+      <div class="module-empty-v2"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+        {% if filters.product_id or filters.movement_type or filters.date_from or filters.date_to %}
+          <h4>{{ _("No hay cambios con estos filtros") }}</h4><p>{{ _("Prueba con otro producto o periodo.") }}</p>
+        {% else %}
+          <h4>{{ _("Todavía no hay cambios de inventario.") }}</h4><p>{{ _("Las ventas, reposiciones y correcciones aparecerán aquí.") }}</p>
+        {% endif %}
+      </div>
     {% endif %}
   </section>
 </div>

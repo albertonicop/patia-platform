@@ -61,7 +61,7 @@ def index():
     )
     can_view_history = has_permission(membership, "view_cash_history")
     history = []
-    if can_view_history:
+    if can_view_history and current:
         history = (
             CashRegisterSession.query.filter_by(
                 organization_id=membership.organization_id,
@@ -79,6 +79,30 @@ def index():
         current.opened_at_local = utc_to_local(
             current.opened_at, timezone_name
         )
+    cash_summary = {}
+    if current:
+        for movement_type, label in (
+            ("OPENING", gettext("Efectivo inicial")),
+            ("SALE_CASH", gettext("Ventas en efectivo")),
+            ("CREDIT_PAYMENT", gettext("Pagos recibidos")),
+            ("CASH_IN", gettext("Efectivo agregado")),
+            ("EXPENSE", gettext("Gastos")),
+            ("WITHDRAWAL", gettext("Retiros")),
+            ("REFUND", gettext("Devoluciones")),
+        ):
+            amount = sum(
+                (
+                    money_decimal(movement.amount)
+                    for movement in current.movements
+                    if movement.movement_type == movement_type
+                ),
+                money_decimal(0),
+            )
+            if movement_type == "OPENING" or amount > 0:
+                cash_summary[movement_type] = {
+                    "label": label,
+                    "amount": amount,
+                }
     for item in history:
         item.closed_at_local = utc_to_local(item.closed_at, timezone_name)
     return render_template(
@@ -86,6 +110,7 @@ def index():
         user=user,
         cash_session=current,
         expected_cash=expected_cash(current.id) if current else None,
+        cash_summary=cash_summary,
         history=history,
         can_manage_movements=has_permission(
             membership, "manage_cash_movements"
@@ -163,7 +188,12 @@ def add_movement():
         cash_session, membership, movement_type, amount, note=note
     )
     db.session.commit()
-    flash(gettext("Movimiento de caja registrado."), "success")
+    confirmations = {
+        "CASH_IN": gettext("Efectivo agregado correctamente."),
+        "WITHDRAWAL": gettext("Retiro registrado correctamente."),
+        "EXPENSE": gettext("Gasto registrado correctamente."),
+    }
+    flash(confirmations[movement_type], "success")
     return redirect(url_for("cash.index"))
 
 

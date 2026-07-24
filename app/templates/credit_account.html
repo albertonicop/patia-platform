@@ -5,8 +5,8 @@
   <section class="receivables-v2__customer">
     <div>
       <a href="{{ url_for('credit.index') if can_manage_credit else url_for('main.sell') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver") }}</a>
-      <span>{{ _("Saldo de cliente") }}</span>
-      <h2>{{ customer.name }}</h2>
+      <span>{{ _("Saldo pendiente") }}</span>
+      <h2>{% if balance > 0 %}{{ _("Registrar pago de %(name)s", name=customer.name) }}{% else %}{{ customer.name }}{% endif %}</h2>
       <p>{{ customer.phone }}</p>
     </div>
     <div><small>{{ _("Debe actualmente") }}</small><strong>{{ balance|money }}</strong></div>
@@ -15,8 +15,9 @@
   {% if not customer.credit_enabled %}<div class="flash warning">{{ _("Este cliente ya no puede hacer nuevas compras a crédito, pero aún puedes recibir sus pagos.") }}</div>{% endif %}
 
   <section class="receivables-v2__grid">
+    {% if balance > 0 %}
     <article class="card receivables-v2__payment" id="registrar-pago">
-      <span>{{ _("Cobro recibido") }}</span>
+      <span>{{ _("Actualmente debe %(amount)s", amount=balance|money) }}</span>
       <h3>{{ _("Registrar pago") }}</h3>
       <form method="post" action="{{ url_for('credit.payment', customer_id=customer.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -35,6 +36,13 @@
         <button class="btn" type="submit"{% if balance <= 0 %} disabled{% endif %}>{{ _("Guardar pago") }}</button>
       </form>
     </article>
+    {% else %}
+    <article class="card module-empty-v2 receivables-v2__payment" id="registrar-pago">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <h3>{{ _("Sin pagos pendientes") }}</h3>
+      <p>{{ _("%(name)s está al corriente.", name=customer.name) }}</p>
+    </article>
+    {% endif %}
     <article class="card receivables-v2__reminder">
       <span>{{ _("Mensaje listo para revisar") }}</span>
       <h3>{{ _("Recordar por WhatsApp") }}</h3>

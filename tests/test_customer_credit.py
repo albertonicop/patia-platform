@@ -483,3 +483,38 @@ class CustomerCreditTests(unittest.TestCase):
         html = account.get_data(as_text=True)
         self.assertIn("wa.me/522381234567", html)
         self.assertIn("Remind via WhatsApp", html)
+
+    def test_receivables_only_show_positive_balances_and_hide_after_payment(self):
+        client = self.client_for(self.owner)
+        empty = client.get("/credit").get_data(as_text=True)
+        self.assertIn("Todo está al corriente", empty)
+        self.assertNotIn(self.customer.name, empty)
+
+        self.assertEqual(self.credit_sale(client).status_code, 200)
+        listed = client.get("/credit").get_data(as_text=True)
+        self.assertIn(self.customer.name, listed)
+        movement = CustomerCreditMovement.query.filter_by(
+            movement_type="CHARGE"
+        ).one()
+        paid = client.post(
+            f"/credit/customers/{self.customer.id}/payments",
+            data={
+                "amount": str(movement.balance_after),
+                "payment_method": "card",
+                "request_id": str(uuid.uuid4()),
+            },
+            follow_redirects=True,
+        )
+        self.assertIn(
+            "ya no tiene saldo pendiente",
+            paid.get_data(as_text=True),
+        )
+        after = client.get("/credit").get_data(as_text=True)
+        self.assertNotIn(self.customer.name, after)
+
+    def test_zero_balance_account_does_not_render_payment_form(self):
+        body = self.client_for(self.owner).get(
+            f"/credit/customers/{self.customer.id}"
+        ).get_data(as_text=True)
+        self.assertIn("Sin pagos pendientes", body)
+        self.assertNotIn('name="amount"', body)

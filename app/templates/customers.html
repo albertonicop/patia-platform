@@ -2,55 +2,58 @@
 {% block title %}{{ _("Clientes") }}{% endblock %}
 
 {% block content %}
-<div class="customers-v1">
-  <section class="card customers-v1__hero">
+<div class="customers-v1 customers-simple-v1">
+  <header class="module-intro-v2 customers-simple-v1__intro">
     <div>
-      <span class="customers-v1__eyebrow">{{ _("Tus clientes") }}</span>
-      <h2>{{ _("Conoce a quienes compran en tu negocio") }}</h2>
-      <p>{{ _("Encuentra sus datos, compras y saldos pendientes en segundos.") }}</p>
+      <p>{{ _("Guarda a las personas que compran contigo y consulta sus compras o pagos pendientes.") }}</p>
     </div>
-    <div class="customers-v1__hero-actions">
-      <details class="module-more-v2"><summary>{{ _("Más opciones") }}</summary><a href="{{ url_for('customers.export_csv', q=query, status='all' if include_inactive else '') }}"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> {{ _("Descargar clientes") }}</a></details>
-      <a class="btn" href="{{ url_for('customers.new') }}"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> {{ _("Agregar cliente") }}</a>
-    </div>
-  </section>
+    <details class="module-more-v2 customers-simple-v1__more">
+      <summary>{{ _("Más") }}</summary>
+      <a href="{{ url_for('customers.index', q=query, status='' if include_inactive else 'all') }}">
+        <i class="fa-solid fa-user-clock" aria-hidden="true"></i>
+        {{ _("Ocultar inactivos") if include_inactive else _("Mostrar inactivos") }}
+      </a>
+      <a href="{{ url_for('customers.export_csv', q=query, status='all' if include_inactive else '') }}">
+        <i class="fa-solid fa-file-csv" aria-hidden="true"></i> {{ _("Descargar clientes") }}
+      </a>
+    </details>
+  </header>
 
-  <section class="card customers-v1__filters" aria-label="{{ _('Buscar clientes') }}">
+  <section class="customers-simple-v1__toolbar" aria-label="{{ _('Buscar clientes') }}">
     <form method="get" action="{{ url_for('customers.index') }}">
-      <div>
-        <label for="customer-search">{{ _("Nombre o teléfono") }}</label>
-        <input id="customer-search" name="q" type="search" value="{{ query }}" placeholder="{{ _('Ej. Ana o 238 123 4567') }}">
-      </div>
-      <label class="customers-v1__check">
-        <input type="checkbox" name="status" value="all"{% if include_inactive %} checked{% endif %}>
-        <span>{{ _("Mostrar inactivos") }}</span>
-      </label>
-      <button class="btn" type="submit">{{ _("Buscar") }}</button>
-      {% if query or include_inactive %}<a class="btn ghost" href="{{ url_for('customers.index') }}">{{ _("Limpiar") }}</a>{% endif %}
+      {% if include_inactive %}<input type="hidden" name="status" value="all">{% endif %}
+      <label class="sr-only" for="customer-search">{{ _("Nombre o teléfono") }}</label>
+      <input id="customer-search" name="q" type="search" value="{{ query }}" placeholder="{{ _('Buscar por nombre o teléfono') }}">
+      <button class="btn ghost" type="submit">{{ _("Buscar") }}</button>
+      {% if query %}<a class="btn ghost" href="{{ url_for('customers.index', status='all' if include_inactive else '') }}">{{ _("Limpiar") }}</a>{% endif %}
     </form>
+    <a class="btn" href="{{ url_for('customers.new') }}"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> {{ _("Agregar cliente") }}</a>
   </section>
 
   <section class="card customers-v1__list" aria-labelledby="customers-list-title">
-    <header>
-      <div>
-        <span class="customers-v1__eyebrow">{{ _("Directorio") }}</span>
-        <h3 id="customers-list-title">{{ _("%(count)s clientes encontrados", count=summaries|length) }}</h3>
-      </div>
+    <header class="customers-simple-v1__list-head">
+      <h3 id="customers-list-title">{{ _("%(count)s clientes encontrados", count=summaries|length) }}</h3>
     </header>
     {% if summaries %}
       <div class="table-wrap">
         <table>
           <caption class="sr-only">{{ _("Lista de clientes") }}</caption>
-          <thead><tr><th scope="col">{{ _("Cliente") }}</th><th scope="col">{{ _("Última compra") }}</th><th scope="col">{{ _("Total comprado") }}</th><th scope="col">{{ _("Saldo pendiente") }}</th><th scope="col">{{ _("Acción") }}</th></tr></thead>
+          <thead><tr><th scope="col">{{ _("Cliente") }}</th><th scope="col">{{ _("Última compra") }}</th><th scope="col">{{ _("Saldo") }}</th><th scope="col"><span class="sr-only">{{ _("Acción") }}</span></th></tr></thead>
           <tbody>
             {% for summary in summaries %}
               {% set customer = summary.customer %}
               <tr>
                 <td data-label="{{ _('Cliente') }}"><strong>{{ customer.name }}</strong><small><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a></small></td>
-                <td data-label="{{ _('Última compra') }}">{% if summary.last_purchase_at %}{{ local_purchase_dates[customer.id].strftime('%d/%m/%Y %H:%M') }}{% else %}{{ _("Sin compras") }}{% endif %}</td>
-                <td data-label="{{ _('Total comprado') }}"><strong>{{ summary.purchase_total|money }}</strong></td>
-                <td data-label="{{ _('Saldo pendiente') }}">{% if summary.credit_balance > 0 %}<strong class="customers-v2__balance">{{ summary.credit_balance|money }}</strong>{% else %}<span>—</span>{% endif %}</td>
-                <td data-label="{{ _('Acción') }}"><a class="btn ghost" href="{{ url_for('customers.detail', customer_id=customer.id) }}">{{ _("Ver cliente") }}</a></td>
+                <td data-label="{{ _('Última compra') }}">{% if summary.last_purchase_at %}{{ local_purchase_dates[customer.id].strftime('%d/%m/%Y') }}{% else %}{{ _("Sin compras") }}{% endif %}</td>
+                <td data-label="{{ _('Saldo') }}">
+                  {% if summary.credit_balance > 0 %}
+                    <strong class="customers-v2__balance">{{ _("Debe %(amount)s", amount=summary.credit_balance|money) }}</strong>
+                    <a class="customers-simple-v1__pay" href="{{ url_for('credit.account', customer_id=customer.id) }}#registrar-pago">{{ _("Registrar pago") }}</a>
+                  {% else %}
+                    <span class="customers-simple-v1__clear">{{ _("Sin saldo pendiente") }}</span>
+                  {% endif %}
+                </td>
+                <td><a class="btn ghost" href="{{ url_for('customers.detail', customer_id=customer.id) }}">{{ _("Ver cliente") }}</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -61,11 +64,11 @@
         <i class="fa-solid fa-address-book" aria-hidden="true"></i>
         {% if query %}
           <h3>{{ _("No encontramos clientes con esa búsqueda") }}</h3>
-          <p>{{ _("Prueba otro nombre o teléfono, o agrega un cliente nuevo.") }}</p>
+          <p>{{ _("Prueba con otro nombre o teléfono.") }}</p>
           <a class="btn ghost" href="{{ url_for('customers.index') }}">{{ _("Ver todos") }}</a>
         {% else %}
-          <h3>{{ _("Tu directorio de clientes está listo") }}</h3>
-          <p>{{ _("Agrega el primero aquí o créalo rápidamente durante una venta.") }}</p>
+          <h3>{{ _("Todavía no tienes clientes") }}</h3>
+          <p>{{ _("Guárdalos para consultar sus compras y permitirles pagar después.") }}</p>
           <a class="btn" href="{{ url_for('customers.new') }}">{{ _("Agregar primer cliente") }}</a>
         {% endif %}
       </div>

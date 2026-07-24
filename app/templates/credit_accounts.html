@@ -1,42 +1,39 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Saldos pendientes") }}{% endblock %}
 {% block content %}
-<div class="receivables-v2">
+<div class="receivables-v2 receivables-simple-v1">
   <header class="module-intro-v2 receivables-v2__intro">
-    <span>{{ _("Pagos de clientes") }}</span>
-    <h2>{{ _("Dinero por cobrar") }}</h2>
-    <p>{{ _("Consulta cuánto debe cada cliente y registra los pagos que recibas.") }}</p>
+    <p>{{ _("Consulta quién te debe y registra los pagos que recibas.") }}</p>
   </header>
 
-  <section class="receivables-v2__total" aria-label="{{ _('Total por cobrar') }}">
-    <span>{{ _("Total por cobrar") }}</span>
-    <strong>{{ total_receivable|money }}</strong>
-    <small>{{ _("Suma de todos los saldos pendientes") }}</small>
-  </section>
-
-  <section class="card receivables-v2__accounts" aria-labelledby="receivables-list-title">
-    <header><h3 id="receivables-list-title">{{ _("Clientes con pago pendiente") }}</h3></header>
-    {% if accounts %}
+  {% if accounts %}
+    <section class="receivables-v2__total" aria-label="{{ _('Total por cobrar') }}">
+      <span>{{ _("Total por cobrar") }}</span>
+      <strong>{{ total_receivable|money }}</strong>
+    </section>
+    <section class="card receivables-v2__accounts" aria-labelledby="receivables-list-title">
+      <header><h3 id="receivables-list-title">{{ _("Clientes con pagos pendientes") }}</h3></header>
       <div class="table-wrap">
         <table>
           <caption class="sr-only">{{ _("Saldos pendientes por cliente") }}</caption>
-          <thead><tr><th scope="col">{{ _("Cliente") }}</th><th scope="col">{{ _("Cuánto debe") }}</th><th scope="col">{{ _("Último movimiento") }}</th><th scope="col">{{ _("Acciones") }}</th></tr></thead>
+          <thead><tr><th scope="col">{{ _("Cliente") }}</th><th scope="col">{{ _("Saldo") }}</th><th scope="col">{{ _("Última compra a crédito") }}</th><th scope="col">{{ _("Acciones") }}</th></tr></thead>
           <tbody>{% for row in accounts %}<tr>
             <td data-label="{{ _('Cliente') }}"><strong>{{ row.customer.name }}</strong><small>{{ row.customer.phone }}</small></td>
-            <td data-label="{{ _('Cuánto debe') }}"><strong>{{ row.balance|money }}</strong></td>
-            <td data-label="{{ _('Último movimiento') }}">{% if row.last_activity %}{{ row.last_activity.strftime('%d/%m/%Y %H:%M') }}{% else %}—{% endif %}</td>
-            <td data-label="{{ _('Acciones') }}"><div class="receivables-v2__actions"><a class="btn" href="{{ url_for('credit.account', customer_id=row.customer.id) }}#registrar-pago">{{ _("Registrar pago") }}</a><a class="btn ghost" href="{{ url_for('credit.account', customer_id=row.customer.id) }}">{{ _("Ver saldo y pagos") }}</a></div></td>
+            <td data-label="{{ _('Saldo') }}"><strong>{{ _("Debe %(amount)s", amount=row.balance|money) }}</strong></td>
+            <td data-label="{{ _('Última compra a crédito') }}">{% if row.last_credit_purchase %}{{ row.last_credit_purchase.strftime('%d/%m/%Y') }}{% else %}{{ _("Sin pagos registrados") }}{% endif %}</td>
+            <td data-label="{{ _('Acciones') }}"><div class="receivables-v2__actions"><a class="btn" href="{{ url_for('credit.account', customer_id=row.customer.id) }}#registrar-pago">{{ _("Registrar pago") }}</a><a class="btn ghost" href="{{ url_for('credit.account', customer_id=row.customer.id) }}">{{ _("Ver detalle") }}</a></div></td>
           </tr>{% endfor %}</tbody>
         </table>
       </div>
-    {% else %}
-      <div class="module-empty-v2">
-        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-        <h3>{{ _("No tienes pagos pendientes.") }}</h3>
-        <p>{{ _("Cuando registres una venta a crédito, el saldo aparecerá aquí.") }}</p>
-        <a class="btn ghost" href="{{ url_for('customers.index') }}">{{ _("Ver clientes") }}</a>
-      </div>
-    {% endif %}
-  </section>
+    </section>
+  {% else %}
+    <section class="card module-empty-v2 receivables-simple-v1__empty">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <h3>{{ _("Todo está al corriente") }}</h3>
+      <p>{{ _("Ningún cliente tiene pagos pendientes.") }}</p>
+      <small>{{ _("Cuando hagas una venta a crédito aparecerá aquí.") }}</small>
+      <a class="btn" href="{{ url_for('main.sell') }}">{{ _("Ir a vender") }}</a>
+    </section>
+  {% endif %}
 </div>
 {% endblock %}

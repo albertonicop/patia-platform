@@ -3210,6 +3210,344 @@ table {
     white-space:normal !important;
 }
 
+/* =========================================================
+   PATIA UX SIMPLIFICATION · DAILY OPERATIONS
+   ========================================================= */
+.app-shell-v2 .customers-simple-v1,
+.app-shell-v2 .receivables-simple-v1 {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.app-shell-v2 .customers-simple-v1__intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 4px;
+}
+
+.app-shell-v2 .customers-simple-v1__intro h2,
+.app-shell-v2 .receivables-simple-v1 .module-intro-v2 h2 {
+  margin-top: 0;
+}
+
+.app-shell-v2 .customers-simple-v1__more {
+  flex: 0 0 auto;
+}
+
+.app-shell-v2 .customers-simple-v1__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e2e5ed;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(25, 30, 50, .05);
+}
+
+.app-shell-v2 .customers-simple-v1__toolbar form {
+  display: flex;
+  flex: 1 1 620px;
+  gap: 8px;
+  margin: 0;
+}
+
+.app-shell-v2 .customers-simple-v1__toolbar input {
+  flex: 1 1 340px;
+  min-width: 160px;
+}
+
+.app-shell-v2 .customers-simple-v1__list-head {
+  margin-bottom: 12px;
+}
+
+.app-shell-v2 .customers-simple-v1__list-head h3 {
+  margin: 0;
+  font-size: .92rem;
+  color: #626b7f;
+}
+
+.app-shell-v2 .customers-simple-v1__clear {
+  color: #39705b;
+  font-weight: 700;
+}
+
+.app-shell-v2 .customers-simple-v1__pay {
+  display: block;
+  width: max-content;
+  margin-top: 5px;
+  color: #5540d7;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__hero {
+  padding: 10px 0 4px;
+  color: #1b1f30;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__hero p,
+.app-shell-v2 .customer-detail-simple-v1__hero a {
+  color: #626b7f;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__hero .btn {
+  color: #fff;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__hero .btn.ghost {
+  color: #353b4e;
+  border-color: #d9dde7;
+  background: #fff;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__credit {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__credit div {
+  padding: 14px;
+  border-radius: 12px;
+  background: #f5f6fa;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__credit span,
+.app-shell-v2 .customer-detail-simple-v1__credit strong {
+  display: block;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__credit span {
+  color: #626b7f;
+  font-size: .78rem;
+}
+
+.app-shell-v2 .customer-detail-simple-v1__credit strong {
+  margin-top: 5px;
+}
+
+.app-shell-v2 .receivables-simple-v1__empty {
+  min-height: 360px;
+}
+
+.app-shell-v2 .receivables-simple-v1__empty small {
+  color: #626b7f;
+}
+
+.app-shell-v2 .cash-v2__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.app-shell-v2 .cash-v2__summary div {
+  padding: 14px 16px;
+  border: 1px solid #e2e5ed;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.app-shell-v2 .cash-v2__summary span,
+.app-shell-v2 .cash-v2__summary strong {
+  display: block;
+}
+
+.app-shell-v2 .cash-v2__summary span {
+  color: #626b7f;
+  font-size: .78rem;
+}
+
+.app-shell-v2 .cash-v2__summary strong {
+  margin-top: 4px;
+  color: #1c2030;
+}
+
+.app-shell-v2 .cash-v2__difference-message {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #3d465b;
+  background: #f2f4f8;
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.app-shell-v2 .team-v2__solo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 28px;
+}
+
+.app-shell-v2 .team-v2__solo > i {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border-radius: 14px;
+  color: #5943dd;
+  background: #efedff;
+}
+
+.app-shell-v2 .team-v2__solo h3,
+.app-shell-v2 .team-v2__solo p {
+  margin: 0;
+}
+
+.app-shell-v2 .team-v2__solo p {
+  margin-top: 5px;
+  color: #626b7f;
+}
+
+.app-shell-v2 .team-v2__solo details {
+  position: relative;
+}
+
+.app-shell-v2 .team-v2__solo details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.app-shell-v2 .team-v2__solo details > form {
+  display: grid;
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  top: calc(100% + 10px);
+  width: min(360px, calc(100vw - 48px));
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid #dfe2eb;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(25, 30, 50, .16);
+}
+
+.app-shell-v2 .dashboard-v2__sell-primary {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 14px;
+  white-space: nowrap;
+}
+
+.app-shell-v2 .dashboard-v2__metric--clear {
+  display: flex;
+  min-height: 110px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #287052;
+  border: 1px solid #d6eee3;
+  background: #f3fbf7;
+  font-weight: 800;
+}
+
+.app-shell-v2 .dashboard-v2__action-alerts {
+  display: grid;
+  gap: 8px;
+}
+
+.app-shell-v2 .dashboard-v2__action-alerts:empty {
+  display: none;
+}
+
+.app-shell-v2 .dashboard-v2__action-alerts article {
+  display: flex;
+  min-height: 62px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px 10px 16px;
+  border: 1px solid #e0e3eb;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.app-shell-v2 .dashboard-v2__action-alerts article div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-shell-v2 .dashboard-v2__action-alerts i {
+  color: #6953df;
+}
+
+@media (max-width: 768px) {
+  .app-shell-v2 .customers-simple-v1__intro,
+  .app-shell-v2 .customers-simple-v1__toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-shell-v2 .customers-simple-v1__more {
+    align-self: flex-start;
+  }
+
+  .app-shell-v2 .customers-simple-v1__toolbar form {
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+  }
+
+  .app-shell-v2 .customers-simple-v1__toolbar form input {
+    flex-basis: 100%;
+  }
+
+.app-shell-v2 .customers-simple-v1__toolbar > .btn {
+    width: 100%;
+  }
+
+  .app-shell-v2 .customer-detail-simple-v1__credit {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell-v2 .team-v2__solo {
+    grid-template-columns: auto 1fr;
+  }
+
+  .app-shell-v2 .team-v2__solo details {
+    grid-column: 1 / -1;
+  }
+
+  .app-shell-v2 .team-v2__solo details > summary {
+    width: 100%;
+  }
+
+  .app-shell-v2 .team-v2__solo details > form {
+    position: static;
+    width: 100%;
+    margin-top: 10px;
+    box-shadow: none;
+  }
+
+  .app-shell-v2 .dashboard-v2__sell-primary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell-v2 .customers-simple-v1__toolbar form .btn {
+    flex: 1 1 auto;
+  }
+
+  .app-shell-v2 .dashboard-v2__action-alerts article {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-shell-v2 .dashboard-v2__action-alerts .btn {
+    width: 100%;
+  }
+}
+
 /* Selectores PATIA: mejora progresiva sobre el control nativo ------------ */
 
 .app-shell-v2 select,
@@ -10110,5 +10448,150 @@ table {
 
   .app-shell-v2 > .language-switcher {
     top: 78px;
+  }
+}
+
+/* Final containment for daily-operation screens. */
+.app-shell-v2 .app-main-v2 {
+  width: auto;
+  min-width: 0;
+}
+
+.app-shell-v2 .customers-simple-v1,
+.app-shell-v2 .inventory-history-v2,
+.app-shell-v2 .receivables-simple-v1,
+.app-shell-v2 .customers-simple-v1 > *,
+.app-shell-v2 .inventory-history-v2 > *,
+.app-shell-v2 .receivables-simple-v1 > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-shell-v2 .customers-simple-v1 .table-wrap,
+.app-shell-v2 .inventory-history-v2 .table-wrap {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-shell-v2 .customers-simple-v1__toolbar > .btn,
+.app-shell-v2 .dashboard-v2__sell-primary {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .app-shell-v2 .inventory-history-v2__filters form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell-v2 .inventory-history-v2__history table,
+  .app-shell-v2 .inventory-history-v2__history tbody,
+  .app-shell-v2 .inventory-history-v2__history tr,
+  .app-shell-v2 .inventory-history-v2__history td {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history table {
+    min-width: 0;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history thead {
+    display: none;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history tr {
+    padding: 14px;
+    border: 1px solid #e4e7ee;
+    border-radius: 13px;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history td {
+    display: grid;
+    grid-template-columns: minmax(120px, .4fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid #eceef3;
+    overflow-wrap: anywhere;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history td:last-child {
+    border-bottom: 0;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history td::before {
+    content: attr(data-label);
+    color: #687085;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 1200px) {
+  .app-shell-v2 .team-v2__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell-v2 .customers-simple-v1 table,
+  .app-shell-v2 .customers-simple-v1 tbody,
+  .app-shell-v2 .customers-simple-v1 tr,
+  .app-shell-v2 .customers-simple-v1 td {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .app-shell-v2 .customers-simple-v1 table {
+    min-width: 0;
+  }
+
+  .app-shell-v2 .customers-simple-v1 thead {
+    display: none;
+  }
+
+  .app-shell-v2 .customers-simple-v1 tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .app-shell-v2 .customers-simple-v1 tr {
+    padding: 15px;
+    border: 1px solid #e4e7ee;
+    border-radius: 13px;
+  }
+
+  .app-shell-v2 .customers-simple-v1 td {
+    padding: 6px 0;
+    border: 0;
+  }
+
+  .app-shell-v2 .customers-simple-v1 td:last-child {
+    margin-top: 6px;
+  }
+
+  .app-shell-v2 .customers-simple-v1 td:last-child .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell-v2 .inventory-history-v2__filters form {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell-v2 .inventory-history-v2__history td {
+    grid-template-columns: 1fr;
+    gap: 5px;
   }
 }

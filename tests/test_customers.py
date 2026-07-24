@@ -310,6 +310,19 @@ class CustomerModuleTests(unittest.TestCase):
         pos = client.get("/sell").get_data(as_text=True)
         self.assertIn("Quick add", pos)
 
+    def test_simplified_customer_list_has_clear_toolbar_and_zero_balance_copy(self):
+        self.create_customer()
+        body = self.client_for(self.owner).get("/customers").get_data(as_text=True)
+        self.assertIn("Buscar por nombre o teléfono", body)
+        self.assertIn("Agregar cliente", body)
+        self.assertIn("Sin saldo pendiente", body)
+        self.assertNotIn("Total comprado</th>", body)
+
+    def test_empty_customer_list_explains_the_first_action(self):
+        body = self.client_for(self.owner).get("/customers").get_data(as_text=True)
+        self.assertIn("Todavía no tienes clientes", body)
+        self.assertIn("Agregar primer cliente", body)
+
     def test_customer_list_aggregates_do_not_use_n_plus_one(self):
         from sqlalchemy import event
 

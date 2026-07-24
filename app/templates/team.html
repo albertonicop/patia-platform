@@ -9,11 +9,37 @@
   </nav>
 
   <header class="module-intro-v2">
-    <span>{{ _("Personal") }}</span>
-    <h2>{{ _("Personas con acceso a PATIA") }}</h2>
-    <p>{{ _("Agrega a quienes trabajan contigo y decide qué pueden hacer.") }}</p>
+    <h2>{{ _("Personal") }}</h2>
+    <p>{{ _("Da acceso a quienes trabajan contigo sin compartir tu contraseña.") }}</p>
   </header>
 
+  {% if members|length == 1 and not invitations %}
+  <section class="card team-v2__solo">
+    <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+    <div>
+      <h3>{{ _("¿Alguien más trabaja contigo?") }}</h3>
+      <p>{{ _("Dale su propio acceso para que no compartan contraseña.") }}</p>
+    </div>
+    <details>
+      <summary class="btn">{{ _("Agregar persona") }}</summary>
+      <form method="POST" action="{{ url_for('team.invite') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="solo-team-email">{{ _("Correo electrónico") }}</label>
+        <input id="solo-team-email" name="email" type="email" required autocomplete="email">
+        <label for="solo-team-role">{{ _("Tipo de acceso") }}</label>
+        <select id="solo-team-role" name="role" required>
+          <option value="CASHIER">{{ _("Cajero") }}</option>
+          <option value="MANAGER">{{ _("Encargado") }}</option>
+        </select>
+        <div class="team-v2__access-help">
+          <p><strong>{{ _("Cajero") }}</strong> · {{ _("Vende, recibe pagos y usa la caja.") }}</p>
+          <p><strong>{{ _("Encargado") }}</strong> · {{ _("También administra inventario, clientes y reportes.") }}</p>
+        </div>
+        <button class="btn" type="submit">{{ _("Enviar invitación") }}</button>
+      </form>
+    </details>
+  </section>
+  {% else %}
   <div class="team-v2__layout">
     <section class="card team-v2__add" aria-labelledby="add-person-title">
       <h3 id="add-person-title">{{ _("Agregar persona") }}</h3>
@@ -28,8 +54,8 @@
           <option value="MANAGER">{{ _("Encargado") }}</option>
         </select>
         <div id="access-help" class="team-v2__access-help">
-          <p><strong>{{ _("Cajero") }}</strong> · {{ _("Puede vender, buscar clientes, recibir pagos y operar la caja.") }}</p>
-          <p><strong>{{ _("Encargado") }}</strong> · {{ _("También puede administrar inventario, clientes, caja y reportes.") }}</p>
+          <p><strong>{{ _("Cajero") }}</strong> · {{ _("Vende, recibe pagos y usa la caja.") }}</p>
+          <p><strong>{{ _("Encargado") }}</strong> · {{ _("También administra inventario, clientes y reportes.") }}</p>
         </div>
         <button class="btn" type="submit">{{ _("Enviar invitación") }}</button>
       </form>
@@ -47,7 +73,7 @@
             <div><strong>{{ member.user.first_name or member.user.email }}</strong><span>{{ member.user.email }}</span></div>
           </div>
           <span class="team-v2__access">{{ _("Propietario") if member.role == "OWNER" else (_("Encargado") if member.role == "MANAGER" else _("Cajero")) }}</span>
-          <span class="team-v2__status team-v2__status--{{ 'active' if member.is_active else 'inactive' }}">{{ _("Activo") if member.is_active else _("Desactivado") }}</span>
+          <span class="team-v2__status team-v2__status--{{ 'active' if member.is_active else 'inactive' }}">{{ _("Acceso activo") if member.is_active else _("Acceso desactivado") }}</span>
           {% if member.role != "OWNER" %}
             <details class="team-v2__manage">
               <summary class="btn ghost">{{ _("Administrar") }}</summary>
@@ -79,6 +105,7 @@
       {% endfor %}
     </section>
   </div>
+  {% endif %}
 
   {% if invitations %}
     <details class="card team-v2__pending">

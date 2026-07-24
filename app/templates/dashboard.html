@@ -28,6 +28,10 @@
         </a>
       </div>
     {% endif %}
+    <a class="btn dashboard-v2__sell-primary" href="{{ url_for('main.sell') }}">
+      <i class="fa-solid fa-cash-register" aria-hidden="true"></i>
+      {{ _("Hacer una venta") }}
+    </a>
   </div>
 
   <div class="dashboard-v2__signal" aria-hidden="true">
@@ -107,6 +111,7 @@
     {% endif %}
   </article>
 
+  {% if total_credit_pending > 0 %}
   <article class="dashboard-v2__metric dashboard-v2__metric--green">
     <div class="dashboard-v2__metric-head">
       <span>{{ _("Dinero por cobrar") }}</span>
@@ -115,6 +120,12 @@
     <strong>{{ total_credit_pending|money }}</strong>
     <small>{{ _("Saldo pendiente de tus clientes") }}</small>
   </article>
+  {% else %}
+  <div class="dashboard-v2__metric dashboard-v2__metric--clear">
+    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+    <span>{{ _("No tienes pagos pendientes") }}</span>
+  </div>
+  {% endif %}
 
   <button class="dashboard-v2__metric dashboard-v2__metric--coral dashboard-v2__metric--action"
           type="button"
@@ -122,7 +133,7 @@
           aria-haspopup="dialog"
           aria-controls="low-stock-dialog">
     <div class="dashboard-v2__metric-head">
-      <span>{{ _("Stock bajo") }}</span>
+      <span>{{ _("Productos por surtir") }}</span>
       <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
     </div>
     <strong>{{ low_stock }}</strong>
@@ -130,23 +141,30 @@
   </button>
 </section>
 
+<section class="dashboard-v2__action-alerts" aria-label="{{ _('Acciones pendientes') }}">
+  {% if not cash_session %}
+    <article><div><i class="fa-solid fa-vault" aria-hidden="true"></i><strong>{{ _("Tu caja está cerrada") }}</strong></div><a class="btn ghost" href="{{ url_for('cash.index') }}">{{ _("Abrir caja") }}</a></article>
+  {% endif %}
+  {% if low_stock %}
+    <article><div><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><strong>{% trans count=low_stock %}{{ count }} producto necesita surtirse{% pluralize %}{{ count }} productos necesitan surtirse{% endtrans %}</strong></div><a class="btn ghost" href="{{ url_for('main.products', low_stock=1) }}">{{ _("Ver productos") }}</a></article>
+  {% endif %}
+  {% if total_credit_pending > 0 %}
+    <article><div><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i><strong>{{ _("Hay pagos pendientes de clientes") }}</strong></div><a class="btn ghost" href="{{ url_for('credit.index') }}">{{ _("Ver saldos") }}</a></article>
+  {% endif %}
+</section>
+
+{% if total_products == 0 %}
 <section class="card cash-status-v1 dashboard-v2__next-action" aria-labelledby="cash-status-title">
   <div>
     <span class="dashboard-v2__kicker">{{ _("Qué hacer ahora") }}</span>
     <h3 id="cash-status-title">
-      {% if total_products == 0 %}{{ _("Agrega productos para comenzar a vender.") }}
-      {% elif not cash_session %}{{ _("Tu caja todavía no está abierta.") }}
-      {% elif total_sales == 0 %}{{ _("Haz tu primera venta.") }}
-      {% elif low_stock %}{{ _("Revisa los productos que necesitas surtir.") }}
-      {% elif total_credit_pending > 0 %}{{ _("Revisa los pagos pendientes de tus clientes.") }}
-      {% else %}{{ _("Tu negocio está al día.") }}{% endif %}
+      {{ _("Agrega productos para comenzar a vender.") }}
     </h3>
     <p>{{ _("PATIA te muestra primero la acción más útil para continuar.") }}</p>
   </div>
-  <a class="btn" href="{% if total_products == 0 %}{{ url_for('main.products') }}{% elif not cash_session %}{{ url_for('cash.index') }}{% elif total_sales == 0 %}{{ url_for('main.sell') }}{% elif low_stock %}{{ url_for('main.products', low_stock=1) }}{% elif total_credit_pending > 0 %}{{ url_for('credit.index') }}{% else %}{{ url_for('main.sell') }}{% endif %}">
-    {% if total_products == 0 %}{{ _("Agregar productos") }}{% elif not cash_session %}{{ _("Abrir caja") }}{% elif total_sales == 0 %}{{ _("Vender ahora") }}{% elif low_stock %}{{ _("Ver productos") }}{% elif total_credit_pending > 0 %}{{ _("Ver saldos") }}{% else %}{{ _("Vender") }}{% endif %}
-  </a>
+  <a class="btn" href="{{ url_for('main.products') }}">{{ _("Agregar productos") }}</a>
 </section>
+{% endif %}
 
 <dialog class="dashboard-v2__stock-dialog" id="low-stock-dialog" aria-labelledby="low-stock-title">
   <div class="dashboard-v2__stock-dialog-head">

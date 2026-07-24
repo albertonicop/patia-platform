@@ -54,16 +54,40 @@ def index():
         .group_by(CustomerCreditMovement.customer_id)
         .subquery()
     )
+    last_credit_purchase = (
+        db.session.query(
+            CustomerCreditMovement.customer_id,
+            func.max(CustomerCreditMovement.created_at).label(
+                "last_credit_purchase_at"
+            ),
+        )
+        .filter(
+            CustomerCreditMovement.organization_id
+            == membership.organization_id,
+            CustomerCreditMovement.movement_type == "CHARGE",
+        )
+        .group_by(CustomerCreditMovement.customer_id)
+        .subquery()
+    )
     rows = (
-        db.session.query(Customer, CustomerCreditMovement)
-        .outerjoin(last_ids, last_ids.c.customer_id == Customer.id)
-        .outerjoin(
+        db.session.query(
+            Customer,
+            CustomerCreditMovement,
+            last_credit_purchase.c.last_credit_purchase_at,
+        )
+        .join(last_ids, last_ids.c.customer_id == Customer.id)
+        .join(
             CustomerCreditMovement,
             CustomerCreditMovement.id == last_ids.c.last_id,
+        )
+        .outerjoin(
+            last_credit_purchase,
+            last_credit_purchase.c.customer_id == Customer.id,
         )
         .filter(
             Customer.organization_id == membership.organization_id,
             Customer.credit_enabled.is_(True),
+            CustomerCreditMovement.balance_after > 0,
         )
         .order_by(Customer.name)
         .all()
@@ -76,20 +100,20 @@ def index():
                 "balance": money_decimal(
                     movement.balance_after if movement else 0
                 ),
-                "last_activity": (
+                "last_credit_purchase": (
                     utc_to_local(
-                        movement.created_at,
+                        last_purchase_at,
                         membership.organization.timezone,
                     )
-                    if movement else None
+                    if last_purchase_at else None
                 ),
             }
-            for customer, movement in rows
+            for customer, movement, last_purchase_at in rows
         ],
         total_receivable=sum(
             (
                 money_decimal(movement.balance_after if movement else 0)
-                for _, movement in rows
+                for _, movement, _ in rows
             ),
             money_decimal(0),
         ),
@@ -192,15 +216,19 @@ def payment(customer_id):
             request_id=request.form.get("request_id") or str(uuid.uuid4()),
         )
         db.session.commit()
-        message = (
-            gettext(
+        if created and movement.balance_after == 0:
+            message = gettext(
+                "Pago registrado. %(name)s ya no tiene saldo pendiente.",
+                name=customer.name,
+            )
+        elif created:
+            message = gettext(
                 "Pago registrado. %(name)s ahora debe %(balance)s.",
                 name=customer.name,
                 balance=f"${movement.balance_after:,.2f}",
             )
-            if created
-            else gettext("Este pago ya había sido registrado.")
-        )
+        else:
+            message = gettext("Este pago ya había sido registrado.")
         flash(message, "success")
     except IntegrityError:
         db.session.rollback()

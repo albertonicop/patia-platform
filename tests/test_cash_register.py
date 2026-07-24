@@ -294,7 +294,25 @@ class CashRegisterTests(unittest.TestCase):
             session["language"] = "en"
         html = client.get("/cash-register").get_data(as_text=True)
         self.assertIn("Daily cash", html)
-        self.assertIn("Start shift", html)
+        self.assertIn("Open register", html)
+
+    def test_closed_register_only_presents_opening_task(self):
+        body = self.client_for(self.owner).get("/cash-register").get_data(as_text=True)
+        self.assertIn("Abre la caja para comenzar", body)
+        self.assertIn("Abrir caja", body)
+        self.assertNotIn("Ver cierres anteriores", body)
+        self.assertNotIn("Registrar gasto", body)
+
+    def test_open_register_presents_summary_and_difference_explanation(self):
+        client = self.client_for(self.owner)
+        self.open_register(client, "20.00")
+        body = client.get("/cash-register").get_data(as_text=True)
+        self.assertIn("En caja debería haber", body)
+        self.assertIn("Efectivo inicial", body)
+        self.assertNotIn("Ventas en efectivo", body)
+        self.assertIn("Todo cuadra.", body)
+        self.assertIn("Faltan", body)
+        self.assertIn("Sobran", body)
 
 
 if __name__ == "__main__":

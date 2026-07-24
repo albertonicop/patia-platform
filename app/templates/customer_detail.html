@@ -3,16 +3,20 @@
 
 {% block content %}
 <div class="customer-detail-v1">
-  <section class="card customer-detail-v1__hero">
+  <section class="customer-detail-v1__hero customer-detail-simple-v1__hero">
     <div>
       <a class="customer-detail-v1__back" href="{{ url_for('customers.index') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a clientes") }}</a>
-      <span class="customers-v1__eyebrow">{{ _("Cliente") }}</span>
       <h2>{{ customer.name }}</h2>
       <p><a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% if customer.email %} · <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% endif %}</p>
     </div>
     <div class="customer-detail-v1__actions">
+      {% if credit_balance > 0 %}
+        <a class="btn" href="{{ url_for('credit.account', customer_id=customer.id) }}#registrar-pago">{{ _("Registrar pago") }}</a>
+        <a class="btn ghost" href="{{ url_for('credit.account', customer_id=customer.id) }}">{{ _("Ver saldo y pagos") }}</a>
+      {% endif %}
+      <a class="btn{% if credit_balance > 0 %} ghost{% endif %}" href="{{ url_for('main.sell') }}">{{ _("Nueva venta") }}</a>
       <a class="btn ghost" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ _("WhatsApp") }}</a>
-      <a class="btn ghost" href="{{ url_for('customers.edit', customer_id=customer.id) }}"><i class="fa-solid fa-pen" aria-hidden="true"></i> {{ _("Editar") }}</a>
+      <a class="btn ghost" href="{{ url_for('customers.edit', customer_id=customer.id) }}"><i class="fa-solid fa-pen" aria-hidden="true"></i> {{ _("Editar cliente") }}</a>
       <form method="post" action="{{ url_for('customers.toggle', customer_id=customer.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn ghost" type="submit">{{ _("Reactivar") if not customer.is_active else _("Desactivar") }}</button>
@@ -23,7 +27,7 @@
   <section class="customer-detail-v1__metrics" aria-label="{{ _('Resumen de compras') }}">
     <article class="card"><span>{{ _("Total comprado") }}</span><strong>{{ total_purchased|money }}</strong></article>
     <article class="card"><span>{{ _("Última compra") }}</span><strong>{% if ticket_rows %}{{ ticket_rows[0].created_at_local.strftime('%d/%m/%Y') }}{% else %}—{% endif %}</strong></article>
-    <article class="card"><span>{{ _("Saldo pendiente") }}</span><strong>{{ credit_balance|money }}</strong></article>
+    <article class="card"><span>{{ _("Saldo pendiente") }}</span><strong>{% if credit_balance > 0 %}{{ credit_balance|money }}{% else %}{{ _("Sin pagos pendientes") }}{% endif %}</strong></article>
   </section>
 
   {% if customer.notes %}
@@ -31,17 +35,21 @@
   {% endif %}
 
   <section class="card customer-detail-v1__notes">
-    <span class="customers-v1__eyebrow">{{ _("Pagar después") }}</span>
+    <span class="customers-v1__eyebrow">{{ _("Compras a crédito") }}</span>
     {% if customer.credit_enabled %}
-      <h3>{{ _("Puede comprar hasta %(limit)s", limit=customer.credit_limit|money) }}</h3>
-      <p>{{ _("Debe actualmente %(balance)s.", balance=credit_balance|money) }}</p>
+      <h3>{{ _("Este cliente puede pagar después") }}</h3>
+      <div class="customer-detail-simple-v1__credit">
+        <div><span>{{ _("Límite acordado") }}</span><strong>{{ customer.credit_limit|money }}</strong></div>
+        <div><span>{{ _("Saldo actual") }}</span><strong>{{ credit_balance|money }}</strong></div>
+        <div><span>{{ _("Todavía puede comprar") }}</span><strong>{{ ([customer.credit_limit - credit_balance, 0]|max)|money }}</strong></div>
+      </div>
     {% else %}
-      <h3>{{ _("¿Le permites pagar después?") }}</h3>
-      <p>{{ _("Actívalo solo si acordaste con este cliente cuánto puede quedar pendiente.") }}</p>
+      <h3>{{ _("¿Este cliente puede pagar después?") }}</h3>
+      <p>{{ _("Actívalo solo si acordaste con esta persona un límite de compras pendientes.") }}</p>
     {% endif %}
     {% if customer.credit_enabled %}
       <div class="customer-credit-settings-v1">
-        <a class="btn" href="{{ url_for('credit.account', customer_id=customer.id) }}">{{ _("Ver saldo") }}</a>
+        <a class="btn ghost" href="{{ url_for('credit.account', customer_id=customer.id) }}">{{ _("Ver saldo y pagos") }}</a>
         <details class="module-more-v2">
           <summary>{{ _("Cambiar límite") }}</summary>
           <form method="post" action="{{ url_for('credit.settings', customer_id=customer.id) }}">
@@ -64,7 +72,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="credit_enabled" value="1">
         <div><label for="credit-limit-new">{{ _("¿Hasta cuánto puede comprar?") }}</label><input id="credit-limit-new" name="credit_limit" type="number" min="0" step="0.01" value="0.00" required></div>
-        <button class="btn" type="submit">{{ _("Activar crédito") }}</button>
+        <button class="btn" type="submit">{{ _("Permitir ventas a crédito") }}</button>
       </form>
     {% endif %}
   </section>
