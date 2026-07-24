@@ -302,10 +302,10 @@ class InventoryKardexTests(unittest.TestCase):
         self.assertEqual(page.status_code, 200)
         html = page.get_data(as_text=True)
         self.assertIn("Producto Kardex", html)
-        self.assertIn("Venta", html)
-        self.assertIn("Todo está en orden", html)
+        self.assertIn("Se vendió 1 unidad", html)
+        self.assertIn("Inventario en orden", html)
         self.assertNotIn(">Kardex<", html)
-        self.assertIn("Aquí puedes ver por qué aumentaron", html)
+        self.assertIn("Consulta cuándo y por qué cambiaron", html)
 
         csv_response = client.get(
             f"/inventory/kardex/export.csv?product_id={self.product.id}&type=SALE"
@@ -328,7 +328,7 @@ class InventoryKardexTests(unittest.TestCase):
             flask_session["language"] = "en"
         english = client.get("/inventory/kardex").get_data(as_text=True)
         self.assertIn("Inventory history", english)
-        self.assertIn("Download CSV", english)
+        self.assertIn("Download recent history", english)
 
     def test_role_permissions_and_organization_isolation(self):
         cashier, _ = self.add_member("CASHIER", "cashier@kardex.test")

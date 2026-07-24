@@ -19,6 +19,12 @@ from sqlalchemy.orm import selectinload
 
 from app import db
 from app.models import OrganizationInvitation, OrganizationMember, User
+from app.plans import (
+    STARTER,
+    current_plan_code,
+    entitlements_for,
+    entitlement_plan_code,
+)
 from app.team.services import active_membership, require_permission
 
 
@@ -93,12 +99,17 @@ def index():
         .order_by(OrganizationInvitation.created_at.desc())
         .all()
     )
+    owner = membership.organization.owner
+    entitlement_code = entitlement_plan_code(owner)
+    plan_entitlements = entitlements_for(entitlement_code)
     return render_template(
         "team.html",
         organization=membership.organization,
         members=members,
         invitations=invitations,
         now=datetime.utcnow(),
+        team_plan_code=current_plan_code(owner),
+        team_entitlements=plan_entitlements,
     )
 
 
@@ -110,6 +121,8 @@ def invite():
     actor = active_membership(current_user())
     email = request.form.get("email", "").strip().lower()
     role = request.form.get("role", "CASHIER").strip().upper()
+    owner = actor.organization.owner
+    plan_entitlements = entitlements_for(entitlement_plan_code(owner))
     try:
         validate_email(email, check_deliverability=False)
     except EmailNotValidError:
@@ -117,6 +130,51 @@ def invite():
         return redirect(url_for("team.index"))
     if role not in {"MANAGER", "CASHIER"}:
         flash(gettext("Selecciona un tipo de acceso válido."), "danger")
+        return redirect(url_for("team.index"))
+    if role == "MANAGER" and not plan_entitlements.advanced_roles:
+        flash(
+            gettext(
+                "Tu plan Starter incluye al propietario y un cajero. Cambia a Pro para agregar encargados y usar permisos avanzados."
+            ),
+            "warning",
+        )
+        return redirect(url_for("main.subscribe"))
+
+    active_count = OrganizationMember.query.filter_by(
+        organization_id=actor.organization_id,
+        is_active=True,
+    ).count()
+    existing_pending = OrganizationInvitation.query.filter_by(
+        organization_id=actor.organization_id,
+        email=email,
+        accepted_at=None,
+    ).first()
+    pending_count = OrganizationInvitation.query.filter(
+        OrganizationInvitation.organization_id == actor.organization_id,
+        OrganizationInvitation.accepted_at.is_(None),
+        OrganizationInvitation.expires_at > datetime.utcnow(),
+    ).count()
+    existing_reserves_slot = bool(
+        existing_pending
+        and existing_pending.expires_at > datetime.utcnow()
+    )
+    reserved_slots = pending_count - (1 if existing_reserves_slot else 0)
+    if active_count + reserved_slots >= plan_entitlements.max_members:
+        if plan_entitlements.max_members == 2:
+            flash(
+                gettext(
+                    "Tu plan Starter incluye al propietario y un cajero. Cambia a Pro para agregar hasta cinco personas y usar permisos avanzados."
+                ),
+                "warning",
+            )
+            return redirect(url_for("main.subscribe"))
+        flash(
+            gettext(
+                "Tu plan permite hasta %(count)s personas activas.",
+                count=plan_entitlements.max_members,
+            ),
+            "warning",
+        )
         return redirect(url_for("team.index"))
 
     existing_user = User.query.filter_by(email=email).first()
@@ -275,6 +333,38 @@ def accept(token):
             )
             return render_template("team_accept.html", invitation=invitation), 409
 
+        owner = invitation.organization.owner
+        plan_entitlements = entitlements_for(entitlement_plan_code(owner))
+        active_count = OrganizationMember.query.filter_by(
+            organization_id=invitation.organization_id,
+            is_active=True,
+        ).count()
+        if active_count >= plan_entitlements.max_members:
+            db.session.rollback()
+            flash(
+                gettext(
+                    "El equipo ya alcanzó el límite de personas de su plan."
+                ),
+                "danger",
+            )
+            return render_template(
+                "team_accept.html", invitation=None
+            ), 409
+        if (
+            invitation.role == "MANAGER"
+            and not plan_entitlements.advanced_roles
+        ):
+            db.session.rollback()
+            flash(
+                gettext(
+                    "El plan actual no incluye acceso de encargado."
+                ),
+                "danger",
+            )
+            return render_template(
+                "team_accept.html", invitation=None
+            ), 409
+
         member = OrganizationMember.query.filter_by(
             organization_id=invitation.organization_id,
             user_id=user.id,
@@ -322,6 +412,19 @@ def change_role(member_id):
     if not member or role not in {"MANAGER", "CASHIER"}:
         flash(gettext("No se pudo cambiar ese tipo de acceso."), "danger")
         return redirect(url_for("team.index"))
+    if (
+        role == "MANAGER"
+        and not entitlements_for(
+            entitlement_plan_code(actor.organization.owner)
+        ).advanced_roles
+    ):
+        flash(
+            gettext(
+                "Los accesos de encargado están incluidos en PATIA Pro."
+            ),
+            "warning",
+        )
+        return redirect(url_for("main.subscribe"))
     member.role = role
     db.session.commit()
     flash(gettext("Tipo de acceso actualizado."), "success")
@@ -338,6 +441,31 @@ def toggle_member(member_id):
     if not member:
         flash(gettext("No se pudo actualizar a esa persona."), "danger")
         return redirect(url_for("team.index"))
+    if not member.is_active:
+        plan_entitlements = entitlements_for(
+            entitlement_plan_code(actor.organization.owner)
+        )
+        active_count = OrganizationMember.query.filter_by(
+            organization_id=actor.organization_id,
+            is_active=True,
+        ).count()
+        if active_count >= plan_entitlements.max_members:
+            flash(
+                gettext(
+                    "Tu plan permite hasta %(count)s personas activas.",
+                    count=plan_entitlements.max_members,
+                ),
+                "warning",
+            )
+            return redirect(url_for("main.subscribe"))
+        if member.role == "MANAGER" and not plan_entitlements.advanced_roles:
+            flash(
+                gettext(
+                    "Cambia a esta persona a Cajero antes de reactivar su acceso en Starter."
+                ),
+                "warning",
+            )
+            return redirect(url_for("team.index"))
     member.is_active = not member.is_active
     db.session.commit()
     flash(gettext("Acceso de la persona actualizado."), "success")

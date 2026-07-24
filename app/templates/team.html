@@ -12,6 +12,10 @@
     <h2>{{ _("Personal") }}</h2>
     <p>{{ _("Da acceso a quienes trabajan contigo sin compartir tu contraseña.") }}</p>
   </header>
+  <div class="team-v3__plan-note">
+    <span>{{ _("Tu plan permite hasta %(count)s personas.", count=team_entitlements.max_members) }}</span>
+    {% if not team_entitlements.advanced_roles %}<a href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Pro para agregar encargados") }}</a>{% endif %}
+  </div>
 
   {% if members|length == 1 and not invitations %}
   <section class="card team-v2__solo">
@@ -29,11 +33,11 @@
         <label for="solo-team-role">{{ _("Tipo de acceso") }}</label>
         <select id="solo-team-role" name="role" required>
           <option value="CASHIER">{{ _("Cajero") }}</option>
-          <option value="MANAGER">{{ _("Encargado") }}</option>
+          {% if team_entitlements.advanced_roles %}<option value="MANAGER">{{ _("Encargado") }}</option>{% endif %}
         </select>
         <div class="team-v2__access-help">
           <p><strong>{{ _("Cajero") }}</strong> · {{ _("Vende, recibe pagos y usa la caja.") }}</p>
-          <p><strong>{{ _("Encargado") }}</strong> · {{ _("También administra inventario, clientes y reportes.") }}</p>
+          {% if team_entitlements.advanced_roles %}<p><strong>{{ _("Encargado") }}</strong> · {{ _("También administra inventario, clientes y reportes.") }}</p>{% endif %}
         </div>
         <button class="btn" type="submit">{{ _("Enviar invitación") }}</button>
       </form>
@@ -51,11 +55,11 @@
         <label for="team-role">{{ _("Tipo de acceso") }}</label>
         <select id="team-role" name="role" required aria-describedby="access-help">
           <option value="CASHIER">{{ _("Cajero") }}</option>
-          <option value="MANAGER">{{ _("Encargado") }}</option>
+          {% if team_entitlements.advanced_roles %}<option value="MANAGER">{{ _("Encargado") }}</option>{% endif %}
         </select>
         <div id="access-help" class="team-v2__access-help">
           <p><strong>{{ _("Cajero") }}</strong> · {{ _("Vende, recibe pagos y usa la caja.") }}</p>
-          <p><strong>{{ _("Encargado") }}</strong> · {{ _("También administra inventario, clientes y reportes.") }}</p>
+          {% if team_entitlements.advanced_roles %}<p><strong>{{ _("Encargado") }}</strong> · {{ _("También administra inventario, clientes y reportes.") }}</p>{% endif %}
         </div>
         <button class="btn" type="submit">{{ _("Enviar invitación") }}</button>
       </form>
@@ -81,7 +85,7 @@
                 <form method="POST" action="{{ url_for('team.change_role', member_id=member.id) }}">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <label for="role-{{ member.id }}">{{ _("Cambiar tipo de acceso") }}</label>
-                  <select id="role-{{ member.id }}" name="role"><option value="CASHIER"{% if member.role == "CASHIER" %} selected{% endif %}>{{ _("Cajero") }}</option><option value="MANAGER"{% if member.role == "MANAGER" %} selected{% endif %}>{{ _("Encargado") }}</option></select>
+                  <select id="role-{{ member.id }}" name="role"><option value="CASHIER"{% if member.role == "CASHIER" %} selected{% endif %}>{{ _("Cajero") }}</option>{% if team_entitlements.advanced_roles %}<option value="MANAGER"{% if member.role == "MANAGER" %} selected{% endif %}>{{ _("Encargado") }}</option>{% endif %}</select>
                   <button type="submit" class="btn ghost">{{ _("Guardar acceso") }}</button>
                 </form>
                 <details class="team-v2__security">

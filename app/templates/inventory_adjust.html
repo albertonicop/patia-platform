@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}{{ _("Corregir existencias") }}{% endblock %}
+
+{% block content %}
+<div class="inventory-adjust-v3">
+  <a href="{{ url_for('inventory.index', product_id=product.id) }}" class="module-back-v2"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver al historial") }}</a>
+  <section class="card inventory-adjust-v3__card">
+    <header>
+      <span>{{ product.name }}</span>
+      {% if mode == "receive" %}
+        <h2>{{ _("Recibir mercancía") }}</h2>
+        <p>{{ _("Registra únicamente las unidades que acaban de llegar.") }}</p>
+      {% elif mode == "loss" %}
+        <h2>{{ _("Registrar pérdida") }}</h2>
+        <p>{{ _("Registra las unidades que ya no puedes vender.") }}</p>
+      {% else %}
+        <h2>{{ _("Corregir existencias de %(product)s", product=product.name) }}</h2>
+        <p>{{ _("PATIA tiene registradas %(count)s unidades.", count=product.stock) }}</p>
+      {% endif %}
+    </header>
+
+    <form method="post" action="{{ url_for('inventory.adjust', product_id=product.id) }}" data-inventory-adjust data-current-stock="{{ product.stock }}" data-mode="{{ mode }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="mode" value="{{ mode }}">
+      {% if mode == "receive" %}
+        <label for="adjust-quantity">{{ _("¿Cuántas unidades llegaron?") }}</label>
+        <input id="adjust-quantity" name="quantity" type="number" min="1" step="1" required autofocus>
+        <input type="hidden" name="reason_code" value="received">
+      {% elif mode == "loss" %}
+        <label for="adjust-quantity">{{ _("¿Cuántas unidades salieron?") }}</label>
+        <input id="adjust-quantity" name="quantity" type="number" min="1" max="{{ product.stock }}" step="1" required autofocus>
+        <label for="adjust-reason">{{ _("¿Por qué salieron?") }}</label>
+        <select id="adjust-reason" name="reason_code" required>
+          <option value="damage">{{ _("Producto dañado") }}</option>
+          <option value="expired">{{ _("Producto vencido") }}</option>
+          <option value="lost">{{ _("Producto perdido") }}</option>
+          <option value="internal">{{ _("Uso interno") }}</option>
+          <option value="other">{{ _("Otra razón") }}</option>
+        </select>
+      {% else %}
+        <label for="adjust-quantity">{{ _("¿Cuántas unidades tienes realmente?") }}</label>
+        <input id="adjust-quantity" name="quantity" type="number" min="0" step="1" required autofocus aria-describedby="adjust-difference">
+        <div id="adjust-difference" class="inventory-adjust-v3__calculation" aria-live="polite">
+          <span>{{ _("Registradas") }}: <strong>{{ product.stock }}</strong></span>
+          <span>{{ _("Contadas") }}: <strong data-counted>—</strong></span>
+          <span>{{ _("Cambio") }}: <strong data-difference>—</strong></span>
+        </div>
+        <label for="adjust-reason">{{ _("¿Por qué cambió?") }}</label>
+        <select id="adjust-reason" name="reason_code" required>
+          <option value="physical">{{ _("Conteo físico diferente") }}</option>
+          <option value="damage">{{ _("Producto dañado") }}</option>
+          <option value="expired">{{ _("Producto vencido") }}</option>
+          <option value="lost">{{ _("Producto perdido") }}</option>
+          <option value="internal">{{ _("Uso interno") }}</option>
+          <option value="received">{{ _("Mercancía recibida") }}</option>
+          <option value="other">{{ _("Otra razón") }}</option>
+        </select>
+      {% endif %}
+      <label for="adjust-note">{{ _("Nota") }} <em>{{ _("Opcional") }}</em></label>
+      <input id="adjust-note" name="note" maxlength="180" placeholder="{{ _('Ej. Se encontraron 7 latas dañadas.') }}">
+      <div class="inventory-adjust-v3__actions">
+        <a class="btn ghost" href="{{ url_for('inventory.index', product_id=product.id) }}">{{ _("Cancelar") }}</a>
+        <button class="btn" type="submit">{% if mode == "receive" %}{{ _("Guardar mercancía recibida") }}{% elif mode == "loss" %}{{ _("Registrar pérdida") }}{% else %}{{ _("Guardar nueva cantidad") }}{% endif %}</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<dialog class="inventory-adjust-v3__confirm" data-adjust-confirm aria-labelledby="adjust-confirm-title">
+  <form method="dialog">
+    <h3 id="adjust-confirm-title">{{ _("Confirma el cambio") }}</h3>
+    <p data-adjust-confirm-copy></p>
+    <div><button class="btn ghost" value="cancel">{{ _("Cancelar") }}</button><button class="btn" value="confirm">{{ _("Confirmar corrección") }}</button></div>
+  </form>
+</dialog>
+<script>
+(() => {
+  const form = document.querySelector('[data-inventory-adjust]');
+  const input = document.getElementById('adjust-quantity');
+  const counted = document.querySelector('[data-counted]');
+  const difference = document.querySelector('[data-difference]');
+  const dialog = document.querySelector('[data-adjust-confirm]');
+  const copy = document.querySelector('[data-adjust-confirm-copy]');
+  if (!form || !input) return;
+  const current = Number(form.dataset.currentStock);
+  const mode = form.dataset.mode;
+  let confirmed = false;
+  const update = () => {
+    if (!counted || !difference) return;
+    const value = input.value === '' ? null : Number(input.value);
+    counted.textContent = value === null ? '—' : String(value);
+    difference.textContent = value === null ? '—' : `${value - current > 0 ? '+' : ''}${value - current}`;
+  };
+  input.addEventListener('input', update);
+  form.addEventListener('submit', (event) => {
+    if (confirmed || !dialog || typeof dialog.showModal !== 'function') return;
+    event.preventDefault();
+    const value = Number(input.value);
+    if (!Number.isFinite(value)) return;
+    copy.textContent = mode === 'count'
+      ? {{ _("Las existencias cambiarán de __BEFORE__ a __AFTER__ unidades.")|tojson }}.replace('__BEFORE__', String(current)).replace('__AFTER__', String(value))
+      : {{ _("PATIA actualizará las existencias con este movimiento.")|tojson }};
+    dialog.showModal();
+  });
+  dialog?.addEventListener('close', () => {
+    if (dialog.returnValue === 'confirm') {
+      confirmed = true;
+      form.requestSubmit();
+    }
+  });
+  update();
+})();
+</script>
+{% endblock %}

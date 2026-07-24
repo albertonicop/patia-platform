@@ -330,7 +330,7 @@
       </p>
     {% endif %}
 
-    {% if not has_pro_access %}
+    {% if not current_plan_entitlements.advanced_reports %}
       <div class="pro-feature-card dashboard-v2__upgrade">
         <h4>
           <i class="fa-solid fa-chart-line"></i>

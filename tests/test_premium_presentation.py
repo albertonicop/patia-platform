@@ -21,10 +21,11 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertNotIn("Probar PATIA gratis", landing)
         self.assertNotIn("PATIA Pro · $199/mes", landing)
         self.assertIn('{{ _("Precios") }}', landing)
-        self.assertIn("Suscribirme por $199 MXN/mes", landing)
+        self.assertIn("Planes simples para cada etapa de tu negocio", landing)
+        self.assertIn("Comenzar prueba con %(plan)s", landing)
         self.assertEqual(landing.count('class="landing-v5__terms"'), 1)
         self.assertIn("Menos decisiones a ciegas", landing)
-        self.assertIn("Reportes completos", landing)
+        self.assertIn("PATIA Pro", landing)
         self.assertIn("$199", landing)
         self.assertIn("14 días", landing)
 
@@ -34,9 +35,12 @@ class PremiumPresentationTests(unittest.TestCase):
         plan_experience = subscribe + plan_service
 
         self.assertIn("Prueba de 14 días", subscribe)
-        self.assertIn("Reportes avanzados y soporte prioritario", plan_experience)
+        self.assertIn("Historial y reportes avanzados", plan_experience)
+        self.assertIn("Soporte prioritario", plan_experience)
         self.assertIn("Productos y ventas sin límites artificiales", plan_experience)
-        self.assertIn("Elegir Starter por $199 al mes", subscribe)
+        self.assertIn("Elegir %(plan)s por $%(price)s al mes", subscribe)
+        self.assertIn('"price": 199', plan_service)
+        self.assertIn('"price": 349', plan_service)
         self.assertIn("STRIPE", (PROJECT_ROOT / "app" / "plans.py").read_text(encoding="utf-8"))
         self.assertNotIn("usuarios ilimitados", subscribe.lower())
         self.assertNotIn("sucursales ilimitadas", subscribe.lower())
@@ -53,8 +57,11 @@ class PremiumPresentationTests(unittest.TestCase):
 
         for endpoint in ("main.billing_portal", "main.cancel_subscription", "main.reactivate_subscription"):
             self.assertIn(endpoint, subscription)
-        self.assertEqual(subscription.count('method="POST"'), 3)
-        self.assertEqual(subscription.count('name="csrf_token"'), 3)
+        self.assertGreaterEqual(subscription.count('method="POST"'), 5)
+        self.assertEqual(
+            subscription.count('method="POST"'),
+            subscription.count('name="csrf_token"'),
+        )
         self.assertNotIn("PATIA Pro manual", subscription)
         self.assertIn("Acceso activo", subscription)
         self.assertIn('current_plan_code == "TRIAL"', subscription)
@@ -79,7 +86,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=119", self.template(name), name)
+            self.assertIn("styles.css') }}?v=120", self.template(name), name)
 
 
 if __name__ == "__main__":

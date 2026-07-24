@@ -28,6 +28,10 @@ class Organization(db.Model):
     )
     currency = db.Column(db.String(3), nullable=False, default="MXN")
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+    monthly_report_enabled = db.Column(
+        db.Boolean, nullable=False, default=False
+    )
+    monthly_report_recipient = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime,
@@ -42,6 +46,12 @@ class Organization(db.Model):
         passive_deletes=True,
     )
     owner = db.relationship("User", foreign_keys=[owner_user_id])
+    monthly_reports = db.relationship(
+        "MonthlyOwnerReport",
+        back_populates="organization",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 
 class OrganizationMember(db.Model):
@@ -1041,6 +1051,12 @@ class User(db.Model):
         db.String(30),
         nullable=True,
     )
+    subscription_plan_code = db.Column(db.String(20), nullable=True)
+    trial_plan_code = db.Column(
+        db.String(20), nullable=False, default="STARTER"
+    )
+    pending_plan_code = db.Column(db.String(20), nullable=True)
+    pending_plan_effective_at = db.Column(db.DateTime, nullable=True)
     current_period_end = db.Column(
         db.DateTime,
         nullable=True,
@@ -1145,3 +1161,50 @@ class StripeWebhookEvent(db.Model):
     failed_at = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(30), nullable=False, default="pending")
     error_message = db.Column(db.Text, nullable=True)
+
+
+class MonthlyOwnerReport(db.Model):
+    __tablename__ = "monthly_owner_report"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id",
+            "report_year",
+            "report_month",
+            name="uq_monthly_owner_report_period",
+        ),
+        db.CheckConstraint(
+            "report_month >= 1 AND report_month <= 12",
+            name="ck_monthly_owner_report_month",
+        ),
+        db.CheckConstraint(
+            "status IN ('pending', 'generated', 'sending', 'sent', 'failed')",
+            name="ck_monthly_owner_report_status",
+        ),
+        db.Index(
+            "ix_monthly_owner_report_status_period",
+            "status",
+            "report_year",
+            "report_month",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    report_year = db.Column(db.Integer, nullable=False)
+    report_month = db.Column(db.Integer, nullable=False)
+    recipient = db.Column(db.String(120), nullable=False)
+    generated_at = db.Column(db.DateTime, nullable=True)
+    sent_at = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="pending")
+    error_message = db.Column(db.Text, nullable=True)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow
+    )
+    organization = db.relationship(
+        "Organization", back_populates="monthly_reports"
+    )

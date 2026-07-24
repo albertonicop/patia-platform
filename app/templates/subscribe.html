@@ -21,14 +21,27 @@
         <header><h3>PATIA {{ plan.name }}</h3><p>{{ plan.description }}</p></header>
         <div class="plans-v2__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN al mes") }}</span></div>
         <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i>{{ feature }}</li>{% endfor %}</ul>
-        {% if plan.code == "STARTER" and plan.checkout_enabled %}
+        {% if user.stripe_subscription_id %}
+          {% if current_plan_code in ["STARTER", "PRO"] and plan.code == current_plan_code %}
+            <button class="btn ghost" type="button" disabled>{{ _("Tu plan actual") }}</button>
+          {% elif current_plan_code in ["STARTER", "PRO"] and plan.configured and not user.pending_plan_code %}
+            <form action="{{ url_for('main.change_subscription_plan') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="plan_code" value="{{ plan.code }}">
+              <button class="btn" type="submit">{{ _("Cambiar a %(plan)s", plan=plan.name) }}</button>
+            </form>
+          {% else %}
+            <a class="btn ghost" href="{{ url_for('main.subscription') }}">{{ _("Administrar mi plan") }}</a>
+          {% endif %}
+        {% elif plan.checkout_enabled %}
           <form action="/create-checkout-session" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn" type="submit">{{ _("Elegir Starter por $199 al mes") }}</button>
+            <input type="hidden" name="plan_code" value="{{ plan.code }}">
+            <button class="btn" type="submit">{{ _("Elegir %(plan)s por $%(price)s al mes", plan=plan.name, price=plan.price) }}</button>
           </form>
         {% elif not plan.configured %}
           <button class="btn ghost" type="button" disabled>{{ _("Disponible próximamente") }}</button>
-          <small>{{ _("Este plan aparecerá para contratar cuando su precio esté configurado de forma segura.") }}</small>
+          <small>{{ _("Pro estará disponible para contratación muy pronto.") if plan.code == "PRO" else _("Este plan estará disponible para contratación muy pronto.") }}</small>
         {% else %}
           <button class="btn ghost" type="button" disabled>{{ _("Cambio de plan próximamente") }}</button>
           <small>{{ _("Tu plan actual no cambiará hasta que confirmes un cambio.") }}</small>

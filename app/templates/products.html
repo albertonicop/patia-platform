@@ -201,15 +201,24 @@
                 <td data-label="{{ _('Margen') }}">{{ p.margin }}%</td>
                 <td data-label="{{ _('Valor') }}">{{ p.inventory_value|money }}</td>
                 <td data-label="{{ _('Acciones') }}">
-                  <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=p.id) }}">{{ _("Editar") }}</a>
-                  {% if can_view_inventory_history %}
-                    <a class="btn ghost" href="{{ url_for('inventory.index', product_id=p.id) }}">{{ _("Ver historial") }}</a>
-                    <a class="btn ghost" href="{{ url_for('inventory.index', product_id=p.id, correct=1) }}">{{ _("Corregir existencias") }}</a>
-                  {% endif %}
-                  <form class="keep-scroll" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm({{ _('¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su historial.')|tojson }});">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn ghost" type="submit">{{ _("Eliminar") }}</button>
-                  </form>
+                  <div class="inventory-v3__row-actions">
+                    <a class="btn ghost" href="{{ url_for('main.edit_product', product_id=p.id) }}">{{ _("Editar") }}</a>
+                    <details class="module-more-v2 inventory-v3__more">
+                      <summary class="btn ghost">{{ _("Más") }}</summary>
+                      <div class="inventory-v3__more-menu">
+                        {% if can_view_inventory_history %}
+                          <a href="{{ url_for('inventory.index', product_id=p.id) }}">{{ _("Ver historial") }}</a>
+                          <a href="{{ url_for('inventory.adjust_form', product_id=p.id, mode='count') }}">{{ _("Corregir existencias") }}</a>
+                          <a href="{{ url_for('inventory.adjust_form', product_id=p.id, mode='receive') }}">{{ _("Recibí mercancía") }}</a>
+                          <a href="{{ url_for('inventory.adjust_form', product_id=p.id, mode='loss') }}">{{ _("Registrar pérdida") }}</a>
+                        {% endif %}
+                        <form class="keep-scroll inventory-v3__danger" method="POST" action="/products/{{ p.id }}/delete#catalogo" onsubmit="return confirm({{ _('¿Retirar este producto del catálogo? Si tiene ventas, PATIA conservará su historial.')|tojson }});">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button type="submit">{{ _("Eliminar producto") }}</button>
+                        </form>
+                      </div>
+                    </details>
+                  </div>
                 </td>
               </tr>
             {% endfor %}

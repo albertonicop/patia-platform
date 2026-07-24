@@ -20,20 +20,25 @@
     {% for value, label in [
       ("today", _("Hoy")),
       ("7d", _("Últimos 7 días")),
-      ("30d", _("Últimos 30 días")),
-      ("this_month", _("Este mes")),
-      ("previous_month", _("Mes anterior"))
+      ("this_month", _("Este mes"))
     ] %}
       <a href="{{ url_for('main.reports', period=value) }}"
          {% if report_period.period == value %}class="is-active" aria-current="page"{% endif %}>{{ label }}</a>
     {% endfor %}
+    {% if can_use_advanced_reports %}
+    <a href="{{ url_for('main.reports', period='30d') }}" {% if report_period.period == '30d' %}class="is-active" aria-current="page"{% endif %}>{{ _("Últimos 30 días") }}</a>
+    <a href="{{ url_for('main.reports', period='previous_month') }}" {% if report_period.period == 'previous_month' %}class="is-active" aria-current="page"{% endif %}>{{ _("Mes anterior") }}</a>
     <a href="{{ url_for('main.reports', show_custom=1) }}#custom-period"
        data-custom-period-toggle
        aria-controls="custom-period"
        aria-expanded="{{ 'true' if show_custom_period else 'false' }}"
        {% if show_custom_period %}class="is-active" aria-current="page"{% endif %}>{{ _("Rango personalizado") }}</a>
+    {% else %}
+      <a class="reports-v3__pro-period" href="{{ url_for('main.subscribe') }}">{{ _("Más periodos con Pro") }}</a>
+    {% endif %}
   </nav>
 
+  {% if can_use_advanced_reports %}
   <form id="custom-period" class="reports-v3__custom-period" method="GET" action="{{ url_for('main.reports') }}"
         {% if not show_custom_period %}hidden{% endif %}>
     <input type="hidden" name="period" value="custom">
@@ -49,6 +54,7 @@
     </label>
     <button class="btn" type="submit">{{ _("Aplicar rango") }}</button>
   </form>
+  {% endif %}
 
   {% if report_period.error %}
     <div class="reports-v3__notice reports-v3__notice--warning" role="alert">
@@ -57,7 +63,7 @@
     </div>
   {% endif %}
 
-  {% if unknown_cost_lines %}
+  {% if unknown_cost_lines and can_use_advanced_reports %}
     <div class="reports-v3__notice" role="status">
       <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
       <p>{{ _("Agrega el costo del producto para incluirlo en los cálculos de utilidad y margen.") }}</p>
@@ -70,16 +76,16 @@
       <strong>{{ report_kpis.sales|money }}</strong>
       <small>{{ _("Ingresos registrados en el periodo") }}</small>
     </article>
-    <article class="reports-v3__kpi reports-v3__kpi--violet">
+    {% if can_use_advanced_reports %}<article class="reports-v3__kpi reports-v3__kpi--violet">
       <span>{{ _("Utilidad") }}</span>
       <strong>{{ report_kpis.profit|money }}</strong>
       <small>{{ _("Solo ventas con costo histórico conocido") }}</small>
-    </article>
-    <article class="reports-v3__kpi reports-v3__kpi--mint">
+    </article>{% endif %}
+    {% if can_use_advanced_reports %}<article class="reports-v3__kpi reports-v3__kpi--mint">
       <span>{{ _("Margen") }}</span>
       <strong>{% if report_kpis.margin is not none %}{{ "%.1f"|format(report_kpis.margin) }}%{% else %}—{% endif %}</strong>
       <small>{{ _("Calculado sobre ingresos con costo conocido") }}</small>
-    </article>
+    </article>{% endif %}
     <article class="reports-v3__kpi">
       <span>{{ _("Ticket promedio") }}</span>
       <strong>{{ report_kpis.average_ticket|money }}</strong>
@@ -96,7 +102,7 @@
     <section class="reports-v3__primary-grid">
       <article class="card reports-v3__panel reports-v3__trend">
         <header class="reports-v3__panel-head">
-          <div><span>{{ _("Evolución diaria") }}</span><h3>{{ _("Ventas vs Utilidad") }}</h3></div>
+          <div><span>{{ _("Evolución diaria") }}</span><h3>{{ _("Ventas vs Utilidad") if can_use_advanced_reports else _("Ventas por día") }}</h3></div>
           <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
         </header>
         <div class="reports-v3__chart reports-v3__chart--line">
@@ -145,6 +151,7 @@
         {% endif %}
       </article>
 
+      {% if can_use_advanced_reports %}
       <article class="card reports-v3__panel">
         <header class="reports-v3__panel-head">
           <div><span>{{ _("Rentabilidad") }}</span><h3>{{ _("Productos más rentables") }}</h3></div>
@@ -173,6 +180,14 @@
           </div>
         {% endif %}
       </article>
+      {% else %}
+        <article class="card reports-v3__panel reports-v3__upgrade">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+          <h3>{{ _("Rentabilidad detallada") }}</h3>
+          <p>{{ _("Compara costos, utilidad y margen por producto con PATIA Pro.") }}</p>
+          <a class="btn ghost" href="{{ url_for('main.subscribe') }}">{{ _("Ver Pro") }}</a>
+        </article>
+      {% endif %}
     </section>
   {% else %}
     <section class="card reports-v3__empty module-empty-v2">
@@ -187,6 +202,7 @@
 {% if report_kpis.ticket_count %}
 <script>
 window.reportAnalytics = {
+  advanced: {{ can_use_advanced_reports|tojson }},
   daily: {{ daily_report|tojson }},
   payments: {{ payments_report|tojson }},
   labels: {

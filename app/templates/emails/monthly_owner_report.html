@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="{{ current_language or 'es' }}">
+<body style="margin:0;background:#f4f6fb;color:#171a2b;font-family:Inter,Arial,sans-serif;">
+  <main style="max-width:680px;margin:0 auto;padding:32px 16px;">
+    <section style="background:#fff;border:1px solid #e5e8f0;border-radius:20px;overflow:hidden;">
+      <header style="padding:28px;background:#171a2b;color:#fff;">
+        <strong style="font-size:22px;">PATIA</strong>
+        <h1 style="margin:18px 0 8px;font-size:28px;">{{ _("Resumen mensual de %(business)s", business=organization.name) }}</h1>
+        <p style="margin:0;color:#c8cddd;">{{ _("Este es el resumen de lo que ocurrió en tu negocio durante %(period)s.", period=period_label) }}</p>
+      </header>
+      <div style="padding:28px;">
+        <table role="presentation" style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Ventas totales") }}</td>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ analytics.report_kpis.sales|money }}</td>
+          </tr>
+          <tr>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Número de ventas") }}</td>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ analytics.report_kpis.ticket_count }}</td>
+          </tr>
+          {% if analytics.unknown_cost_lines == 0 %}
+          <tr>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Utilidad estimada") }}</td>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ analytics.report_kpis.profit|money }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Valor actual del inventario") }}</td>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ inventory.value|money }}</td>
+          </tr>
+          <tr>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Pendiente por cobrar") }}</td>
+            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ credit.total|money }}</td>
+          </tr>
+        </table>
+
+        {% if comparison is not none %}<p><strong>{{ _("Comparación con el mes anterior:") }}</strong> {{ _("%(percentage)s%% en ventas.", percentage=comparison) }}</p>{% endif %}
+        {% if analytics.top_selling_report %}
+          <h2 style="font-size:18px;margin-top:28px;">{{ _("Productos más vendidos") }}</h2>
+          <ol>{% for product in analytics.top_selling_report[:5] %}<li>{{ product.name }} — {{ _("%(count)s unidades", count=product.units) }}</li>{% endfor %}</ol>
+        {% endif %}
+        {% if inventory.low_stock %}
+          <h2 style="font-size:18px;margin-top:28px;">{{ _("Productos con pocas existencias") }}</h2>
+          <ul>{% for product in inventory.low_stock[:5] %}<li>{{ product.name }} — {{ product.stock }} / {{ product.min_stock }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if credit.customers %}
+          <h2 style="font-size:18px;margin-top:28px;">{{ _("Saldos pendientes más altos") }}</h2>
+          <ul>{% for customer in credit.customers %}<li>{{ customer.name }} — {{ customer.balance|money }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if cash.count %}<p><strong>{{ _("Diferencias de caja:") }}</strong> {{ cash.count }} · {{ cash.net_difference|money }}</p>{% endif %}
+        <h2 style="font-size:18px;margin-top:28px;">{{ _("Qué conviene revisar") }}</h2>
+        <ul>{% for recommendation in recommendations %}<li>{{ recommendation }}</li>{% endfor %}</ul>
+        <a href="{{ reports_url }}" style="display:inline-block;margin-top:20px;padding:13px 20px;background:#5b45e8;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;">{{ _("Abrir Reportes en PATIA") }}</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

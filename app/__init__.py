@@ -1,10 +1,17 @@
 import os
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import click
-from flask import Flask, jsonify, render_template, request, session
+from flask import (
+    Flask,
+    has_request_context,
+    jsonify,
+    render_template,
+    request,
+    session,
+)
 from flask_babel import Babel, gettext
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -24,6 +31,8 @@ SUPPORTED_LANGUAGES = ("es", "en")
 
 
 def select_locale():
+    if not has_request_context():
+        return "es"
     selected = session.get("language", "es")
     return selected if selected in SUPPORTED_LANGUAGES else "es"
 
@@ -69,13 +78,14 @@ def create_app():
     if not stripe_disabled:
         missing = [
             name
-            for name in (
-                "STRIPE_SECRET_KEY",
-                "STRIPE_PRICE_ID",
-                "STRIPE_WEBHOOK_SECRET",
-            )
+            for name in ("STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET")
             if not stripe_config[name]
         ]
+        if not (
+            stripe_config["STRIPE_STARTER_PRICE_ID"]
+            or stripe_config["STRIPE_PRICE_ID"]
+        ):
+            missing.append("STRIPE_STARTER_PRICE_ID (o STRIPE_PRICE_ID)")
         if missing:
             raise RuntimeError(
                 "Falta configurar Stripe: " + ", ".join(sorted(missing))
@@ -161,6 +171,13 @@ def create_app():
     def inject_pro_access():
         user = current_user()
         from .team.services import active_membership, has_permission
+        from .plans import (
+            current_plan_label,
+            current_plan_code,
+            entitlement_plan_code,
+            entitlements_for,
+            plan_price,
+        )
 
         current_membership = active_membership(user) if user else None
         access_user = (
@@ -171,8 +188,20 @@ def create_app():
         trial_days_left = None
         if access_user and access_user.created_at:
             trial_days_left = max(0, 14 - (datetime.utcnow() - access_user.created_at).days)
+        paid_access = has_pro_access(access_user)
+        plan_code = current_plan_code(
+            access_user, has_paid_access=paid_access
+        )
+        entitlement_code = entitlement_plan_code(
+            access_user, has_paid_access=paid_access
+        )
         return {
             "has_pro_access": has_pro_access(access_user),
+            "current_plan_code": plan_code,
+            "current_plan_label": current_plan_label(plan_code),
+            "current_entitlement_plan_code": entitlement_code,
+            "current_plan_price": plan_price(entitlement_code),
+            "current_plan_entitlements": entitlements_for(entitlement_code),
             "trial_days_left": trial_days_left,
             "supported_languages": SUPPORTED_LANGUAGES,
             "current_language": select_locale(),
@@ -219,6 +248,61 @@ def create_app():
                 f"{candidate.id},{candidate.email},{candidate.company_name}"
             )
         click.echo(f"total={len(candidates)}")
+
+    @app.cli.command("send-monthly-reports")
+    @click.option("--year", type=int)
+    @click.option("--month", type=click.IntRange(1, 12))
+    def send_monthly_reports_command(year, month):
+        """Send the previous month by default; safe for a Render Cron Job."""
+        from .monthly_reports import run_monthly_reports
+
+        previous = datetime.utcnow().date().replace(day=1) - timedelta(days=1)
+        report_year = year or previous.year
+        report_month = month or previous.month
+        summary = run_monthly_reports(report_year, report_month)
+        click.echo(
+            "period=%04d-%02d sent=%d skipped=%d failed=%d"
+            % (
+                report_year,
+                report_month,
+                summary["sent"],
+                summary["skipped"],
+                summary["failed"],
+            )
+        )
+        if summary["failed"]:
+            raise click.ClickException(
+                "Uno o más reportes no pudieron enviarse."
+            )
+
+    @app.cli.command("preview-monthly-report")
+    @click.option("--organization-id", type=int, required=True)
+    @click.option("--year", type=int, required=True)
+    @click.option("--month", type=click.IntRange(1, 12), required=True)
+    def preview_monthly_report_command(organization_id, year, month):
+        """Generate one eligible report without sending email."""
+        from .monthly_reports import generate_monthly_report
+
+        record, payload = generate_monthly_report(
+            organization_id,
+            year,
+            month,
+            send=False,
+            preview=True,
+        )
+        click.echo(
+            "report_id=%d organization_id=%d period=%04d-%02d "
+            "status=%s recipient=%s"
+            % (
+                record.id,
+                organization_id,
+                year,
+                month,
+                record.status,
+                record.recipient,
+            )
+        )
+        click.echo(payload["subject"])
 
     @app.after_request
     def add_security_headers(response):

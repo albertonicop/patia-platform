@@ -28,7 +28,10 @@ from .models import (
     CustomerCreditMovement,
     InventoryMovement,
     InventoryRestockEvent,
+    MonthlyOwnerReport,
     Organization,
+    OrganizationInvitation,
+    OrganizationMember,
     Product,
     Sale,
     SalesTicket,
@@ -398,20 +401,15 @@ def _as_utc_datetime(value):
 
 
 def has_pro_access(user, now=None):
-    if not user:
-        return False
-    if user.manual_pro_access:
-        return True
+    from .plans import subscription_access_is_active
 
-    now = now or datetime.utcnow()
-    status = (user.subscription_status or "").lower()
-    period_end = user.current_period_end
-    if status in {"active", "trialing"}:
-        return bool(period_end and period_end >= now)
-    if status == "past_due" and period_end:
-        grace_days = current_app.config.get("STRIPE_PAST_DUE_GRACE_DAYS", 3)
-        return period_end + timedelta(days=grace_days) >= now
-    return False
+    return subscription_access_is_active(
+        user,
+        now=now,
+        grace_days=current_app.config.get(
+            "STRIPE_PAST_DUE_GRACE_DAYS", 3
+        ),
+    )
 
 
 def sync_user_plan(user, now=None):
@@ -423,9 +421,51 @@ def _public_url(path):
 
 
 def _subscription_has_configured_price(subscription):
-    expected = current_app.config["STRIPE_PRICE_ID"]
+    from .plans import configured_price_plan
+
     items = (subscription.get("items") or {}).get("data") or []
-    return any((item.get("price") or {}).get("id") == expected for item in items)
+    return any(
+        configured_price_plan(
+            current_app.config, (item.get("price") or {}).get("id")
+        )
+        for item in items
+    )
+
+
+def _subscription_plan_code(subscription, *, preserve_legacy=False):
+    from .plans import (
+        GRANDFATHERED,
+        PAID_PLAN_CODES,
+        configured_price_plan,
+        normalize_plan_code,
+    )
+
+    metadata_code = normalize_plan_code(
+        (subscription.get("metadata") or {}).get("plan_code"),
+        default="",
+    )
+    items = (subscription.get("items") or {}).get("data") or []
+    plans = {
+        configured_price_plan(
+            current_app.config, (item.get("price") or {}).get("id")
+        )
+        for item in items
+    }
+    plans.discard(None)
+    if len(plans) != 1:
+        raise StripeEventIgnored(
+            "La suscripción no corresponde a un único plan configurado."
+        )
+    price_plan = plans.pop()
+    if metadata_code in PAID_PLAN_CODES and metadata_code != price_plan:
+        raise StripeEventIgnored(
+            "El plan de los metadatos no coincide con el Price ID."
+        )
+    if metadata_code in PAID_PLAN_CODES:
+        return metadata_code
+    if preserve_legacy:
+        return GRANDFATHERED
+    return price_plan
 
 
 def _subscription_period_end(subscription):
@@ -460,7 +500,9 @@ def _event_is_newer(user, stripe_created_at, event_family):
 
 def _validate_subscription(subscription, user=None, customer_id=None):
     if not _subscription_has_configured_price(subscription):
-        raise StripeEventIgnored("La suscripción no usa STRIPE_PRICE_ID.")
+        raise StripeEventIgnored(
+            "La suscripción no usa un Price ID configurado en PATIA."
+        )
     subscription_customer = subscription.get("customer")
     if customer_id and subscription_customer != customer_id:
         raise StripeEventIgnored("El cliente de Stripe no coincide.")
@@ -504,6 +546,18 @@ def _sync_subscription_state(user, subscription, stripe_created_at, deleted=Fals
     user.current_period_end = _subscription_period_end(subscription) or user.current_period_end
     user.cancel_at_period_end = bool(subscription.get("cancel_at_period_end", False))
     user.stripe_subscription_updated_at = stripe_created_at
+    if not deleted:
+        metadata = subscription.get("metadata") or {}
+        resolved_plan = _subscription_plan_code(
+            subscription,
+            preserve_legacy=not (
+                user.subscription_plan_code or metadata.get("plan_code")
+            ),
+        )
+        user.subscription_plan_code = resolved_plan
+        if user.pending_plan_code == resolved_plan:
+            user.pending_plan_code = None
+            user.pending_plan_effective_at = None
     if status != "past_due":
         user.next_payment_attempt = None
     sync_user_plan(user)
@@ -535,7 +589,14 @@ def _has_managed_stripe_subscription(user):
         return True
 
 
-def send_email(to, subject, html, language="es"):
+def send_email(
+    to,
+    subject,
+    html,
+    language="es",
+    *,
+    idempotency_key=None,
+):
     api_key = current_app.config.get("RESEND_API_KEY")
     sender = current_app.config.get("RESEND_FROM")
     if not api_key or not sender:
@@ -544,12 +605,21 @@ def send_email(to, subject, html, language="es"):
     try:
         with force_locale(language if language in SUPPORTED_LANGUAGES else "es"):
             resend.api_key = api_key
-            resend.Emails.send({
+            params = {
                 "from": sender,
                 "to": to,
                 "subject": gettext(subject),
                 "html": html,
-            })
+            }
+            options = (
+                {"idempotency_key": idempotency_key}
+                if idempotency_key
+                else None
+            )
+            if options:
+                resend.Emails.send(params, options=options)
+            else:
+                resend.Emails.send(params)
         return True
     except Exception:
         current_app.logger.exception("No se pudo enviar un correo con Resend.")
@@ -638,7 +708,20 @@ def register():
                 form_data=request.form,
             ), 409
 
-        user = User(email=email, company_name=company_name)
+        from .plans import PRO, STARTER
+
+        requested_plan = str(
+            request.form.get("plan")
+            or request.args.get("plan")
+            or STARTER
+        ).upper()
+        if requested_plan not in {STARTER, PRO}:
+            requested_plan = STARTER
+        user = User(
+            email=email,
+            company_name=company_name,
+            trial_plan_code=requested_plan,
+        )
         user.preferred_language = selected_language
         user.first_name = first_name
         user.last_name = last_name
@@ -673,7 +756,7 @@ def register():
         session["organization_id"] = membership.organization_id
         session["post_verify_destination"] = (
             "subscribe"
-            if request.args.get("plan") == "pro" or request.form.get("plan") == "pro"
+            if requested_plan == PRO
             else "dashboard"
         )
 
@@ -1448,7 +1531,12 @@ def dashboard():
         language = session.get("language", "es")
         session.clear()
         session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
-        return render_template("landing.html")
+        from .plans import commercial_plans
+
+        return render_template(
+            "landing.html",
+            commercial_plans=commercial_plans(current_app.config),
+        )
     membership = active_membership(user)
     if not has_permission(membership, "view_dashboard"):
         return redirect(url_for("main.sell"))
@@ -2860,22 +2948,38 @@ def reports():
         return redirect(url_for("main.login"))
     owner = current_organization_owner(user)
     membership = active_membership(user)
-    if owner.email == "albertonicopat@gmail.com" or has_pro_access(owner):
-        timezone_name = safe_timezone_name(membership.organization.timezone)
-        report_period = _parse_report_period(
-            request.args,
-            timezone_name=timezone_name,
-        )
-        return render_template(
-            "reports.html",
-            user=user,
-            **_report_analytics(
-                membership.organization_id,
-                report_period,
-                timezone_name=timezone_name,
+    from .plans import has_entitlement
+
+    advanced_reports = has_entitlement(owner, "advanced_reports")
+    requested_period = request.args.get("period", "7d")
+    period_args = request.args
+    if (
+        not advanced_reports
+        and requested_period
+        in {"30d", "previous_month", "custom"}
+    ):
+        period_args = {"period": "7d"}
+        flash(
+            gettext(
+                "Los periodos y análisis avanzados están incluidos en PATIA Pro."
             ),
+            "info",
         )
-    return redirect(url_for("main.subscribe"))
+    timezone_name = safe_timezone_name(membership.organization.timezone)
+    report_period = _parse_report_period(
+        period_args,
+        timezone_name=timezone_name,
+    )
+    return render_template(
+        "reports.html",
+        user=user,
+        can_use_advanced_reports=advanced_reports,
+        **_report_analytics(
+            membership.organization_id,
+            report_period,
+            timezone_name=timezone_name,
+        ),
+    )
 
 
 @main.route("/suppliers", methods=["GET", "POST"])
@@ -2990,10 +3094,29 @@ def create_checkout_session():
         flash("La facturación no está disponible en este entorno.", "danger")
         return redirect(url_for("main.subscribe"))
 
+    from .plans import PAID_PLAN_CODES, STARTER, price_id_for
+
+    requested_plan = str(
+        request.form.get("plan_code") or STARTER
+    ).strip().upper()
+    if requested_plan not in PAID_PLAN_CODES:
+        flash("Selecciona un plan válido.", "danger")
+        return redirect(url_for("main.subscribe"))
+    price_id = price_id_for(current_app.config, requested_plan)
+    if not price_id:
+        flash(
+            "Este plan estará disponible para contratación muy pronto.",
+            "info",
+        )
+        return redirect(url_for("main.subscribe"))
+
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     existing_subscription = None
 
-    if user.stripe_subscription_id and user.subscription_status in MANAGED_SUBSCRIPTION_STATUSES:
+    if (
+        user.stripe_subscription_id
+        and user.subscription_status in MANAGED_SUBSCRIPTION_STATUSES
+    ):
         return _redirect_to_billing_portal(user)
 
     if user.stripe_customer_id:
@@ -3030,12 +3153,22 @@ def create_checkout_session():
     checkout_params = {
         "payment_method_types": ["card"],
         "mode": "subscription",
-        "line_items": [{"price": current_app.config["STRIPE_PRICE_ID"], "quantity": 1}],
+        "line_items": [{"price": price_id, "quantity": 1}],
         "success_url": _public_url("/stripe-success") + "?session_id={CHECKOUT_SESSION_ID}",
         "cancel_url": _public_url("/subscribe?checkout=cancelled"),
         "client_reference_id": str(user.id),
-        "metadata": {"user_id": str(user.id)},
-        "subscription_data": {"metadata": {"user_id": str(user.id)}},
+        "metadata": {
+            "user_id": str(user.id),
+            "organization_id": str(current_organization_id(user)),
+            "plan_code": requested_plan,
+        },
+        "subscription_data": {
+            "metadata": {
+                "user_id": str(user.id),
+                "organization_id": str(current_organization_id(user)),
+                "plan_code": requested_plan,
+            }
+        },
     }
     if user.stripe_customer_id:
         checkout_params["customer"] = user.stripe_customer_id
@@ -3046,7 +3179,10 @@ def create_checkout_session():
     try:
         checkout_session = stripe.checkout.Session.create(
             **checkout_params,
-            idempotency_key=f"patia-checkout-{user.id}-{idempotency_window}",
+            idempotency_key=(
+                f"patia-checkout-{user.id}-{requested_plan.lower()}-"
+                f"{idempotency_window}"
+            ),
         )
         return redirect(checkout_session.url, code=303)
     except Exception as error:
@@ -3091,6 +3227,26 @@ def _process_stripe_event(event):
         metadata_user_id = str((subscription.get("metadata") or {}).get("user_id") or "")
         if metadata_user_id and metadata_user_id != str(user.id):
             raise StripeEventIgnored("Metadatos de suscripción no coinciden.")
+        metadata_org_id = str(
+            (subscription.get("metadata") or {}).get("organization_id") or ""
+        )
+        organization = Organization.query.filter_by(owner_user_id=user.id).first()
+        if (
+            metadata_org_id
+            and organization
+            and metadata_org_id != str(organization.id)
+        ):
+            raise StripeEventIgnored(
+                "Metadatos de organización no coinciden."
+            )
+        requested_plan = str(
+            (data.get("metadata") or {}).get("plan_code") or ""
+        ).upper()
+        subscription_plan = _subscription_plan_code(subscription)
+        if requested_plan and requested_plan != subscription_plan:
+            raise StripeEventIgnored(
+                "El plan de Checkout no coincide con la suscripción."
+            )
         user.stripe_customer_id = customer_id
         user.stripe_subscription_id = subscription_id
         return
@@ -3123,6 +3279,17 @@ def _process_stripe_event(event):
             if not subscription_event_is_newer:
                 user.subscription_status = status
                 user.next_payment_attempt = None
+            resolved_plan = _subscription_plan_code(
+                subscription,
+                preserve_legacy=not (
+                    user.subscription_plan_code
+                    or (subscription.get("metadata") or {}).get("plan_code")
+                ),
+            )
+            user.subscription_plan_code = resolved_plan
+            if user.pending_plan_code == resolved_plan:
+                user.pending_plan_code = None
+                user.pending_plan_effective_at = None
         else:
             if not subscription_event_is_newer:
                 user.subscription_status = "past_due"
@@ -3271,7 +3438,15 @@ def stripe_success():
         return redirect(url_for("main.subscription"))
 
     if has_pro_access(user):
-        flash("Tu cuenta PATIA Pro está activa.", "success")
+        from .plans import current_plan_code, current_plan_label
+
+        flash(
+            gettext(
+                "Tu plan %(plan)s está activo.",
+                plan=current_plan_label(current_plan_code(user)),
+            ),
+            "success",
+        )
     else:
         flash("Pago recibido. Estamos confirmando tu suscripción con Stripe.", "success")
     return redirect(url_for("main.dashboard"))
@@ -3415,10 +3590,31 @@ def subscription():
             db.session.rollback()
             current_app.logger.exception("No se pudo sincronizar la suscripción")
             flash("No pudimos actualizar el estado de tu suscripción.", "danger")
-    from .plans import current_plan_code, current_plan_label
+    from .plans import (
+        commercial_plans,
+        current_plan_code,
+        current_plan_label,
+        has_entitlement,
+        plan_price,
+    )
 
     paid_access = has_pro_access(user)
     plan_code = current_plan_code(user, has_paid_access=paid_access)
+    organization = Organization.query.filter_by(
+        owner_user_id=user.id
+    ).first()
+    last_monthly_report = (
+        MonthlyOwnerReport.query.filter_by(
+            organization_id=organization.id
+        )
+        .order_by(
+            MonthlyOwnerReport.report_year.desc(),
+            MonthlyOwnerReport.report_month.desc(),
+        )
+        .first()
+        if organization
+        else None
+    )
     return render_template(
         "subscription.html",
         user=user,
@@ -3426,6 +3622,18 @@ def subscription():
         has_paid_access=paid_access,
         current_plan_code=plan_code,
         current_plan_label=current_plan_label(plan_code),
+        current_plan_price=plan_price(plan_code),
+        commercial_plans=commercial_plans(current_app.config),
+        organization=organization,
+        monthly_report_available=(
+            paid_access
+            and has_entitlement(
+                user,
+                "monthly_owner_report",
+                has_paid_access=paid_access,
+            )
+        ),
+        last_monthly_report=last_monthly_report,
         subscription_status_label=_subscription_status_label(user.subscription_status),
         current_period_end_local=utc_to_local(
             user.current_period_end,
@@ -3436,6 +3644,224 @@ def subscription():
             user.timezone,
         ),
     )
+
+
+@main.post("/subscription/monthly-report")
+@require_permission("manage_subscription")
+def update_monthly_report_settings():
+    from .plans import has_entitlement
+
+    actor = current_user()
+    owner = current_organization_owner(actor) if actor else None
+    membership = active_membership(actor) if actor else None
+    if not owner or not membership:
+        return redirect(url_for("main.login"))
+    enabled = request.form.get("enabled") == "1"
+    paid_access = has_pro_access(owner)
+    if enabled and (
+        not paid_access
+        or not has_entitlement(
+            owner,
+            "monthly_owner_report",
+            has_paid_access=paid_access,
+        )
+    ):
+        flash(
+            "El reporte mensual para el propietario está incluido en PATIA Pro.",
+            "info",
+        )
+        return redirect(url_for("main.subscribe"))
+    recipient = (
+        request.form.get("recipient", "").strip().lower() or owner.email
+    )
+    try:
+        validate_email(recipient, check_deliverability=False)
+    except EmailNotValidError:
+        flash("Escribe un correo válido para recibir el reporte.", "danger")
+        return redirect(url_for("main.subscription"))
+    organization = membership.organization
+    organization.monthly_report_enabled = enabled
+    organization.monthly_report_recipient = (
+        recipient if recipient != owner.email else None
+    )
+    db.session.commit()
+    flash(
+        "Preferencias del reporte mensual actualizadas.",
+        "success",
+    )
+    return redirect(url_for("main.subscription"))
+
+
+@main.post("/subscription/change-plan")
+@require_permission("manage_subscription")
+def change_subscription_plan():
+    from .plans import (
+        PAID_PLAN_CODES,
+        STARTER,
+        current_plan_code,
+        entitlements_for,
+        price_id_for,
+    )
+
+    actor = current_user()
+    owner = current_organization_owner(actor) if actor else None
+    membership = active_membership(actor) if actor else None
+    target_plan = str(request.form.get("plan_code") or "").upper()
+    if not owner or not membership or target_plan not in PAID_PLAN_CODES:
+        flash("Selecciona un plan válido.", "danger")
+        return redirect(url_for("main.subscription"))
+    if not owner.stripe_subscription_id:
+        return redirect(url_for("main.subscribe"))
+    if current_app.config["STRIPE_DISABLED"]:
+        flash("La facturación no está disponible en este entorno.", "danger")
+        return redirect(url_for("main.subscription"))
+    target_price = price_id_for(current_app.config, target_plan)
+    if not target_price:
+        flash(
+            "Este plan estará disponible para contratación muy pronto.",
+            "info",
+        )
+        return redirect(url_for("main.subscription"))
+    current_code = current_plan_code(
+        owner, has_paid_access=has_pro_access(owner)
+    )
+    if current_code == target_plan and not owner.pending_plan_code:
+        flash("Ese ya es tu plan actual.", "info")
+        return redirect(url_for("main.subscription"))
+
+    if target_plan == STARTER:
+        member_count = OrganizationMember.query.filter_by(
+            organization_id=membership.organization_id,
+            is_active=True,
+        ).count()
+        if member_count > entitlements_for(STARTER).max_members:
+            flash(
+                "Tu negocio tiene más personas de las permitidas en Starter. "
+                "Desactiva las necesarias antes de solicitar el cambio.",
+                "warning",
+            )
+            return redirect(url_for("team.index"))
+        active_manager = OrganizationMember.query.filter_by(
+            organization_id=membership.organization_id,
+            is_active=True,
+            role="MANAGER",
+        ).first()
+        if active_manager:
+            flash(
+                gettext(
+                    "Starter no incluye encargados. Cambia sus accesos a Cajero antes de solicitar el cambio."
+                ),
+                "warning",
+            )
+            return redirect(url_for("team.index"))
+
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+    try:
+        subscription = stripe.Subscription.retrieve(
+            owner.stripe_subscription_id
+        )
+        _validate_subscription(subscription, user=owner)
+        items = (subscription.get("items") or {}).get("data") or []
+        if len(items) != 1 or not items[0].get("id"):
+            raise StripeEventIgnored(
+                "La suscripción no tiene un único concepto modificable."
+            )
+        metadata = {
+            **(subscription.get("metadata") or {}),
+            "user_id": str(owner.id),
+            "organization_id": str(membership.organization_id),
+            "plan_code": target_plan,
+        }
+        period_end = _subscription_period_end(subscription)
+        if target_plan == STARTER:
+            schedule_id = subscription.get("schedule")
+            if schedule_id:
+                schedule = stripe.SubscriptionSchedule.retrieve(
+                    schedule_id
+                )
+            else:
+                schedule = stripe.SubscriptionSchedule.create(
+                    from_subscription=owner.stripe_subscription_id,
+                    idempotency_key=(
+                        f"patia-plan-schedule-{owner.id}-starter-"
+                        f"{subscription.get('current_period_end')}"
+                    ),
+                )
+            current_price = (items[0].get("price") or {}).get("id")
+            stripe.SubscriptionSchedule.modify(
+                schedule.get("id"),
+                end_behavior="release",
+                phases=[
+                    {
+                        "start_date": subscription.get(
+                            "current_period_start"
+                        ),
+                        "end_date": subscription.get("current_period_end"),
+                        "items": [
+                            {
+                                "price": current_price,
+                                "quantity": items[0].get("quantity", 1),
+                            }
+                        ],
+                        "metadata": subscription.get("metadata") or {},
+                    },
+                    {
+                        "start_date": subscription.get(
+                            "current_period_end"
+                        ),
+                        "items": [
+                            {
+                                "price": target_price,
+                                "quantity": items[0].get("quantity", 1),
+                            }
+                        ],
+                        "metadata": metadata,
+                    },
+                ],
+                idempotency_key=(
+                    f"patia-plan-downgrade-{owner.id}-starter-"
+                    f"{subscription.get('current_period_end')}"
+                ),
+            )
+            owner.pending_plan_code = target_plan
+            owner.pending_plan_effective_at = period_end
+            flash(
+                "El cambio a Starter quedó programado para el final de tu periodo pagado.",
+                "success",
+            )
+        else:
+            stripe.Subscription.modify(
+                owner.stripe_subscription_id,
+                items=[{"id": items[0]["id"], "price": target_price}],
+                metadata=metadata,
+                proration_behavior="create_prorations",
+                payment_behavior="pending_if_incomplete",
+                idempotency_key=(
+                    f"patia-plan-upgrade-{owner.id}-pro-"
+                    f"{subscription.get('current_period_end')}"
+                ),
+            )
+            owner.pending_plan_code = target_plan
+            owner.pending_plan_effective_at = datetime.utcnow()
+            flash(
+                "Solicitamos el cambio a Pro. Se activará cuando Stripe confirme el pago.",
+                "success",
+            )
+        db.session.commit()
+    except Exception as error:
+        db.session.rollback()
+        error_type, error_code, error_message = _safe_stripe_error(error)
+        current_app.logger.exception(
+            "No se pudo cambiar el plan: type=%s code=%s message=%s",
+            error_type,
+            error_code,
+            error_message,
+        )
+        flash(
+            "No pudimos cambiar el plan. Intenta nuevamente.",
+            "danger",
+        )
+    return redirect(url_for("main.subscription"))
 
 
 @main.route("/cancel-subscription", methods=["POST"])
@@ -3544,8 +3970,51 @@ def admin():
             .all()
         )
     }
+    member_counts = dict(
+        db.session.query(
+            OrganizationMember.organization_id,
+            func.count(OrganizationMember.id),
+        )
+        .filter(OrganizationMember.is_active.is_(True))
+        .group_by(OrganizationMember.organization_id)
+        .all()
+    )
+    last_activity = dict(
+        db.session.query(
+            Sale.organization_id, func.max(Sale.created_at)
+        )
+        .group_by(Sale.organization_id)
+        .all()
+    )
+    latest_report_ids = (
+        db.session.query(
+            MonthlyOwnerReport.organization_id,
+            func.max(MonthlyOwnerReport.id).label("report_id"),
+        )
+        .group_by(MonthlyOwnerReport.organization_id)
+        .subquery()
+    )
+    latest_reports = {
+        report.organization_id: report
+        for report in (
+            MonthlyOwnerReport.query.join(
+                latest_report_ids,
+                MonthlyOwnerReport.id == latest_report_ids.c.report_id,
+            ).all()
+        )
+    }
     today = datetime.utcnow()
-    from .plans import current_plan_code, current_plan_label
+    next_report_estimate = (
+        (today.replace(day=28) + timedelta(days=4))
+        .replace(day=2, hour=13, minute=0, second=0, microsecond=0)
+    )
+    from .plans import (
+        PRO,
+        STARTER,
+        current_plan_code,
+        current_plan_label,
+        plan_price,
+    )
 
     clients = []
     total_products = total_sales_count = total_sales_money = trial_clients = expired_clients = expiring_soon = new_this_week = new_this_month = 0
@@ -3559,7 +4028,7 @@ def admin():
 
         paid_access = has_pro_access(u)
         if paid_access:
-            status = "Pro"
+            status = "Activo"
             trial_days_left = "inf"
         elif trial_days_left > 0:
             status = "Prueba"
@@ -3579,6 +4048,7 @@ def admin():
         total_sales_count += sales_count
         total_sales_money += sales_money
         plan_code = current_plan_code(u, has_paid_access=paid_access)
+        monthly_report = latest_reports.get(organization.id)
         clients.append({
             "organization": organization,
             "user": u,
@@ -3601,15 +4071,86 @@ def admin():
             "in_grace": u.subscription_status == "past_due",
             "manual_access": u.manual_pro_access,
             "read_only": status == "Vencido",
+            "price": plan_price(plan_code),
+            "member_count": member_counts.get(organization.id, 0),
+            "last_activity": last_activity.get(organization.id),
+            "last_payment": u.stripe_invoice_updated_at,
+            "monthly_report_enabled": organization.monthly_report_enabled,
+            "monthly_report": monthly_report,
+            "next_monthly_report_at": (
+                next_report_estimate
+                if organization.monthly_report_enabled
+                and plan_code == PRO
+                and not status == "Vencido"
+                else None
+            ),
         })
 
     top_client = max(clients, key=lambda c: c["products_count"], default=None)
     latest_client = clients[0] if clients else None
 
-    return render_template("admin.html", clients=clients, total_clients=len(organizations), total_products=total_products,
+    mrr = sum(
+        client["price"] or 0
+        for client in clients
+        if client["plan_code"] in {STARTER, PRO}
+        and client["subscription_status"] in {"active", "trialing", "past_due"}
+        and not client["read_only"]
+    )
+    plan_counts = {
+        code: sum(
+            client["plan_code"] == code and not client["read_only"]
+            for client in clients
+        )
+        for code in ("TRIAL", "STARTER", "PRO", "GRANDFATHERED", "MANUAL")
+    }
+    renewal_limit = today + timedelta(days=30)
+    upcoming_renewals = sum(
+        bool(
+            client["user"].current_period_end
+            and today <= client["user"].current_period_end <= renewal_limit
+            and client["subscription_status"]
+            in {"active", "trialing", "past_due"}
+        )
+        for client in clients
+    )
+    report_sent = sum(
+        bool(client["monthly_report"] and client["monthly_report"].status == "sent")
+        for client in clients
+    )
+    report_failed = sum(
+        bool(client["monthly_report"] and client["monthly_report"].status == "failed")
+        for client in clients
+    )
+    selected_filter = request.args.get("filter", "all")
+    filter_predicates = {
+        "trial": lambda client: client["plan_code"] == "TRIAL" and not client["read_only"],
+        "starter": lambda client: client["plan_code"] == "STARTER",
+        "pro": lambda client: client["plan_code"] == "PRO",
+        "grandfathered": lambda client: client["plan_code"] == "GRANDFATHERED",
+        "manual": lambda client: client["plan_code"] == "MANUAL",
+        "past_due": lambda client: client["subscription_status"] == "past_due",
+        "cancelling": lambda client: client["scheduled_cancellation"],
+        "expired": lambda client: client["read_only"],
+    }
+    if selected_filter in filter_predicates:
+        visible_clients = [
+            client
+            for client in clients
+            if filter_predicates[selected_filter](client)
+        ]
+    else:
+        selected_filter = "all"
+        visible_clients = clients
+
+    return render_template("admin.html", clients=visible_clients, total_clients=len(organizations), total_products=total_products,
         total_sales_count=total_sales_count, total_sales_money=total_sales_money, trial_clients=trial_clients,
         expired_clients=expired_clients, expiring_soon=expiring_soon, new_this_week=new_this_week,
-        new_this_month=new_this_month, top_client=top_client, latest_client=latest_client)
+        new_this_month=new_this_month, top_client=top_client, latest_client=latest_client,
+        plan_counts=plan_counts, estimated_mrr=mrr, report_sent=report_sent,
+        report_failed=report_failed, selected_filter=selected_filter,
+        upcoming_renewals=upcoming_renewals,
+        scheduled_cancellations=sum(c["scheduled_cancellation"] for c in clients),
+        past_due_count=sum(c["subscription_status"] == "past_due" for c in clients))
 
 
 @main.route("/products/<int:product_id>/delete", methods=["POST"])

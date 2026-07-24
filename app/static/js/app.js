@@ -58,33 +58,36 @@ function initializeReportCharts() {
             locale,
             {day: "numeric", month: "short"}
         ));
+        const trendDatasets = [
+            {
+                label: report.labels.sales,
+                data: report.daily.map(point => point.sales),
+                borderColor: "#6956e8",
+                backgroundColor: "rgba(105, 86, 232, .10)",
+                pointBackgroundColor: "#6956e8",
+                borderWidth: 2.5,
+                pointRadius: report.daily.length > 60 ? 0 : 3,
+                tension: .28,
+                fill: true
+            }
+        ];
+        if (report.advanced) {
+            trendDatasets.push({
+                label: report.labels.profit,
+                data: report.daily.map(point => point.profit),
+                borderColor: "#20a88a",
+                backgroundColor: "rgba(32, 168, 138, .06)",
+                pointBackgroundColor: "#20a88a",
+                borderWidth: 2.5,
+                pointRadius: report.daily.length > 60 ? 0 : 3,
+                tension: .28
+            });
+        }
         new Chart(trendCanvas, {
             type: "line",
             data: {
                 labels,
-                datasets: [
-                    {
-                        label: report.labels.sales,
-                        data: report.daily.map(point => point.sales),
-                        borderColor: "#6956e8",
-                        backgroundColor: "rgba(105, 86, 232, .10)",
-                        pointBackgroundColor: "#6956e8",
-                        borderWidth: 2.5,
-                        pointRadius: report.daily.length > 60 ? 0 : 3,
-                        tension: .28,
-                        fill: true
-                    },
-                    {
-                        label: report.labels.profit,
-                        data: report.daily.map(point => point.profit),
-                        borderColor: "#20a88a",
-                        backgroundColor: "rgba(32, 168, 138, .06)",
-                        pointBackgroundColor: "#20a88a",
-                        borderWidth: 2.5,
-                        pointRadius: report.daily.length > 60 ? 0 : 3,
-                        tension: .28
-                    }
-                ]
+                datasets: trendDatasets
             },
             options: {
                 responsive: true,

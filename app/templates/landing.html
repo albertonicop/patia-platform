@@ -7,7 +7,7 @@
   <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
   <meta name="description" content="{{ _('Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=119">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=120">
 </head>
 
 <body class="landing-v2 landing-premium-v1 landing-v3 landing-v4">
@@ -33,9 +33,9 @@
         <p class="landing-v2__lead">
           {{ _("Administra inventario, ventas y reportes desde un solo lugar para tomar decisiones con información clara.") }}
         </p>
-        <div class="landing-v5__terms" aria-label="{{ _('Condiciones de PATIA Pro') }}">
+        <div class="landing-v5__terms" aria-label="{{ _('Condiciones de PATIA') }}">
           <span><i class="fa-solid fa-gift" aria-hidden="true"></i><strong>{{ _("14 días gratis") }}</strong></span>
-          <span><i class="fa-solid fa-tag" aria-hidden="true"></i><strong>{{ _("Después, $199 MXN al mes") }}</strong></span>
+          <span><i class="fa-solid fa-tag" aria-hidden="true"></i><strong>{{ _("Después, planes desde $199 MXN al mes") }}</strong></span>
           <span><i class="fa-solid fa-circle-check" aria-hidden="true"></i><strong>{{ _("Cancela cuando quieras") }}</strong></span>
         </div>
         <div class="landing-v2__actions">
@@ -171,40 +171,43 @@
       </div>
     </section>
 
+    {% set pro_plan = commercial_plans|selectattr("code", "equalto", "PRO")|first %}
     <section class="landing-v2__section landing-premium-v1__pro-value">
       <div class="landing-premium-v1__pro-copy">
-        <span class="landing-v2__eyebrow">{{ _("El valor de PATIA Pro") }}</span>
-        <h2>{{ _("No es solo registrar datos. Es saber qué hacer con ellos.") }}</h2>
-        <p>{{ _("Tu operación genera información todos los días. PATIA Pro la organiza y la convierte en seguimiento comercial útil para decidir con mayor confianza.") }}</p>
+        <span class="landing-v2__eyebrow">{{ _("PATIA Pro") }}</span>
+        <h2>{{ _("Más control cuando tu equipo crece.") }}</h2>
+        <p>{{ _("Agrega encargados, consulta el historial completo y recibe un resumen mensual para dar seguimiento sin complicar la operación diaria.") }}</p>
         <a href="#precio" class="landing-v2__button landing-v2__button--secondary">{{ _("Ver precio y condiciones") }}</a>
       </div>
       <div class="landing-premium-v1__pro-grid">
-        <article><i class="fa-solid fa-chart-line" aria-hidden="true"></i><div><strong>{{ _("Reportes completos") }}</strong><span>{{ _("Ventas, utilidad estimada, categorías y desempeño del inventario.") }}</span></div></article>
-        <article><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><div><strong>{{ _("Recomendaciones explicadas") }}</strong><span>{{ _("Sugerencias basadas en la actividad registrada en tu propia cuenta.") }}</span></div></article>
-        <article><i class="fa-solid fa-box-open" aria-hidden="true"></i><div><strong>{{ _("Seguimiento de existencias") }}</strong><span>{{ _("Alertas y contexto para anticipar productos que necesitan atención.") }}</span></div></article>
-        <article><i class="fa-solid fa-receipt" aria-hidden="true"></i><div><strong>{{ _("Operación profesional") }}</strong><span>{{ _("POS, historial y tickets listos para consultar o imprimir.") }}</span></div></article>
+        {% if pro_plan %}{% for feature in pro_plan.features %}
+          <article><i class="fa-solid fa-check" aria-hidden="true"></i><div><strong>{{ feature }}</strong></div></article>
+        {% endfor %}{% endif %}
       </div>
     </section>
 
     <section class="landing-v2__section landing-v2__pricing" id="precio">
       <div class="landing-v2__pricing-copy">
-        <span class="landing-v2__eyebrow">{{ _("Precio simple") }}</span>
-        <h2>{{ _("Todo lo necesario para controlar mejor tu negocio.") }}</h2>
-        <p>{{ _("Sin paquetes confusos ni costos ocultos. Prueba PATIA durante 14 días y decide con calma.") }}</p>
+        <span class="landing-v2__eyebrow">{{ _("Planes simples") }}</span>
+        <h2>{{ _("Planes simples para cada etapa de tu negocio") }}</h2>
+        <p>{{ _("Prueba PATIA durante 14 días y elige el nivel de control que necesita tu negocio.") }}</p>
       </div>
-      <article class="landing-v2__price-card">
-        <span class="landing-v2__price-label">{{ _("PATIA Pro") }}</span>
-        <div class="landing-v2__price"><strong>$199</strong><span>{{ _("MXN") }}<br>{{ _("al mes") }}</span></div>
-        <p>{{ _("Continúa operando sin límite de tiempo y desbloquea el análisis completo de tu negocio.") }}</p>
-        <ul>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Inventario, ventas, proveedores y tickets") }}</li>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Dashboard, reportes y recomendaciones IA") }}</li>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Acceso desde computadora o celular") }}</li>
-          <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Suscripción mensual administrable") }}</li>
-        </ul>
-        <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba gratis") }}</a>
-        <a href="{{ url_for('main.register') }}?plan=pro" class="landing-v2__price-link">{{ _("Suscribirme por $199 MXN/mes") }}</a>
-      </article>
+      <div class="landing-plans-v1">
+        {% for plan in commercial_plans %}
+          <article class="landing-v2__price-card{% if plan.code == 'PRO' %} landing-v2__price-card--pro{% endif %}">
+            <span class="landing-v2__price-label">PATIA {{ plan.name }}</span>
+            <div class="landing-v2__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN") }}<br>{{ _("al mes") }}</span></div>
+            <p>{{ plan.description }}</p>
+            <small>{{ plan.audience }}</small>
+            <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ feature }}</li>{% endfor %}</ul>
+            {% if plan.code == "PRO" and not plan.configured %}
+              <span class="landing-v2__button landing-v2__button--secondary" aria-disabled="true">{{ _("Pro estará disponible para contratación muy pronto.") }}</span>
+            {% else %}
+              <a href="{{ url_for('main.register', plan=plan.code|lower) }}" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba con %(plan)s", plan=plan.name) }}</a>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
     </section>
 
     <section class="landing-v2__section landing-v2__faq">
@@ -215,7 +218,7 @@
       <div class="landing-v2__faq-list">
         <details><summary>{{ _("¿Necesito instalar algún programa?") }}</summary><p>{{ _("No. PATIA funciona desde el navegador y puedes acceder desde computadora o celular.") }}</p></details>
         <details><summary>{{ _("¿Puedo importar mis productos?") }}</summary><p>{{ _("Sí. PATIA incluye una plantilla para importar tu catálogo desde un archivo Excel o CSV.") }}</p></details>
-        <details><summary>{{ _("¿Qué pasa al terminar los 14 días?") }}</summary><p>{{ _("Tus datos permanecen en tu cuenta y puedes activar PATIA Pro por $199 MXN al mes.") }}</p></details>
+        <details><summary>{{ _("¿Qué pasa al terminar los 14 días?") }}</summary><p>{{ _("Tus datos permanecen en tu cuenta y puedes elegir Starter por $199 MXN al mes o Pro por $349 MXN al mes.") }}</p></details>
         <details><summary>{{ _("¿PATIA sirve para más de un tipo de negocio?") }}</summary><p>{{ _("Sí. Está diseñado para comercios y PyMEs que manejan productos, inventario y ventas.") }}</p></details>
       </div>
     </section>

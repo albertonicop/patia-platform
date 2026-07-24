@@ -137,17 +137,17 @@ class PhaseEExperienceTests(unittest.TestCase):
     def test_trial_and_pro_messages_use_central_access(self):
         self.login_user(days_used=4)
         trial_html = self.client.get("/suppliers").get_data(as_text=True)
-        self.assertIn("Plan actual: Prueba", trial_html)
-        self.assertIn("10 días restantes · $199 MXN/mes", trial_html)
-        self.assertIn("Activar PATIA Pro", trial_html)
-        self.assertNotIn("Plan actual: PATIA Pro", trial_html)
+        self.assertIn("Prueba de Starter", trial_html)
+        self.assertIn("10 días restantes · $199 MXN/mes después", trial_html)
+        self.assertIn("Comparar planes", trial_html)
+        self.assertNotIn("Plan actual: Acceso manual", trial_html)
 
         self.setUp()
         self.login_user(pro=True)
         pro_html = self.client.get("/suppliers").get_data(as_text=True)
-        self.assertIn("Plan actual: PATIA Pro", pro_html)
-        self.assertIn("Suscripción activa · $199 MXN/mes", pro_html)
-        self.assertNotIn("Activar PATIA Pro", pro_html)
+        self.assertIn("Plan actual: Acceso manual", pro_html)
+        self.assertIn("Acceso activo", pro_html)
+        self.assertNotIn("Comparar planes", pro_html)
 
 
 if __name__ == "__main__":

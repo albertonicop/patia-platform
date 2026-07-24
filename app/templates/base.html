@@ -13,7 +13,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=119">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=120">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -40,10 +40,8 @@
     {% if can_operate_cash_register %}<a href="{{ url_for('cash.index') }}"{% if request.path.startswith('/cash-register') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-vault" aria-hidden="true"></i><span>{{ _("Caja del día") }}</span></a>{% endif %}
     {% if can_manage_customers %}<a href="{{ url_for('customers.index') }}"{% if request.path.startswith('/customers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-address-book" aria-hidden="true"></i><span>{{ _("Clientes") }}</span></a>{% endif %}
     {% if can_manage_credit %}<a href="{{ url_for('credit.index') }}"{% if request.path.startswith('/credit') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i><span>{{ _("Saldos pendientes") }}</span></a>{% endif %}
-    {% if can_view_reports and user is defined and user and has_pro_access %}
+    {% if can_view_reports and user is defined and user %}
 <a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes") }}</span></a>
-{% elif can_view_reports and can_manage_subscription and user is defined and user %}
-<a href="/subscribe" class="sidebar-v2__pro-link"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes") }} <small>{{ _("PRO") }}</small></span></a>
 {% endif %}
     {% if can_manage_inventory %}<a href="/suppliers"{% if request.path.startswith('/suppliers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-truck" aria-hidden="true"></i><span>{{ _("Proveedores") }}</span></a>{% endif %}
     {% if can_manage_subscription %}<a href="/settings"{% if request.path.startswith('/settings') or request.path.startswith('/team') or request.path.startswith('/subscription') or request.path.startswith('/subscribe') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{{ _("Configuración") }}</span></a>{% endif %}
@@ -71,13 +69,14 @@
     <div class="sidebar-card sidebar-v2__footer{% if not has_pro_access %} sidebar-v2__footer--trial{% endif %}">
       <span class="sidebar-v2__status-dot" aria-hidden="true"></span>
       <div>
-        {% if has_pro_access %}
-          <b>{{ _("Plan actual: PATIA Pro") }}</b>
-          <p>{{ _("Suscripción activa · $199 MXN/mes") }}</p>
+        {% if current_plan_code == "TRIAL" %}
+          <b>{{ _("Prueba de %(plan)s", plan=current_entitlement_plan_code|title) }}</b>
+          <p>{{ _("%(days)s días restantes", days=trial_days_left if trial_days_left is not none else 0) }}{% if current_plan_price %} · ${{ current_plan_price }} {{ _("MXN/mes después") }}{% endif %}</p>
+          {% if can_manage_subscription %}<a href="/subscribe">{{ _("Comparar planes") }}</a>{% endif %}
         {% else %}
-          <b>{{ _("Plan actual: Prueba") }}</b>
-          <p>{{ _("%(days)s días restantes · $199 MXN/mes", days=trial_days_left if trial_days_left is not none else 0) }}</p>
-          {% if can_manage_subscription %}<a href="/subscribe">{{ _("Activar PATIA Pro") }}</a>{% endif %}
+          <b>{{ _("Plan actual: %(plan)s", plan=current_plan_label) }}</b>
+          <p>{% if has_pro_access %}{{ _("Acceso activo") }}{% else %}{{ _("Acceso restringido") }}{% endif %}{% if current_plan_price %} · ${{ current_plan_price }} {{ _("MXN/mes") }}{% endif %}</p>
+          {% if can_manage_subscription %}<a href="/subscription">{{ _("Administrar suscripción") }}</a>{% endif %}
         {% endif %}
       </div>
     </div>
@@ -109,6 +108,6 @@
     </footer>
   </main>
 
-  <script src="{{ url_for('static', filename='js/app.js') }}?v=109"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=110"></script>
 </body>
 </html>

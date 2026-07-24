@@ -39,6 +39,10 @@ CURRENT_USER_COLUMNS = {
     "stripe_customer_id",
     "stripe_subscription_id",
     "subscription_status",
+    "subscription_plan_code",
+    "trial_plan_code",
+    "pending_plan_code",
+    "pending_plan_effective_at",
     "current_period_end",
     "next_payment_attempt",
     "stripe_subscription_updated_at",
@@ -338,7 +342,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260724_18",
+                "20260724_19",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -453,6 +457,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "inventory_movement",
                 "customer",
                 "customer_credit_movement",
+                "monthly_owner_report",
             }.issubset(inspector.get_table_names())
         )
         self.assertTrue(CURRENT_USER_COLUMNS.issubset(self.columns(inspector, "user")))
@@ -495,7 +500,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260724_18",
+                "20260724_19",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
@@ -687,7 +692,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 connection.execute(
                     sa.text("SELECT version_num FROM alembic_version")
                 ).scalar_one(),
-                "20260724_18",
+                "20260724_19",
             )
             self.assertEqual(
                 connection.execute(

@@ -39,9 +39,16 @@
         </div>
         <div>
           <dt>{{ _("Precio actual") }}</dt>
-          <dd>{% if current_plan_code == "TRIAL" %}{{ _("$0 durante la prueba") }}{% else %}{{ _("$199 MXN al mes") }}{% endif %}</dd>
+          <dd>{% if current_plan_code == "TRIAL" %}{{ _("$0 durante la prueba") }}{% elif current_plan_price %}${{ current_plan_price }} {{ _("MXN al mes") }}{% else %}{{ _("Acceso protegido sin cambio de precio") }}{% endif %}</dd>
         </div>
       </dl>
+
+      {% if user.pending_plan_code %}
+        <div class="subscription-v2__payment-alert" role="status">
+          <i class="fa-solid fa-clock" aria-hidden="true"></i>
+          <div><strong>{{ _("Cambio de plan pendiente: %(plan)s", plan=user.pending_plan_code|title) }}</strong><p>{% if user.pending_plan_effective_at %}{{ _("Fecha estimada: %(date)s", date=user.pending_plan_effective_at.strftime("%d/%m/%Y")) }}{% else %}{{ _("Se aplicará cuando Stripe lo confirme.") }}{% endif %}</p></div>
+        </div>
+      {% endif %}
 
       {% if user.subscription_status == "past_due" %}
         <div class="subscription-v2__payment-alert" role="alert">
@@ -78,6 +85,31 @@
           <a class="btn" href="{{ url_for('main.subscribe') }}">{{ _("Ver planes") }}</a>
         {% endif %}
       </div>
+
+      {% if user.stripe_subscription_id and current_plan_code in ["STARTER", "PRO"] and not user.pending_plan_code %}
+        <div class="subscription-v3__change-plan">
+          {% if current_plan_code == "STARTER" %}
+            {% set target = commercial_plans|selectattr("code", "equalto", "PRO")|first %}
+            {% if target and target.configured %}
+              <form method="POST" action="{{ url_for('main.change_subscription_plan') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="plan_code" value="PRO">
+                <p>{{ _("Cambia a Pro por $349 MXN al mes. Stripe calculará el ajuste proporcional del periodo actual.") }}</p>
+                <button class="btn" type="submit">{{ _("Cambiar a Pro") }}</button>
+              </form>
+            {% else %}
+              <p>{{ _("Pro estará disponible para contratación muy pronto.") }}</p>
+            {% endif %}
+          {% else %}
+            <form method="POST" action="{{ url_for('main.change_subscription_plan') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="plan_code" value="STARTER">
+              <p>{{ _("El cambio a Starter se aplicará al terminar el periodo pagado. Antes, tu equipo debe cumplir el límite de dos personas.") }}</p>
+              <button class="btn ghost" type="submit">{{ _("Cambiar a Starter") }}</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
     </article>
 
     <aside class="card module-card-v2 subscription-v2__guide">
@@ -93,14 +125,34 @@
           {{ _("Funciones incluidas en tu acceso actual") }}
         {% endif %}
       </h3>
+      {% set visible_plan_code = current_entitlement_plan_code if current_plan_code == "TRIAL" else current_plan_code %}
+      {% set visible_plan = commercial_plans|selectattr("code", "equalto", visible_plan_code)|first %}
       <ul>
-        <li><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span><strong>{{ _("Seguimiento completo") }}</strong> {{ _("Dashboard, reportes IA y recomendaciones basadas en tus datos.") }}</span></li>
-        <li><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span><strong>{{ _("Operación conectada") }}</strong> {{ _("Inventario, ventas, proveedores, historial y tickets en una sola cuenta.") }}</span></li>
+        {% if visible_plan %}{% for feature in visible_plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ feature }}</span></li>{% endfor %}{% endif %}
         <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><span><strong>{{ _("Cuándo se cobra") }}</strong> {{ _("El cargo mensual se procesa en la fecha de renovación indicada en tu cuenta.") }}</span></li>
         <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><span><strong>{{ _("Si cancelas") }}</strong> {{ _("Conservas el acceso hasta terminar el periodo que ya pagaste.") }}</span></li>
         <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span><strong>{{ _("Cómo administrarla") }}</strong> {{ _("El portal seguro te permite actualizar tu tarjeta y consultar la facturación.") }}</span></li>
       </ul>
     </aside>
+  </section>
+  <section class="card subscription-v3__monthly-report">
+    <div>
+      <span class="subscription-v2__eyebrow">{{ _("Solo en Pro") }}</span>
+      <h3>{{ _("Reporte mensual por correo") }}</h3>
+      <p>{{ _("Recibe cada mes un resumen de ventas, inventario, caja y saldos pendientes.") }}</p>
+      {% if last_monthly_report %}<small>{{ _("Último estado: %(status)s · %(year)s-%(month)02d", status=last_monthly_report.status, year=last_monthly_report.report_year, month=last_monthly_report.report_month) }}</small>{% endif %}
+    </div>
+    {% if monthly_report_available %}
+      <form method="POST" action="{{ url_for('main.update_monthly_report_settings') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="monthly-report-recipient">{{ _("Correo destinatario") }}</label>
+        <input id="monthly-report-recipient" name="recipient" type="email" value="{{ organization.monthly_report_recipient or user.email }}" required>
+        <label class="module-check-v2"><input type="checkbox" name="enabled" value="1"{% if organization.monthly_report_enabled %} checked{% endif %}>{{ _("Enviar mi resumen cada mes") }}</label>
+        <button class="btn" type="submit">{{ _("Guardar preferencias") }}</button>
+      </form>
+    {% else %}
+      <a class="btn ghost" href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Pro") }}</a>
+    {% endif %}
   </section>
   <a class="btn ghost subscription-v2__plans-link" href="{{ url_for('main.subscribe') }}">{{ _("Comparar Starter y Pro") }}</a>
 </div>

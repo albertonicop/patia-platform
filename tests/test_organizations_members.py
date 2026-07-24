@@ -363,6 +363,7 @@ class OrganizationMemberTests(unittest.TestCase):
 
     def test_owner_changes_role_resets_pin_and_deactivates_member(self):
         owner_user = self.add_user("owner-actions@patia.test", "Acciones")
+        owner_user.trial_plan_code = "PRO"
         employee = self.add_user("employee@patia.test", "Acciones")
         owner = ensure_owner_organization(owner_user)
         member = OrganizationMember(

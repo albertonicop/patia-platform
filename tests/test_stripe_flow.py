@@ -30,6 +30,9 @@ class StripeFlowTests(unittest.TestCase):
             TESTING=True,
             WTF_CSRF_ENABLED=False,
             RATELIMIT_ENABLED=False,
+            STRIPE_PRICE_ID="price_patia_pro",
+            STRIPE_STARTER_PRICE_ID="price_patia_starter",
+            STRIPE_PRO_PRICE_ID="price_patia_pro",
         )
         cls.context = cls.app.app_context()
         cls.context.push()
@@ -379,9 +382,9 @@ class StripeFlowTests(unittest.TestCase):
         legacy = self.make_user(email="visual-trial@patia.test", plan="pro")
         self.login(legacy)
         trial_page = self.client.get("/").get_data(as_text=True)
-        self.assertIn("Prueba gratuita", trial_page)
-        self.assertNotIn("Plan actual: PRO", trial_page)
-        self.assertNotIn('href="/reports"', trial_page)
+        self.assertIn("Prueba de Starter", trial_page)
+        self.assertNotIn("Plan actual: Acceso manual", trial_page)
+        self.assertIn('href="/reports"', trial_page)
 
         manual = self.make_user(
             email="visual-manual@patia.test",
@@ -390,7 +393,7 @@ class StripeFlowTests(unittest.TestCase):
         )
         self.login(manual)
         pro_page = self.client.get("/").get_data(as_text=True)
-        self.assertIn("Plan actual: PRO", pro_page)
+        self.assertIn("Plan actual: Acceso manual", pro_page)
         self.assertIn('href="/reports"', pro_page)
 
     def test_active_subscriber_is_sent_to_portal_not_checkout(self):
