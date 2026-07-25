@@ -1,0 +1,259 @@
+/* =========================================================
+   PATIA LANDING MOTION V1
+   Progressive, isolated motion for the public landing page.
+   Content remains visible when JavaScript is unavailable.
+   ========================================================= */
+
+.landing-motion-v1 {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    /* Initial hero choreography */
+    .landing-motion-v1.is-motion-enhanced .landing-motion__hero-item {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0);
+        will-change: opacity, transform;
+    }
+
+    .landing-motion-v1.is-motion-enhanced .landing-v2__header.landing-motion__hero-item {
+        transform: translate3d(0, -12px, 0);
+    }
+
+    .landing-motion-v1.is-motion-enhanced .landing-v3__product-stage.landing-motion__hero-item {
+        transform: translate3d(22px, 14px, 0) scale(.985);
+    }
+
+    .landing-motion-v1.is-motion-loaded .landing-motion__hero-item {
+        animation: landing-motion-enter 680ms cubic-bezier(.16, 1, .3, 1) forwards;
+        animation-delay: calc(55ms + (var(--motion-index, 0) * 85ms));
+    }
+
+    .landing-motion-v1.is-motion-loaded .landing-v3__product-stage.landing-motion__hero-item {
+        animation-name: landing-motion-preview-enter;
+        animation-duration: 820ms;
+    }
+
+    /* The existing chart waits until the preview itself enters. */
+    .landing-motion-v1.is-motion-enhanced .landing-v2__bars span {
+        animation-play-state: paused;
+    }
+
+    .landing-motion-v1.is-motion-loaded .landing-v2__bars span {
+        animation-play-state: running;
+    }
+
+    /* Scroll reveal: activated only after JS has prepared every target. */
+    .landing-motion-v1.is-motion-enhanced .landing-motion__reveal {
+        opacity: 0;
+        transform: translate3d(0, 24px, 0);
+        transition:
+            opacity 620ms cubic-bezier(.16, 1, .3, 1),
+            transform 620ms cubic-bezier(.16, 1, .3, 1);
+        transition-delay: var(--motion-delay, 0ms);
+        will-change: opacity, transform;
+    }
+
+    .landing-motion-v1.is-motion-enhanced .landing-motion__reveal[data-motion-direction="left"] {
+        transform: translate3d(-22px, 12px, 0);
+    }
+
+    .landing-motion-v1.is-motion-enhanced .landing-motion__reveal[data-motion-direction="right"] {
+        transform: translate3d(22px, 12px, 0);
+    }
+
+    .landing-motion-v1.is-motion-enhanced .landing-motion__reveal.is-visible {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+
+    /* Product preview feels alive without becoming distracting. */
+    .landing-motion-v1.is-motion-loaded .landing-v2__preview {
+        animation: landing-motion-float 8s 1.2s ease-in-out infinite;
+    }
+
+    .landing-motion-v1 .landing-v2__preview-metrics article {
+        transition:
+            border-color 220ms ease,
+            background-color 220ms ease,
+            box-shadow 220ms ease,
+            transform 220ms ease;
+    }
+
+    .landing-motion-v1 .landing-v2__status i {
+        animation: landing-motion-status 2.8s ease-out infinite;
+    }
+
+    .landing-motion-v1 .landing-v2__button--primary i {
+        transition: transform 200ms cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .landing-motion-v1 .landing-v2__button--primary:hover i,
+    .landing-motion-v1 .landing-v2__button--primary:focus-visible i {
+        transform: translateX(4px);
+    }
+
+    .landing-motion-v1 .landing-v2__button--primary {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .landing-motion-v1 .landing-v2__button--primary::after {
+        position: absolute;
+        inset: -40% auto -40% -45%;
+        z-index: -1;
+        width: 34%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .26), transparent);
+        content: "";
+        pointer-events: none;
+        transform: skewX(-18deg);
+        transition: left 560ms cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .landing-motion-v1 .landing-v2__button--primary:hover::after,
+    .landing-motion-v1 .landing-v2__button--primary:focus-visible::after {
+        left: 115%;
+    }
+
+    .landing-motion-v1 .landing-v5__terms > span,
+    .landing-motion-v1 .landing-v2__trust > div > span,
+    .landing-motion-v1 .landing-premium-v1__pro-grid > article {
+        transition:
+            border-color 200ms ease,
+            background-color 200ms ease,
+            box-shadow 200ms ease,
+            transform 200ms cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .landing-motion-v1 .landing-v2__faq details[open] > p {
+        animation: landing-motion-faq 240ms ease both;
+    }
+
+    .landing-motion-v1 .landing-v4__demo:not([hidden]) .landing-v5__video-stage {
+        animation: landing-motion-demo-stage 260ms 60ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    @media (hover: hover) {
+        .landing-motion-v1 .landing-v2__preview-metrics article:hover {
+            border-color: #dad6f4;
+            background: #fff;
+            box-shadow: 0 12px 28px rgba(41, 43, 66, .08);
+            transform: translateY(-3px);
+        }
+
+        .landing-motion-v1 .landing-v5__terms > span:hover,
+        .landing-motion-v1 .landing-v2__trust > div > span:hover,
+        .landing-motion-v1 .landing-premium-v1__pro-grid > article:hover {
+            border-color: #d8d3f4;
+            background-color: #fff;
+            box-shadow: 0 12px 28px rgba(41, 43, 66, .07);
+            transform: translateY(-2px);
+        }
+    }
+}
+
+@keyframes landing-motion-enter {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes landing-motion-preview-enter {
+    from {
+        opacity: 0;
+        transform: translate3d(22px, 14px, 0) scale(.985);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes landing-motion-float {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+    50% {
+        transform: translate3d(0, -5px, 0);
+    }
+}
+
+@keyframes landing-motion-status {
+    0%,
+    55%,
+    100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 0 rgba(31, 157, 112, 0));
+    }
+    72% {
+        opacity: .72;
+        filter: drop-shadow(0 0 5px rgba(31, 157, 112, .4));
+    }
+}
+
+@keyframes landing-motion-faq {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -5px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes landing-motion-demo-stage {
+    from {
+        opacity: 0;
+        transform: scale(.99);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Small screens use shorter travel and no perpetual floating. */
+@media (max-width: 600px) and (prefers-reduced-motion: no-preference) {
+    .landing-motion-v1.is-motion-enhanced .landing-v3__product-stage.landing-motion__hero-item {
+        transform: translate3d(0, 14px, 0) scale(.99);
+    }
+
+    .landing-motion-v1.is-motion-loaded .landing-v2__preview {
+        animation: none;
+    }
+
+    .landing-motion-v1.is-motion-enhanced .landing-motion__reveal,
+    .landing-motion-v1.is-motion-enhanced .landing-motion__reveal[data-motion-direction] {
+        transform: translate3d(0, 16px, 0);
+    }
+}
+
+/* Accessibility: no hidden content or movement when motion is reduced. */
+@media (prefers-reduced-motion: reduce) {
+    .landing-motion-v1 {
+        scroll-behavior: auto;
+    }
+
+    .landing-motion-v1 *,
+    .landing-motion-v1 *::before,
+    .landing-motion-v1 *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+    }
+
+    .landing-motion-v1 .landing-motion__hero-item,
+    .landing-motion-v1 .landing-motion__reveal {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
