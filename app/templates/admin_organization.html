@@ -84,10 +84,15 @@
     <div><h3>{{ _("Acciones") }}</h3><p>{{ _("Las acciones sensibles requieren confirmación y nunca muestran credenciales.") }}</p></div>
     <div>
       <a class="btn ghost" href="mailto:{{ owner.email }}">{{ _("Contactar") }}</a>
-      {% if not owner.manual_pro_access %}
+      {% if owner.manual_pro_access %}
+      <form method="POST" action="{{ url_for('main.admin_remove_manual_pro', user_id=owner.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn ghost" type="submit">{{ _("Desactivar") }}</button>
+      </form>
+      {% else %}
       <form method="POST" action="{{ url_for('main.admin_make_pro', user_id=owner.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn ghost" type="submit">{{ _("Administrar acceso manual") }}</button>
+        <button class="btn ghost" type="submit">{{ _("Activar PATIA Pro") }}</button>
       </form>
       {% endif %}
     </div>

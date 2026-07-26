@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-26 10:11-0600\n"
+"POT-Creation-Date: 2026-07-26 13:14-0600\n"
 "PO-Revision-Date: 2026-07-17 11:53-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -421,7 +421,7 @@ msgstr ""
 "Hello %(name)s, your PATIA free trial period ends soon. Don't lose access"
 " to your inventory and sales."
 
-#: app/routes.py:977
+#: app/routes.py:977 app/templates/admin_organization.html:95
 msgid "Activar PATIA Pro"
 msgstr "Activate PATIA Pro"
 
@@ -953,6 +953,18 @@ msgstr ""
 #, python-format
 msgid "%(count)s productos eliminados."
 msgstr "%(count)s products deleted."
+
+#: app/routes.py:4698 app/routes.py:4725
+msgid "El acceso Pro se administra en el propietario de la organización."
+msgstr "Pro access is managed through the organization owner."
+
+#: app/routes.py:4706
+msgid "Acceso manual Pro activado."
+msgstr "Manual Pro access enabled."
+
+#: app/routes.py:4733
+msgid "Acceso manual Pro desactivado."
+msgstr "Manual Pro access disabled."
 
 #: app/cash/routes.py:25 app/cash/routes.py:85 app/cash/routes.py:151
 #: app/templates/cash_register.html:89
@@ -1981,8 +1993,9 @@ msgid ""
 msgstr "Sensitive actions require confirmation and never display credentials."
 
 #: app/templates/admin_organization.html:90
-msgid "Administrar acceso manual"
-msgstr "Manage manual access"
+#: app/templates/customer_detail.html:22
+msgid "Desactivar"
+msgstr "Deactivate"
 
 #: app/templates/auth.html:16 app/templates/forgot_password.html:14
 #: app/templates/legal.html:13 app/templates/reset_password.html:14
@@ -2744,10 +2757,6 @@ msgstr "Edit customer"
 #: app/templates/customer_detail.html:22
 msgid "Reactivar"
 msgstr "Reactivate"
-
-#: app/templates/customer_detail.html:22
-msgid "Desactivar"
-msgstr "Deactivate"
 
 #: app/templates/customer_detail.html:27
 msgid "Resumen de compras"
@@ -7207,3 +7216,6 @@ msgstr "The invitation expires in 48 hours."
 
 #~ msgid "Abrir Reportes en PATIA"
 #~ msgstr "Open Reports in PATIA"
+
+#~ msgid "Administrar acceso manual"
+#~ msgstr "Manage manual access"

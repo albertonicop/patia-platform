@@ -204,6 +204,61 @@ class AdminRedesignTests(unittest.TestCase):
             force_retry=True,
         )
 
+    def test_admin_can_activate_and_remove_manual_pro_access(self):
+        self._login(self.admin, self.admin_membership)
+
+        enabled = self.client.post(
+            f"/admin/make-pro/{self.trial.id}",
+            follow_redirects=True,
+        )
+        db.session.refresh(self.trial)
+
+        self.assertEqual(enabled.status_code, 200)
+        self.assertTrue(self.trial.manual_pro_access)
+        self.assertEqual(self.trial.plan, "pro")
+        self.assertIn("Acceso manual Pro activado", enabled.get_data(as_text=True))
+
+        disabled = self.client.post(
+            f"/admin/remove-manual-pro/{self.trial.id}",
+            follow_redirects=True,
+        )
+        db.session.refresh(self.trial)
+
+        self.assertEqual(disabled.status_code, 200)
+        self.assertFalse(self.trial.manual_pro_access)
+        self.assertEqual(self.trial.plan, "trial")
+        self.assertIn(
+            "Acceso manual Pro desactivado",
+            disabled.get_data(as_text=True),
+        )
+
+    def test_removing_manual_access_does_not_change_stripe_subscription(self):
+        self.pro.manual_pro_access = True
+        db.session.commit()
+        self._login(self.admin, self.admin_membership)
+
+        response = self.client.post(
+            f"/admin/remove-manual-pro/{self.pro.id}",
+            follow_redirects=True,
+        )
+        db.session.refresh(self.pro)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.pro.manual_pro_access)
+        self.assertEqual(self.pro.subscription_plan_code, PRO)
+        self.assertEqual(self.pro.subscription_status, "active")
+        self.assertEqual(self.pro.stripe_subscription_id, "sub_admin_pro")
+        self.assertEqual(self.pro.plan, "pro")
+
+    def test_non_admin_cannot_change_manual_pro_access(self):
+        self._login(self.trial, self.trial_membership)
+
+        response = self.client.post(f"/admin/make-pro/{self.pro.id}")
+        db.session.refresh(self.pro)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(self.pro.manual_pro_access)
+
 
 if __name__ == "__main__":
     unittest.main()

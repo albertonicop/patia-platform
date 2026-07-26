@@ -4691,14 +4691,52 @@ def admin_make_pro(user_id):
     if not admin_user or admin_user.email != "albertonicopat@gmail.com":
         return redirect(url_for("main.dashboard"))
     user = User.query.get_or_404(user_id)
-    if not Organization.query.filter_by(owner_user_id=user.id).first():
-        flash("El acceso Pro se administra en el propietario de la organización.", "danger")
+    organization = Organization.query.filter_by(owner_user_id=user.id).first()
+    if not organization:
+        flash(
+            gettext(
+                "El acceso Pro se administra en el propietario de la organización."
+            ),
+            "danger",
+        )
         return redirect(url_for("main.admin"))
     user.manual_pro_access = True
     sync_user_plan(user)
     db.session.commit()
-    flash("Cliente marcado como PRO.")
-    return redirect(url_for("main.admin"))
+    flash(gettext("Acceso manual Pro activado."), "success")
+    return redirect(
+        url_for(
+            "main.admin_organization_detail",
+            organization_id=organization.id,
+        )
+    )
+
+
+@main.route("/admin/remove-manual-pro/<int:user_id>", methods=["POST"])
+def admin_remove_manual_pro(user_id):
+    admin_user = current_user()
+    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+        return redirect(url_for("main.dashboard"))
+    user = User.query.get_or_404(user_id)
+    organization = Organization.query.filter_by(owner_user_id=user.id).first()
+    if not organization:
+        flash(
+            gettext(
+                "El acceso Pro se administra en el propietario de la organización."
+            ),
+            "danger",
+        )
+        return redirect(url_for("main.admin"))
+    user.manual_pro_access = False
+    sync_user_plan(user)
+    db.session.commit()
+    flash(gettext("Acceso manual Pro desactivado."), "success")
+    return redirect(
+        url_for(
+            "main.admin_organization_detail",
+            organization_id=organization.id,
+        )
+    )
 
 @main.route("/settings", methods=["GET", "POST"])
 @require_roles("OWNER")

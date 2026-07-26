@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-26 10:11-0600\n"
+"POT-Creation-Date: 2026-07-26 13:14-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -418,7 +418,7 @@ msgid ""
 "pierdas el acceso a tu inventario y ventas."
 msgstr ""
 
-#: app/routes.py:977
+#: app/routes.py:977 app/templates/admin_organization.html:95
 msgid "Activar PATIA Pro"
 msgstr ""
 
@@ -930,6 +930,18 @@ msgstr ""
 #: app/routes.py:4637
 #, python-format
 msgid "%(count)s productos eliminados."
+msgstr ""
+
+#: app/routes.py:4698 app/routes.py:4725
+msgid "El acceso Pro se administra en el propietario de la organización."
+msgstr ""
+
+#: app/routes.py:4706
+msgid "Acceso manual Pro activado."
+msgstr ""
+
+#: app/routes.py:4733
+msgid "Acceso manual Pro desactivado."
 msgstr ""
 
 #: app/cash/routes.py:25 app/cash/routes.py:85 app/cash/routes.py:151
@@ -1945,7 +1957,8 @@ msgid ""
 msgstr ""
 
 #: app/templates/admin_organization.html:90
-msgid "Administrar acceso manual"
+#: app/templates/customer_detail.html:22
+msgid "Desactivar"
 msgstr ""
 
 #: app/templates/auth.html:16 app/templates/forgot_password.html:14
@@ -2701,10 +2714,6 @@ msgstr ""
 
 #: app/templates/customer_detail.html:22
 msgid "Reactivar"
-msgstr ""
-
-#: app/templates/customer_detail.html:22
-msgid "Desactivar"
 msgstr ""
 
 #: app/templates/customer_detail.html:27
