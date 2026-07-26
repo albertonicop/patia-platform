@@ -172,17 +172,41 @@ class MonthlyOwnerReportTests(unittest.TestCase):
                 self.organization.id, 2026, 7, send=True
             )
             retried, _ = generate_monthly_report(
-                self.organization.id, 2026, 7, send=True
+                self.organization.id,
+                2026,
+                7,
+                send=True,
+                force_retry=True,
             )
 
         self.assertEqual(failed.id, retried.id)
         self.assertEqual(retried.status, "sent")
+        self.assertEqual(retried.attempt_count, 2)
+        self.assertIsNone(retried.next_retry_at)
+        self.assertIsNone(retried.failure_code)
         self.assertEqual(send.call_count, 2)
         self.assertEqual(
             send.call_args_list[0].kwargs["idempotency_key"],
             send.call_args_list[1].kwargs["idempotency_key"],
         )
         self.assertEqual(MonthlyOwnerReport.query.count(), 1)
+
+    def test_failed_delivery_waits_before_automatic_retry(self):
+        with patch("app.routes.send_email", return_value=False) as send:
+            failed, _ = generate_monthly_report(
+                self.organization.id, 2026, 7, send=True
+            )
+            deferred, payload = generate_monthly_report(
+                self.organization.id, 2026, 7, send=True
+            )
+
+        self.assertEqual(failed.id, deferred.id)
+        self.assertEqual(deferred.status, "failed")
+        self.assertEqual(deferred.failure_code, "DELIVERY_REJECTED")
+        self.assertEqual(deferred.attempt_count, 1)
+        self.assertIsNotNone(deferred.next_retry_at)
+        self.assertIsNone(payload)
+        send.assert_called_once()
 
     def test_stale_sending_claim_can_retry_with_provider_idempotency(self):
         record = MonthlyOwnerReport(

@@ -3979,6 +3979,12 @@ def admin():
         .group_by(OrganizationMember.organization_id)
         .all()
     )
+    customer_counts = dict(
+        db.session.query(Customer.organization_id, func.count(Customer.id))
+        .filter(Customer.is_active.is_(True))
+        .group_by(Customer.organization_id)
+        .all()
+    )
     last_activity = dict(
         db.session.query(
             Sale.organization_id, func.max(Sale.created_at)
@@ -4049,6 +4055,48 @@ def admin():
         total_sales_money += sales_money
         plan_code = current_plan_code(u, has_paid_access=paid_access)
         monthly_report = latest_reports.get(organization.id)
+        attention_reasons = []
+        if u.subscription_status == "past_due":
+            attention_reasons.append(("payment", gettext("Pago pendiente")))
+        if trial_days_left != "inf" and 0 < trial_days_left <= 3:
+            attention_reasons.append(
+                (
+                    "trial",
+                    gettext(
+                        "La prueba vence en %(days)s días",
+                        days=trial_days_left,
+                    ),
+                )
+            )
+        if u.cancel_at_period_end:
+            attention_reasons.append(
+                ("cancellation", gettext("Cancelación programada"))
+            )
+        if monthly_report and monthly_report.status == "failed":
+            attention_reasons.append(
+                ("report", gettext("Reporte mensual fallido"))
+            )
+        if status == "Vencido":
+            attention_reasons.append(("expired", gettext("Cuenta vencida")))
+
+        plan_admin_labels = {
+            "TRIAL": gettext("Trial"),
+            "STARTER": gettext("Starter"),
+            "PRO": gettext("Pro"),
+            "GRANDFATHERED": gettext("Cliente anterior"),
+            "MANUAL": gettext("Acceso manual"),
+        }
+        status_code = (
+            "payment_pending"
+            if u.subscription_status == "past_due"
+            else "cancelling"
+            if u.cancel_at_period_end
+            else "expired"
+            if status == "Vencido"
+            else "trial"
+            if plan_code == "TRIAL"
+            else "active"
+        )
         clients.append({
             "organization": organization,
             "user": u,
@@ -4062,7 +4110,9 @@ def admin():
             ),
             "status": status,
             "plan_code": plan_code,
-            "plan_label": current_plan_label(plan_code),
+            "plan_label": plan_admin_labels.get(
+                plan_code, current_plan_label(plan_code)
+            ),
             "subscription_status": u.subscription_status,
             "renewal_date": utc_to_local(
                 u.current_period_end, u.timezone
@@ -4073,6 +4123,7 @@ def admin():
             "read_only": status == "Vencido",
             "price": plan_price(plan_code),
             "member_count": member_counts.get(organization.id, 0),
+            "customer_count": customer_counts.get(organization.id, 0),
             "last_activity": last_activity.get(organization.id),
             "last_payment": u.stripe_invoice_updated_at,
             "monthly_report_enabled": organization.monthly_report_enabled,
@@ -4084,6 +4135,15 @@ def admin():
                 and not status == "Vencido"
                 else None
             ),
+            "status_code": status_code,
+            "status_label": {
+                "payment_pending": gettext("Pago pendiente"),
+                "cancelling": gettext("Cancelación programada"),
+                "expired": gettext("Vencido"),
+                "trial": gettext("En prueba"),
+                "active": gettext("Activo"),
+            }[status_code],
+            "attention_reasons": attention_reasons,
         })
 
     top_client = max(clients, key=lambda c: c["products_count"], default=None)
@@ -4093,8 +4153,14 @@ def admin():
         client["price"] or 0
         for client in clients
         if client["plan_code"] in {STARTER, PRO}
-        and client["subscription_status"] in {"active", "trialing", "past_due"}
+        and client["subscription_status"] in {"active", "trialing"}
         and not client["read_only"]
+    )
+    paying_clients = sum(
+        client["plan_code"] in {STARTER, PRO}
+        and client["subscription_status"] in {"active", "trialing"}
+        and not client["read_only"]
+        for client in clients
     )
     plan_counts = {
         code: sum(
@@ -4121,36 +4187,292 @@ def admin():
         bool(client["monthly_report"] and client["monthly_report"].status == "failed")
         for client in clients
     )
-    selected_filter = request.args.get("filter", "all")
-    filter_predicates = {
-        "trial": lambda client: client["plan_code"] == "TRIAL" and not client["read_only"],
-        "starter": lambda client: client["plan_code"] == "STARTER",
-        "pro": lambda client: client["plan_code"] == "PRO",
-        "grandfathered": lambda client: client["plan_code"] == "GRANDFATHERED",
-        "manual": lambda client: client["plan_code"] == "MANUAL",
-        "past_due": lambda client: client["subscription_status"] == "past_due",
-        "cancelling": lambda client: client["scheduled_cancellation"],
-        "expired": lambda client: client["read_only"],
+    attention_clients = sorted(
+        (client for client in clients if client["attention_reasons"]),
+        key=lambda client: (
+            0
+            if client["status_code"] == "payment_pending"
+            else 1
+            if client["status_code"] == "expired"
+            else 2,
+            client["organization"].name.lower(),
+        ),
+    )
+    query = request.args.get("q", "").strip()
+    selected_plan = request.args.get("plan", "all").strip().upper()
+    selected_status = request.args.get("status", "all").strip().lower()
+    selected_attention = request.args.get("attention", "all").strip().lower()
+    valid_plans = {"ALL", "TRIAL", "STARTER", "PRO", "GRANDFATHERED", "MANUAL"}
+    valid_statuses = {
+        "all",
+        "active",
+        "payment_pending",
+        "cancelling",
+        "expired",
+        "trial",
     }
-    if selected_filter in filter_predicates:
+    valid_attention = {
+        "all",
+        "payment",
+        "trial",
+        "cancellation",
+        "report",
+        "expired",
+    }
+    if selected_plan not in valid_plans:
+        selected_plan = "ALL"
+    if selected_status not in valid_statuses:
+        selected_status = "all"
+    if selected_attention not in valid_attention:
+        selected_attention = "all"
+
+    visible_clients = clients
+    if query:
+        normalized_query = query.casefold()
         visible_clients = [
             client
-            for client in clients
-            if filter_predicates[selected_filter](client)
+            for client in visible_clients
+            if normalized_query
+            in " ".join(
+                (
+                    client["organization"].name,
+                    client["user"].email,
+                    client["user"].first_name or "",
+                    client["user"].last_name or "",
+                    client["user"].phone or "",
+                )
+            ).casefold()
         ]
-    else:
-        selected_filter = "all"
-        visible_clients = clients
+    if selected_plan != "ALL":
+        visible_clients = [
+            client
+            for client in visible_clients
+            if client["plan_code"] == selected_plan
+        ]
+    if selected_status != "all":
+        visible_clients = [
+            client
+            for client in visible_clients
+            if client["status_code"] == selected_status
+        ]
+    if selected_attention != "all":
+        visible_clients = [
+            client
+            for client in visible_clients
+            if any(
+                reason_code == selected_attention
+                for reason_code, _ in client["attention_reasons"]
+            )
+        ]
+
+    applied_filters = []
+    if query:
+        applied_filters.append(("q", query, gettext("Búsqueda: %(value)s", value=query)))
+    if selected_plan != "ALL":
+        applied_filters.append(
+            (
+                "plan",
+                selected_plan,
+                gettext(
+                    "Plan: %(value)s",
+                    value=next(
+                        (
+                            client["plan_label"]
+                            for client in clients
+                            if client["plan_code"] == selected_plan
+                        ),
+                        selected_plan.title(),
+                    ),
+                ),
+            )
+        )
+    if selected_status != "all":
+        status_labels = {
+            "active": gettext("Activo"),
+            "payment_pending": gettext("Pago pendiente"),
+            "cancelling": gettext("Cancelación programada"),
+            "expired": gettext("Vencido"),
+            "trial": gettext("En prueba"),
+        }
+        applied_filters.append(
+            (
+                "status",
+                selected_status,
+                gettext(
+                    "Estado: %(value)s",
+                    value=status_labels[selected_status],
+                ),
+            )
+        )
+    if selected_attention != "all":
+        attention_labels = {
+            "payment": gettext("Pago pendiente"),
+            "trial": gettext("Prueba por vencer"),
+            "cancellation": gettext("Cancelación programada"),
+            "report": gettext("Reporte fallido"),
+            "expired": gettext("Cuenta vencida"),
+        }
+        applied_filters.append(
+            (
+                "attention",
+                selected_attention,
+                gettext(
+                    "Atención: %(value)s",
+                    value=attention_labels[selected_attention],
+                ),
+            )
+        )
 
     return render_template("admin.html", clients=visible_clients, total_clients=len(organizations), total_products=total_products,
         total_sales_count=total_sales_count, total_sales_money=total_sales_money, trial_clients=trial_clients,
         expired_clients=expired_clients, expiring_soon=expiring_soon, new_this_week=new_this_week,
         new_this_month=new_this_month, top_client=top_client, latest_client=latest_client,
         plan_counts=plan_counts, estimated_mrr=mrr, report_sent=report_sent,
-        report_failed=report_failed, selected_filter=selected_filter,
+        report_failed=report_failed,
         upcoming_renewals=upcoming_renewals,
         scheduled_cancellations=sum(c["scheduled_cancellation"] for c in clients),
-        past_due_count=sum(c["subscription_status"] == "past_due" for c in clients))
+        past_due_count=sum(c["subscription_status"] == "past_due" for c in clients),
+        paying_clients=paying_clients,
+        attention_clients=attention_clients,
+        query=query,
+        selected_plan=selected_plan,
+        selected_status=selected_status,
+        selected_attention=selected_attention,
+        applied_filters=applied_filters)
+
+
+@main.route("/admin/organizations/<int:organization_id>")
+def admin_organization_detail(organization_id):
+    admin_user = current_user()
+    if not admin_user:
+        session.clear()
+        return redirect(url_for("main.login"))
+    if admin_user.email != "albertonicopat@gmail.com":
+        flash("No autorizado.", "danger")
+        return redirect(url_for("main.dashboard"))
+
+    organization = (
+        Organization.query.options(
+            selectinload(Organization.owner),
+            selectinload(Organization.members),
+        )
+        .filter_by(id=organization_id)
+        .first_or_404()
+    )
+    owner = organization.owner
+    usage = {
+        "members": sum(member.is_active for member in organization.members),
+        "products": Product.query.filter_by(
+            organization_id=organization.id, is_active=True
+        ).count(),
+        "sales": Sale.query.filter_by(
+            organization_id=organization.id
+        ).count(),
+        "customers": Customer.query.filter_by(
+            organization_id=organization.id, is_active=True
+        ).count(),
+    }
+    last_sale = (
+        Sale.query.filter_by(organization_id=organization.id)
+        .order_by(Sale.created_at.desc(), Sale.id.desc())
+        .first()
+    )
+    report_history = (
+        MonthlyOwnerReport.query.filter_by(
+            organization_id=organization.id
+        )
+        .order_by(
+            MonthlyOwnerReport.report_year.desc(),
+            MonthlyOwnerReport.report_month.desc(),
+        )
+        .limit(12)
+        .all()
+    )
+    from .plans import (
+        current_plan_code,
+        plan_price,
+        subscription_access_is_active,
+    )
+
+    paid_access = subscription_access_is_active(
+        owner,
+        grace_days=current_app.config.get("STRIPE_PAST_DUE_GRACE_DAYS", 3),
+    )
+    plan_code = current_plan_code(owner, has_paid_access=paid_access)
+    plan_label = {
+        "TRIAL": gettext("Trial"),
+        "STARTER": gettext("Starter"),
+        "PRO": gettext("Pro"),
+        "GRANDFATHERED": gettext("Cliente anterior"),
+        "MANUAL": gettext("Acceso manual"),
+    }.get(plan_code, gettext("Plan actual"))
+    return render_template(
+        "admin_organization.html",
+        organization=organization,
+        owner=owner,
+        usage=usage,
+        last_sale=last_sale,
+        report_history=report_history,
+        plan_code=plan_code,
+        plan_label=plan_label,
+        plan_price=plan_price(plan_code),
+        paid_access=paid_access,
+    )
+
+
+@main.route(
+    "/admin/monthly-reports/<int:report_id>/retry",
+    methods=["POST"],
+)
+def admin_retry_monthly_report(report_id):
+    admin_user = current_user()
+    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+        return redirect(url_for("main.dashboard"))
+    report = db.session.get(MonthlyOwnerReport, report_id)
+    if not report:
+        abort(404)
+    if report.status != "failed":
+        flash("Este reporte no necesita reintentarse.", "warning")
+        return redirect(
+            url_for(
+                "main.admin_organization_detail",
+                organization_id=report.organization_id,
+            )
+        )
+    organization_id = report.organization_id
+    try:
+        from .monthly_reports import generate_monthly_report
+
+        retried, _ = generate_monthly_report(
+            organization_id,
+            report.report_year,
+            report.report_month,
+            send=True,
+            force_retry=True,
+        )
+        if retried.status == "sent":
+            flash("Reporte mensual enviado correctamente.", "success")
+        else:
+            flash(
+                "No pudimos entregar el reporte. Podrás reintentarlo después.",
+                "danger",
+            )
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "Admin monthly report retry failed for report_id=%s",
+            report_id,
+        )
+        flash(
+            "No pudimos entregar el reporte. Podrás reintentarlo después.",
+            "danger",
+        )
+    return redirect(
+        url_for(
+            "main.admin_organization_detail",
+            organization_id=organization_id,
+        )
+    )
 
 
 @main.route("/products/<int:product_id>/delete", methods=["POST"])

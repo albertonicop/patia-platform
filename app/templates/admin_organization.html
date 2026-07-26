@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}{{ organization.name }} · {{ _("Administración PATIA") }}{% endblock %}
+{% block content %}
+<div class="admin-detail-v1">
+  <nav class="module-back-v2"><a href="{{ url_for('main.admin') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a negocios") }}</a></nav>
+  <header class="module-intro-v2 admin-detail-v1__intro">
+    <div>
+      <span>{{ _("Detalle del negocio") }}</span>
+      <h2>{{ organization.name }}</h2>
+      <p>{{ owner.email }}{% if owner.phone %} · {{ owner.phone }}{% endif %}</p>
+    </div>
+    <div class="admin-detail-v1__headline">
+      <span class="admin-v4__plan admin-v4__plan--{{ plan_code|lower }}">{{ plan_label }}</span>
+      <span class="admin-v4__status admin-v4__status--{{ 'active' if paid_access else 'trial' if plan_code == 'TRIAL' else 'expired' }}">{{ _("Activo") if paid_access else _("En prueba") if plan_code == "TRIAL" else _("Sin acceso activo") }}</span>
+    </div>
+  </header>
+
+  <div class="admin-detail-v1__grid">
+    <section class="card">
+      <header><i class="fa-regular fa-building" aria-hidden="true"></i><h3>{{ _("Datos del negocio") }}</h3></header>
+      <dl>
+        <div><dt>{{ _("Propietario") }}</dt><dd>{{ ((owner.first_name or "") ~ " " ~ (owner.last_name or "")).strip() or _("Sin nombre") }}</dd></div>
+        <div><dt>{{ _("Correo") }}</dt><dd>{{ owner.email }}</dd></div>
+        <div><dt>{{ _("Teléfono") }}</dt><dd>{{ owner.phone or "—" }}</dd></div>
+        <div><dt>{{ _("Ciudad") }}</dt><dd>{{ owner.city or "—" }}</dd></div>
+        <div><dt>{{ _("Fecha de registro") }}</dt><dd>{{ organization.created_at.strftime('%d/%m/%Y') }}</dd></div>
+        <div><dt>{{ _("Última actividad") }}</dt><dd>{% if last_sale %}{{ last_sale.created_at.strftime('%d/%m/%Y %H:%M') }}{% else %}{{ _("Sin ventas") }}{% endif %}</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <header><i class="fa-regular fa-credit-card" aria-hidden="true"></i><h3>{{ _("Suscripción") }}</h3></header>
+      <dl>
+        <div><dt>{{ _("Plan") }}</dt><dd>{{ plan_label }}</dd></div>
+        <div><dt>{{ _("Precio") }}</dt><dd>{% if plan_price %}${{ plan_price }} MXN/{{ _("mes") }}{% else %}—{% endif %}</dd></div>
+        <div><dt>{{ _("Estado") }}</dt><dd>{{ _("Pago pendiente") if owner.subscription_status == "past_due" else _("Activo") if paid_access else _("Sin acceso activo") }}</dd></div>
+        <div><dt>{{ _("Próxima renovación") }}</dt><dd>{% if owner.current_period_end %}{{ owner.current_period_end.strftime('%d/%m/%Y') }}{% else %}—{% endif %}</dd></div>
+        <div><dt>{{ _("Cancelación programada") }}</dt><dd>{{ _("Sí") if owner.cancel_at_period_end else _("No") }}</dd></div>
+        <div><dt>{{ _("Acceso manual") }}</dt><dd>{{ _("Sí") if owner.manual_pro_access else _("No") }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <header><i class="fa-solid fa-chart-simple" aria-hidden="true"></i><h3>{{ _("Uso") }}</h3></header>
+      <dl class="admin-detail-v1__usage">
+        <div><dt>{{ _("Personas activas") }}</dt><dd>{{ usage.members }}</dd></div>
+        <div><dt>{{ _("Productos") }}</dt><dd>{{ usage.products }}</dd></div>
+        <div><dt>{{ _("Ventas") }}</dt><dd>{{ usage.sales }}</dd></div>
+        <div><dt>{{ _("Clientes") }}</dt><dd>{{ usage.customers }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <header><i class="fa-regular fa-envelope" aria-hidden="true"></i><h3>{{ _("Reporte mensual") }}</h3></header>
+      <dl>
+        <div><dt>{{ _("Envío automático") }}</dt><dd>{{ _("Activado") if organization.monthly_report_enabled else _("Desactivado") }}</dd></div>
+        <div><dt>{{ _("Destinatario") }}</dt><dd>{{ organization.monthly_report_recipient or owner.email }}</dd></div>
+        {% if report_history %}
+        <div><dt>{{ _("Último periodo") }}</dt><dd>{{ "%04d-%02d"|format(report_history[0].report_year, report_history[0].report_month) }}</dd></div>
+        <div><dt>{{ _("Último estado") }}</dt><dd>
+          {% if report_history[0].status == "sent" %}{{ _("Enviado") }}
+          {% elif report_history[0].status == "failed" %}{{ _("Falló") }}
+          {% elif report_history[0].status == "sending" %}{{ _("Enviando") }}
+          {% else %}{{ _("Generado") }}{% endif %}
+        </dd></div>
+        <div><dt>{{ _("Intentos") }}</dt><dd>{{ report_history[0].attempt_count }}</dd></div>
+        {% if report_history[0].next_retry_at %}
+        <div><dt>{{ _("Próximo reintento") }}</dt><dd>{{ report_history[0].next_retry_at.strftime('%d/%m/%Y %H:%M') }}</dd></div>
+        {% endif %}
+        {% else %}
+        <div><dt>{{ _("Último envío") }}</dt><dd>{{ _("Todavía no hay envíos") }}</dd></div>
+        {% endif %}
+      </dl>
+      {% if report_history and report_history[0].status == "failed" %}
+      <form method="POST" action="{{ url_for('main.admin_retry_monthly_report', report_id=report_history[0].id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn" type="submit">{{ _("Reintentar reporte") }}</button>
+      </form>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="card admin-detail-v1__actions">
+    <div><h3>{{ _("Acciones") }}</h3><p>{{ _("Las acciones sensibles requieren confirmación y nunca muestran credenciales.") }}</p></div>
+    <div>
+      <a class="btn ghost" href="mailto:{{ owner.email }}">{{ _("Contactar") }}</a>
+      {% if not owner.manual_pro_access %}
+      <form method="POST" action="{{ url_for('main.admin_make_pro', user_id=owner.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn ghost" type="submit">{{ _("Administrar acceso manual") }}</button>
+      </form>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,56 +1,105 @@
 <!doctype html>
 <html lang="{{ current_language or 'es' }}">
-<body style="margin:0;background:#f4f6fb;color:#171a2b;font-family:Inter,Arial,sans-serif;">
-  <main style="max-width:680px;margin:0 auto;padding:32px 16px;">
-    <section style="background:#fff;border:1px solid #e5e8f0;border-radius:20px;overflow:hidden;">
-      <header style="padding:28px;background:#171a2b;color:#fff;">
-        <strong style="font-size:22px;">PATIA</strong>
-        <h1 style="margin:18px 0 8px;font-size:28px;">{{ _("Resumen mensual de %(business)s", business=organization.name) }}</h1>
-        <p style="margin:0;color:#c8cddd;">{{ _("Este es el resumen de lo que ocurrió en tu negocio durante %(period)s.", period=period_label) }}</p>
-      </header>
-      <div style="padding:28px;">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ _("Resumen mensual de %(business)s", business=organization.name) }}</title>
+</head>
+<body style="margin:0;background:#f3f5fa;color:#171a2b;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+    {{ headline }}
+  </div>
+  <main style="max-width:680px;margin:0 auto;padding:28px 14px;">
+    <section style="overflow:hidden;background:#fff;border:1px solid #e4e7ef;border-radius:22px;box-shadow:0 16px 45px rgba(30,35,55,.08);">
+      <header style="padding:30px;background:#181b2d;color:#fff;">
         <table role="presentation" style="width:100%;border-collapse:collapse;">
           <tr>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Ventas totales") }}</td>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ analytics.report_kpis.sales|money }}</td>
+            <td style="font-size:22px;font-weight:850;letter-spacing:.08em;">PATIA</td>
+            <td style="text-align:right;color:#cbd0df;font-size:13px;">{{ period_label }}</td>
+          </tr>
+        </table>
+        <p style="margin:28px 0 8px;color:#ada5ff;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;">{{ _("Resumen del negocio") }}</p>
+        <h1 style="margin:0;font-size:29px;line-height:1.16;">{{ headline }}</h1>
+        <p style="margin:13px 0 0;color:#cbd0df;line-height:1.6;">{{ _("Este resumen reúne lo más importante de %(business)s durante %(period)s.", business=organization.name, period=period_label) }}</p>
+      </header>
+
+      <div style="padding:28px;">
+        <h2 style="margin:0 0 14px;font-size:18px;">{{ _("El mes en números") }}</h2>
+        <table role="presentation" style="width:100%;border-spacing:8px;border-collapse:separate;margin:-8px;">
+          <tr>
+            <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
+              <span style="display:block;color:#677086;font-size:12px;">{{ _("Ventas") }}</span>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.sales|money }}</strong>
+            </td>
+            <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
+              <span style="display:block;color:#677086;font-size:12px;">{{ _("Ventas registradas") }}</span>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.ticket_count }}</strong>
+            </td>
           </tr>
           <tr>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Número de ventas") }}</td>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ analytics.report_kpis.ticket_count }}</td>
-          </tr>
-          {% if analytics.unknown_cost_lines == 0 %}
-          <tr>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Utilidad estimada") }}</td>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ analytics.report_kpis.profit|money }}</td>
-          </tr>
-          {% endif %}
-          <tr>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Valor actual del inventario") }}</td>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ inventory.value|money }}</td>
-          </tr>
-          <tr>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;">{{ _("Pendiente por cobrar") }}</td>
-            <td style="padding:12px;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ credit.total|money }}</td>
+            <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
+              <span style="display:block;color:#677086;font-size:12px;">{{ _("Utilidad estimada") }}</span>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{% if analytics.unknown_cost_lines == 0 %}{{ analytics.report_kpis.profit|money }}{% else %}{{ _("Costo incompleto") }}{% endif %}</strong>
+            </td>
+            <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
+              <span style="display:block;color:#677086;font-size:12px;">{{ _("Ticket promedio") }}</span>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.average_ticket|money }}</strong>
+            </td>
           </tr>
         </table>
 
-        {% if comparison is not none %}<p><strong>{{ _("Comparación con el mes anterior:") }}</strong> {{ _("%(percentage)s%% en ventas.", percentage=comparison) }}</p>{% endif %}
+        <section style="margin-top:28px;padding:20px;border:1px solid #dcefe7;background:#f1fbf7;border-radius:15px;">
+          <h2 style="margin:0 0 12px;color:#176b4a;font-size:17px;">{{ _("Lo que salió bien") }}</h2>
+          <ul style="margin:0;padding-left:20px;line-height:1.7;">
+            {% for item in wins %}<li style="margin:5px 0;">{{ item }}</li>{% endfor %}
+          </ul>
+        </section>
+
+        <section style="margin-top:14px;padding:20px;border:1px solid #f0dfd7;background:#fff7f2;border-radius:15px;">
+          <h2 style="margin:0 0 12px;color:#9b4d2d;font-size:17px;">{{ _("Lo que conviene revisar") }}</h2>
+          <ul style="margin:0;padding-left:20px;line-height:1.7;">
+            {% for item in attention %}<li style="margin:5px 0;">{{ item }}</li>{% endfor %}
+          </ul>
+        </section>
+
         {% if analytics.top_selling_report %}
-          <h2 style="font-size:18px;margin-top:28px;">{{ _("Productos más vendidos") }}</h2>
-          <ol>{% for product in analytics.top_selling_report[:5] %}<li>{{ product.name }} — {{ _("%(count)s unidades", count=product.units) }}</li>{% endfor %}</ol>
+        <section style="margin-top:28px;">
+          <h2 style="margin:0 0 12px;font-size:18px;">{{ _("Productos con más movimiento") }}</h2>
+          <table role="presentation" style="width:100%;border-collapse:collapse;">
+            {% for product in analytics.top_selling_report[:5] %}
+            <tr>
+              <td style="padding:11px 0;border-bottom:1px solid #eceef4;">{{ product.name }}</td>
+              <td style="padding:11px 0;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ _("%(count)s unidades", count=product.units) }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </section>
         {% endif %}
-        {% if inventory.low_stock %}
-          <h2 style="font-size:18px;margin-top:28px;">{{ _("Productos con pocas existencias") }}</h2>
-          <ul>{% for product in inventory.low_stock[:5] %}<li>{{ product.name }} — {{ product.stock }} / {{ product.min_stock }}</li>{% endfor %}</ul>
-        {% endif %}
-        {% if credit.customers %}
-          <h2 style="font-size:18px;margin-top:28px;">{{ _("Saldos pendientes más altos") }}</h2>
-          <ul>{% for customer in credit.customers %}<li>{{ customer.name }} — {{ customer.balance|money }}</li>{% endfor %}</ul>
-        {% endif %}
-        {% if cash.count %}<p><strong>{{ _("Diferencias de caja:") }}</strong> {{ cash.count }} · {{ cash.net_difference|money }}</p>{% endif %}
-        <h2 style="font-size:18px;margin-top:28px;">{{ _("Qué conviene revisar") }}</h2>
-        <ul>{% for recommendation in recommendations %}<li>{{ recommendation }}</li>{% endfor %}</ul>
-        <a href="{{ reports_url }}" style="display:inline-block;margin-top:20px;padding:13px 20px;background:#5b45e8;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;">{{ _("Abrir Reportes en PATIA") }}</a>
+
+        <section style="margin-top:28px;">
+          <h2 style="margin:0 0 12px;font-size:18px;">{{ _("Acciones recomendadas") }}</h2>
+          <ol style="margin:0;padding-left:22px;line-height:1.7;">
+            {% for recommendation in recommendations %}<li style="margin:8px 0;">{{ recommendation }}</li>{% endfor %}
+          </ol>
+        </section>
+
+        <table role="presentation" style="width:100%;margin-top:28px;border-collapse:collapse;">
+          <tr>
+            <td style="padding:12px 0;color:#677086;">{{ _("Valor del inventario") }}</td>
+            <td style="padding:12px 0;text-align:right;font-weight:750;">{{ inventory.value|money }}</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 0;border-top:1px solid #eceef4;color:#677086;">{{ _("Pendiente por cobrar") }}</td>
+            <td style="padding:12px 0;border-top:1px solid #eceef4;text-align:right;font-weight:750;">{{ credit.total|money }}</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 0;border-top:1px solid #eceef4;color:#677086;">{{ _("Cierres con diferencia") }}</td>
+            <td style="padding:12px 0;border-top:1px solid #eceef4;text-align:right;font-weight:750;">{{ cash.count }}</td>
+          </tr>
+        </table>
+
+        <a href="{{ reports_url }}" style="display:block;margin-top:26px;padding:14px 20px;background:#5b45e8;color:#fff;text-align:center;text-decoration:none;border-radius:11px;font-weight:800;">{{ _("Revisar mi negocio en PATIA") }}</a>
+        <p style="margin:22px 0 0;color:#7a8192;font-size:12px;line-height:1.55;text-align:center;">{{ _("Los cálculos se basan únicamente en la información registrada en PATIA durante el periodo.") }}</p>
       </div>
     </section>
   </main>

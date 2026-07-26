@@ -1,81 +1,183 @@
 {% extends 'base.html' %}
 {% block title %}{{ _("Administración PATIA") }}{% endblock %}
 {% block content %}
-<div class="admin-v3">
-  <header class="module-intro-v2">
-    <span>{{ _("Operación comercial") }}</span>
-    <h2>{{ _("Negocios y suscripciones") }}</h2>
-    <p>{{ _("Consulta planes, renovaciones y reportes mensuales sin mostrar credenciales ni datos sensibles.") }}</p>
+<div class="admin-v4">
+  <header class="module-intro-v2 admin-v4__intro">
+    <div>
+      <span>{{ _("Operación comercial") }}</span>
+      <h2>{{ _("Tu negocio de PATIA, de un vistazo") }}</h2>
+      <p>{{ _("Clientes, ingresos y asuntos que necesitan atención, sin ruido técnico.") }}</p>
+    </div>
   </header>
 
-  <section class="admin-v3__metrics" aria-label="{{ _('Resumen comercial') }}">
-    <article class="card"><span>{{ _("Negocios") }}</span><strong>{{ total_clients }}</strong></article>
-    <article class="card"><span>{{ _("Trial activos") }}</span><strong>{{ plan_counts.TRIAL }}</strong></article>
-    <article class="card"><span>{{ _("Starter activos") }}</span><strong>{{ plan_counts.STARTER }}</strong></article>
-    <article class="card"><span>{{ _("Pro activos") }}</span><strong>{{ plan_counts.PRO }}</strong></article>
-    <article class="card"><span>{{ _("MRR estimado") }}</span><strong>${{ estimated_mrr }} MXN</strong></article>
-    <article class="card"><span>{{ _("Renovaciones en 30 días") }}</span><strong>{{ upcoming_renewals }}</strong></article>
-    <article class="card"><span>{{ _("Cancelaciones programadas") }}</span><strong>{{ scheduled_cancellations }}</strong></article>
-    <article class="card"><span>{{ _("Pagos pendientes") }}</span><strong>{{ past_due_count }}</strong></article>
-    <article class="card"><span>{{ _("Reportes enviados / fallidos") }}</span><strong>{{ report_sent }} / {{ report_failed }}</strong></article>
+  <section class="admin-v4__metrics" aria-label="{{ _('Resumen comercial') }}">
+    <article class="card"><span>{{ _("Negocios totales") }}</span><strong>{{ total_clients }}</strong></article>
+    <article class="card"><span>{{ _("Clientes de pago") }}</span><strong>{{ paying_clients }}</strong></article>
+    <article class="card admin-v4__metric--revenue"><span>{{ _("Ingreso mensual estimado") }}</span><strong>${{ estimated_mrr }} <small>{{ _("MXN") }}</small></strong></article>
+    <article class="card"><span>{{ _("Pruebas activas") }}</span><strong>{{ plan_counts.TRIAL }}</strong></article>
+    <article class="card{% if attention_clients %} admin-v4__metric--attention{% endif %}"><span>{{ _("Requieren atención") }}</span><strong>{{ attention_clients|length }}</strong></article>
   </section>
 
-  <nav class="admin-v3__filters" aria-label="{{ _('Filtrar negocios') }}">
-    {% for value, label in [
-      ("all", _("Todos")), ("trial", _("Trial")), ("starter", _("Starter")),
-      ("pro", _("Pro")), ("grandfathered", _("Grandfathered")),
-      ("past_due", _("Past due")), ("cancelling", _("Cancelación programada")),
-      ("expired", _("Vencidos")), ("manual", _("Acceso manual"))
-    ] %}
-      <a href="{{ url_for('main.admin', filter=value) }}"{% if selected_filter == value %} class="is-active" aria-current="page"{% endif %}>{{ label }}</a>
-    {% endfor %}
-  </nav>
+  <details class="admin-v4__secondary card">
+    <summary>{{ _("Ver más métricas") }}</summary>
+    <dl>
+      <div><dt>{{ _("Starter activos") }}</dt><dd>{{ plan_counts.STARTER }}</dd></div>
+      <div><dt>{{ _("Pro activos") }}</dt><dd>{{ plan_counts.PRO }}</dd></div>
+      <div><dt>{{ _("Clientes anteriores") }}</dt><dd>{{ plan_counts.GRANDFATHERED }}</dd></div>
+      <div><dt>{{ _("Accesos manuales") }}</dt><dd>{{ plan_counts.MANUAL }}</dd></div>
+      <div><dt>{{ _("Renovaciones próximas") }}</dt><dd>{{ upcoming_renewals }}</dd></div>
+      <div><dt>{{ _("Cancelaciones") }}</dt><dd>{{ scheduled_cancellations }}</dd></div>
+      <div><dt>{{ _("Reportes enviados") }}</dt><dd>{{ report_sent }}</dd></div>
+      <div><dt>{{ _("Reportes fallidos") }}</dt><dd>{{ report_failed }}</dd></div>
+    </dl>
+  </details>
 
-  <section class="card admin-v3__clients">
-    <header><h3>{{ _("Negocios registrados") }}</h3><span>{{ _("%(count)s visibles", count=clients|length) }}</span></header>
-    <div class="admin-v3__list">
-      {% for c in clients %}
-        <article class="admin-v3__client">
-          <header>
-            <div><h4>{{ c.organization.name }}</h4><span>{{ c.plan_label }}</span></div>
-            <span class="admin-v2__status admin-v2__status--{{ c.status|lower }}">{{ c.status }}</span>
-          </header>
-          <dl>
-            <div><dt>{{ _("Propietario") }}</dt><dd>{{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or _("Sin nombre") }}<small>{{ c.user.email }}</small></dd></div>
-            <div><dt>{{ _("Contacto") }}</dt><dd>{{ c.user.phone or "—" }}<small>{{ c.user.city or "—" }}</small></dd></div>
-            <div><dt>{{ _("Plan y precio") }}</dt><dd>{{ c.plan_label }}<small>{% if c.price %}${{ c.price }} MXN/{{ _("mes") }}{% elif c.manual_access %}{{ _("Acceso manual") }}{% else %}—{% endif %}</small></dd></div>
-            <div><dt>{{ _("Suscripción") }}</dt><dd>{{ c.subscription_status or _("Sin suscripción") }}<small>{% if c.scheduled_cancellation %}{{ _("Cancelación programada") }}{% elif c.in_grace %}{{ _("Periodo de gracia") }}{% else %}{{ _("Operación activa") if not c.read_only else _("Solo lectura") }}{% endif %}</small></dd></div>
-            <div><dt>{{ _("Personas") }}</dt><dd>{{ c.member_count }}</dd></div>
-            <div><dt>{{ _("Próxima renovación") }}</dt><dd>{% if c.renewal_date %}{{ c.renewal_date.strftime('%d/%m/%Y') }}{% elif c.trial_end %}{{ c.trial_end.strftime('%d/%m/%Y') }}{% else %}—{% endif %}</dd></div>
-            <div><dt>{{ _("Última actividad") }}</dt><dd>{% if c.last_activity %}{{ c.last_activity.strftime('%d/%m/%Y %H:%M') }}{% else %}—{% endif %}<small>{% if c.last_payment %}{{ _("Último pago: %(date)s", date=c.last_payment.strftime('%d/%m/%Y')) }}{% endif %}</small></dd></div>
-            <div>
-              <dt>{{ _("Reporte mensual") }}</dt>
-              <dd>
-                {{ _("Activado") if c.monthly_report_enabled else _("Desactivado") }}
-                <small>
-                  {% if c.monthly_report and c.monthly_report.status == "sent" %}
-                    {{ _("Último envío: %(date)s", date=c.monthly_report.sent_at.strftime('%d/%m/%Y') if c.monthly_report.sent_at else "—") }}
-                  {% elif c.monthly_report and c.monthly_report.status == "failed" %}
-                    {{ _("El último envío falló") }}
-                  {% elif c.monthly_report %}
-                    {{ _("Estado: %(status)s", status=c.monthly_report.status) }}
-                  {% else %}
-                    {{ _("Sin envíos") }}
-                  {% endif %}
-                  {% if c.next_monthly_report_at %} · {{ _("Próximo estimado: %(date)s", date=c.next_monthly_report_at.strftime('%d/%m/%Y')) }}{% endif %}
-                </small>
-              </dd>
-            </div>
-          </dl>
-          <footer>
-            <a class="btn ghost" href="mailto:{{ c.user.email }}">{{ _("Contactar") }}</a>
-            {% if not c.manual_access %}<form method="POST" action="/admin/make-pro/{{ c.user.id }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn ghost" type="submit">{{ _("Dar acceso manual") }}</button></form>{% endif %}
-          </footer>
-        </article>
-      {% else %}
-        <div class="module-empty-v2"><i class="fa-solid fa-filter" aria-hidden="true"></i><h3>{{ _("No hay negocios con este filtro") }}</h3></div>
+  {% if attention_clients %}
+  <section class="admin-v4__attention" aria-labelledby="admin-attention-title">
+    <header>
+      <div>
+        <span>{{ _("Prioridad") }}</span>
+        <h3 id="admin-attention-title">{{ _("Necesitan atención") }}</h3>
+      </div>
+      <small>{{ _("%(count)s negocio", count=attention_clients|length) if attention_clients|length == 1 else _("%(count)s negocios", count=attention_clients|length) }}</small>
+    </header>
+    <div class="admin-v4__attention-list">
+      {% for c in attention_clients[:6] %}
+      <article class="card">
+        <div>
+          <strong>{{ c.organization.name }}</strong>
+          <span>{{ c.user.email }}</span>
+        </div>
+        <ul>
+          {% for reason_code, reason_label in c.attention_reasons %}
+          <li class="admin-v4__reason admin-v4__reason--{{ reason_code }}">{{ reason_label }}</li>
+          {% endfor %}
+        </ul>
+        <div class="admin-v4__attention-actions">
+          <a class="btn ghost" href="mailto:{{ c.user.email }}">{{ _("Contactar") }}</a>
+          <a class="btn" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Revisar") }}</a>
+        </div>
+      </article>
       {% endfor %}
     </div>
+  </section>
+  {% endif %}
+
+  <section class="admin-v4__directory" aria-labelledby="admin-directory-title">
+    <header>
+      <div>
+        <span>{{ _("Directorio") }}</span>
+        <h3 id="admin-directory-title">{{ _("Negocios") }}</h3>
+      </div>
+      <small>{{ _("%(count)s resultado", count=clients|length) if clients|length == 1 else _("%(count)s resultados", count=clients|length) }}</small>
+    </header>
+
+    <form class="admin-v4__toolbar" method="GET" action="{{ url_for('main.admin') }}">
+      <label class="admin-v4__search">
+        <span class="sr-only">{{ _("Buscar negocio") }}</span>
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" name="q" value="{{ query }}" placeholder="{{ _('Buscar negocio, propietario o correo...') }}">
+      </label>
+      <details class="admin-v4__filter">
+        <summary class="btn ghost"><i class="fa-solid fa-sliders" aria-hidden="true"></i> {{ _("Filtrar") }}</summary>
+        <div class="card admin-v4__filter-panel">
+          <label>{{ _("Plan") }}
+            <select name="plan">
+              <option value="all"{% if selected_plan == "ALL" %} selected{% endif %}>{{ _("Todos") }}</option>
+              <option value="trial"{% if selected_plan == "TRIAL" %} selected{% endif %}>{{ _("Trial") }}</option>
+              <option value="starter"{% if selected_plan == "STARTER" %} selected{% endif %}>{{ _("Starter") }}</option>
+              <option value="pro"{% if selected_plan == "PRO" %} selected{% endif %}>{{ _("Pro") }}</option>
+              <option value="grandfathered"{% if selected_plan == "GRANDFATHERED" %} selected{% endif %}>{{ _("Cliente anterior") }}</option>
+              <option value="manual"{% if selected_plan == "MANUAL" %} selected{% endif %}>{{ _("Acceso manual") }}</option>
+            </select>
+          </label>
+          <label>{{ _("Estado") }}
+            <select name="status">
+              <option value="all"{% if selected_status == "all" %} selected{% endif %}>{{ _("Todos") }}</option>
+              <option value="active"{% if selected_status == "active" %} selected{% endif %}>{{ _("Activo") }}</option>
+              <option value="trial"{% if selected_status == "trial" %} selected{% endif %}>{{ _("En prueba") }}</option>
+              <option value="payment_pending"{% if selected_status == "payment_pending" %} selected{% endif %}>{{ _("Pago pendiente") }}</option>
+              <option value="cancelling"{% if selected_status == "cancelling" %} selected{% endif %}>{{ _("Cancelación programada") }}</option>
+              <option value="expired"{% if selected_status == "expired" %} selected{% endif %}>{{ _("Vencido") }}</option>
+            </select>
+          </label>
+          <label>{{ _("Atención") }}
+            <select name="attention">
+              <option value="all"{% if selected_attention == "all" %} selected{% endif %}>{{ _("Cualquiera") }}</option>
+              <option value="payment"{% if selected_attention == "payment" %} selected{% endif %}>{{ _("Pago pendiente") }}</option>
+              <option value="trial"{% if selected_attention == "trial" %} selected{% endif %}>{{ _("Prueba por vencer") }}</option>
+              <option value="cancellation"{% if selected_attention == "cancellation" %} selected{% endif %}>{{ _("Cancelación programada") }}</option>
+              <option value="report"{% if selected_attention == "report" %} selected{% endif %}>{{ _("Reporte fallido") }}</option>
+              <option value="expired"{% if selected_attention == "expired" %} selected{% endif %}>{{ _("Cuenta vencida") }}</option>
+            </select>
+          </label>
+          <div>
+            <a class="btn ghost" href="{{ url_for('main.admin') }}">{{ _("Limpiar") }}</a>
+            <button class="btn" type="submit">{{ _("Aplicar filtros") }}</button>
+          </div>
+        </div>
+      </details>
+      <button class="btn admin-v4__search-submit" type="submit">{{ _("Buscar") }}</button>
+    </form>
+
+    {% if applied_filters %}
+    <div class="admin-v4__chips" aria-label="{{ _('Filtros aplicados') }}">
+      {% for key, value, label in applied_filters %}
+      <a href="{{ url_for('main.admin',
+        q='' if key == 'q' else query,
+        plan='all' if key == 'plan' else selected_plan,
+        status='all' if key == 'status' else selected_status,
+        attention='all' if key == 'attention' else selected_attention) }}">
+        {{ label }} <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </a>
+      {% endfor %}
+      <a class="admin-v4__clear" href="{{ url_for('main.admin') }}">{{ _("Quitar todos") }}</a>
+    </div>
+    {% endif %}
+
+    {% if clients %}
+    <div class="card admin-v4__table-wrap">
+      <table class="admin-v4__table">
+        <thead>
+          <tr>
+            <th>{{ _("Negocio") }}</th>
+            <th>{{ _("Propietario") }}</th>
+            <th>{{ _("Plan") }}</th>
+            <th>{{ _("Estado") }}</th>
+            <th>{{ _("Pago o renovación") }}</th>
+            <th>{{ _("Última actividad") }}</th>
+            <th><span class="sr-only">{{ _("Acción") }}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clients %}
+          <tr>
+            <td><strong>{{ c.organization.name }}</strong><small>{{ c.user.city or _("Sin ciudad") }}</small></td>
+            <td>{{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or _("Sin nombre") }}<small>{{ c.user.email }}</small></td>
+            <td><span class="admin-v4__plan admin-v4__plan--{{ c.plan_code|lower }}">{{ c.plan_label }}</span></td>
+            <td><span class="admin-v4__status admin-v4__status--{{ c.status_code }}">{{ c.status_label }}</span></td>
+            <td>{% if c.renewal_date %}{{ c.renewal_date.strftime('%d/%m/%Y') }}{% elif c.trial_end %}{{ _("Prueba hasta %(date)s", date=c.trial_end.strftime('%d/%m/%Y')) }}{% else %}—{% endif %}</td>
+            <td>{% if c.last_activity %}{{ c.last_activity.strftime('%d/%m/%Y') }}{% else %}{{ _("Sin ventas") }}{% endif %}</td>
+            <td><a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="admin-v4__mobile-list">
+      {% for c in clients %}
+      <article class="card">
+        <header><strong>{{ c.organization.name }}</strong><span class="admin-v4__status admin-v4__status--{{ c.status_code }}">{{ c.status_label }}</span></header>
+        <p>{{ c.plan_label }} · {{ c.user.email }}</p>
+        <small>{% if c.last_activity %}{{ _("Última actividad: %(date)s", date=c.last_activity.strftime('%d/%m/%Y')) }}{% else %}{{ _("Sin ventas registradas") }}{% endif %}</small>
+        <a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card module-empty-v2"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><h3>{{ _("No encontramos negocios con estos filtros") }}</h3><p>{{ _("Prueba otra búsqueda o quita alguno de los filtros.") }}</p><a class="btn ghost" href="{{ url_for('main.admin') }}">{{ _("Ver todos los negocios") }}</a></div>
+    {% endif %}
   </section>
 </div>
 {% endblock %}
