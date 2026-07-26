@@ -51,3 +51,28 @@ del correo ni credenciales.
 La tabla `monthly_owner_report` tiene una restricción única por organización,
 año y mes. Un periodo marcado como `sent` no vuelve a enviarse. Los fallos
 quedan registrados para permitir un reintento controlado.
+
+Cada intento guarda fecha, número de intento, código interno de fallo y próximo
+reintento. El proceso automático respeta esperas progresivas de 15 minutos,
+2 horas, 12 horas y 24 horas. El panel administrativo permite reintentar
+manualmente un reporte fallido sin crear otro registro ni cambiar la llave de
+idempotencia del proveedor.
+
+Los detalles técnicos se escriben únicamente en logs. El panel y el correo no
+exponen respuestas internas de Resend ni credenciales.
+
+## Validación local segura de migraciones
+
+No ejecutes `flask db upgrade` manualmente para comprobar migraciones locales:
+si `DATABASE_URL` falta o está mal formada, Flask puede usar la base de
+desarrollo. Usa siempre:
+
+```bash
+python scripts/verify_sqlite_migrations.py
+```
+
+El comando crea una SQLite desechable dentro del directorio temporal del
+sistema, reemplaza cualquier `DATABASE_URL` heredada y rechaza expresamente
+`instance/tiendaia.db`. Este comando es solo para validación local. Render
+mantiene `python -m flask --app run.py db upgrade` como pre-deploy contra la
+base configurada en el servicio.
