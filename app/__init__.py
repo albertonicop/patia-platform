@@ -166,6 +166,9 @@ def create_app():
     from .credit.routes import credit
 
     app.register_blueprint(credit)
+    from .pro.routes import pro
+
+    app.register_blueprint(pro)
 
     @app.context_processor
     def inject_pro_access():

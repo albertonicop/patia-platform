@@ -13,12 +13,12 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=121">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=122">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="app-body app-shell-v2">
+<body class="app-body app-shell-v2{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}">
   {% include "_language_selector.html" %}
   <aside class="sidebar sidebar-v2">
     <div class="sidebar-v2__head">
@@ -43,6 +43,13 @@
     {% if can_view_reports and user is defined and user %}
 <a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes") }}</span></a>
 {% endif %}
+    {% if can_view_reports and current_plan_entitlements.executive_dashboard %}
+      <div class="sidebar-v2__section-label">{{ _("PATIA PRO") }}</div>
+      <a href="{{ url_for('pro.dashboard') }}"{% if request.path.startswith('/pro') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
+        <i class="fa-solid fa-sparkles" aria-hidden="true"></i>
+        <span>{{ _("Panel ejecutivo") }}</span>
+      </a>
+    {% endif %}
     {% if can_manage_inventory %}<a href="/suppliers"{% if request.path.startswith('/suppliers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-truck" aria-hidden="true"></i><span>{{ _("Proveedores") }}</span></a>{% endif %}
     {% if can_manage_subscription %}<a href="/settings"{% if request.path.startswith('/settings') or request.path.startswith('/team') or request.path.startswith('/subscription') or request.path.startswith('/subscribe') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{{ _("Configuración") }}</span></a>{% endif %}
 
@@ -85,7 +92,7 @@
   <main class="main app-main-v2">
     <header class="topbar app-topbar-v2">
       <div>
-        <span class="eyebrow">{{ _("Tu negocio hoy") }}</span>
+        <span class="eyebrow">{{ _("Visión ejecutiva") if request.path.startswith('/pro') else _("Tu negocio hoy") }}</span>
         <h1>{% block title %}{% endblock %}</h1>
       </div>
 
@@ -108,6 +115,6 @@
     </footer>
   </main>
 
-  <script src="{{ url_for('static', filename='js/app.js') }}?v=110"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=111"></script>
 </body>
 </html>

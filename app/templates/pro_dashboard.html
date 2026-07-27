@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Dashboard Ejecutivo") }}{% endblock %}
+
+{% macro trend(value, unit="percent") %}
+  {% if value is none %}
+    <span class="pro-dashboard-v1__trend pro-dashboard-v1__trend--neutral">
+      {{ _("Sin comparación disponible") }}
+    </span>
+  {% else %}
+    {% set trend_class = 'pro-dashboard-v1__trend--neutral' if value == 0 else ('pro-dashboard-v1__trend--up' if value|abs == value else 'pro-dashboard-v1__trend--down') %}
+    {% set trend_icon = 'fa-minus' if value == 0 else ('fa-arrow-trend-up' if value|abs == value else 'fa-arrow-trend-down') %}
+    <span class="pro-dashboard-v1__trend {{ trend_class }}">
+      <i class="fa-solid {{ trend_icon }}" aria-hidden="true"></i>
+      {% if unit == "points" %}
+        {{ _("%(value)s puntos vs. periodo anterior", value=("%+.1f"|format(value))) }}
+      {% else %}
+        {{ _("%(value)s%% vs. periodo anterior", value=("%+.1f"|format(value))) }}
+      {% endif %}
+    </span>
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="pro-dashboard-v1">
+  <header class="pro-dashboard-v1__header">
+    <div>
+      <span class="pro-dashboard-v1__product">
+        <i class="fa-solid fa-sparkles" aria-hidden="true"></i>
+        {{ _("PATIA PRO") }}
+      </span>
+      <h2>{{ _("La perspectiva completa de tu negocio") }}</h2>
+      <p>{{ _("Compara resultados, entiende la rentabilidad y anticipa cómo cerrará el mes.") }}</p>
+    </div>
+    <div class="pro-dashboard-v1__range">
+      <span>{{ _("Periodo analizado") }}</span>
+      <strong>{{ executive_period.start_date.strftime("%d/%m/%Y") }} — {{ executive_period.end_date.strftime("%d/%m/%Y") }}</strong>
+    </div>
+  </header>
+
+  {% set show_custom_period = executive_period.period == "custom" or request.args.get("period") == "custom" %}
+  <nav class="pro-dashboard-v1__periods" aria-label="{{ _('Periodo del Dashboard Ejecutivo') }}">
+    {% for value, label in [
+      ("7d", _("Últimos 7 días")),
+      ("this_month", _("Este mes")),
+      ("30d", _("Últimos 30 días"))
+    ] %}
+      <a href="{{ url_for('pro.dashboard', period=value) }}"
+         {% if executive_period.period == value %}class="is-active" aria-current="page"{% endif %}>
+        {{ label }}
+      </a>
+    {% endfor %}
+    <a href="{{ url_for('pro.dashboard', period='custom') }}#custom-period"
+       data-custom-period-toggle
+       aria-controls="custom-period"
+       aria-expanded="{{ 'true' if show_custom_period else 'false' }}"
+       {% if show_custom_period %}class="is-active" aria-current="page"{% endif %}>
+      {{ _("Rango personalizado") }}
+    </a>
+  </nav>
+
+  <form id="custom-period" class="pro-dashboard-v1__custom-period" method="GET"
+        action="{{ url_for('pro.dashboard') }}" {% if not show_custom_period %}hidden{% endif %}>
+    <input type="hidden" name="period" value="custom">
+    <label for="report-start">
+      {{ _("Desde") }}
+      <input id="report-start" type="date" name="start"
+             value="{{ executive_period.custom_start }}" required>
+    </label>
+    <label for="report-end">
+      {{ _("Hasta") }}
+      <input id="report-end" type="date" name="end"
+             value="{{ executive_period.custom_end }}" required>
+    </label>
+    <button class="btn" type="submit">{{ _("Aplicar rango") }}</button>
+  </form>
+
+  <section class="pro-dashboard-v1__summary pro-dashboard-v1__summary--{{ executive_summary.state }}"
+           aria-labelledby="executive-summary-title">
+    <div class="pro-dashboard-v1__summary-icon" aria-hidden="true">
+      <i class="fa-solid {{ 'fa-arrow-trend-up' if executive_summary.state == 'strong' else ('fa-triangle-exclamation' if executive_summary.state == 'attention' else 'fa-chart-line') }}"></i>
+    </div>
+    <div>
+      <span>{{ executive_summary.label }}</span>
+      <h3 id="executive-summary-title">{{ executive_summary.title }}</h3>
+      <p>{{ executive_summary.body }}</p>
+    </div>
+  </section>
+
+  <section class="pro-dashboard-v1__kpis" aria-label="{{ _('Indicadores ejecutivos') }}">
+    <article class="pro-dashboard-v1__kpi">
+      <div class="pro-dashboard-v1__kpi-head">
+        <span>{{ _("Ventas") }}</span>
+        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+      </div>
+      <strong>{{ executive_kpis.sales|money }}</strong>
+      {{ trend(executive_kpis.sales_change) }}
+      <small>{{ _("%(tickets)s tickets en el periodo", tickets=executive_kpis.ticket_count) }}</small>
+    </article>
+
+    <article class="pro-dashboard-v1__kpi pro-dashboard-v1__kpi--profit">
+      <div class="pro-dashboard-v1__kpi-head">
+        <span>{{ _("Utilidad") }}</span>
+        <i class="fa-solid fa-coins" aria-hidden="true"></i>
+      </div>
+      <strong>{{ executive_kpis.profit|money }}</strong>
+      {{ trend(executive_kpis.profit_change) }}
+      {% if executive_kpis.profit_coverage is not none %}
+        <small>{{ _("%(coverage)s%% de las ventas tiene costo conocido", coverage=("%.1f"|format(executive_kpis.profit_coverage))) }}</small>
+      {% endif %}
+    </article>
+
+    <article class="pro-dashboard-v1__kpi">
+      <div class="pro-dashboard-v1__kpi-head">
+        <span>{{ _("Margen") }}</span>
+        <i class="fa-solid fa-percent" aria-hidden="true"></i>
+      </div>
+      <strong>{% if executive_kpis.margin is not none %}{{ "%.1f"|format(executive_kpis.margin) }}%{% else %}—{% endif %}</strong>
+      {{ trend(executive_kpis.margin_change, "points") }}
+      <small>{{ _("Calculado con los costos históricos disponibles") }}</small>
+    </article>
+
+    <article class="pro-dashboard-v1__kpi">
+      <div class="pro-dashboard-v1__kpi-head">
+        <span>{{ _("Ticket promedio") }}</span>
+        <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+      </div>
+      <strong>{{ executive_kpis.average_ticket|money }}</strong>
+      {{ trend(executive_kpis.average_change) }}
+      <small>{{ _("Importe promedio de cada venta") }}</small>
+    </article>
+  </section>
+
+  {% if unknown_cost_lines %}
+    <div class="pro-dashboard-v1__notice" role="status">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <p>{{ _("Agrega el costo del producto para incluir todas las ventas en utilidad y margen.") }}</p>
+      <a href="{{ url_for('main.products') }}">{{ _("Revisar inventario") }}</a>
+    </div>
+  {% endif %}
+
+  <section class="pro-dashboard-v1__main-grid">
+    <article class="pro-dashboard-v1__panel pro-dashboard-v1__goal">
+      <header>
+        <div>
+          <span>{{ _("Meta mensual") }}</span>
+          <h3>{{ _("Avance del mes") }}</h3>
+        </div>
+        <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+      </header>
+
+      {% if monthly_goal %}
+        <div class="pro-dashboard-v1__goal-values">
+          <div><span>{{ _("Ventas del mes") }}</span><strong>{{ monthly_sales|money }}</strong></div>
+          <div><span>{{ _("Meta") }}</span><strong>{{ monthly_goal|money }}</strong></div>
+        </div>
+        <div class="pro-dashboard-v1__progress">
+          <span style="width: {{ [monthly_goal_progress or 0, 100]|min }}%"></span>
+        </div>
+        <p>{{ _("%(progress)s%% de la meta alcanzada", progress=("%.1f"|format(monthly_goal_progress or 0))) }}</p>
+      {% else %}
+        <div class="pro-dashboard-v1__goal-empty">
+          <strong>{{ _("Define cuánto quieres vender este mes") }}</strong>
+          <p>{{ _("PATIA comparará tus ventas reales con ese objetivo.") }}</p>
+        </div>
+      {% endif %}
+
+      {% if can_edit_goal %}
+        <details class="pro-dashboard-v1__goal-edit">
+          <summary>{{ _("Cambiar meta") if monthly_goal else _("Definir meta") }}</summary>
+          <form method="POST" action="{{ url_for('pro.monthly_goal') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="monthly-sales-goal">
+              {{ _("Meta de ventas mensual") }}
+              <input id="monthly-sales-goal" name="monthly_sales_goal" type="number"
+                     min="0.01" step="0.01" inputmode="decimal"
+                     value="{{ monthly_goal if monthly_goal is not none else '' }}"
+                     placeholder="50000.00" required>
+            </label>
+            <button class="btn" type="submit">{{ _("Guardar meta") }}</button>
+          </form>
+          {% if monthly_goal %}
+            <form method="POST" action="{{ url_for('pro.monthly_goal') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="monthly_sales_goal" value="">
+              <button class="btn ghost" type="submit">{{ _("Eliminar meta") }}</button>
+            </form>
+          {% endif %}
+        </details>
+      {% endif %}
+    </article>
+
+    <article class="pro-dashboard-v1__panel pro-dashboard-v1__projection">
+      <header>
+        <div>
+          <span>{{ _("Proyección") }}</span>
+          <h3>{{ _("Cierre estimado del mes") }}</h3>
+        </div>
+        <i class="fa-solid fa-forward" aria-hidden="true"></i>
+      </header>
+      {% if monthly_projection is not none %}
+        <strong>{{ monthly_projection|money }}</strong>
+        <p>{{ _("Estimación basada en el ritmo de ventas registrado durante el mes. No es una garantía.") }}</p>
+      {% else %}
+        <div class="pro-dashboard-v1__projection-empty">
+          <strong>{{ _("Aún no hay suficiente actividad para proyectar") }}</strong>
+          <p>{{ _("La proyección aparecerá después de varios días y ventas registradas.") }}</p>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="pro-dashboard-v1__panel pro-dashboard-v1__chart-panel">
+      <header>
+        <div>
+          <span>{{ _("Tendencia") }}</span>
+          <h3>{{ _("Ventas y utilidad frente al periodo anterior") }}</h3>
+        </div>
+        <span class="pro-dashboard-v1__comparison">{{ _("Comparación equivalente") }}</span>
+      </header>
+      {% if executive_kpis.ticket_count %}
+        <div class="pro-dashboard-v1__chart">
+          <canvas id="executiveTrendChart"></canvas>
+        </div>
+      {% else %}
+        <div class="pro-dashboard-v1__chart-empty">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+          <strong>{{ _("La gráfica aparecerá cuando registres ventas") }}</strong>
+          <p>{{ _("Aquí verás ventas, utilidad y el periodo anterior en una sola vista.") }}</p>
+          <a class="btn" href="{{ url_for('main.sell') }}">{{ _("Registrar una venta") }}</a>
+        </div>
+      {% endif %}
+    </article>
+  </section>
+</div>
+
+{% if executive_kpis.ticket_count %}
+<script>
+window.executiveAnalytics = {
+  current: {{ executive_chart.current|tojson }},
+  previous: {{ executive_chart.previous|tojson }},
+  labels: {
+    sales: {{ _("Ventas")|tojson }},
+    profit: {{ _("Utilidad")|tojson }},
+    previous: {{ _("Ventas del periodo anterior")|tojson }}
+  }
+};
+</script>
+{% endif %}
+{% endblock %}

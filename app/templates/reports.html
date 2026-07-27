@@ -203,7 +203,7 @@
 <script>
 window.reportAnalytics = {
   advanced: {{ can_use_advanced_reports|tojson }},
-  daily: {{ daily_report|tojson }},
+  daily: {{ client_daily_report|tojson }},
   payments: {{ payments_report|tojson }},
   labels: {
     sales: {{ _("Ventas")|tojson }},

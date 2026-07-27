@@ -1506,6 +1506,11 @@ def _report_analytics(
                 total_sales / ticket_count if ticket_count else MONEY_ZERO
             ),
             "ticket_count": int(ticket_count),
+            "profit_coverage": (
+                round(known_revenue / total_sales * 100, 1)
+                if total_sales
+                else None
+            ),
         },
         "unknown_cost_lines": int(totals.unknown_cost_lines or 0),
         "daily_report": daily,
@@ -2970,15 +2975,23 @@ def reports():
         period_args,
         timezone_name=timezone_name,
     )
+    analytics = _report_analytics(
+        membership.organization_id,
+        report_period,
+        timezone_name=timezone_name,
+    )
+    client_daily_report = analytics["daily_report"]
+    if not advanced_reports:
+        client_daily_report = [
+            {"date": point["date"], "sales": point["sales"]}
+            for point in client_daily_report
+        ]
     return render_template(
         "reports.html",
         user=user,
         can_use_advanced_reports=advanced_reports,
-        **_report_analytics(
-            membership.organization_id,
-            report_period,
-            timezone_name=timezone_name,
-        ),
+        client_daily_report=client_daily_report,
+        **analytics,
     )
 
 

@@ -10784,6 +10784,595 @@ table {
 }
 
 /* =========================================================
+   PATIA Pro · Dashboard Ejecutivo v1
+   Scope: .pro-dashboard-v1 / .app-shell-v2--pro
+   ========================================================= */
+.app-shell-v2 .sidebar-v2__section-label {
+  margin: 16px 10px 4px;
+  color: #7a6af0;
+  font-size: .64rem;
+  font-weight: 850;
+  letter-spacing: .13em;
+}
+
+.app-shell-v2 .sidebar-v2__pro-link {
+  color: #35277d;
+  background: linear-gradient(135deg, #f2efff, #fbfaff);
+  border: 1px solid #e2dcff;
+}
+
+.app-shell-v2 .sidebar-v2__pro-link i {
+  color: #6752e8;
+}
+
+.app-shell-v2 .sidebar-v2__pro-link:hover,
+.app-shell-v2 .sidebar-v2__pro-link.is-active {
+  color: #fff;
+  background: linear-gradient(135deg, #6752e8, #5140c5);
+  border-color: transparent;
+  box-shadow: 0 10px 24px rgba(83, 64, 197, .2);
+}
+
+.app-shell-v2 .sidebar-v2__pro-link:hover i,
+.app-shell-v2 .sidebar-v2__pro-link.is-active i {
+  color: #fff;
+}
+
+.app-shell-v2--pro .app-main-v2 {
+  background:
+    radial-gradient(circle at 88% 2%, rgba(112, 90, 231, .08), transparent 27rem),
+    #f8f9fc;
+}
+
+.app-shell-v2 .pro-dashboard-v1 {
+  --pro-ink: #191c2b;
+  --pro-muted: #5e667b;
+  --pro-line: #e3e6ef;
+  --pro-violet: #6752e8;
+  --pro-green: #16866d;
+  display: grid;
+  gap: 22px;
+  max-width: 1440px;
+  margin: 0 auto;
+  color: var(--pro-ink);
+}
+
+.app-shell-v2 .pro-dashboard-v1__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 26px 30px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(255, 255, 255, .16), transparent 18rem),
+    linear-gradient(130deg, #1b1e31 0%, #29244d 58%, #5441c9 100%);
+  border-radius: 22px;
+  box-shadow: 0 18px 44px rgba(34, 29, 70, .16);
+}
+
+.app-shell-v2 .pro-dashboard-v1__product {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #cfc7ff;
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: .13em;
+}
+
+.app-shell-v2 .pro-dashboard-v1__header h2 {
+  max-width: 720px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.65rem, 3vw, 2.55rem);
+  line-height: 1.08;
+  letter-spacing: -.035em;
+}
+
+.app-shell-v2 .pro-dashboard-v1__header p {
+  max-width: 690px;
+  margin: 12px 0 0;
+  color: #d6d8e7;
+  line-height: 1.65;
+}
+
+.app-shell-v2 .pro-dashboard-v1__range {
+  flex: 0 0 auto;
+  padding: 13px 16px;
+  color: #d8d9e8;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 13px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__range span,
+.app-shell-v2 .pro-dashboard-v1__range strong {
+  display: block;
+}
+
+.app-shell-v2 .pro-dashboard-v1__range span {
+  margin-bottom: 4px;
+  font-size: .72rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__range strong {
+  color: #fff;
+  font-size: .9rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__periods {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--pro-line);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(30, 35, 55, .05);
+  scrollbar-width: none;
+}
+
+.app-shell-v2 .pro-dashboard-v1__periods::-webkit-scrollbar {
+  display: none;
+}
+
+.app-shell-v2 .pro-dashboard-v1__periods a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 0 auto;
+  padding: 8px 17px;
+  color: #50586c;
+  font-size: .84rem;
+  font-weight: 750;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.app-shell-v2 .pro-dashboard-v1__periods a:hover {
+  color: #3f319e;
+  background: #f5f3ff;
+}
+
+.app-shell-v2 .pro-dashboard-v1__periods a.is-active {
+  color: #fff;
+  background: var(--pro-violet);
+  box-shadow: 0 7px 16px rgba(103, 82, 232, .22);
+}
+
+.app-shell-v2 .pro-dashboard-v1__custom-period {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--pro-line);
+  border-radius: 14px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__custom-period[hidden] {
+  display: none;
+}
+
+.app-shell-v2 .pro-dashboard-v1__custom-period label {
+  flex: 1;
+  margin: 0;
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+  background: #fff;
+  border: 1px solid var(--pro-line);
+  border-left: 4px solid #858da0;
+  border-radius: 17px;
+  box-shadow: 0 10px 32px rgba(30, 35, 55, .055);
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary--strong {
+  border-left-color: var(--pro-green);
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary--attention {
+  border-left-color: #d27741;
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  color: var(--pro-violet);
+  background: #f0edff;
+  border-radius: 14px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary--strong .pro-dashboard-v1__summary-icon {
+  color: var(--pro-green);
+  background: #eaf8f3;
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary--attention .pro-dashboard-v1__summary-icon {
+  color: #a6502d;
+  background: #fff3ec;
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary span,
+.app-shell-v2 .pro-dashboard-v1__panel header span {
+  color: var(--pro-muted);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary h3 {
+  margin: 4px 0 6px;
+  font-size: 1.15rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__summary p {
+  margin: 0;
+  color: var(--pro-muted);
+}
+
+.app-shell-v2 .pro-dashboard-v1__kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__kpi,
+.app-shell-v2 .pro-dashboard-v1__panel {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--pro-line);
+  border-radius: 17px;
+  box-shadow: 0 9px 26px rgba(30, 35, 55, .045);
+}
+
+.app-shell-v2 .pro-dashboard-v1__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 20px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--pro-muted);
+  font-size: .82rem;
+  font-weight: 750;
+}
+
+.app-shell-v2 .pro-dashboard-v1__kpi-head i {
+  color: #8070e8;
+}
+
+.app-shell-v2 .pro-dashboard-v1__kpi > strong {
+  overflow-wrap: anywhere;
+  font-size: clamp(1.35rem, 1.85vw, 1.78rem);
+  line-height: 1.1;
+  letter-spacing: -.025em;
+}
+
+.app-shell-v2 .pro-dashboard-v1__kpi small {
+  color: #747c8f;
+  font-size: .72rem;
+  line-height: 1.4;
+}
+
+.app-shell-v2 .pro-dashboard-v1__trend {
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #687085;
+  font-size: .7rem;
+  font-weight: 750;
+}
+
+.app-shell-v2 .pro-dashboard-v1__trend--up {
+  color: #117960;
+}
+
+.app-shell-v2 .pro-dashboard-v1__trend--down {
+  color: #af4b3b;
+}
+
+.app-shell-v2 .pro-dashboard-v1__notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  color: #674520;
+  background: #fff9ed;
+  border: 1px solid #f0dfbd;
+  border-radius: 12px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__notice p {
+  flex: 1;
+  margin: 0;
+  font-size: .83rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__notice a {
+  color: #5945c5;
+  font-weight: 800;
+}
+
+.app-shell-v2 .pro-dashboard-v1__main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  gap: 16px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__panel {
+  padding: 22px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__panel header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__panel header h3 {
+  margin: 4px 0 0;
+  font-size: 1.08rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__panel header > i {
+  color: var(--pro-violet);
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-values div {
+  padding: 12px;
+  background: #f7f8fb;
+  border-radius: 11px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-values span,
+.app-shell-v2 .pro-dashboard-v1__goal-values strong {
+  display: block;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-values span {
+  margin-bottom: 4px;
+  color: var(--pro-muted);
+  font-size: .73rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-values strong {
+  overflow-wrap: anywhere;
+}
+
+.app-shell-v2 .pro-dashboard-v1__progress {
+  height: 9px;
+  margin-top: 18px;
+  overflow: hidden;
+  background: #eceef4;
+  border-radius: 99px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__progress span {
+  height: 100%;
+  display: block;
+  background: linear-gradient(90deg, #6752e8, #8a78ef);
+  border-radius: inherit;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal > p {
+  margin: 8px 0 0;
+  color: var(--pro-muted);
+  font-size: .78rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-empty,
+.app-shell-v2 .pro-dashboard-v1__projection-empty {
+  padding: 17px;
+  background: #f7f8fb;
+  border-radius: 12px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-empty p,
+.app-shell-v2 .pro-dashboard-v1__projection p,
+.app-shell-v2 .pro-dashboard-v1__projection-empty p {
+  margin: 6px 0 0;
+  color: var(--pro-muted);
+  line-height: 1.5;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-edit {
+  margin-top: 17px;
+  padding-top: 14px;
+  border-top: 1px solid var(--pro-line);
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-edit summary {
+  cursor: pointer;
+  color: #5140bd;
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-edit form {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__goal-edit label {
+  flex: 1;
+  margin: 0;
+}
+
+.app-shell-v2 .pro-dashboard-v1__projection > strong {
+  display: block;
+  margin-top: 10px;
+  color: #3d2daa;
+  font-size: clamp(1.75rem, 3vw, 2.55rem);
+  letter-spacing: -.035em;
+}
+
+.app-shell-v2 .pro-dashboard-v1__chart-panel {
+  grid-column: 1 / -1;
+}
+
+.app-shell-v2 .pro-dashboard-v1__comparison {
+  padding: 6px 9px;
+  color: #6252c6 !important;
+  background: #f2efff;
+  border-radius: 8px;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.app-shell-v2 .pro-dashboard-v1__chart {
+  height: 340px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__chart-empty {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: var(--pro-muted);
+  background: #fafafe;
+  border: 1px dashed #dfe1eb;
+  border-radius: 13px;
+}
+
+.app-shell-v2 .pro-dashboard-v1__chart-empty i {
+  color: #8878e9;
+  font-size: 1.7rem;
+}
+
+.app-shell-v2 .pro-dashboard-v1__chart-empty p {
+  margin: 0 0 8px;
+}
+
+@media (max-width: 1024px) {
+  .app-shell-v2 .pro-dashboard-v1__kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell-v2 .pro-dashboard-v1 {
+    gap: 16px;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 22px;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__range {
+    width: 100%;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__chart-panel {
+    grid-column: auto;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__custom-period {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__chart {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell-v2 .pro-dashboard-v1__header,
+  .app-shell-v2 .pro-dashboard-v1__panel,
+  .app-shell-v2 .pro-dashboard-v1__kpi {
+    padding: 18px;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__summary {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__summary-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__periods a {
+    padding-inline: 13px;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__notice {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__notice a {
+    width: 100%;
+    padding-left: 26px;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__goal-values {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__goal-edit form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-shell-v2 .pro-dashboard-v1__chart {
+    height: 280px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell-v2 .pro-dashboard-v1 *,
+  .app-shell-v2 .sidebar-v2__pro-link {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+
+/* =========================================================
    PATIA ADMIN V4
    Compact commercial overview and organization detail.
    ========================================================= */

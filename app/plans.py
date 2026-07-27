@@ -30,6 +30,7 @@ class PlanEntitlements:
     advanced_exports: bool
     monthly_owner_report: bool
     priority_support: bool
+    executive_dashboard: bool
 
 
 STARTER_ENTITLEMENTS = PlanEntitlements(
@@ -40,6 +41,7 @@ STARTER_ENTITLEMENTS = PlanEntitlements(
     advanced_exports=False,
     monthly_owner_report=False,
     priority_support=False,
+    executive_dashboard=False,
 )
 PRO_ENTITLEMENTS = PlanEntitlements(
     max_members=5,
@@ -49,6 +51,7 @@ PRO_ENTITLEMENTS = PlanEntitlements(
     advanced_exports=True,
     monthly_owner_report=True,
     priority_support=True,
+    executive_dashboard=True,
 )
 # Existing customers keep every capability they already had, but monthly email
 # is not silently enabled because it is a new outbound communication.
@@ -60,6 +63,7 @@ GRANDFATHERED_ENTITLEMENTS = PlanEntitlements(
     advanced_exports=True,
     monthly_owner_report=False,
     priority_support=True,
+    executive_dashboard=False,
 )
 
 DAILY_CAPABILITIES = frozenset(
@@ -109,6 +113,8 @@ def capabilities_for(plan_code: str) -> frozenset[str]:
         capabilities.add("monthly_owner_report")
     if entitlements.priority_support:
         capabilities.add("priority_support")
+    if entitlements.executive_dashboard:
+        capabilities.add("executive_dashboard")
     return frozenset(capabilities)
 
 

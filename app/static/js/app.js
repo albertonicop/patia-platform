@@ -160,6 +160,100 @@ function initializeReportCharts() {
     }
 }
 
+function initializeExecutiveChart() {
+    const analytics = window.executiveAnalytics;
+    const canvas = document.getElementById("executiveTrendChart");
+    if (!analytics || !canvas || typeof Chart === "undefined") return;
+
+    const locale = document.documentElement.lang === "en" ? "en-US" : "es-MX";
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const labels = analytics.current.map(point => new Date(`${point.date}T12:00:00`).toLocaleDateString(
+        locale,
+        {day: "numeric", month: "short"}
+    ));
+
+    new Chart(canvas, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: analytics.labels.sales,
+                    data: analytics.current.map(point => Number(point.sales)),
+                    borderColor: "#6752e8",
+                    backgroundColor: "rgba(103, 82, 232, .10)",
+                    pointBackgroundColor: "#6752e8",
+                    borderWidth: 2.5,
+                    pointRadius: analytics.current.length > 45 ? 0 : 2.5,
+                    tension: .3,
+                    fill: true
+                },
+                {
+                    label: analytics.labels.profit,
+                    data: analytics.current.map(point => Number(point.profit)),
+                    borderColor: "#159879",
+                    backgroundColor: "transparent",
+                    pointBackgroundColor: "#159879",
+                    borderWidth: 2.25,
+                    pointRadius: analytics.current.length > 45 ? 0 : 2.5,
+                    tension: .3
+                },
+                {
+                    label: analytics.labels.previous,
+                    data: analytics.previous.map(point => Number(point.sales)),
+                    borderColor: "#aeb5c5",
+                    backgroundColor: "transparent",
+                    borderDash: [6, 5],
+                    pointRadius: 0,
+                    borderWidth: 1.8,
+                    tension: .3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {duration: reducedMotion ? 0 : 180},
+            interaction: {mode: "index", intersect: false},
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        usePointStyle: true,
+                        padding: 18,
+                        color: "#555d70",
+                        boxWidth: 8,
+                        boxHeight: 8
+                    }
+                },
+                tooltip: {
+                    backgroundColor: "#202435",
+                    padding: 12,
+                    cornerRadius: 10,
+                    titleFont: {weight: "700"},
+                    callbacks: {
+                        label: context => `${context.dataset.label}: ${reportMoney(context.raw)}`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {display: false},
+                    ticks: {maxTicksLimit: 8, color: "#687085"}
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {color: "rgba(218, 222, 232, .65)"},
+                    ticks: {
+                        color: "#687085",
+                        callback: value => reportMoney(value)
+                    }
+                }
+            }
+        }
+    });
+}
+
 function initializeCustomReportPeriod() {
     const toggle = document.querySelector("[data-custom-period-toggle]");
     const form = document.getElementById("custom-period");
@@ -177,6 +271,7 @@ function initializeCustomReportPeriod() {
 }
 
 initializeReportCharts();
+initializeExecutiveChart();
 initializeCustomReportPeriod();
 
 function initializePatiaSelects() {

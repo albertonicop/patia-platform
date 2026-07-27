@@ -155,6 +155,7 @@ class CommercialPlanTests(unittest.TestCase):
         self.assertFalse(starter.advanced_reports)
         self.assertFalse(starter.advanced_exports)
         self.assertFalse(starter.monthly_owner_report)
+        self.assertFalse(starter.executive_dashboard)
         self.assertEqual(pro.max_members, 5)
         self.assertTrue(pro.advanced_roles)
         self.assertTrue(pro.advanced_inventory_history)
@@ -162,6 +163,7 @@ class CommercialPlanTests(unittest.TestCase):
         self.assertTrue(pro.advanced_exports)
         self.assertTrue(pro.monthly_owner_report)
         self.assertTrue(pro.priority_support)
+        self.assertTrue(pro.executive_dashboard)
 
     def test_starter_blocks_manager_and_third_person_in_backend(self):
         client = self.client_for(self.owner)

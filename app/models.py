@@ -32,6 +32,7 @@ class Organization(db.Model):
         db.Boolean, nullable=False, default=False
     )
     monthly_report_recipient = db.Column(db.String(120), nullable=True)
+    monthly_sales_goal = db.Column(db.Numeric(14, 2), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime,
