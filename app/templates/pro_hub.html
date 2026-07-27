@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ _("PATIA Pro") }}{% endblock %}
+{% block content %}
+{% set report_status_labels = {
+  "pending": _("Pendiente"),
+  "generated": _("Generado"),
+  "sending": _("Enviando"),
+  "sent": _("Enviado"),
+  "failed": _("Fallido")
+} %}
+<div class="pro-hub-v1">
+  <header class="pro-hub-v1__hero">
+    <div>
+      <span class="eyebrow">{{ _("Centro de decisiones") }}</span>
+      <h2>{{ _("PATIA administra el negocio contigo") }}</h2>
+      <p>{{ _("Revisa resultados, prioridades, compras y tu resumen mensual desde un solo lugar.") }}</p>
+    </div>
+    <a class="btn primary" href="{{ url_for('pro.dashboard') }}">
+      <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+      {{ _("Abrir Panel ejecutivo") }}
+    </a>
+  </header>
+
+  <section class="pro-hub-v1__grid" aria-label="{{ _('Herramientas Pro') }}">
+    <a class="pro-hub-v1__card" href="{{ url_for('pro.dashboard') }}">
+      <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+      <span>{{ _("Resultados") }}</span>
+      <h3>{{ _("Panel ejecutivo") }}</h3>
+      <p>{{ _("Entiende qué cambió, por qué y qué conviene hacer ahora.") }}</p>
+    </a>
+    <a class="pro-hub-v1__card" href="{{ url_for('pro.monthly_reports') }}">
+      <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+      <span>{{ _("Resumen mensual") }}</span>
+      <h3>
+        {% if latest_report %}
+          {{ _("%(year)s-%(month)02d · %(status)s", year=latest_report.report_year, month=latest_report.report_month, status=report_status_labels.get(latest_report.status, latest_report.status)) }}
+        {% else %}
+          {{ _("Genera tu primer resumen") }}
+        {% endif %}
+      </h3>
+      <p>{{ _("Conserva una fotografía inmutable de cada mes y descárgala en PDF.") }}</p>
+    </a>
+    <a class="pro-hub-v1__card" href="{{ url_for('pro.purchases') }}">
+      <i class="fa-solid fa-truck-ramp-box" aria-hidden="true"></i>
+      <span>{{ _("Compras inteligentes") }}</span>
+      <h3>{{ _("%(count)s productos por reponer", count=purchase_summary.products) }}</h3>
+      <p>{{ _("%(orders)s pedidos abiertos · %(units)s unidades sugeridas", orders=open_orders, units=purchase_summary.units) }}</p>
+    </a>
+    <a class="pro-hub-v1__card" href="{{ url_for('pro.alerts') }}">
+      <i class="fa-solid fa-bell" aria-hidden="true"></i>
+      <span>{{ _("Alertas inteligentes") }}</span>
+      <h3>{{ _("%(count)s situaciones para revisar", count=alert_summary.total) }}</h3>
+      <p>{{ _("%(count)s tienen prioridad alta y evidencia disponible.", count=alert_summary.high) }}</p>
+    </a>
+  </section>
+</div>
+{% endblock %}

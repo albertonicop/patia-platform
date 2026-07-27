@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Reporte mensual Pro") }}{% endblock %}
+{% block content %}
+<div class="pro-monthly-report-v1">
+  {% if preview %}
+    <div class="pro-monthly-report-v1__preview" role="status">
+      <strong>{{ _("Vista previa de PATIA Pro") }}</strong>
+      <span>{{ _("Este ejemplo usa tus datos, pero no se guardó ni se envió.") }}</span>
+      <a class="btn primary" href="{{ url_for('main.subscribe') }}">{{ _("Conocer PATIA Pro") }}</a>
+    </div>
+  {% endif %}
+
+  {% if snapshot %}
+    <header class="pro-monthly-report-v1__header">
+      <div>
+        <span class="eyebrow">{{ snapshot.period.label }}</span>
+        <h2>{{ snapshot.headline }}</h2>
+        <p>
+          {{ _("Resumen inmutable de %(business)s", business=snapshot.business_name) }}
+          ·
+          {% if snapshot.get("language", "es") == "en" %}
+            {{ _("Idioma del documento: Inglés") }}
+          {% else %}
+            {{ _("Idioma del documento: Español") }}
+          {% endif %}
+        </p>
+      </div>
+      {% if record %}
+        <div class="pro-monthly-report-v1__actions">
+          <a class="btn ghost" href="{{ url_for('pro.monthly_report_download', report_id=record.id) }}">
+            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>{{ _("Descargar PDF") }}
+          </a>
+          {% if can_resend %}
+            <form method="POST" action="{{ url_for('pro.monthly_report_resend', report_id=record.id) }}" data-submit-once>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>{{ _("Reenviar") }}</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
+    </header>
+
+    <section class="pro-monthly-report-v1__kpis">
+      <article><span>{{ _("Ventas") }}</span><strong>{{ snapshot.kpis.sales|money }}</strong></article>
+      <article><span>{{ _("Utilidad estimada") }}</span><strong>{{ snapshot.kpis.profit|money }}</strong></article>
+      <article><span>{{ _("Ventas registradas") }}</span><strong>{{ snapshot.kpis.ticket_count }}</strong></article>
+      <article><span>{{ _("Ticket promedio") }}</span><strong>{{ snapshot.kpis.average_ticket|money }}</strong></article>
+    </section>
+
+    {% if snapshot.kpis.unknown_cost_lines %}
+      <div class="reports-v3__notice reports-v3__notice--warning" role="alert">
+        {{ _("La utilidad no incluye %(count)s ventas con costo desconocido.", count=snapshot.kpis.unknown_cost_lines) }}
+      </div>
+    {% endif %}
+
+    <div class="pro-monthly-report-v1__columns">
+      <section>
+        <h3>{{ _("Lo que salió bien") }}</h3>
+        <ul>{% for item in snapshot.wins %}<li>{{ item }}</li>{% endfor %}</ul>
+      </section>
+      <section>
+        <h3>{{ _("Lo que conviene revisar") }}</h3>
+        <ul>{% for item in snapshot.attention %}<li>{{ item }}</li>{% endfor %}</ul>
+      </section>
+    </div>
+
+    <section class="pro-monthly-report-v1__recommendations">
+      <h3>{{ _("Qué hacer el próximo mes") }}</h3>
+      <ol>{% for item in snapshot.recommendations %}<li>{{ item }}</li>{% endfor %}</ol>
+    </section>
+
+    <section class="pro-monthly-report-v1__details">
+      <article><span>{{ _("Valor del inventario") }}</span><strong>{{ snapshot.inventory.value|money }}</strong></article>
+      <article><span>{{ _("Pendiente por cobrar") }}</span><strong>{{ snapshot.credit.total|money }}</strong></article>
+      <article><span>{{ _("Cierres con diferencia") }}</span><strong>{{ snapshot.cash.count }}</strong></article>
+    </section>
+
+    {% if record %}
+      <footer class="pro-monthly-report-v1__integrity">
+        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+        <span>{{ _("Snapshot protegido") }} · {{ (record.snapshot_hash or "")[:12] }}</span>
+      </footer>
+    {% endif %}
+  {% else %}
+    <section class="empty-state-v2">
+      <h3>{{ _("Este reporte no tiene un snapshot disponible") }}</h3>
+      <p>{{ _("Genera nuevamente el periodo para crear su vista protegida.") }}</p>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

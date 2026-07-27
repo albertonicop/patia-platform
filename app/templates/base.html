@@ -13,7 +13,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=123">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=124">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -45,9 +45,27 @@
 {% endif %}
     {% if can_view_reports and current_plan_entitlements.executive_dashboard %}
       <div class="sidebar-v2__section-label">{{ _("PATIA PRO") }}</div>
-      <a href="{{ url_for('pro.dashboard') }}"{% if request.path.startswith('/pro') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
+      <a href="{{ url_for('pro.hub') }}"{% if request.path == '/pro/hub' %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
+        <i class="fa-solid fa-gem" aria-hidden="true"></i>
+        <span>{{ _("Centro Pro") }}</span>
+      </a>
+      <a href="{{ url_for('pro.dashboard') }}"{% if request.path == '/pro' or request.path == '/pro/' %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
         <i class="fa-solid fa-sparkles" aria-hidden="true"></i>
         <span>{{ _("Panel ejecutivo") }}</span>
+      </a>
+      <a href="{{ url_for('pro.monthly_reports') }}"{% if request.path.startswith('/pro/monthly-reports') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
+        <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+        <span>{{ _("Resumen mensual") }}</span>
+      </a>
+      {% if can_manage_inventory %}
+        <a href="{{ url_for('pro.purchases') }}"{% if request.path.startswith('/pro/purchases') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
+          <i class="fa-solid fa-truck-ramp-box" aria-hidden="true"></i>
+          <span>{{ _("Compras") }}</span>
+        </a>
+      {% endif %}
+      <a href="{{ url_for('pro.alerts') }}"{% if request.path.startswith('/pro/alerts') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
+        <i class="fa-solid fa-bell" aria-hidden="true"></i>
+        <span>{{ _("Alertas") }}</span>
       </a>
     {% endif %}
     {% if can_manage_inventory %}<a href="/suppliers"{% if request.path.startswith('/suppliers') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-truck" aria-hidden="true"></i><span>{{ _("Proveedores") }}</span></a>{% endif %}
@@ -115,6 +133,6 @@
     </footer>
   </main>
 
-  <script src="{{ url_for('static', filename='js/app.js') }}?v=111"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=113"></script>
 </body>
 </html>

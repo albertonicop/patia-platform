@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Pedido %(number)s", number=order.number) }}{% endblock %}
+{% block content %}
+{% set order_status_labels = {
+  "DRAFT": _("Borrador"),
+  "ORDERED": _("Pedido confirmado"),
+  "PARTIALLY_RECEIVED": _("Recibido parcialmente"),
+  "RECEIVED": _("Recibido"),
+  "CANCELLED": _("Cancelado")
+} %}
+<div class="pro-purchase-detail-v1">
+  <header class="module-heading-v2">
+    <div>
+      <span class="eyebrow">{{ order.supplier_name or _("Sin proveedor") }}</span>
+      <h2>{{ order.number }}</h2>
+      <p>{{ _("Estado: %(status)s", status=order_status_labels.get(order.status, order.status)) }}</p>
+    </div>
+    <a class="btn ghost" href="{{ url_for('pro.purchases') }}">{{ _("Volver a Compras") }}</a>
+  </header>
+
+  {% if order.status == "DRAFT" %}
+    <form method="POST" action="{{ url_for('pro.purchase_update', order_id=order.id) }}" class="pro-purchase-detail-v1__form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% endif %}
+  <div class="table-responsive pro-purchase-detail-v1__table">
+    <table>
+      <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Pedido") }}</th><th>{{ _("Recibido") }}</th><th>{{ _("Pendiente") }}</th><th>{{ _("Costo unitario") }}</th></tr></thead>
+      <tbody>
+        {% for item in order.items %}
+          <tr>
+            <td data-label="{{ _('Producto') }}"><strong>{{ item.product_name }}</strong><small>{{ item.product_sku }}</small></td>
+            <td data-label="{{ _('Pedido') }}">
+              {% if order.status == "DRAFT" %}
+                <input type="number" min="1" step="1" name="quantity_{{ item.id }}" value="{{ item.ordered_quantity }}" aria-label="{{ _('Cantidad de %(product)s', product=item.product_name) }}" required>
+              {% else %}{{ item.ordered_quantity }}{% endif %}
+            </td>
+            <td data-label="{{ _('Recibido') }}">{{ item.received_quantity }}</td>
+            <td data-label="{{ _('Pendiente') }}">{{ item.pending_quantity }}</td>
+            <td data-label="{{ _('Costo unitario') }}">{{ item.unit_cost|money if item.unit_cost is not none else "—" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if order.status == "DRAFT" %}
+      <label for="purchase-notes">{{ _("Notas para el proveedor") }}</label>
+      <textarea id="purchase-notes" name="notes" rows="3">{{ order.notes or "" }}</textarea>
+      <div class="pro-purchase-detail-v1__actions">
+        <button class="btn ghost" type="submit">{{ _("Guardar borrador") }}</button>
+      </div>
+    </form>
+    <form method="POST" action="{{ url_for('pro.purchase_confirm', order_id=order.id) }}" data-submit-once>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn primary" type="submit">{{ _("Confirmar pedido") }}</button>
+    </form>
+  {% elif order.status in ("ORDERED", "PARTIALLY_RECEIVED") %}
+    <section class="pro-purchase-detail-v1__receive">
+      <div>
+        <span class="eyebrow">{{ _("Recepción") }}</span>
+        <h3>{{ _("¿Qué mercancía llegó?") }}</h3>
+        <p>{{ _("Registra solo lo recibido hoy. PATIA actualizará Inventario e Historial en la misma operación.") }}</p>
+      </div>
+      <form method="POST" action="{{ url_for('pro.purchase_receive', order_id=order.id) }}" data-submit-once>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="request_id" value="{{ receipt_request_id }}">
+        {% for item in order.items if item.pending_quantity %}
+          <label>
+            <span>{{ item.product_name }} <small>{{ _("Pendientes: %(count)s", count=item.pending_quantity) }}</small></span>
+            <input type="number" min="0" max="{{ item.pending_quantity }}" step="1" name="received_{{ item.id }}" value="{{ item.pending_quantity }}">
+          </label>
+        {% endfor %}
+        <button class="btn primary" type="submit">{{ _("Recibir mercancía") }}</button>
+      </form>
+    </section>
+  {% else %}
+    <section class="pro-purchase-detail-v1__complete">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <div><h3>{{ _("Pedido recibido") }}</h3><p>{{ _("Todas las existencias ya fueron incorporadas al inventario.") }}</p></div>
+    </section>
+  {% endif %}
+
+  {% if order.receipts %}
+    <section class="pro-purchase-detail-v1__history">
+      <h3>{{ _("Recepciones") }}</h3>
+      {% for receipt in order.receipts %}
+        <article>
+          <strong>{{ receipt.created_at_local.strftime("%d/%m/%Y %H:%M") }}</strong>
+          <span>{{ ngettext("%(count)s producto recibido", "%(count)s productos recibidos", receipt.items|length, count=receipt.items|length) }}</span>
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

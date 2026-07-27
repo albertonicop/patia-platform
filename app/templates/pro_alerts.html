@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Alertas inteligentes") }}{% endblock %}
+{% block content %}
+<div class="pro-alerts-v1">
+  <header class="module-heading-v2">
+    <div>
+      <span class="eyebrow">{{ _("Evidencia antes que ruido") }}</span>
+      <h2>{{ _("Lo que necesita tu atención") }}</h2>
+      <p>{{ _("Cada alerta explica qué ocurrió, muestra la evidencia y abre una acción útil.") }}</p>
+    </div>
+    <a class="btn ghost" href="{{ url_for('pro.hub') }}">{{ _("Volver a PATIA Pro") }}</a>
+  </header>
+
+  <nav class="pro-alerts-v1__periods" aria-label="{{ _('Periodo de alertas') }}">
+    {% for value, label in [("7d", _("7 días")), ("30d", _("30 días")), ("this_month", _("Este mes")), ("previous_month", _("Mes anterior"))] %}
+      <a href="{{ url_for('pro.alerts', period=value) }}"{% if alert_period.period == value %} class="is-active" aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+
+  <section class="pro-alerts-v1__summary">
+    <article><span>{{ _("Alertas activas") }}</span><strong>{{ alert_summary.total }}</strong></article>
+    <article><span>{{ _("Prioridad alta") }}</span><strong>{{ alert_summary.high }}</strong></article>
+    <article><span>{{ _("Prioridad media") }}</span><strong>{{ alert_summary.medium }}</strong></article>
+  </section>
+
+  {% if smart_alerts %}
+    <div class="pro-alerts-v1__list">
+      {% for alert in smart_alerts %}
+        <article class="pro-alerts-v1__alert pro-alerts-v1__alert--{{ alert.tone }}">
+          <div class="pro-alerts-v1__icon"><i class="fa-solid {{ alert.icon }}" aria-hidden="true"></i></div>
+          <div>
+            <span>{{ _("Prioridad %(priority)s", priority=alert.priority_label) }}</span>
+            <h3>{{ alert.title }}</h3>
+            <p><strong>{{ _("Evidencia:") }}</strong> {{ alert.evidence }}</p>
+            <p>{{ alert.action }}</p>
+          </div>
+          <a class="btn ghost" href="{{ alert.url }}">{{ alert.action_label }}</a>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <section class="empty-state-v2">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <h3>{{ _("Tu negocio no presenta alertas importantes") }}</h3>
+      <p>{{ _("Seguiremos revisando ventas, margen, inventario, crédito y caja con los datos que registres.") }}</p>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

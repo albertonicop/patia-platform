@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Reporte mensual Pro") }}{% endblock %}
+{% block content %}
+{% set report_status_labels = {
+  "pending": _("Pendiente"),
+  "generated": _("Generado"),
+  "sending": _("Enviando"),
+  "sent": _("Enviado"),
+  "failed": _("Fallido")
+} %}
+<div class="pro-monthly-v1">
+  <header class="module-heading-v2">
+    <div>
+      <span class="eyebrow">{{ _("Tu negocio, explicado cada mes") }}</span>
+      <h2>{{ _("Historial de reportes mensuales") }}</h2>
+      <p>{{ _("Cada reporte conserva las cifras exactas del momento en que fue generado.") }}</p>
+    </div>
+    <a class="btn ghost" href="{{ url_for('pro.hub') }}">{{ _("Volver a PATIA Pro") }}</a>
+  </header>
+
+  <section class="pro-monthly-v1__generate">
+    <div>
+      <h3>{{ _("Generar reporte manual") }}</h3>
+      <p>{{ _("Selecciona un mes terminado. Si ya existe, PATIA abrirá el mismo snapshot sin cambiar sus cifras.") }}</p>
+    </div>
+    <form method="POST" action="{{ url_for('pro.monthly_report_generate') }}" data-submit-once>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="monthly-period">{{ _("Periodo") }}</label>
+      <select id="monthly-period" name="period" required>
+        {% for period in periods %}
+          <option value="{{ period.value }}">{{ period.value }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn primary" type="submit">{{ _("Generar reporte") }}</button>
+    </form>
+  </section>
+
+  {% if reports %}
+    <div class="pro-monthly-v1__history">
+      {% for report in reports %}
+        <a href="{{ url_for('pro.monthly_report_detail', report_id=report.id) }}">
+          <div>
+            <span>{{ _("%(year)s-%(month)02d", year=report.report_year, month=report.report_month) }}</span>
+            <h3>{{ _("Resumen mensual de %(business)s", business=organization.name) }}</h3>
+            <small>{{ _("Generado %(date)s", date=(report.generated_at_local.strftime("%d/%m/%Y") if report.generated_at_local else "—")) }}</small>
+          </div>
+          <span class="status-badge status-badge--{{ report.status }}">{{ report_status_labels.get(report.status, report.status) }}</span>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <section class="empty-state-v2">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
+      <h3>{{ _("Todavía no hay reportes mensuales") }}</h3>
+      <p>{{ _("Genera el primer resumen para conservar una fotografía de tu negocio.") }}</p>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

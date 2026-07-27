@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import event
+from sqlalchemy import event, inspect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import db
@@ -33,6 +33,9 @@ class Organization(db.Model):
     )
     monthly_report_recipient = db.Column(db.String(120), nullable=True)
     monthly_sales_goal = db.Column(db.Numeric(14, 2), nullable=True)
+    next_purchase_order_number = db.Column(
+        db.Integer, nullable=False, default=1
+    )
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime,
@@ -49,6 +52,12 @@ class Organization(db.Model):
     owner = db.relationship("User", foreign_keys=[owner_user_id])
     monthly_reports = db.relationship(
         "MonthlyOwnerReport",
+        back_populates="organization",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    purchase_orders = db.relationship(
+        "PurchaseOrder",
         back_populates="organization",
         cascade="all, delete-orphan",
         passive_deletes=True,
@@ -1207,9 +1216,272 @@ class MonthlyOwnerReport(db.Model):
     status = db.Column(db.String(20), nullable=False, default="pending")
     failure_code = db.Column(db.String(40), nullable=True)
     error_message = db.Column(db.Text, nullable=True)
+    snapshot_json = db.Column(db.Text, nullable=True)
+    snapshot_hash = db.Column(db.String(64), nullable=True)
+    snapshot_version = db.Column(db.Integer, nullable=False, default=1)
+    generated_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    manual_generation = db.Column(
+        db.Boolean, nullable=False, default=False
+    )
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow
     )
     organization = db.relationship(
         "Organization", back_populates="monthly_reports"
     )
+    generated_by_member = db.relationship("OrganizationMember")
+
+
+def _prevent_monthly_snapshot_mutation(mapper, connection, target):
+    state = inspect(target)
+    for attribute_name in (
+        "snapshot_json",
+        "snapshot_hash",
+        "snapshot_version",
+    ):
+        history = state.attrs[attribute_name].history
+        if history.deleted and history.deleted[0] is not None:
+            raise ValueError("Monthly report snapshots are immutable.")
+
+
+event.listen(
+    MonthlyOwnerReport,
+    "before_update",
+    _prevent_monthly_snapshot_mutation,
+)
+
+
+class PurchaseOrder(db.Model):
+    """A supplier order scoped to one organization."""
+
+    __tablename__ = "purchase_order"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id",
+            "number",
+            name="uq_purchase_order_organization_number",
+        ),
+        db.CheckConstraint(
+            "status IN "
+            "('DRAFT', 'ORDERED', 'PARTIALLY_RECEIVED', "
+            "'RECEIVED', 'CANCELLED')",
+            name="ck_purchase_order_status",
+        ),
+        db.Index(
+            "ix_purchase_order_org_status_created",
+            "organization_id",
+            "status",
+            "created_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    number = db.Column(db.String(24), nullable=False)
+    supplier_id = db.Column(
+        db.Integer,
+        db.ForeignKey("supplier.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    supplier_name = db.Column(db.String(120), nullable=False)
+    status = db.Column(db.String(24), nullable=False, default="DRAFT")
+    notes = db.Column(db.Text, nullable=True)
+    created_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow
+    )
+    ordered_at = db.Column(db.DateTime, nullable=True)
+    completed_at = db.Column(db.DateTime, nullable=True)
+
+    organization = db.relationship(
+        "Organization", back_populates="purchase_orders"
+    )
+    supplier = db.relationship("Supplier")
+    created_by_member = db.relationship("OrganizationMember")
+    items = db.relationship(
+        "PurchaseOrderItem",
+        back_populates="purchase_order",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="PurchaseOrderItem.id",
+    )
+    receipts = db.relationship(
+        "PurchaseReceipt",
+        back_populates="purchase_order",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="PurchaseReceipt.created_at",
+    )
+
+
+class PurchaseOrderItem(db.Model):
+    __tablename__ = "purchase_order_item"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "purchase_order_id",
+            "product_id",
+            name="uq_purchase_order_item_product",
+        ),
+        db.CheckConstraint(
+            "ordered_quantity > 0",
+            name="ck_purchase_order_item_ordered_positive",
+        ),
+        db.CheckConstraint(
+            "received_quantity >= 0 "
+            "AND received_quantity <= ordered_quantity",
+            name="ck_purchase_order_item_received_valid",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    purchase_order_id = db.Column(
+        db.Integer,
+        db.ForeignKey("purchase_order.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey("product.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    product_name = db.Column(db.String(160), nullable=False)
+    product_sku = db.Column(db.String(64), nullable=False)
+    ordered_quantity = db.Column(db.Integer, nullable=False)
+    received_quantity = db.Column(
+        db.Integer, nullable=False, default=0
+    )
+    unit_cost = db.Column(db.Numeric(14, 2), nullable=True)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow
+    )
+
+    purchase_order = db.relationship(
+        "PurchaseOrder", back_populates="items"
+    )
+    product = db.relationship("Product")
+    receipt_items = db.relationship(
+        "PurchaseReceiptItem",
+        back_populates="order_item",
+        passive_deletes=True,
+    )
+
+    @property
+    def pending_quantity(self):
+        return max(
+            int(self.ordered_quantity) - int(self.received_quantity),
+            0,
+        )
+
+
+class PurchaseReceipt(db.Model):
+    __tablename__ = "purchase_receipt"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id",
+            "request_id",
+            name="uq_purchase_receipt_organization_request",
+        ),
+        db.Index(
+            "ix_purchase_receipt_org_created",
+            "organization_id",
+            "created_at",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    purchase_order_id = db.Column(
+        db.Integer,
+        db.ForeignKey("purchase_order.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    received_by_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    request_id = db.Column(db.String(64), nullable=False)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow
+    )
+
+    purchase_order = db.relationship(
+        "PurchaseOrder", back_populates="receipts"
+    )
+    received_by_member = db.relationship("OrganizationMember")
+    items = db.relationship(
+        "PurchaseReceiptItem",
+        back_populates="receipt",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+class PurchaseReceiptItem(db.Model):
+    __tablename__ = "purchase_receipt_item"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "purchase_receipt_id",
+            "purchase_order_item_id",
+            name="uq_purchase_receipt_item_order_item",
+        ),
+        db.CheckConstraint(
+            "quantity > 0",
+            name="ck_purchase_receipt_item_quantity_positive",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    purchase_receipt_id = db.Column(
+        db.Integer,
+        db.ForeignKey("purchase_receipt.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    purchase_order_item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("purchase_order_item.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_cost = db.Column(db.Numeric(14, 2), nullable=True)
+    restock_event_id = db.Column(
+        db.Integer,
+        db.ForeignKey("inventory_restock_event.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
+    receipt = db.relationship(
+        "PurchaseReceipt", back_populates="items"
+    )
+    order_item = db.relationship(
+        "PurchaseOrderItem", back_populates="receipt_items"
+    )
+    restock_event = db.relationship("InventoryRestockEvent")

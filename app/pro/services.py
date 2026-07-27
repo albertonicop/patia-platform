@@ -326,7 +326,40 @@ def _products_without_movement(organization_id, period):
     }
 
 
-def _team_activity(organization_id, period):
+def _cash_differences(organization_id, period):
+    row = (
+        db.session.query(
+            func.coalesce(
+                func.sum(
+                    case(
+                        (
+                            CashRegisterSession.difference != 0,
+                            1,
+                        ),
+                        else_=0,
+                    )
+                ),
+                0,
+            ).label("count"),
+            func.coalesce(
+                func.sum(func.abs(CashRegisterSession.difference)), 0
+            ).label("amount"),
+        )
+        .filter(
+            CashRegisterSession.organization_id == organization_id,
+            CashRegisterSession.status == "CLOSED",
+            CashRegisterSession.closed_at >= period["start_at"],
+            CashRegisterSession.closed_at < period["end_before"],
+        )
+        .one()
+    )
+    return {
+        "count": int(row.count or 0),
+        "amount": money_decimal(row.amount or 0),
+    }
+
+
+def _team_activity(organization_id, period, cash_difference):
     active_members = OrganizationMember.query.filter_by(
         organization_id=organization_id,
         is_active=True,
@@ -376,32 +409,6 @@ def _team_activity(organization_id, period):
         )
         .one()
     )
-    cash_difference = (
-        db.session.query(
-            func.coalesce(
-                func.sum(
-                    case(
-                        (
-                            CashRegisterSession.difference != 0,
-                            1,
-                        ),
-                        else_=0,
-                    )
-                ),
-                0,
-            ).label("count"),
-            func.coalesce(
-                func.sum(func.abs(CashRegisterSession.difference)), 0
-            ).label("amount"),
-        )
-        .filter(
-            CashRegisterSession.organization_id == organization_id,
-            CashRegisterSession.status == "CLOSED",
-            CashRegisterSession.closed_at >= period["start_at"],
-            CashRegisterSession.closed_at < period["end_before"],
-        )
-        .one()
-    )
     return {
         "visible": True,
         "member_count": active_members,
@@ -435,8 +442,8 @@ def _team_activity(organization_id, period):
             {
                 "key": "differences",
                 "label": gettext("Cierres con diferencia"),
-                "count": int(cash_difference.count or 0),
-                "amount": money_decimal(cash_difference.amount or 0),
+                "count": cash_difference["count"],
+                "amount": cash_difference["amount"],
                 "url": _internal_url("cash.index"),
                 "icon": "fa-scale-balanced",
             },
@@ -450,6 +457,7 @@ def _actionable_snapshot(
     current,
     previous,
     margin_change,
+    sales_change,
 ):
     organization_id = organization.id
     inventory = _inventory_control(organization_id)
@@ -512,6 +520,30 @@ def _actionable_snapshot(
         )
 
     attention = []
+    if sales_change is not None and sales_change <= Decimal("-10"):
+        attention.append(
+            {
+                "key": "sales",
+                "priority": 110 + abs(float(sales_change)),
+                "title": gettext("Las ventas disminuyeron"),
+                "evidence": gettext(
+                    "Vendiste %(percentage)s%% menos que en el periodo anterior.",
+                    percentage=f"{abs(sales_change):.1f}",
+                ),
+                "action": gettext(
+                    "Revisa los productos y días que explican la caída."
+                ),
+                "url": _internal_url(
+                    "main.reports",
+                    period=period["period"],
+                    start=period["custom_start"],
+                    end=period["custom_end"],
+                ),
+                "action_label": gettext("Analizar ventas"),
+                "icon": "fa-arrow-trend-down",
+                "tone": "danger",
+            }
+        )
     current_margin = current["report_kpis"]["margin"]
     previous_margin = previous["report_kpis"]["margin"]
     if (
@@ -519,6 +551,8 @@ def _actionable_snapshot(
         and margin_change <= Decimal("-2")
         and current_margin is not None
         and previous_margin is not None
+        and current["unknown_cost_lines"] == 0
+        and previous["unknown_cost_lines"] == 0
     ):
         attention.append(
             {
@@ -602,17 +636,34 @@ def _actionable_snapshot(
                 "tone": "neutral",
             }
         )
+    if credit["balance"] > MONEY_ZERO:
+        attention.append(
+            {
+                "key": "credit",
+                "priority": 85 + credit["customers"],
+                "title": gettext("Hay saldos pendientes por cobrar"),
+                "evidence": ngettext(
+                    "%(count)s cliente debe %(amount)s.",
+                    "%(count)s clientes deben %(amount)s.",
+                    credit["customers"],
+                    count=credit["customers"],
+                    amount=f"${credit['balance']:,.2f}",
+                ),
+                "action": gettext(
+                    "Da seguimiento a los saldos con mayor antigüedad."
+                ),
+                "url": _internal_url("credit.index"),
+                "action_label": gettext("Ver saldos pendientes"),
+                "icon": "fa-hand-holding-dollar",
+                "tone": "warning",
+            }
+        )
 
-    activity = _team_activity(organization_id, period)
-    cash_differences = next(
-        (
-            item
-            for item in activity["items"]
-            if item["key"] == "differences"
-        ),
-        None,
+    cash_differences = _cash_differences(organization_id, period)
+    activity = _team_activity(
+        organization_id, period, cash_differences
     )
-    if cash_differences and cash_differences["count"]:
+    if cash_differences["count"]:
         attention.append(
             {
                 "key": "cash",
@@ -824,6 +875,47 @@ def build_executive_dashboard(
             current,
             previous,
             margin_change,
+            sales_change,
         )
     )
     return result
+
+
+def build_smart_alerts(organization, args, *, now_utc=None):
+    """Reuse the executive evidence engine for the dedicated alert center."""
+    data = build_executive_dashboard(
+        organization,
+        args,
+        now_utc=now_utc,
+    )
+    alerts = []
+    for item in data["executive_attention"]:
+        alerts.append(
+            {
+                **item,
+                "priority_label": (
+                    gettext("Alta")
+                    if item["priority"] >= 90
+                    else (
+                        gettext("Media")
+                        if item["priority"] >= 70
+                        else gettext("Informativa")
+                    )
+                ),
+            }
+        )
+    return {
+        "alert_period": data["executive_period"],
+        "smart_alerts": alerts,
+        "alert_summary": {
+            "total": len(alerts),
+            "high": sum(
+                1 for item in alerts if item["priority"] >= 90
+            ),
+            "medium": sum(
+                1
+                for item in alerts
+                if 70 <= item["priority"] < 90
+            ),
+        },
+    }

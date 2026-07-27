@@ -143,15 +143,21 @@
       {% if last_monthly_report %}<small>{{ _("Último estado: %(status)s · %(year)s-%(month)02d", status=last_monthly_report.status, year=last_monthly_report.report_year, month=last_monthly_report.report_month) }}</small>{% endif %}
     </div>
     {% if monthly_report_available %}
-      <form method="POST" action="{{ url_for('main.update_monthly_report_settings') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="monthly-report-recipient">{{ _("Correo destinatario") }}</label>
-        <input id="monthly-report-recipient" name="recipient" type="email" value="{{ organization.monthly_report_recipient or user.email }}" required>
-        <label class="module-check-v2"><input type="checkbox" name="enabled" value="1"{% if organization.monthly_report_enabled %} checked{% endif %}>{{ _("Enviar mi resumen cada mes") }}</label>
-        <button class="btn" type="submit">{{ _("Guardar preferencias") }}</button>
-      </form>
+      <div>
+        <form method="POST" action="{{ url_for('main.update_monthly_report_settings') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label for="monthly-report-recipient">{{ _("Correo destinatario") }}</label>
+          <input id="monthly-report-recipient" name="recipient" type="email" value="{{ organization.monthly_report_recipient or user.email }}" required>
+          <label class="module-check-v2"><input type="checkbox" name="enabled" value="1"{% if organization.monthly_report_enabled %} checked{% endif %}>{{ _("Enviar mi resumen cada mes") }}</label>
+          <button class="btn" type="submit">{{ _("Guardar preferencias") }}</button>
+        </form>
+        <a class="btn ghost" href="{{ url_for('pro.monthly_reports') }}">{{ _("Abrir reportes mensuales") }}</a>
+      </div>
     {% else %}
-      <a class="btn ghost" href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Pro") }}</a>
+      <div>
+        <a class="btn ghost" href="{{ url_for('pro.monthly_report_preview') }}">{{ _("Ver ejemplo con mis datos") }}</a>
+        <a class="btn primary" href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Pro") }}</a>
+      </div>
     {% endif %}
   </section>
   <a class="btn ghost subscription-v2__plans-link" href="{{ url_for('main.subscribe') }}">{{ _("Comparar Starter y Pro") }}</a>

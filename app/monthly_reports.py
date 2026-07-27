@@ -4,9 +4,23 @@ from __future__ import annotations
 
 from calendar import monthrange
 from datetime import date, datetime, timedelta
+from decimal import Decimal
+from hashlib import sha256
+from io import BytesIO
+import json
+from types import SimpleNamespace
 
 from flask import current_app, render_template
-from flask_babel import force_locale, format_currency, format_date, gettext
+from flask_babel import (
+    force_locale,
+    format_currency,
+    format_date,
+    get_locale,
+    gettext,
+)
+from reportlab.lib.colors import HexColor
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
@@ -35,6 +49,272 @@ RETRY_DELAYS = (
     timedelta(hours=12),
     timedelta(days=1),
 )
+
+SNAPSHOT_VERSION = 1
+
+
+def _decimal_text(value):
+    return format(money_decimal(value, nonnegative=False), ".2f")
+
+
+def _plain_number(value):
+    return float(value) if isinstance(value, Decimal) else value
+
+
+def build_report_snapshot(payload, subject):
+    """Freeze every user-visible business value used by a monthly report."""
+    analytics = payload["analytics"]
+    kpis = analytics["report_kpis"]
+    snapshot = {
+        "version": SNAPSHOT_VERSION,
+        "language": str(get_locale() or "es").split("_")[0],
+        "subject": subject,
+        "business_name": payload["organization"].name,
+        "period": {
+            "year": payload["period"]["start_date"].year,
+            "month": payload["period"]["start_date"].month,
+            "start": payload["period"]["start_date"].isoformat(),
+            "end": payload["period"]["end_date"].isoformat(),
+            "label": payload["period_label"],
+        },
+        "headline": payload["headline"],
+        "wins": list(payload["wins"]),
+        "attention": list(payload["attention"]),
+        "recommendations": list(payload["recommendations"]),
+        "comparison": _plain_number(payload["comparison"]),
+        "profit_comparison": _plain_number(
+            payload["profit_comparison"]
+        ),
+        "kpis": {
+            "sales": _decimal_text(kpis["sales"]),
+            "profit": _decimal_text(kpis["profit"]),
+            "margin": _plain_number(kpis["margin"]),
+            "average_ticket": _decimal_text(kpis["average_ticket"]),
+            "ticket_count": int(kpis["ticket_count"]),
+            "profit_coverage": _plain_number(
+                kpis["profit_coverage"]
+            ),
+            "unknown_cost_lines": int(analytics["unknown_cost_lines"]),
+        },
+        "daily": [
+            {
+                "date": item["date"],
+                "sales": _decimal_text(item["sales"]),
+                "profit": _decimal_text(item["profit"]),
+            }
+            for item in analytics["daily_report"]
+        ],
+        "payments": [
+            {
+                "key": item["key"],
+                "label": item["label"],
+                "amount": _decimal_text(item["amount"]),
+                "tickets": int(item["tickets"]),
+                "percentage": _plain_number(item["percentage"]),
+            }
+            for item in analytics["payments_report"]
+        ],
+        "top_selling": [
+            {
+                "name": item.name,
+                "units": int(item.units or 0),
+                "revenue": _decimal_text(item.revenue or 0),
+            }
+            for item in analytics["top_selling_report"][:10]
+        ],
+        "profitable_products": [
+            {
+                "name": item["name"],
+                "units": int(item["units"]),
+                "revenue": _decimal_text(item["revenue"]),
+                "cost": (
+                    _decimal_text(item["cost"])
+                    if item["cost"] is not None
+                    else None
+                ),
+                "profit": (
+                    _decimal_text(item["profit"])
+                    if item["profit"] is not None
+                    else None
+                ),
+                "margin": _plain_number(item["margin"]),
+            }
+            for item in analytics["profitable_products_report"][:10]
+        ],
+        "inventory": {
+            "value": _decimal_text(payload["inventory"]["value"]),
+            "low_stock": list(payload["inventory"]["low_stock"]),
+        },
+        "credit": {
+            "total": _decimal_text(payload["credit"]["total"]),
+            "customers": [
+                {
+                    "name": item["name"],
+                    "balance": _decimal_text(item["balance"]),
+                }
+                for item in payload["credit"]["customers"]
+            ],
+        },
+        "cash": {
+            "count": int(payload["cash"]["count"]),
+            "net_difference": _decimal_text(
+                payload["cash"]["net_difference"]
+            ),
+        },
+    }
+    return snapshot
+
+
+def serialize_snapshot(snapshot):
+    return json.dumps(
+        snapshot,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def report_snapshot(record):
+    if not record or not record.snapshot_json:
+        return None
+    return json.loads(record.snapshot_json)
+
+
+def payload_from_snapshot(record):
+    snapshot = report_snapshot(record)
+    if not snapshot:
+        return None
+    kpis = snapshot["kpis"]
+    return {
+        "subject": snapshot["subject"],
+        "snapshot": snapshot,
+        "organization": SimpleNamespace(
+            name=snapshot["business_name"]
+        ),
+        "period_label": snapshot["period"]["label"],
+        "headline": snapshot["headline"],
+        "wins": snapshot["wins"],
+        "attention": snapshot["attention"],
+        "recommendations": snapshot["recommendations"],
+        "analytics": {
+            "report_kpis": {
+                "sales": Decimal(kpis["sales"]),
+                "profit": Decimal(kpis["profit"]),
+                "margin": kpis["margin"],
+                "average_ticket": Decimal(kpis["average_ticket"]),
+                "ticket_count": kpis["ticket_count"],
+                "profit_coverage": kpis["profit_coverage"],
+            },
+            "unknown_cost_lines": kpis["unknown_cost_lines"],
+            "daily_report": snapshot["daily"],
+            "payments_report": snapshot["payments"],
+            "top_selling_report": [
+                SimpleNamespace(
+                    name=item["name"],
+                    units=item["units"],
+                    revenue=Decimal(item["revenue"]),
+                )
+                for item in snapshot["top_selling"]
+            ],
+            "profitable_products_report": snapshot[
+                "profitable_products"
+            ],
+        },
+        "inventory": {
+            "value": Decimal(snapshot["inventory"]["value"]),
+            "low_stock": snapshot["inventory"]["low_stock"],
+        },
+        "credit": {
+            "total": Decimal(snapshot["credit"]["total"]),
+            "customers": snapshot["credit"]["customers"],
+        },
+        "cash": {
+            "count": snapshot["cash"]["count"],
+            "net_difference": Decimal(
+                snapshot["cash"]["net_difference"]
+            ),
+        },
+        "comparison": snapshot["comparison"],
+        "profit_comparison": snapshot["profit_comparison"],
+    }
+
+
+def monthly_report_pdf(record):
+    """Render a compact PDF exclusively from the immutable snapshot."""
+    snapshot = report_snapshot(record)
+    if not snapshot:
+        raise MonthlyReportUnavailable("Report snapshot is unavailable.")
+    with force_locale(snapshot.get("language") or "es"):
+        labels = {
+            "sales": gettext("Ventas"),
+            "profit": gettext("Utilidad estimada"),
+            "recorded_sales": gettext("Ventas registradas"),
+            "average_ticket": gettext("Ticket promedio"),
+            "wins": gettext("Lo que salió bien"),
+            "attention": gettext("Lo que conviene revisar"),
+            "actions": gettext("Acciones recomendadas"),
+            "snapshot": gettext(
+                "Snapshot %(hash)s",
+                hash=(record.snapshot_hash or "")[:12],
+            ),
+        }
+    output = BytesIO()
+    pdf = canvas.Canvas(output, pagesize=letter)
+    width, height = letter
+    left = 54
+    y = height - 54
+
+    def line(text, *, size=10, bold=False, color="#171A2B", gap=16):
+        nonlocal y
+        if y < 60:
+            pdf.showPage()
+            y = height - 54
+        pdf.setFillColor(HexColor(color))
+        pdf.setFont("Helvetica-Bold" if bold else "Helvetica", size)
+        safe = str(text or "")
+        chunks = [
+            safe[index:index + 92]
+            for index in range(0, len(safe), 92)
+        ] or [""]
+        for chunk in chunks:
+            pdf.drawString(left, y, chunk)
+            y -= gap
+
+    line("PATIA PRO", size=12, bold=True, color="#5B45E8")
+    line(snapshot["business_name"], size=20, bold=True, gap=24)
+    line(snapshot["period"]["label"], color="#677086", gap=24)
+    line(snapshot["headline"], size=14, bold=True, gap=22)
+    kpis = snapshot["kpis"]
+    line(
+        f"{labels['sales']}: ${Decimal(kpis['sales']):,.2f} MXN",
+        size=12,
+        bold=True,
+    )
+    line(
+        f"{labels['profit']}: ${Decimal(kpis['profit']):,.2f} MXN"
+    )
+    line(f"{labels['recorded_sales']}: {kpis['ticket_count']}")
+    line(
+        f"{labels['average_ticket']}: "
+        f"${Decimal(kpis['average_ticket']):,.2f} MXN",
+        gap=24,
+    )
+    line(labels["wins"], size=12, bold=True)
+    for item in snapshot["wins"]:
+        line(f"• {item}")
+    y -= 8
+    line(labels["attention"], size=12, bold=True)
+    for item in snapshot["attention"]:
+        line(f"• {item}")
+    y -= 8
+    line(labels["actions"], size=12, bold=True)
+    for index, item in enumerate(snapshot["recommendations"], 1):
+        line(f"{index}. {item}")
+    y -= 8
+    line(labels["snapshot"], size=8, color="#7A8192")
+    pdf.save()
+    output.seek(0)
+    return output.getvalue()
 
 
 def _delivery_is_claimed(record, now=None):
@@ -121,44 +401,63 @@ def _credit_snapshot(organization_id: int):
 
 
 def _inventory_snapshot(organization_id: int):
-    products = Product.query.filter_by(
-        organization_id=organization_id, is_active=True
-    ).all()
-    return {
-        "value": money_decimal(
-            sum(
-                (
-                    product.cost_price * product.stock
-                    for product in products
-                ),
-                MONEY_ZERO,
+    value = (
+        db.session.query(
+            func.coalesce(
+                func.sum(Product.cost_price * Product.stock), 0
             )
-        ),
+        )
+        .filter(
+            Product.organization_id == organization_id,
+            Product.is_active.is_(True),
+        )
+        .scalar()
+    )
+    low_stock = (
+        Product.query.filter(
+            Product.organization_id == organization_id,
+            Product.is_active.is_(True),
+            Product.stock <= Product.min_stock,
+        )
+        .order_by(Product.stock.asc(), Product.name.asc())
+        .limit(10)
+        .all()
+    )
+    return {
+        "value": money_decimal(value or 0),
         "low_stock": [
             {
                 "name": product.name,
                 "stock": product.stock,
                 "min_stock": product.min_stock,
             }
-            for product in products
-            if product.stock <= product.min_stock
-        ][:10],
+            for product in low_stock
+        ],
     }
 
 
 def _cash_snapshot(organization_id: int, start_at, end_before):
-    rows = CashRegisterSession.query.filter(
-        CashRegisterSession.organization_id == organization_id,
-        CashRegisterSession.status == "CLOSED",
-        CashRegisterSession.closed_at >= start_at,
-        CashRegisterSession.closed_at < end_before,
-        CashRegisterSession.difference.is_not(None),
-        CashRegisterSession.difference != 0,
-    ).all()
+    row = (
+        db.session.query(
+            func.count(CashRegisterSession.id).label("count"),
+            func.coalesce(
+                func.sum(CashRegisterSession.difference), 0
+            ).label("net_difference"),
+        )
+        .filter(
+            CashRegisterSession.organization_id == organization_id,
+            CashRegisterSession.status == "CLOSED",
+            CashRegisterSession.closed_at >= start_at,
+            CashRegisterSession.closed_at < end_before,
+            CashRegisterSession.difference.is_not(None),
+            CashRegisterSession.difference != 0,
+        )
+        .one()
+    )
     return {
-        "count": len(rows),
+        "count": int(row.count or 0),
         "net_difference": money_decimal(
-            sum((row.difference for row in rows), MONEY_ZERO),
+            row.net_difference or 0,
             nonnegative=False,
         ),
     }
@@ -350,6 +649,9 @@ def generate_monthly_report(
     send=False,
     preview=False,
     force_retry=False,
+    resend=False,
+    generated_by_member_id=None,
+    manual_generation=False,
 ):
     """Generate one report period once; optionally deliver it by email."""
     organization = (
@@ -384,7 +686,7 @@ def generate_monthly_report(
         report_year=year,
         report_month=month,
     ).first()
-    if record and send and (
+    if record and send and not resend and (
         record.status == "sent" or _delivery_is_claimed(record)
     ):
         return record, None
@@ -419,38 +721,59 @@ def generate_monthly_report(
         record = MonthlyOwnerReport.query.filter_by(
             id=record.id
         ).with_for_update().one()
-    if send and (
+    if send and not resend and (
         record.status == "sent" or _delivery_is_claimed(record)
     ):
         return record, None
 
     try:
         language = owner.preferred_language or "es"
-        # Scheduled jobs do not have a browser request. This minimal context
-        # lets Flask-Babel and the existing Jinja processors render from CLI.
         with current_app.test_request_context("/"):
             with force_locale(language):
-                payload = report_payload(organization, year, month)
+                payload = payload_from_snapshot(record)
+                if payload is None:
+                    live_payload = report_payload(
+                        organization, year, month
+                    )
+                    subject = gettext(
+                        "Tu resumen mensual de %(business)s — %(period)s",
+                        business=organization.name,
+                        period=live_payload["period_label"],
+                    )
+                    snapshot = build_report_snapshot(
+                        live_payload, subject
+                    )
+                    serialized = serialize_snapshot(snapshot)
+                    record.snapshot_json = serialized
+                    record.snapshot_hash = sha256(
+                        serialized.encode("utf-8")
+                    ).hexdigest()
+                    record.snapshot_version = SNAPSHOT_VERSION
+                    record.generated_by_member_id = (
+                        generated_by_member_id
+                    )
+                    record.manual_generation = bool(manual_generation)
+                    record.generated_at = datetime.utcnow()
+                    payload = {
+                        "subject": subject,
+                        "snapshot": snapshot,
+                        **live_payload,
+                    }
+                subject = payload["subject"]
                 reports_url = (
                     current_app.config["PUBLIC_BASE_URL"].rstrip("/")
-                    + "/reports"
+                    + "/pro/monthly-reports"
                 )
                 html = render_template(
                     "emails/monthly_owner_report.html",
                     reports_url=reports_url,
                     **payload,
                 )
-                subject = gettext(
-                "Tu resumen mensual de %(business)s — %(period)s",
-                    business=organization.name,
-                    period=payload["period_label"],
-                )
         record.recipient = recipient
-        record.generated_at = datetime.utcnow()
-        record.sent_at = None
-        record.failure_code = None
-        record.error_message = None
-        record.status = "generated"
+        if record.status not in {"sent", "failed"}:
+            record.failure_code = None
+            record.error_message = None
+            record.status = "generated"
 
         db.session.commit()
         response_payload = {"subject": subject, "html": html, **payload}
@@ -462,7 +785,13 @@ def generate_monthly_report(
         record = MonthlyOwnerReport.query.filter_by(
             id=record.id
         ).with_for_update().one()
-        if record.status == "sent" or _delivery_is_claimed(record):
+        if (
+            not resend
+            and (
+                record.status == "sent"
+                or _delivery_is_claimed(record)
+            )
+        ):
             db.session.rollback()
             return record, None
         record.status = "sending"
@@ -481,7 +810,13 @@ def generate_monthly_report(
             html=html,
             language=language,
             idempotency_key=(
-                f"patia-monthly-report-{organization.id}-{year:04d}-{month:02d}"
+                f"patia-monthly-report-{organization.id}-"
+                f"{year:04d}-{month:02d}"
+                + (
+                    f"-resend-{record.attempt_count}"
+                    if resend
+                    else ""
+                )
             ),
         )
         record = db.session.get(MonthlyOwnerReport, record.id)
@@ -549,10 +884,12 @@ def run_monthly_reports(year: int, month: int):
             break
         for organization in organizations:
             try:
-                record, _ = generate_monthly_report(
+                record, delivery_payload = generate_monthly_report(
                     organization.id, year, month, send=True
                 )
-                if record.status == "sent":
+                if delivery_payload is None:
+                    summary["skipped"] += 1
+                elif record.status == "sent":
                     summary["sent"] += 1
                 elif record.status == "failed":
                     summary["failed"] += 1
