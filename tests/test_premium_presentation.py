@@ -30,6 +30,14 @@ class PremiumPresentationTests(unittest.TestCase):
             self.assertTrue(video.is_file(), filename)
             self.assertGreater(video.stat().st_size, 1_000_000, filename)
 
+        generator = (
+            PROJECT_ROOT / "scripts" / "generate_patia_demo.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("target_rms", generator)
+        self.assertIn("warm_voice", generator)
+        self.assertNotIn("sweep_phase", generator)
+        self.assertNotIn("A simple ascending motif", generator)
+
         app_factory = (PROJECT_ROOT / "app" / "__init__.py").read_text(
             encoding="utf-8"
         )
@@ -103,6 +111,18 @@ class PremiumPresentationTests(unittest.TestCase):
         )
         for name in consumers:
             self.assertIn("styles.css') }}?v=125", self.template(name), name)
+
+    def test_sidebar_keeps_pro_routes_without_visual_plan_badges(self):
+        base = self.template("base.html")
+
+        for endpoint in (
+            "pro.dashboard",
+            "pro.monthly_reports",
+            "pro.purchases",
+            "pro.alerts",
+        ):
+            self.assertIn(endpoint, base)
+        self.assertNotIn("<small>{{ _(\"Pro\") }}</small>", base)
 
 
 if __name__ == "__main__":

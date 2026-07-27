@@ -151,7 +151,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         dashboard = client.get("/")
         html = dashboard.get_data(as_text=True)
         self.assertIn("Panel ejecutivo", html)
-        self.assertIn(">Pro</small>", html)
+        self.assertNotIn(">Pro</small>", html)
         self.assertGreaterEqual(
             html.count('class="sidebar-v2__section-label"'), 3
         )

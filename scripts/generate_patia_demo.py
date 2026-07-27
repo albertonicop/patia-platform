@@ -552,8 +552,30 @@ def soundtrack(path: Path) -> None:
             ) ** 2
         return result
 
-    # D minor progression: Dm · Bb · F · C. Layered harmonics create a
-    # cinematic string/brass bed without using external or copyrighted audio.
+    def warm_voice(
+        frequency: float,
+        tone_time: np.ndarray,
+        *,
+        detune: float = 0.0025,
+    ) -> np.ndarray:
+        """Return a soft orchestral voice without electronic pure-tone edges."""
+        voice = np.zeros(len(tone_time), dtype=np.float64)
+        partials = ((1, 1.0), (2, 0.24), (3, 0.11), (4, 0.045))
+        for spread in (-detune, 0.0, detune):
+            for harmonic, level in partials:
+                voice += level * np.sin(
+                    2
+                    * np.pi
+                    * frequency
+                    * harmonic
+                    * (1 + spread)
+                    * tone_time
+                    + spread * 83
+                )
+        return voice / (3 * sum(level for _, level in partials))
+
+    # D minor progression: Dm · Bb · F · C. Slowly moving, detuned harmonics
+    # emulate warm strings and restrained brass without copyrighted material.
     progression = (
         (73.42, 110.00, 146.83, 174.61),
         (58.27, 87.31, 116.54, 146.83),
@@ -570,95 +592,99 @@ def soundtrack(path: Path) -> None:
         pad = np.zeros(length, dtype=np.float64)
         intensity = 0.55 + 0.45 * (start_seconds / DURATION)
         for frequency in frequencies:
-            phase = chord_index * 0.37
-            pad += np.sin(2 * np.pi * frequency * tone_time + phase)
-            pad += 0.32 * np.sin(2 * np.pi * frequency * 2 * tone_time + phase / 2)
-            pad += 0.12 * np.sin(2 * np.pi * frequency * 3 * tone_time)
-        pad /= len(frequencies) * 1.44
-        pad *= smooth_envelope(length, 1.0, 1.2)
-        mix(float(start_seconds), 0.105 * intensity * pad)
+            pad += warm_voice(frequency, tone_time)
+        pad /= len(frequencies)
+        pad *= smooth_envelope(length, 1.35, 1.5)
+        mix(float(start_seconds), 0.16 * intensity * pad)
 
-    beat_seconds = 60 / 96
-    # Low ostinato gives the soundtrack motion and grows across the story.
-    ostinato = (146.83, 174.61, 220.00, 174.61, 146.83, 220.00, 261.63, 220.00)
+        # A low root anchors each chapter and keeps the music confident rather
+        # than playful or melodic.
+        root = warm_voice(frequencies[0] / 2, tone_time, detune=0.0015)
+        root *= smooth_envelope(length, 0.7, 1.4)
+        mix(float(start_seconds), 0.085 * intensity * root)
+
+    beat_seconds = 60 / 88
+    # A soft piano-like pattern creates forward motion. Notes stay in the
+    # middle register and use rounded attacks, avoiding notification-like
+    # beeps entirely.
+    piano_pattern = (
+        146.83,
+        174.61,
+        220.00,
+        174.61,
+        146.83,
+        220.00,
+        261.63,
+        220.00,
+    )
     for beat_index, start_seconds in enumerate(
-        np.arange(2.5, DURATION - 0.4, beat_seconds / 2)
+        np.arange(3.0, DURATION - 0.7, beat_seconds)
     ):
-        length = int(0.5 * sample_rate)
+        length = int(1.45 * sample_rate)
         tone_time = np.arange(length, dtype=np.float64) / sample_rate
-        frequency = ostinato[beat_index % len(ostinato)]
-        pulse = np.sin(2 * np.pi * frequency * tone_time)
-        pulse += 0.2 * np.sin(2 * np.pi * frequency * 2 * tone_time)
-        envelope = np.exp(-tone_time * 7.2)
-        growth = 0.45 + 0.55 * (start_seconds / DURATION)
-        mix(float(start_seconds), 0.045 * growth * pulse * envelope)
+        frequency = piano_pattern[beat_index % len(piano_pattern)]
+        piano = warm_voice(frequency, tone_time, detune=0.0008)
+        piano *= np.exp(-tone_time * 2.35)
+        piano *= smooth_envelope(length, 0.055, 0.72)
+        growth = 0.48 + 0.52 * (start_seconds / DURATION)
+        mix(float(start_seconds), 0.052 * growth * piano)
 
     rng = np.random.default_rng(20260727)
-    # Deep cinematic kick on every beat. Percussion enters progressively so
-    # the opening remains elegant and the final scenes feel larger.
+    # Low cinematic drums enter every two beats. Their energy stays below the
+    # speech range and never resembles interface or system sound effects.
     for beat_index, start_seconds in enumerate(
-        np.arange(3.0, DURATION - 0.2, beat_seconds)
+        np.arange(4.0, DURATION - 0.4, beat_seconds * 2)
     ):
-        length = int(0.42 * sample_rate)
+        length = int(0.72 * sample_rate)
         tone_time = np.arange(length, dtype=np.float64) / sample_rate
-        phase = 2 * np.pi * (72 * tone_time - 26 * tone_time**2)
-        kick = np.sin(phase) * np.exp(-tone_time * 9)
-        impact = np.sin(2 * np.pi * 45 * tone_time) * np.exp(-tone_time * 15)
+        phase = 2 * np.pi * (58 * tone_time - 13 * tone_time**2)
+        drum = np.sin(phase) * np.exp(-tone_time * 6.2)
+        body = np.sin(2 * np.pi * 41 * tone_time) * np.exp(-tone_time * 8.5)
+        drum *= smooth_envelope(length, 0.018, 0.4)
         growth = 0.55 + 0.45 * (start_seconds / DURATION)
-        mix(float(start_seconds), growth * (0.16 * kick + 0.075 * impact))
+        mix(float(start_seconds), growth * (0.14 * drum + 0.055 * body))
 
-        if beat_index % 4 in {1, 3} and start_seconds > 10:
-            snare_length = int(0.24 * sample_rate)
-            snare_time = np.arange(snare_length, dtype=np.float64) / sample_rate
-            noise = rng.normal(0, 1, snare_length)
-            # Differencing removes low frequencies and creates a crisp,
-            # restrained cinematic snare.
-            noise = np.concatenate(([0.0], np.diff(noise)))
-            noise /= max(np.max(np.abs(noise)), 1)
-            snare = noise * np.exp(-snare_time * 18)
-            mix(float(start_seconds), 0.052 * growth * snare)
-
-    # Scene transitions receive an original riser and impact.
+    # Scene transitions use only broad, filtered ambience and a low impact.
+    # The former tonal sweep was the source of the audible "beep".
     for scene_start in range(SCENE_SECONDS, DURATION, SCENE_SECONDS):
-        riser_seconds = 1.15
+        riser_seconds = 1.4
         length = int(riser_seconds * sample_rate)
-        tone_time = np.arange(length, dtype=np.float64) / sample_rate
         noise = rng.normal(0, 1, length)
-        noise = np.cumsum(noise)
+        kernel = np.ones(181, dtype=np.float64) / 181
+        noise = np.convolve(noise, kernel, mode="same")
         noise /= max(np.max(np.abs(noise)), 1)
-        envelope = np.linspace(0, 1, length) ** 2
-        sweep_phase = 2 * np.pi * (
-            160 * tone_time + 420 * tone_time**2
-        )
-        riser = 0.028 * noise * envelope
-        riser += 0.018 * np.sin(sweep_phase) * envelope
-        mix(scene_start - riser_seconds, riser)
+        envelope = np.sin(np.linspace(0, math.pi / 2, length)) ** 2
+        mix(scene_start - riser_seconds, 0.018 * noise * envelope)
 
-        impact_length = int(0.8 * sample_rate)
+        impact_length = int(1.05 * sample_rate)
         impact_time = np.arange(impact_length, dtype=np.float64) / sample_rate
-        impact = np.sin(2 * np.pi * 52 * impact_time) * np.exp(-impact_time * 5.5)
-        impact += 0.35 * np.sin(2 * np.pi * 104 * impact_time) * np.exp(-impact_time * 7)
-        mix(scene_start, 0.095 * impact)
+        impact = np.sin(2 * np.pi * 43 * impact_time) * np.exp(-impact_time * 4.6)
+        impact *= smooth_envelope(impact_length, 0.02, 0.7)
+        mix(scene_start, 0.07 * impact)
 
-    # A simple ascending motif carries the Pro and closing scenes.
-    melody = (293.66, 349.23, 440.00, 523.25, 440.00, 587.33, 698.46, 587.33)
-    for note_index, start_seconds in enumerate(
-        np.arange(29.0, DURATION - 0.5, beat_seconds)
-    ):
-        length = int(1.25 * sample_rate)
-        tone_time = np.arange(length, dtype=np.float64) / sample_rate
-        frequency = melody[note_index % len(melody)]
-        lead = np.sin(2 * np.pi * frequency * tone_time)
-        lead += 0.22 * np.sin(2 * np.pi * frequency * 2 * tone_time)
-        lead *= smooth_envelope(length, 0.08, 0.65)
-        mix(float(start_seconds), 0.032 * lead)
+    # The final act gains breadth through an extra string octave instead of a
+    # bright lead melody. This supplies a premium cinematic lift without
+    # changing the timing or competing with the on-screen message.
+    lift_start = 28.0
+    lift_length = int((DURATION - lift_start) * sample_rate)
+    lift_time = np.arange(lift_length, dtype=np.float64) / sample_rate
+    lift = np.zeros(lift_length, dtype=np.float64)
+    for frequency in (146.83, 174.61, 220.00, 261.63):
+        lift += warm_voice(frequency, lift_time, detune=0.0032)
+    lift /= 4
+    lift *= smooth_envelope(lift_length, 3.0, 2.0)
+    mix(lift_start, 0.055 * lift)
 
-    # Gentle master compression keeps impacts strong without clipping.
-    audio = np.tanh(audio * 1.65) * 0.68
+    # Gentle compression and RMS matching retain the approved playback level.
+    audio = np.tanh(audio * 1.45)
+    current_rms = math.sqrt(float(np.mean(audio**2)))
+    target_rms = 10 ** (-27.3 / 20)
+    if current_rms:
+        audio *= target_rms / current_rms
     fade = int(1.35 * sample_rate)
     audio[:fade] *= np.linspace(0, 1, fade)
     audio[-fade:] *= np.linspace(1, 0, fade)
-    audio = np.clip(audio, -0.92, 0.92)
+    audio = np.clip(audio, -0.34, 0.34)
     pcm = (audio * 32767).astype("<i2")
     with wave.open(str(path), "wb") as output:
         output.setnchannels(1)
