@@ -16,6 +16,7 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertIn("Tu negocio, bajo control. Todos los días.", landing)
         self.assertIn("Ver demo", landing)
         self.assertIn("videos/patia-demo.mp4", landing)
+        self.assertIn("videos/patia-demo-en.mp4", landing)
         self.assertIn("Demo en video próximamente", landing)
         self.assertNotIn("data-demo-scene", landing)
         self.assertNotIn("Probar PATIA gratis", landing)
@@ -24,6 +25,16 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertIn("Planes simples para cada etapa de tu negocio", landing)
         self.assertIn("Comenzar prueba con %(plan)s", landing)
         self.assertEqual(landing.count('class="landing-v5__terms"'), 1)
+        for filename in ("patia-demo.mp4", "patia-demo-en.mp4"):
+            video = PROJECT_ROOT / "app" / "static" / "videos" / filename
+            self.assertTrue(video.is_file(), filename)
+            self.assertGreater(video.stat().st_size, 1_000_000, filename)
+
+        app_factory = (PROJECT_ROOT / "app" / "__init__.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("PATIA_DEMO_VIDEO_AVAILABLE=_env_flag(", app_factory)
+        self.assertIn("default=True", app_factory)
         self.assertIn("Menos decisiones a ciegas", landing)
         self.assertIn("PATIA Pro", landing)
         self.assertIn("$199", landing)

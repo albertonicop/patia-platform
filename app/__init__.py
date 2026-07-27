@@ -113,6 +113,10 @@ def create_app():
         ),
         RESEND_API_KEY=os.environ.get("RESEND_API_KEY"),
         RESEND_FROM=os.environ.get("RESEND_FROM"),
+        PATIA_DEMO_VIDEO_AVAILABLE=_env_flag(
+            "PATIA_DEMO_VIDEO_AVAILABLE",
+            default=True,
+        ),
         MAX_CONTENT_LENGTH=10 * 1024 * 1024,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE=os.environ.get("SESSION_COOKIE_SAMESITE", "Lax"),

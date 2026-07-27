@@ -249,12 +249,13 @@
       </header>
 
       {% set demo_video_available = config.get("PATIA_DEMO_VIDEO_AVAILABLE", false) %}
+      {% set demo_video_filename = "videos/patia-demo-en.mp4" if current_language == "en" else "videos/patia-demo.mp4" %}
       <div class="landing-v5__video-stage" data-video-available="{{ 'true' if demo_video_available else 'false' }}">
         <video class="landing-v5__video" controls preload="metadata" playsinline data-demo-video {% if not demo_video_available %}hidden{% endif %}>
           {% if demo_video_available %}
-          <source src="{{ url_for('static', filename='videos/patia-demo.mp4') }}" type="video/mp4">
+          <source src="{{ url_for('static', filename=demo_video_filename) }}" type="video/mp4">
           {% else %}
-          <source data-src="{{ url_for('static', filename='videos/patia-demo.mp4') }}" type="video/mp4">
+          <source data-src="{{ url_for('static', filename=demo_video_filename) }}" type="video/mp4">
           {% endif %}
           {{ _("Tu navegador no puede reproducir este video.") }}
         </video>
