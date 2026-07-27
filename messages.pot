@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-26 21:18-0600\n"
+"POT-Creation-Date: 2026-07-26 22:38-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1419,79 +1419,223 @@ msgstr ""
 msgid "Meta mensual guardada."
 msgstr ""
 
-#: app/pro/services.py:60
+#: app/pro/services.py:94
 msgid "Datos insuficientes"
 msgstr ""
 
-#: app/pro/services.py:61
+#: app/pro/services.py:95
 msgid "Tu resumen comenzará con la primera venta"
 msgstr ""
 
-#: app/pro/services.py:63
+#: app/pro/services.py:97
 msgid ""
 "Registra ventas para comparar el desempeño, calcular la utilidad y "
 "proyectar el cierre del mes."
 msgstr ""
 
-#: app/pro/services.py:70
+#: app/pro/services.py:104
 msgid "Primer periodo comparable"
 msgstr ""
 
-#: app/pro/services.py:71
+#: app/pro/services.py:105
 msgid "Tu negocio ya está generando información útil"
 msgstr ""
 
-#: app/pro/services.py:73
+#: app/pro/services.py:107
 #, python-format
 msgid ""
 "Registraste %(tickets)s ventas por %(sales)s. Cuando exista un periodo "
 "anterior comparable, PATIA mostrará la tendencia."
 msgstr ""
 
-#: app/pro/services.py:85
+#: app/pro/services.py:119
 #, python-format
 msgid " y el margen mejoró %(points)s puntos"
 msgstr ""
 
-#: app/pro/services.py:90
+#: app/pro/services.py:124
 msgid "Resultado favorable"
 msgstr ""
 
-#: app/pro/services.py:91
+#: app/pro/services.py:125
 msgid "Las ventas avanzan con una tendencia saludable"
 msgstr ""
 
-#: app/pro/services.py:93
+#: app/pro/services.py:127
 #, python-format
 msgid "Vendiste %(change)s%% más que en el periodo anterior%(margin_text)s."
 msgstr ""
 
-#: app/pro/services.py:102
+#: app/pro/services.py:136
 msgid "Requiere atención"
 msgstr ""
 
-#: app/pro/services.py:103
+#: app/pro/services.py:137
 msgid "Las ventas bajaron frente al periodo anterior"
 msgstr ""
 
-#: app/pro/services.py:105
+#: app/pro/services.py:139
 #, python-format
 msgid ""
 "La variación fue de %(change)s%%. Revisa el periodo completo antes de "
 "tomar una decisión."
 msgstr ""
 
-#: app/pro/services.py:112
+#: app/pro/services.py:146
 msgid "Negocio estable"
 msgstr ""
 
-#: app/pro/services.py:113
+#: app/pro/services.py:147
 msgid "El desempeño se mantiene cerca del periodo anterior"
 msgstr ""
 
-#: app/pro/services.py:115
+#: app/pro/services.py:149
 #, python-format
 msgid "Las ventas variaron %(change)s%% y no muestran un cambio brusco."
+msgstr ""
+
+#: app/pro/services.py:417
+msgid "Ventas canceladas"
+msgstr ""
+
+#: app/pro/services.py:427
+msgid "Correcciones de inventario"
+msgstr ""
+
+#: app/pro/services.py:435
+msgid "Retiros de caja"
+msgstr ""
+
+#: app/pro/services.py:443 app/templates/emails/monthly_owner_report.html:96
+msgid "Cierres con diferencia"
+msgstr ""
+
+#: app/pro/services.py:474
+msgid "Producto rentable"
+msgstr ""
+
+#: app/pro/services.py:478
+#, python-format
+msgid "%(units)s unidades · %(margin)s%% de margen"
+msgstr ""
+
+#: app/pro/services.py:494
+msgid "Mejor día"
+msgstr ""
+
+#: app/pro/services.py:499
+msgid "Ventas registradas ese día"
+msgstr ""
+
+#: app/pro/services.py:512
+msgid "Mejor horario"
+msgstr ""
+
+#: app/pro/services.py:515
+msgid "Ventas acumuladas en esa franja"
+msgstr ""
+
+#: app/pro/services.py:533
+msgid "El margen se redujo"
+msgstr ""
+
+#: app/pro/services.py:535
+#, python-format
+msgid "Pasó de %(previous)s%% a %(current)s%% en el periodo."
+msgstr ""
+
+#: app/pro/services.py:540
+msgid "Revisa precios y costos de los productos vendidos."
+msgstr ""
+
+#: app/pro/services.py:548
+msgid "Analizar rentabilidad"
+msgstr ""
+
+#: app/pro/services.py:559
+#, python-format
+msgid "%(count)s producto puede agotarse"
+msgid_plural "%(count)s productos pueden agotarse"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/pro/services.py:565
+#, python-format
+msgid "La reposición sugerida suma %(units)s unidad."
+msgid_plural "La reposición sugerida suma %(units)s unidades."
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/pro/services.py:571
+msgid "Prioriza la mercancía que ya alcanzó su mínimo."
+msgstr ""
+
+#: app/pro/services.py:574 app/templates/dashboard.html:149
+msgid "Ver productos"
+msgstr ""
+
+#: app/pro/services.py:585
+#, python-format
+msgid "%(count)s producto no tuvo ventas"
+msgid_plural "%(count)s productos no tuvieron ventas"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/pro/services.py:591
+#, python-format
+msgid "No registraron movimiento entre %(start)s y %(end)s."
+msgstr ""
+
+#: app/pro/services.py:596
+msgid "Evalúa precio, exhibición o próxima compra."
+msgstr ""
+
+#: app/pro/services.py:606 app/templates/pro_dashboard.html:137
+msgid "Revisar inventario"
+msgstr ""
+
+#: app/pro/services.py:627
+#, python-format
+msgid "%(count)s cierre tuvo diferencia"
+msgid_plural "%(count)s cierres tuvieron diferencia"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/pro/services.py:633
+#, python-format
+msgid "La diferencia absoluta acumulada fue %(amount)s."
+msgstr ""
+
+#: app/pro/services.py:637
+msgid "Compara el efectivo esperado con los cierres registrados."
+msgstr ""
+
+#: app/pro/services.py:640 app/pro/services.py:702
+msgid "Abrir Caja del día"
+msgstr ""
+
+#: app/pro/services.py:680
+#, python-format
+msgid "Da seguimiento a %(amount)s por cobrar"
+msgstr ""
+
+#: app/pro/services.py:684
+#, python-format
+msgid "%(count)s cliente mantiene saldo pendiente."
+msgid_plural "%(count)s clientes mantienen saldo pendiente."
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/pro/services.py:689
+msgid "Ver saldos pendientes"
+msgstr ""
+
+#: app/pro/services.py:698
+msgid "La caja principal está cerrada"
+msgstr ""
+
+#: app/pro/services.py:700
+msgid "Las ventas en efectivo necesitan una caja abierta."
 msgstr ""
 
 #: app/team/routes.py:66
@@ -1962,7 +2106,7 @@ msgstr ""
 
 #: app/templates/admin_organization.html:48
 #: app/templates/emails/monthly_owner_report.html:31
-#: app/templates/pro_dashboard.html:90 app/templates/pro_dashboard.html:239
+#: app/templates/pro_dashboard.html:92 app/templates/pro_dashboard.html:440
 #: app/templates/reports.html:209
 msgid "Ventas"
 msgstr ""
@@ -2265,15 +2409,17 @@ msgstr ""
 
 #: app/templates/base.html:39 app/templates/dashboard.html:172
 #: app/templates/dashboard.html:230 app/templates/edit_product.html:7
-#: app/templates/landing.html:70
+#: app/templates/landing.html:70 app/templates/pro_dashboard.html:321
 msgid "Inventario"
 msgstr ""
 
 #: app/templates/base.html:40 app/templates/cash_register.html:2
+#: app/templates/pro_dashboard.html:351
 msgid "Caja del día"
 msgstr ""
 
 #: app/templates/base.html:42 app/templates/credit_accounts.html:2
+#: app/templates/pro_dashboard.html:336
 msgid "Saldos pendientes"
 msgstr ""
 
@@ -2281,7 +2427,7 @@ msgstr ""
 msgid "Reportes"
 msgstr ""
 
-#: app/templates/base.html:47 app/templates/pro_dashboard.html:27
+#: app/templates/base.html:47 app/templates/pro_dashboard.html:29
 msgid "PATIA PRO"
 msgstr ""
 
@@ -3172,10 +3318,6 @@ msgid_plural "%(count)s productos necesitan surtirse"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/templates/dashboard.html:149
-msgid "Ver productos"
-msgstr ""
-
 #: app/templates/dashboard.html:152
 msgid "Hay pagos pendientes de clientes"
 msgstr ""
@@ -3560,12 +3702,12 @@ msgstr ""
 msgid "Todos los cambios"
 msgstr ""
 
-#: app/templates/inventory_kardex.html:57 app/templates/pro_dashboard.html:63
+#: app/templates/inventory_kardex.html:57 app/templates/pro_dashboard.html:65
 #: app/templates/reports.html:46
 msgid "Desde"
 msgstr ""
 
-#: app/templates/inventory_kardex.html:58 app/templates/pro_dashboard.html:68
+#: app/templates/inventory_kardex.html:58 app/templates/pro_dashboard.html:70
 #: app/templates/reports.html:51
 msgid "Hasta"
 msgstr ""
@@ -3739,7 +3881,7 @@ msgstr ""
 msgid "Productos con mayor movimiento"
 msgstr ""
 
-#: app/templates/landing.html:74 app/templates/pro_dashboard.html:41
+#: app/templates/landing.html:74 app/templates/pro_dashboard.html:43
 #: app/templates/reports.html:22
 msgid "Últimos 7 días"
 msgstr ""
@@ -4323,195 +4465,306 @@ msgstr ""
 msgid "Sin comparación disponible"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:13
+#: app/templates/pro_dashboard.html:15
 #, python-format
 msgid "%(value)s puntos vs. periodo anterior"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:15
+#: app/templates/pro_dashboard.html:17
 #, python-format
 msgid "%(value)s%% vs. periodo anterior"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:29
+#: app/templates/pro_dashboard.html:31
 msgid "La perspectiva completa de tu negocio"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:30
+#: app/templates/pro_dashboard.html:32
 msgid ""
 "Compara resultados, entiende la rentabilidad y anticipa cómo cerrará el "
 "mes."
 msgstr ""
 
-#: app/templates/pro_dashboard.html:33
+#: app/templates/pro_dashboard.html:35
 msgid "Periodo analizado"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:39
+#: app/templates/pro_dashboard.html:41
 msgid "Periodo del Dashboard Ejecutivo"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:42 app/templates/reports.html:23
+#: app/templates/pro_dashboard.html:44 app/templates/reports.html:23
 msgid "Este mes"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:43 app/templates/reports.html:29
+#: app/templates/pro_dashboard.html:45 app/templates/reports.html:29
 msgid "Últimos 30 días"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:55 app/templates/reports.html:35
+#: app/templates/pro_dashboard.html:57 app/templates/reports.html:35
 msgid "Rango personalizado"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:72 app/templates/reports.html:55
+#: app/templates/pro_dashboard.html:74 app/templates/reports.html:55
 msgid "Aplicar rango"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:87
+#: app/templates/pro_dashboard.html:89
 msgid "Indicadores ejecutivos"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:95
+#: app/templates/pro_dashboard.html:97
 #, python-format
 msgid "%(tickets)s tickets en el periodo"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:100 app/templates/pro_dashboard.html:240
+#: app/templates/pro_dashboard.html:102 app/templates/pro_dashboard.html:441
 #: app/templates/reports.html:80 app/templates/reports.html:162
 #: app/templates/reports.html:210
 msgid "Utilidad"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:106
+#: app/templates/pro_dashboard.html:108
 #, python-format
 msgid "%(coverage)s%% de las ventas tiene costo conocido"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:112 app/templates/products.html:192
+#: app/templates/pro_dashboard.html:114 app/templates/products.html:192
 #: app/templates/products.html:201 app/templates/reports.html:85
 #: app/templates/reports.html:162
 msgid "Margen"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:117
+#: app/templates/pro_dashboard.html:119
 msgid "Calculado con los costos históricos disponibles"
 msgstr ""
 
 #: app/templates/emails/monthly_owner_report.html:45
-#: app/templates/pro_dashboard.html:122 app/templates/reports.html:90
+#: app/templates/pro_dashboard.html:124 app/templates/reports.html:90
 msgid "Ticket promedio"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:127
+#: app/templates/pro_dashboard.html:129
 msgid "Importe promedio de cada venta"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:134
+#: app/templates/pro_dashboard.html:136
 msgid ""
 "Agrega el costo del producto para incluir todas las ventas en utilidad y "
 "margen."
 msgstr ""
 
-#: app/templates/pro_dashboard.html:135
-msgid "Revisar inventario"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:143
+#: app/templates/pro_dashboard.html:145
 msgid "Meta mensual"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:144
+#: app/templates/pro_dashboard.html:146
 msgid "Avance del mes"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:151
+#: app/templates/pro_dashboard.html:153
 msgid "Ventas del mes"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:152
+#: app/templates/pro_dashboard.html:154
 msgid "Meta"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:157
+#: app/templates/pro_dashboard.html:159
 #, python-format
 msgid "%(progress)s%% de la meta alcanzada"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:160
+#: app/templates/pro_dashboard.html:162
 msgid "Define cuánto quieres vender este mes"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:161
+#: app/templates/pro_dashboard.html:163
 msgid "PATIA comparará tus ventas reales con ese objetivo."
 msgstr ""
 
-#: app/templates/pro_dashboard.html:167
+#: app/templates/pro_dashboard.html:169
 msgid "Cambiar meta"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:167
+#: app/templates/pro_dashboard.html:169
 msgid "Definir meta"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:171
+#: app/templates/pro_dashboard.html:173
 msgid "Meta de ventas mensual"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:177
+#: app/templates/pro_dashboard.html:179
 msgid "Guardar meta"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:183
+#: app/templates/pro_dashboard.html:185
 msgid "Eliminar meta"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:193
+#: app/templates/pro_dashboard.html:195
 msgid "Proyección"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:194
+#: app/templates/pro_dashboard.html:196
 msgid "Cierre estimado del mes"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:200
+#: app/templates/pro_dashboard.html:202
 msgid ""
 "Estimación basada en el ritmo de ventas registrado durante el mes. No es "
 "una garantía."
 msgstr ""
 
-#: app/templates/pro_dashboard.html:203
+#: app/templates/pro_dashboard.html:205
 msgid "Aún no hay suficiente actividad para proyectar"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:204
+#: app/templates/pro_dashboard.html:206
 msgid "La proyección aparecerá después de varios días y ventas registradas."
 msgstr ""
 
-#: app/templates/pro_dashboard.html:212
+#: app/templates/pro_dashboard.html:214
 msgid "Tendencia"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:213
+#: app/templates/pro_dashboard.html:215
 msgid "Ventas y utilidad frente al periodo anterior"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:215
+#: app/templates/pro_dashboard.html:217
 msgid "Comparación equivalente"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:224
+#: app/templates/pro_dashboard.html:226
 msgid "La gráfica aparecerá cuando registres ventas"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:225
+#: app/templates/pro_dashboard.html:227
 msgid "Aquí verás ventas, utilidad y el periodo anterior en una sola vista."
 msgstr ""
 
-#: app/templates/pro_dashboard.html:226 app/templates/reports.html:197
+#: app/templates/pro_dashboard.html:228 app/templates/reports.html:197
 msgid "Registrar una venta"
 msgstr ""
 
-#: app/templates/pro_dashboard.html:241
+#: app/templates/pro_dashboard.html:238
+msgid "Qué impulsa el resultado"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:239
+msgid "Lo que más aportó en el periodo"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:244
+#, python-format
+msgid "%(start)s — %(end)s · basado en ventas registradas"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:266
+msgid "Aquí aparecerán los principales impulsores"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:267
+msgid "Registra ventas para identificar productos, días y horarios destacados."
+msgstr ""
+
+#: app/templates/pro_dashboard.html:276
+msgid "Qué requiere atención"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:277
+msgid "Hallazgos respaldados por tus datos"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:301
+msgid "No detectamos situaciones urgentes en este periodo"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:302
+msgid ""
+"PATIA seguirá comparando margen, movimiento, existencias y cierres de "
+"caja."
+msgstr ""
+
+#: app/templates/pro_dashboard.html:312
+msgid "Control del negocio"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:313
+msgid "Tres áreas que conviene mantener en orden"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:325
+#, python-format
+msgid "%(count)s productos en o por debajo del mínimo"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:327
+#, python-format
+msgid "%(count)s productos activos · sin alertas de stock"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:340
+#, python-format
+msgid "%(count)s clientes con saldo"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:342
+msgid "Ningún cliente tiene saldo pendiente"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:354
+msgid "Efectivo esperado · caja abierta"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:356
+msgid "Cerrada"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:359
+#, python-format
+msgid "Última diferencia: %(amount)s"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:361
+msgid "Abre la caja antes de cobrar en efectivo"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:375
+msgid "Actividad del equipo"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:376
+msgid "Movimientos operativos del periodo"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:381
+msgid "Un resumen para entender la operación, no para vigilar a las personas."
+msgstr ""
+
+#: app/templates/pro_dashboard.html:392
+msgid "eventos registrados"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:403
+msgid "Acciones prioritarias"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:404
+msgid "Qué puedes hacer ahora"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:426
+msgid "No hay acciones prioritarias pendientes"
+msgstr ""
+
+#: app/templates/pro_dashboard.html:427
+msgid "El negocio no presenta alertas accionables con los datos disponibles."
+msgstr ""
+
+#: app/templates/pro_dashboard.html:442
 msgid "Ventas del periodo anterior"
 msgstr ""
 
@@ -6260,10 +6513,6 @@ msgstr ""
 
 #: app/templates/emails/monthly_owner_report.html:92
 msgid "Pendiente por cobrar"
-msgstr ""
-
-#: app/templates/emails/monthly_owner_report.html:96
-msgid "Cierres con diferencia"
 msgstr ""
 
 #: app/templates/emails/monthly_owner_report.html:101

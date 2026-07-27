@@ -230,6 +230,205 @@
       {% endif %}
     </article>
   </section>
+
+  <section class="pro-dashboard-v1__insight-grid">
+    <article class="pro-dashboard-v1__panel pro-dashboard-v1__drivers">
+      <header>
+        <div>
+          <span>{{ _("Qué impulsa el resultado") }}</span>
+          <h3>{{ _("Lo que más aportó en el periodo") }}</h3>
+        </div>
+        <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
+      </header>
+      <p class="pro-dashboard-v1__section-context">
+        {{ _("%(start)s — %(end)s · basado en ventas registradas", start=executive_period.start_date.strftime("%d/%m/%Y"), end=executive_period.end_date.strftime("%d/%m/%Y")) }}
+      </p>
+      {% if executive_drivers %}
+        <ol class="pro-dashboard-v1__driver-list">
+          {% for item in executive_drivers %}
+            <li>
+              <span class="pro-dashboard-v1__item-icon" aria-hidden="true">
+                <i class="fa-solid {{ item.icon }}"></i>
+              </span>
+              <div>
+                <small>{{ item.label }}</small>
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.evidence }}</span>
+              </div>
+              <b>{{ item.value|money }}</b>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <div class="pro-dashboard-v1__section-empty">
+          <i class="fa-solid fa-chart-simple" aria-hidden="true"></i>
+          <div>
+            <strong>{{ _("Aquí aparecerán los principales impulsores") }}</strong>
+            <p>{{ _("Registra ventas para identificar productos, días y horarios destacados.") }}</p>
+          </div>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="pro-dashboard-v1__panel pro-dashboard-v1__attention">
+      <header>
+        <div>
+          <span>{{ _("Qué requiere atención") }}</span>
+          <h3>{{ _("Hallazgos respaldados por tus datos") }}</h3>
+        </div>
+        <i class="fa-solid fa-compass" aria-hidden="true"></i>
+      </header>
+      {% if executive_attention %}
+        <div class="pro-dashboard-v1__attention-list">
+          {% for item in executive_attention %}
+            <article class="pro-dashboard-v1__finding pro-dashboard-v1__finding--{{ item.tone }}">
+              <span class="pro-dashboard-v1__item-icon" aria-hidden="true">
+                <i class="fa-solid {{ item.icon }}"></i>
+              </span>
+              <div>
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.evidence }}</p>
+                <small>{{ item.action }}</small>
+              </div>
+              <a href="{{ item.url }}">{{ item.action_label }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="pro-dashboard-v1__section-empty pro-dashboard-v1__section-empty--success">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+          <div>
+            <strong>{{ _("No detectamos situaciones urgentes en este periodo") }}</strong>
+            <p>{{ _("PATIA seguirá comparando margen, movimiento, existencias y cierres de caja.") }}</p>
+          </div>
+        </div>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="pro-dashboard-v1__panel pro-dashboard-v1__control" aria-labelledby="business-control-title">
+    <header>
+      <div>
+        <span>{{ _("Control del negocio") }}</span>
+        <h3 id="business-control-title">{{ _("Tres áreas que conviene mantener en orden") }}</h3>
+      </div>
+      <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+    </header>
+    <div class="pro-dashboard-v1__control-grid">
+      <a href="{{ executive_control.inventory.url }}">
+        <span class="pro-dashboard-v1__item-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+        <div>
+          <small>{{ _("Inventario") }}</small>
+          <strong>{{ executive_control.inventory.value|money }}</strong>
+          <span>
+            {% if executive_control.inventory.low_stock %}
+              {{ _("%(count)s productos en o por debajo del mínimo", count=executive_control.inventory.low_stock) }}
+            {% else %}
+              {{ _("%(count)s productos activos · sin alertas de stock", count=executive_control.inventory.products) }}
+            {% endif %}
+          </span>
+        </div>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="{{ executive_control.credit.url }}">
+        <span class="pro-dashboard-v1__item-icon" aria-hidden="true"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <div>
+          <small>{{ _("Saldos pendientes") }}</small>
+          <strong>{{ executive_control.credit.balance|money }}</strong>
+          <span>
+            {% if executive_control.credit.customers %}
+              {{ _("%(count)s clientes con saldo", count=executive_control.credit.customers) }}
+            {% else %}
+              {{ _("Ningún cliente tiene saldo pendiente") }}
+            {% endif %}
+          </span>
+        </div>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="{{ executive_control.cash.url }}">
+        <span class="pro-dashboard-v1__item-icon" aria-hidden="true"><i class="fa-solid fa-cash-register"></i></span>
+        <div>
+          <small>{{ _("Caja del día") }}</small>
+          {% if executive_control.cash.status == "open" %}
+            <strong>{{ executive_control.cash.amount|money }}</strong>
+            <span>{{ _("Efectivo esperado · caja abierta") }}</span>
+          {% else %}
+            <strong>{{ _("Cerrada") }}</strong>
+            <span>
+              {% if executive_control.cash.difference is not none %}
+                {{ _("Última diferencia: %(amount)s", amount=(executive_control.cash.difference|money)) }}
+              {% else %}
+                {{ _("Abre la caja antes de cobrar en efectivo") }}
+              {% endif %}
+            </span>
+          {% endif %}
+        </div>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </a>
+    </div>
+  </section>
+
+  {% if team_activity.visible %}
+    <section class="pro-dashboard-v1__panel pro-dashboard-v1__team" aria-labelledby="team-activity-title">
+      <header>
+        <div>
+          <span>{{ _("Actividad del equipo") }}</span>
+          <h3 id="team-activity-title">{{ _("Movimientos operativos del periodo") }}</h3>
+        </div>
+        <i class="fa-solid fa-people-group" aria-hidden="true"></i>
+      </header>
+      <p class="pro-dashboard-v1__section-context">
+        {{ _("Un resumen para entender la operación, no para vigilar a las personas.") }}
+      </p>
+      <div class="pro-dashboard-v1__team-grid">
+        {% for item in team_activity["items"] %}
+          <a href="{{ item.url }}">
+            <span class="pro-dashboard-v1__item-icon" aria-hidden="true"><i class="fa-solid {{ item.icon }}"></i></span>
+            <small>{{ item.label }}</small>
+            <strong>{{ item.count }}</strong>
+            {% if item.amount is not none and item.amount %}
+              <span>{{ item.amount|money }}</span>
+            {% else %}
+              <span>{{ _("eventos registrados") }}</span>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="pro-dashboard-v1__panel pro-dashboard-v1__actions" aria-labelledby="priority-actions-title">
+    <header>
+      <div>
+        <span>{{ _("Acciones prioritarias") }}</span>
+        <h3 id="priority-actions-title">{{ _("Qué puedes hacer ahora") }}</h3>
+      </div>
+      <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+    </header>
+    {% if priority_actions %}
+      <ol>
+        {% for item in priority_actions %}
+          <li>
+            <span class="pro-dashboard-v1__action-number">{{ loop.index }}</span>
+            <span class="pro-dashboard-v1__item-icon" aria-hidden="true"><i class="fa-solid {{ item.icon }}"></i></span>
+            <div>
+              <strong>{{ item.title }}</strong>
+              <p>{{ item.evidence }}</p>
+            </div>
+            <a class="btn ghost" href="{{ item.url }}">{{ item.label }}</a>
+          </li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <div class="pro-dashboard-v1__section-empty pro-dashboard-v1__section-empty--success">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <div>
+          <strong>{{ _("No hay acciones prioritarias pendientes") }}</strong>
+          <p>{{ _("El negocio no presenta alertas accionables con los datos disponibles.") }}</p>
+        </div>
+      </div>
+    {% endif %}
+  </section>
 </div>
 
 {% if executive_kpis.ticket_count %}
