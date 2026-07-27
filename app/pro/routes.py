@@ -48,11 +48,94 @@ from .services import build_executive_dashboard, build_smart_alerts
 pro = Blueprint("pro", __name__, url_prefix="/pro")
 
 
-def _pro_access():
+def _pro_preview(module):
+    previews = {
+        "hub": {
+            "icon": "fa-gem",
+            "eyebrow": gettext("PATIA Pro"),
+            "title": gettext("Tu centro de decisiones, en un solo lugar"),
+            "description": gettext(
+                "Reúne resultados, alertas, compras y resúmenes mensuales "
+                "para que sepas qué atender primero."
+            ),
+            "benefits": (
+                gettext("Prioridades claras para el día"),
+                gettext("Acceso directo a cada herramienta Pro"),
+                gettext("Menos tiempo buscando información"),
+            ),
+        },
+        "dashboard": {
+            "icon": "fa-chart-column",
+            "eyebrow": gettext("Panel ejecutivo"),
+            "title": gettext("Entiende qué cambió y qué conviene hacer"),
+            "description": gettext(
+                "PATIA interpreta ventas, utilidad, inventario y operación "
+                "para convertir tus datos en decisiones."
+            ),
+            "benefits": (
+                gettext("Comparaciones contra periodos anteriores"),
+                gettext("Proyección y meta mensual"),
+                gettext("Acciones respaldadas por datos reales"),
+            ),
+        },
+        "monthly": {
+            "icon": "fa-file-lines",
+            "eyebrow": gettext("Reporte mensual"),
+            "title": gettext("Recibe el resumen que le darías a un gerente"),
+            "description": gettext(
+                "Conserva una fotografía de cada mes, descárgala en PDF "
+                "y compártela sin preparar reportes manuales."
+            ),
+            "benefits": (
+                gettext("Historial mensual inmutable"),
+                gettext("PDF listo para compartir"),
+                gettext("Envío y reenvío desde PATIA"),
+            ),
+        },
+        "purchases": {
+            "icon": "fa-truck-ramp-box",
+            "eyebrow": gettext("Compras inteligentes"),
+            "title": gettext("Compra lo necesario antes de quedarte sin stock"),
+            "description": gettext(
+                "PATIA usa existencias y ventas recientes para sugerir "
+                "qué pedir, cuánto y a qué proveedor."
+            ),
+            "benefits": (
+                gettext("Reposición agrupada por proveedor"),
+                gettext("Pedidos y recepciones conectados al inventario"),
+                gettext("Evidencia detrás de cada sugerencia"),
+            ),
+        },
+        "alerts": {
+            "icon": "fa-bell",
+            "eyebrow": gettext("Alertas"),
+            "title": gettext("Detecta lo importante antes de que sea urgente"),
+            "description": gettext(
+                "Revisa cambios en ventas, margen, stock, crédito y caja "
+                "con evidencia y una acción concreta."
+            ),
+            "benefits": (
+                gettext("Prioridad según impacto"),
+                gettext("Evidencia fácil de comprobar"),
+                gettext("Acceso directo para resolver cada situación"),
+            ),
+        },
+    }
+    return previews[module]
+
+
+def _pro_access(preview=None):
     user = current_user()
     membership = active_membership(user) if user else None
     owner = current_organization_owner(user)
     if not owner or not has_entitlement(owner, "executive_dashboard"):
+        if preview and user and membership and request.method == "GET":
+            return user, membership, render_template(
+                "pro_preview.html",
+                user=user,
+                organization=membership.organization,
+                preview=_pro_preview(preview),
+            )
         flash(
             gettext(
                 "El Dashboard Ejecutivo está incluido en PATIA Pro. "
@@ -67,7 +150,7 @@ def _pro_access():
 @pro.route("", methods=["GET"], strict_slashes=False)
 @require_permission("view_reports")
 def dashboard():
-    user, membership, blocked = _pro_access()
+    user, membership, blocked = _pro_access("dashboard")
     if blocked:
         return blocked
     data = build_executive_dashboard(
@@ -139,7 +222,7 @@ def _selected_completed_period(organization):
 @pro.route("/hub")
 @require_permission("view_reports")
 def hub():
-    user, membership, blocked = _pro_access()
+    user, membership, blocked = _pro_access("hub")
     if blocked:
         return blocked
     alerts = build_smart_alerts(
@@ -157,27 +240,64 @@ def hub():
         )
         .first()
     )
-    open_orders = PurchaseOrder.query.filter(
-        PurchaseOrder.organization_id == membership.organization_id,
-        PurchaseOrder.status.in_(
-            ("DRAFT", "ORDERED", "PARTIALLY_RECEIVED")
-        ),
-    ).count()
+    priorities = [
+        {
+            "title": item["title"],
+            "evidence": item["evidence"],
+            "label": item["action_label"],
+            "url": item["url"],
+            "icon": item["icon"],
+            "tone": item["tone"],
+        }
+        for item in alerts["smart_alerts"][:3]
+    ]
+    if (
+        len(priorities) < 3
+        and purchases["summary"]["products"]
+        and not any(item["key"] == "stock" for item in alerts["smart_alerts"])
+    ):
+        priorities.append(
+            {
+                "title": gettext(
+                    "%(count)s productos necesitan reposición",
+                    count=purchases["summary"]["products"],
+                ),
+                "evidence": gettext(
+                    "PATIA sugiere pedir %(units)s unidades con base en existencias y ventas recientes.",
+                    units=purchases["summary"]["units"],
+                ),
+                "label": gettext("Preparar compra"),
+                "url": url_for("pro.purchases"),
+                "icon": "fa-truck-ramp-box",
+                "tone": "warning",
+            }
+        )
+    if len(priorities) < 3 and not latest_report:
+        priorities.append(
+            {
+                "title": gettext("Tu primer reporte mensual está listo para generarse"),
+                "evidence": gettext(
+                    "Guarda una fotografía del mes y descárgala en PDF."
+                ),
+                "label": gettext("Generar reporte"),
+                "url": url_for("pro.monthly_reports"),
+                "icon": "fa-file-lines",
+                "tone": "neutral",
+            }
+        )
     return render_template(
         "pro_hub.html",
         user=user,
         organization=membership.organization,
-        alert_summary=alerts["alert_summary"],
-        purchase_summary=purchases["summary"],
         latest_report=latest_report,
-        open_orders=open_orders,
+        priorities=priorities[:3],
     )
 
 
 @pro.route("/alerts")
 @require_permission("view_reports")
 def alerts():
-    user, membership, blocked = _pro_access()
+    user, membership, blocked = _pro_access("alerts")
     if blocked:
         return blocked
     data = build_smart_alerts(membership.organization, request.args)
@@ -194,7 +314,7 @@ def alerts():
 @pro.route("/monthly-reports")
 @require_permission("view_reports")
 def monthly_reports():
-    user, membership, blocked = _pro_access()
+    user, membership, blocked = _pro_access("monthly")
     if blocked:
         return blocked
     reports = (
@@ -390,7 +510,7 @@ def monthly_report_resend(report_id):
 @pro.route("/purchases")
 @require_permission("manage_inventory")
 def purchases():
-    user, membership, blocked = _pro_access()
+    user, membership, blocked = _pro_access("purchases")
     if blocked:
         return blocked
     suggestions = purchase_suggestions(membership.organization_id)

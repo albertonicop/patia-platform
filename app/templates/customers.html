@@ -8,7 +8,7 @@
       <p>{{ _("Guarda a las personas que compran contigo y consulta sus compras o pagos pendientes.") }}</p>
     </div>
     <details class="module-more-v2 customers-simple-v1__more">
-      <summary>{{ _("Más") }}</summary>
+      <summary>{{ _("Más acciones") }}</summary>
       <a href="{{ url_for('customers.index', q=query, status='' if include_inactive else 'all') }}">
         <i class="fa-solid fa-user-clock" aria-hidden="true"></i>
         {{ _("Ocultar inactivos") if include_inactive else _("Mostrar inactivos") }}

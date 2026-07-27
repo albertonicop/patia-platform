@@ -5,6 +5,7 @@ from functools import wraps
 from flask import (
     abort,
     flash,
+    g,
     has_request_context,
     jsonify,
     redirect,
@@ -122,17 +123,31 @@ def ensure_owner_organization(user: User) -> OrganizationMember:
 
 def active_membership(user: User) -> OrganizationMember | None:
     requested_id = session.get("organization_id") if has_request_context() else None
+    cache_key = (user.id, requested_id)
+    if has_request_context():
+        cache = getattr(g, "_active_membership_cache", {})
+        if cache_key in cache:
+            return cache[cache_key]
+
     query = OrganizationMember.query.filter_by(user_id=user.id, is_active=True)
     if requested_id is not None:
         membership = query.filter_by(organization_id=requested_id).first()
         if membership and membership.organization.is_active:
+            cache[cache_key] = membership
+            g._active_membership_cache = cache
             return membership
 
     membership = query.order_by(OrganizationMember.id).first()
     if membership and membership.organization.is_active:
         if has_request_context():
             session["organization_id"] = membership.organization_id
+            cache[cache_key] = membership
+            cache[(user.id, membership.organization_id)] = membership
+            g._active_membership_cache = cache
         return membership
+    if has_request_context():
+        cache[cache_key] = None
+        g._active_membership_cache = cache
     return None
 
 

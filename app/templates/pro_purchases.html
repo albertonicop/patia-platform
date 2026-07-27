@@ -13,10 +13,25 @@
     <div>
       <span class="eyebrow">{{ _("Compra lo necesario, a tiempo") }}</span>
       <h2>{{ _("Reposición sugerida") }}</h2>
-      <p>{{ _("PATIA combina existencias, mínimos y ventas recientes. Tú decides qué pedir.") }}</p>
+      <p>{{ _("PATIA revisa cuánto tienes, cuánto vendiste y el mínimo que definiste. Te propone una cantidad; tú siempre decides qué pedir.") }}</p>
     </div>
     <a class="btn ghost" href="{{ url_for('pro.hub') }}">{{ _("Volver a PATIA Pro") }}</a>
   </header>
+
+  <section class="pro-purchases-v1__guide" aria-labelledby="purchase-guide-title">
+    <div>
+      <span class="eyebrow">{{ _("Cómo usar esta pantalla") }}</span>
+      <h3 id="purchase-guide-title">{{ _("De una sugerencia a inventario actualizado") }}</h3>
+      <p>{{ _("La recomendación aparece cuando el stock llega al mínimo o la cobertura estimada es de 14 días o menos.") }}</p>
+    </div>
+    <ol aria-label="{{ _('Flujo de una compra') }}">
+      <li><span>1</span>{{ _("Seleccionar") }}</li>
+      <li><span>2</span>{{ _("Crear borrador") }}</li>
+      <li><span>3</span>{{ _("Confirmar") }}</li>
+      <li><span>4</span>{{ _("Recibir") }}</li>
+      <li><span>5</span>{{ _("Inventario actualizado") }}</li>
+    </ol>
+  </section>
 
   <section class="pro-purchases-v1__summary">
     <article><span>{{ _("Productos por reponer") }}</span><strong>{{ summary.products }}</strong></article>
@@ -40,13 +55,21 @@
           </header>
           <div class="table-responsive">
             <table>
-              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Stock") }}</th><th>{{ _("Cobertura") }}</th><th>{{ _("Pedir") }}</th></tr></thead>
+              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Evidencia") }}</th><th>{{ _("Pedir") }}</th></tr></thead>
               <tbody>
                 {% for item in group["items"] %}
                   <tr>
                     <td data-label="{{ _('Producto') }}"><strong>{{ item.name }}</strong><small>{{ item.sku }}</small></td>
-                    <td data-label="{{ _('Stock') }}">{{ item.stock }} / {{ item.min_stock }}</td>
-                    <td data-label="{{ _('Cobertura') }}">{% if item.coverage_days is not none %}{{ _("%(days)s días", days=item.coverage_days) }}{% else %}{{ _("Sin ventas recientes") }}{% endif %}</td>
+                    <td data-label="{{ _('Evidencia') }}" class="pro-purchases-v1__evidence">
+                      <strong>{{ _("Stock %(stock)s · mínimo %(minimum)s", stock=item.stock, minimum=item.min_stock) }}</strong>
+                      <small>
+                        {% if item.coverage_days is not none %}
+                          {{ _("%(units)s unidades vendidas en 30 días · cobertura aproximada de %(days)s días", units=item.recent_units, days=item.coverage_days) }}
+                        {% else %}
+                          {{ _("Sin ventas recientes; la sugerencia se basa en el stock mínimo.") }}
+                        {% endif %}
+                      </small>
+                    </td>
                     <td data-label="{{ _('Pedir') }}"><input aria-label="{{ _('Cantidad para %(product)s', product=item.name) }}" type="number" min="1" step="1" name="quantity_{{ item.product_id }}" value="{{ item.suggested_quantity }}" required></td>
                   </tr>
                 {% endfor %}
@@ -66,8 +89,9 @@
   {% endif %}
 
   <section class="pro-purchases-v1__method">
-    <h3>{{ _("Cómo calcula PATIA la sugerencia") }}</h3>
-    <p>{{ _("%(sales)s días de ventas · %(coverage)s días de cobertura objetivo · productos sin movimiento en %(movement)s días", sales=method.sales_window_days, coverage=method.target_coverage_days, movement=method.no_movement_days) }}</p>
+    <h3>{{ _("Qué ocurre después") }}</h3>
+    <p>{{ _("El borrador no cambia existencias. Al confirmar registras el pedido; al recibir mercancía, PATIA aumenta el stock y conserva el movimiento en el historial de inventario.") }}</p>
+    <small>{{ _("%(sales)s días de ventas analizados · %(coverage)s días de cobertura objetivo · sin movimiento después de %(movement)s días", sales=method.sales_window_days, coverage=method.target_coverage_days, movement=method.no_movement_days) }}</small>
   </section>
 
   {% if no_movement %}

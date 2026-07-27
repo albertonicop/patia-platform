@@ -98,7 +98,7 @@ def index():
                 ),
                 money_decimal(0),
             )
-            if movement_type == "OPENING" or amount > 0:
+            if amount > 0:
                 cash_summary[movement_type] = {
                     "label": label,
                     "amount": amount,
@@ -116,6 +116,13 @@ def index():
             membership, "manage_cash_movements"
         ),
         can_view_history=can_view_history,
+        has_cash_activity=bool(
+            current
+            and any(
+                movement.movement_type != "OPENING"
+                for movement in current.movements
+            )
+        ),
     )
 
 

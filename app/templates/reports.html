@@ -1,18 +1,23 @@
 {% extends 'base.html' %}
-{% block title %}{{ _("Reportes IA") }}{% endblock %}
+{% block title %}{{ _("Reportes") }}{% endblock %}
 
 {% block content %}
 <div class="reports-v3">
   <header class="reports-v3__intro">
     <div>
-      <span>{{ _("Análisis del negocio") }}</span>
-      <h2>{{ _("Reportes ejecutivos") }}</h2>
-      <p>{{ _("Consulta ventas, utilidad y desempeño usando los costos guardados al momento de cada venta.") }}</p>
+      <span>{{ _("Datos del negocio") }}</span>
+      <h2>{{ _("Lo que ocurrió en el periodo") }}</h2>
+      <p>{{ _("Consulta ventas, utilidad, productos y formas de pago con los datos registrados. Para entender por qué cambió y qué hacer ahora, abre el Panel ejecutivo.") }}</p>
     </div>
-    <p class="reports-v3__range">
-      <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-      {{ report_period.start_date.strftime("%d/%m/%Y") }} — {{ report_period.end_date.strftime("%d/%m/%Y") }}
-    </p>
+    <div class="reports-v3__heading-actions">
+      {% if can_use_advanced_reports %}
+        <a class="btn ghost" href="{{ url_for('pro.dashboard') }}">{{ _("Interpretar en Panel ejecutivo") }}</a>
+      {% endif %}
+      <p class="reports-v3__range">
+        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+        {{ report_period.start_date.strftime("%d/%m/%Y") }} — {{ report_period.end_date.strftime("%d/%m/%Y") }}
+      </p>
+    </div>
   </header>
 
   {% set show_custom_period = report_period.period == "custom" or request.args.get("period") == "custom" or request.args.get("show_custom") == "1" %}

@@ -1,13 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ _("PATIA Pro") }}{% endblock %}
 {% block content %}
-{% set report_status_labels = {
-  "pending": _("Pendiente"),
-  "generated": _("Generado"),
-  "sending": _("Enviando"),
-  "sent": _("Enviado"),
-  "failed": _("Fallido")
-} %}
 <div class="pro-hub-v1">
   <header class="pro-hub-v1__hero">
     <div>
@@ -21,6 +14,31 @@
     </a>
   </header>
 
+  <section class="pro-hub-v1__priorities" aria-labelledby="hub-priorities-title">
+    <header>
+      <span class="eyebrow">{{ _("Tu enfoque para hoy") }}</span>
+      <h2 id="hub-priorities-title">{{ _("Lo más importante hoy") }}</h2>
+      <p>{{ _("Hasta tres acciones ordenadas por impacto, cada una con la evidencia que la explica.") }}</p>
+    </header>
+    {% if priorities %}
+      <div class="pro-hub-v1__priority-list">
+        {% for item in priorities %}
+          <article class="pro-hub-v1__priority pro-hub-v1__priority--{{ item.tone }}">
+            <span aria-hidden="true"><i class="fa-solid {{ item.icon }}"></i></span>
+            <div><h3>{{ item.title }}</h3><p>{{ item.evidence }}</p></div>
+            <a class="btn ghost" href="{{ item.url }}">{{ item.label }}</a>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="pro-hub-v1__clear">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <div><h3>{{ _("Todo está en orden por ahora") }}</h3><p>{{ _("No detectamos una acción urgente con los datos registrados.") }}</p></div>
+        <a class="btn ghost" href="{{ url_for('pro.dashboard') }}">{{ _("Revisar resultados") }}</a>
+      </div>
+    {% endif %}
+  </section>
+
   <section class="pro-hub-v1__grid" aria-label="{{ _('Herramientas Pro') }}">
     <a class="pro-hub-v1__card" href="{{ url_for('pro.dashboard') }}">
       <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
@@ -30,27 +48,21 @@
     </a>
     <a class="pro-hub-v1__card" href="{{ url_for('pro.monthly_reports') }}">
       <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
-      <span>{{ _("Resumen mensual") }}</span>
-      <h3>
-        {% if latest_report %}
-          {{ _("%(year)s-%(month)02d · %(status)s", year=latest_report.report_year, month=latest_report.report_month, status=report_status_labels.get(latest_report.status, latest_report.status)) }}
-        {% else %}
-          {{ _("Genera tu primer resumen") }}
-        {% endif %}
-      </h3>
+      <span>{{ _("Seguimiento mensual") }}</span>
+      <h3>{{ _("Reporte mensual") }}</h3>
       <p>{{ _("Conserva una fotografía inmutable de cada mes y descárgala en PDF.") }}</p>
     </a>
     <a class="pro-hub-v1__card" href="{{ url_for('pro.purchases') }}">
       <i class="fa-solid fa-truck-ramp-box" aria-hidden="true"></i>
-      <span>{{ _("Compras inteligentes") }}</span>
-      <h3>{{ _("%(count)s productos por reponer", count=purchase_summary.products) }}</h3>
-      <p>{{ _("%(orders)s pedidos abiertos · %(units)s unidades sugeridas", orders=open_orders, units=purchase_summary.units) }}</p>
+      <span>{{ _("Reposición") }}</span>
+      <h3>{{ _("Compras inteligentes") }}</h3>
+      <p>{{ _("Prepara pedidos con base en stock, mínimos y ventas recientes.") }}</p>
     </a>
     <a class="pro-hub-v1__card" href="{{ url_for('pro.alerts') }}">
       <i class="fa-solid fa-bell" aria-hidden="true"></i>
-      <span>{{ _("Alertas inteligentes") }}</span>
-      <h3>{{ _("%(count)s situaciones para revisar", count=alert_summary.total) }}</h3>
-      <p>{{ _("%(count)s tienen prioridad alta y evidencia disponible.", count=alert_summary.high) }}</p>
+      <span>{{ _("Seguimiento continuo") }}</span>
+      <h3>{{ _("Alertas") }}</h3>
+      <p>{{ _("Revisa situaciones priorizadas con evidencia y una acción concreta.") }}</p>
     </a>
   </section>
 </div>

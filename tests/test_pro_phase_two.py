@@ -201,8 +201,29 @@ class ProPhaseTwoTests(unittest.TestCase):
         starter_response = self._client(
             starter, starter_membership
         ).get("/pro/hub")
-        self.assertEqual(starter_response.status_code, 302)
-        self.assertIn("/subscribe", starter_response.location)
+        self.assertEqual(starter_response.status_code, 200)
+        starter_html = starter_response.get_data(as_text=True)
+        self.assertIn("Tu centro de decisiones", starter_html)
+        self.assertIn("Actualizar a Pro", starter_html)
+
+    def test_starter_can_preview_every_pro_entry_point(self):
+        starter, membership = self._owner(
+            "starter-previews@example.com"
+        )
+        client = self._client(starter, membership)
+        for path, expected in (
+            ("/pro", "Panel ejecutivo"),
+            ("/pro/hub", "Tu centro de decisiones"),
+            ("/pro/monthly-reports", "Reporte mensual"),
+            ("/pro/purchases", "Compras inteligentes"),
+            ("/pro/alerts", "Detecta lo importante"),
+        ):
+            with self.subTest(path=path):
+                response = client.get(path)
+                self.assertEqual(response.status_code, 200)
+                html = response.get_data(as_text=True)
+                self.assertIn(expected, html)
+                self.assertIn("Actualizar a Pro", html)
 
     def test_empty_pro_views_explain_the_next_step(self):
         owner, membership = self._owner(

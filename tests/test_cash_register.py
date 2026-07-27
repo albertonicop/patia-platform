@@ -298,7 +298,7 @@ class CashRegisterTests(unittest.TestCase):
 
     def test_closed_register_only_presents_opening_task(self):
         body = self.client_for(self.owner).get("/cash-register").get_data(as_text=True)
-        self.assertIn("Abre la caja para comenzar", body)
+        self.assertIn("Todav\u00eda no has abierto caja", body)
         self.assertIn("Abrir caja", body)
         self.assertNotIn("Ver cierres anteriores", body)
         self.assertNotIn("Registrar gasto", body)

@@ -137,17 +137,25 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         db.session.commit()
         return sale
 
-    def test_starter_is_redirected_without_executive_data_or_navigation(self):
+    def test_starter_sees_pro_preview_without_executive_data(self):
         starter, membership = self._owner("starter@pro-dashboard.test")
         client = self._client(starter, membership)
 
         response = client.get("/pro")
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("/subscribe", response.location)
+        self.assertEqual(response.status_code, 200)
+        preview = response.get_data(as_text=True)
+        self.assertIn("Panel ejecutivo", preview)
+        self.assertIn("Actualizar a Pro", preview)
+        self.assertNotIn("executiveAnalytics", preview)
 
         dashboard = client.get("/")
         html = dashboard.get_data(as_text=True)
-        self.assertNotIn("Panel ejecutivo", html)
+        self.assertIn("Panel ejecutivo", html)
+        self.assertIn(">Pro</small>", html)
+        self.assertGreaterEqual(
+            html.count('class="sidebar-v2__section-label"'), 3
+        )
+        self.assertIn('href="/team"', html)
         self.assertNotIn("executiveAnalytics", html)
 
     def test_pro_owner_and_pro_trial_can_open_dashboard(self):

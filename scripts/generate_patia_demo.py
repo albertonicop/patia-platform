@@ -529,30 +529,136 @@ def render_frame(language: str, frame_index: int) -> np.ndarray:
 def soundtrack(path: Path) -> None:
     sample_rate = 44100
     total = int(DURATION * sample_rate)
-    time = np.arange(total, dtype=np.float64) / sample_rate
     audio = np.zeros(total, dtype=np.float64)
-    progression = ((220.00, 277.18, 329.63), (196.00, 246.94, 293.66), (174.61, 220.00, 261.63), (196.00, 246.94, 329.63))
-    for beat in np.arange(0, DURATION, 0.5):
-        chord = progression[int(beat // 4) % len(progression)]
-        start = int(beat * sample_rate)
-        length = min(int(1.15 * sample_rate), total - start)
-        envelope = np.exp(-np.arange(length) / sample_rate * 3.4)
-        tone_time = np.arange(length) / sample_rate
-        note = chord[int((beat * 2) % len(chord))]
-        pluck = np.sin(2 * np.pi * note * tone_time)
-        pluck += 0.28 * np.sin(2 * np.pi * note * 2 * tone_time)
-        audio[start : start + length] += 0.027 * pluck * envelope
-    for scene_start in range(0, DURATION, SCENE_SECONDS):
-        start = int(scene_start * sample_rate)
-        length = min(int(0.8 * sample_rate), total - start)
-        tone_time = np.arange(length) / sample_rate
-        sweep = np.sin(2 * np.pi * (420 + 520 * tone_time) * tone_time)
-        envelope = np.sin(np.pi * np.arange(length) / max(length, 1)) ** 2
-        audio[start : start + length] += 0.018 * sweep * envelope
-    fade = int(1.2 * sample_rate)
+
+    def mix(start_seconds: float, signal: np.ndarray) -> None:
+        start = int(start_seconds * sample_rate)
+        if start >= total:
+            return
+        length = min(len(signal), total - start)
+        audio[start : start + length] += signal[:length]
+
+    def smooth_envelope(length: int, attack: float, release: float) -> np.ndarray:
+        result = np.ones(length, dtype=np.float64)
+        attack_samples = min(length, int(attack * sample_rate))
+        release_samples = min(length, int(release * sample_rate))
+        if attack_samples:
+            result[:attack_samples] = np.sin(
+                np.linspace(0, math.pi / 2, attack_samples)
+            ) ** 2
+        if release_samples:
+            result[-release_samples:] = np.sin(
+                np.linspace(math.pi / 2, 0, release_samples)
+            ) ** 2
+        return result
+
+    # D minor progression: Dm · Bb · F · C. Layered harmonics create a
+    # cinematic string/brass bed without using external or copyrighted audio.
+    progression = (
+        (73.42, 110.00, 146.83, 174.61),
+        (58.27, 87.31, 116.54, 146.83),
+        (87.31, 130.81, 174.61, 220.00),
+        (65.41, 98.00, 130.81, 164.81),
+    )
+    chord_seconds = 6.0
+    for chord_index, start_seconds in enumerate(
+        np.arange(0, DURATION, chord_seconds)
+    ):
+        frequencies = progression[chord_index % len(progression)]
+        length = min(int(chord_seconds * sample_rate), total - int(start_seconds * sample_rate))
+        tone_time = np.arange(length, dtype=np.float64) / sample_rate
+        pad = np.zeros(length, dtype=np.float64)
+        intensity = 0.55 + 0.45 * (start_seconds / DURATION)
+        for frequency in frequencies:
+            phase = chord_index * 0.37
+            pad += np.sin(2 * np.pi * frequency * tone_time + phase)
+            pad += 0.32 * np.sin(2 * np.pi * frequency * 2 * tone_time + phase / 2)
+            pad += 0.12 * np.sin(2 * np.pi * frequency * 3 * tone_time)
+        pad /= len(frequencies) * 1.44
+        pad *= smooth_envelope(length, 1.0, 1.2)
+        mix(float(start_seconds), 0.105 * intensity * pad)
+
+    beat_seconds = 60 / 96
+    # Low ostinato gives the soundtrack motion and grows across the story.
+    ostinato = (146.83, 174.61, 220.00, 174.61, 146.83, 220.00, 261.63, 220.00)
+    for beat_index, start_seconds in enumerate(
+        np.arange(2.5, DURATION - 0.4, beat_seconds / 2)
+    ):
+        length = int(0.5 * sample_rate)
+        tone_time = np.arange(length, dtype=np.float64) / sample_rate
+        frequency = ostinato[beat_index % len(ostinato)]
+        pulse = np.sin(2 * np.pi * frequency * tone_time)
+        pulse += 0.2 * np.sin(2 * np.pi * frequency * 2 * tone_time)
+        envelope = np.exp(-tone_time * 7.2)
+        growth = 0.45 + 0.55 * (start_seconds / DURATION)
+        mix(float(start_seconds), 0.045 * growth * pulse * envelope)
+
+    rng = np.random.default_rng(20260727)
+    # Deep cinematic kick on every beat. Percussion enters progressively so
+    # the opening remains elegant and the final scenes feel larger.
+    for beat_index, start_seconds in enumerate(
+        np.arange(3.0, DURATION - 0.2, beat_seconds)
+    ):
+        length = int(0.42 * sample_rate)
+        tone_time = np.arange(length, dtype=np.float64) / sample_rate
+        phase = 2 * np.pi * (72 * tone_time - 26 * tone_time**2)
+        kick = np.sin(phase) * np.exp(-tone_time * 9)
+        impact = np.sin(2 * np.pi * 45 * tone_time) * np.exp(-tone_time * 15)
+        growth = 0.55 + 0.45 * (start_seconds / DURATION)
+        mix(float(start_seconds), growth * (0.16 * kick + 0.075 * impact))
+
+        if beat_index % 4 in {1, 3} and start_seconds > 10:
+            snare_length = int(0.24 * sample_rate)
+            snare_time = np.arange(snare_length, dtype=np.float64) / sample_rate
+            noise = rng.normal(0, 1, snare_length)
+            # Differencing removes low frequencies and creates a crisp,
+            # restrained cinematic snare.
+            noise = np.concatenate(([0.0], np.diff(noise)))
+            noise /= max(np.max(np.abs(noise)), 1)
+            snare = noise * np.exp(-snare_time * 18)
+            mix(float(start_seconds), 0.052 * growth * snare)
+
+    # Scene transitions receive an original riser and impact.
+    for scene_start in range(SCENE_SECONDS, DURATION, SCENE_SECONDS):
+        riser_seconds = 1.15
+        length = int(riser_seconds * sample_rate)
+        tone_time = np.arange(length, dtype=np.float64) / sample_rate
+        noise = rng.normal(0, 1, length)
+        noise = np.cumsum(noise)
+        noise /= max(np.max(np.abs(noise)), 1)
+        envelope = np.linspace(0, 1, length) ** 2
+        sweep_phase = 2 * np.pi * (
+            160 * tone_time + 420 * tone_time**2
+        )
+        riser = 0.028 * noise * envelope
+        riser += 0.018 * np.sin(sweep_phase) * envelope
+        mix(scene_start - riser_seconds, riser)
+
+        impact_length = int(0.8 * sample_rate)
+        impact_time = np.arange(impact_length, dtype=np.float64) / sample_rate
+        impact = np.sin(2 * np.pi * 52 * impact_time) * np.exp(-impact_time * 5.5)
+        impact += 0.35 * np.sin(2 * np.pi * 104 * impact_time) * np.exp(-impact_time * 7)
+        mix(scene_start, 0.095 * impact)
+
+    # A simple ascending motif carries the Pro and closing scenes.
+    melody = (293.66, 349.23, 440.00, 523.25, 440.00, 587.33, 698.46, 587.33)
+    for note_index, start_seconds in enumerate(
+        np.arange(29.0, DURATION - 0.5, beat_seconds)
+    ):
+        length = int(1.25 * sample_rate)
+        tone_time = np.arange(length, dtype=np.float64) / sample_rate
+        frequency = melody[note_index % len(melody)]
+        lead = np.sin(2 * np.pi * frequency * tone_time)
+        lead += 0.22 * np.sin(2 * np.pi * frequency * 2 * tone_time)
+        lead *= smooth_envelope(length, 0.08, 0.65)
+        mix(float(start_seconds), 0.032 * lead)
+
+    # Gentle master compression keeps impacts strong without clipping.
+    audio = np.tanh(audio * 1.65) * 0.68
+    fade = int(1.35 * sample_rate)
     audio[:fade] *= np.linspace(0, 1, fade)
     audio[-fade:] *= np.linspace(1, 0, fade)
-    audio = np.clip(audio, -0.85, 0.85)
+    audio = np.clip(audio, -0.92, 0.92)
     pcm = (audio * 32767).astype("<i2")
     with wave.open(str(path), "wb") as output:
         output.setnchannels(1)

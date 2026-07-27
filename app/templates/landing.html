@@ -7,7 +7,7 @@
   <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
   <meta name="description" content="{{ _('Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=124">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=125">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/landing-motion.css') }}?v=1">
 </head>
 
@@ -101,6 +101,56 @@
       <article><strong>{{ _("Listo para operar desde el navegador") }}</strong><span>{{ _("Sin instalaciones, desde computadora o celular.") }}</span></article>
     </section>
 
+    <section class="landing-v2__section landing-showcase-v1" aria-labelledby="landing-showcase-title">
+      <header class="landing-v2__section-head">
+        <span class="landing-v2__eyebrow">{{ _("El producto, sin promesas abstractas") }}</span>
+        <h2 id="landing-showcase-title">{{ _("Así se ve tener el negocio en orden.") }}</h2>
+        <p>{{ _("Estas son pantallas reales de PATIA: operación diaria con Starter y decisiones respaldadas por datos con Pro.") }}</p>
+      </header>
+      <div class="landing-showcase-v1__grid">
+        <article class="landing-showcase-v1__card landing-showcase-v1__card--wide">
+          <div class="landing-showcase-v1__image">
+            <img src="{{ url_for('static', filename='img/landing/patia-starter.jpg') }}"
+                 width="1160" height="770" loading="lazy" decoding="async"
+                 alt="{{ _('Dashboard Starter de PATIA con ventas, caja e inventario') }}">
+          </div>
+          <div>
+            <span>{{ _("PATIA Starter") }}</span>
+            <h3>{{ _("Opera tu negocio todos los días") }}</h3>
+            <p>{{ _("Vende, controla inventario, caja, clientes y saldos desde una experiencia rápida.") }}</p>
+          </div>
+        </article>
+        <article class="landing-showcase-v1__card">
+          <div class="landing-showcase-v1__image">
+            <img src="{{ url_for('static', filename='img/landing/patia-pos.jpg') }}"
+                 width="1160" height="760" loading="lazy" decoding="async"
+                 alt="{{ _('Punto de venta de PATIA con un carrito de productos') }}">
+          </div>
+          <div>
+            <span>{{ _("Punto de venta") }}</span>
+            <h3>{{ _("Registra una venta sin perder el ritmo") }}</h3>
+            <p>{{ _("Busca, cobra y actualiza existencias en un solo flujo.") }}</p>
+          </div>
+        </article>
+        <article class="landing-showcase-v1__card">
+          <div class="landing-showcase-v1__image">
+            <img src="{{ url_for('static', filename='img/landing/patia-pro.jpg') }}"
+                 width="1125" height="720" loading="lazy" decoding="async"
+                 alt="{{ _('Panel ejecutivo Pro de PATIA con indicadores y proyección') }}">
+          </div>
+          <div>
+            <span>{{ _("PATIA Pro") }}</span>
+            <h3>{{ _("Entiende qué cambió y qué hacer") }}</h3>
+            <p>{{ _("Convierte los datos de la operación en prioridades, compras y seguimiento mensual.") }}</p>
+          </div>
+        </article>
+      </div>
+      <button type="button" class="landing-v2__button landing-v2__button--secondary landing-showcase-v1__demo" data-demo-open>
+        <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
+        {{ _("Ver PATIA en acción") }}
+      </button>
+    </section>
+
     <section class="landing-v2__section" id="beneficios">
       <header class="landing-v2__section-head">
         <span class="landing-v2__eyebrow">{{ _("Lo que resuelve PATIA") }}</span>
@@ -176,8 +226,8 @@
     <section class="landing-v2__section landing-premium-v1__pro-value">
       <div class="landing-premium-v1__pro-copy">
         <span class="landing-v2__eyebrow">{{ _("PATIA Pro") }}</span>
-        <h2>{{ _("Más control cuando tu equipo crece.") }}</h2>
-        <p>{{ _("Agrega encargados, consulta el historial completo y recibe un resumen mensual para dar seguimiento sin complicar la operación diaria.") }}</p>
+        <h2>{{ _("PATIA administra el negocio contigo.") }}</h2>
+        <p>{{ _("Interpreta resultados en el Panel ejecutivo, prepara compras con evidencia, revisa alertas accionables y conserva un reporte de cada mes.") }}</p>
         <a href="#precio" class="landing-v2__button landing-v2__button--secondary">{{ _("Ver precio y condiciones") }}</a>
       </div>
       <div class="landing-premium-v1__pro-grid">

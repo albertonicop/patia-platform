@@ -203,7 +203,7 @@ def create_app():
             access_user, has_paid_access=paid_access
         )
         return {
-            "has_pro_access": has_pro_access(access_user),
+            "has_pro_access": paid_access,
             "current_plan_code": plan_code,
             "current_plan_label": current_plan_label(plan_code),
             "current_entitlement_plan_code": entitlement_code,

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ preview.eyebrow }}{% endblock %}
+{% block content %}
+<div class="pro-preview-v1">
+  <section class="pro-preview-v1__hero" aria-labelledby="pro-preview-title">
+    <div class="pro-preview-v1__copy">
+      <span class="pro-preview-v1__icon" aria-hidden="true">
+        <i class="fa-solid {{ preview.icon }}"></i>
+      </span>
+      <span class="eyebrow">{{ preview.eyebrow }} · {{ _("Incluido en Pro") }}</span>
+      <h2 id="pro-preview-title">{{ preview.title }}</h2>
+      <p>{{ preview.description }}</p>
+      <ul>
+        {% for benefit in preview.benefits %}
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ benefit }}</span></li>
+        {% endfor %}
+      </ul>
+      <div class="pro-preview-v1__actions">
+        <a class="btn primary" href="{{ url_for('main.subscribe') }}">
+          {{ _("Actualizar a Pro") }}
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </a>
+        <a class="btn ghost" href="{{ url_for('main.dashboard') }}">{{ _("Volver a Inicio") }}</a>
+      </div>
+    </div>
+
+    <div class="pro-preview-v1__sample" aria-label="{{ _('Vista previa ilustrativa') }}">
+      <header>
+        <span>{{ _("Vista previa") }}</span>
+        <strong>{{ preview.eyebrow }}</strong>
+      </header>
+      <div class="pro-preview-v1__sample-kpis">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="pro-preview-v1__sample-chart">
+        <i style="--height: 42%"></i>
+        <i style="--height: 64%"></i>
+        <i style="--height: 51%"></i>
+        <i style="--height: 82%"></i>
+        <i style="--height: 70%"></i>
+        <i style="--height: 94%"></i>
+      </div>
+      <div class="pro-preview-v1__sample-action">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <span>{{ _("Una prioridad clara, con evidencia y siguiente paso.") }}</span>
+      </div>
+    </div>
+  </section>
+
+  <p class="pro-preview-v1__note">
+    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+    {{ _("Tu operación Starter permanece completa. Pro agrega supervisión, análisis y automatización.") }}
+  </p>
+</div>
+{% endblock %}

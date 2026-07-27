@@ -19,14 +19,27 @@
       </dl>
     </section>
 
-    <section class="cash-v2__summary" aria-label="{{ _('Resumen de caja') }}">
-      {% for item in cash_summary.values() %}
-        <div><span>{{ item.label }}</span><strong>{{ item.amount|money }}</strong></div>
-      {% endfor %}
-    </section>
+    {% if cash_summary %}
+      <section class="cash-v2__summary" aria-label="{{ _('Resumen de caja') }}">
+        {% for item in cash_summary.values() %}
+          <div><span>{{ item.label }}</span><strong>{{ item.amount|money }}</strong></div>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% if not has_cash_activity %}
+      <section class="cash-v2__empty" aria-labelledby="cash-empty-title">
+        <span aria-hidden="true"><i class="fa-solid fa-receipt"></i></span>
+        <div>
+          <h3 id="cash-empty-title">{{ _("No existen movimientos") }}</h3>
+          <p>{{ _("Las ventas en efectivo y los movimientos que registres aparecerán aquí.") }}</p>
+        </div>
+        {% if can_manage_movements %}<a class="btn ghost" href="#cash-actions">{{ _("Registrar movimiento") }}</a>{% endif %}
+      </section>
+    {% endif %}
 
     {% if can_manage_movements %}
-      <section class="cash-v2__actions" aria-label="{{ _('Acciones de caja') }}">
+      <section class="cash-v2__actions" id="cash-actions" aria-label="{{ _('Acciones de caja') }}">
         {% for action in [
           ("CASH_IN", _("Agregar efectivo"), "fa-plus"),
           ("WITHDRAWAL", _("Retirar efectivo"), "fa-arrow-up"),
@@ -81,7 +94,7 @@
       <span class="cash-v2__start-icon" aria-hidden="true"><i class="fa-solid fa-vault"></i></span>
       <div>
         <span>{{ _("Caja cerrada") }}</span>
-        <h2 id="start-cash-title">{{ _("Abre la caja para comenzar") }}</h2>
+        <h2 id="start-cash-title">{{ _("Todavía no has abierto caja") }}</h2>
         <p>{{ _("Escribe cuánto efectivo tienes disponible antes de la primera venta.") }}</p>
       </div>
       <form method="POST" action="{{ url_for('cash.open_register') }}">

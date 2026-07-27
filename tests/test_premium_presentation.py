@@ -37,6 +37,11 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertIn("default=True", app_factory)
         self.assertIn("Menos decisiones a ciegas", landing)
         self.assertIn("PATIA Pro", landing)
+        self.assertIn("patia-starter.jpg", landing)
+        self.assertIn("patia-pos.jpg", landing)
+        self.assertIn("patia-pro.jpg", landing)
+        self.assertIn('loading="lazy"', landing)
+        self.assertIn("pantallas reales de PATIA", landing)
         self.assertIn("$199", landing)
         self.assertIn("14 días", landing)
 
@@ -97,7 +102,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=124", self.template(name), name)
+            self.assertIn("styles.css') }}?v=125", self.template(name), name)
 
 
 if __name__ == "__main__":
