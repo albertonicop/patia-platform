@@ -171,6 +171,45 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         trial_response = self._client(trial, membership).get("/pro")
         self.assertEqual(trial_response.status_code, 200)
 
+    def test_analysis_navigation_is_consistent_on_customers_and_credit(self):
+        def assert_analysis_navigation(client, path, active_href):
+            response = client.get(path)
+            self.assertEqual(response.status_code, 200)
+            html = response.get_data(as_text=True)
+            self.assertIn("Análisis", html)
+            self.assertIn(">Reportes</span>", html)
+            self.assertIn(">Panel ejecutivo</span>", html)
+            self.assertIn(">Reporte mensual</span>", html)
+            self.assertIn(">Compras inteligentes</span>", html)
+            self.assertIn(">Alertas</span>", html)
+            self.assertIn(
+                f'href="{active_href}" class="is-active" '
+                'aria-current="page"',
+                html,
+            )
+            self.assertIn('class="sidebar-v2__toggle"', html)
+
+        owner_client = self._client(self.owner, self.membership)
+        assert_analysis_navigation(owner_client, "/customers", "/customers")
+        assert_analysis_navigation(owner_client, "/credit", "/credit")
+
+        manager, manager_membership = self._member("MANAGER")
+        manager_client = self._client(manager, manager_membership)
+        assert_analysis_navigation(manager_client, "/customers", "/customers")
+        assert_analysis_navigation(manager_client, "/credit", "/credit")
+
+        starter, starter_membership = self._owner(
+            "starter-nav@pro-dashboard.test"
+        )
+        starter_client = self._client(starter, starter_membership)
+        assert_analysis_navigation(starter_client, "/customers", "/customers")
+        assert_analysis_navigation(starter_client, "/credit", "/credit")
+
+        cashier, cashier_membership = self._member("CASHIER")
+        cashier_client = self._client(cashier, cashier_membership)
+        self.assertEqual(cashier_client.get("/customers").status_code, 403)
+        self.assertEqual(cashier_client.get("/credit").status_code, 403)
+
     def test_manager_can_view_cashier_cannot_and_only_owner_changes_goal(self):
         manager, manager_membership = self._member("MANAGER")
         cashier, cashier_membership = self._member("CASHIER")
