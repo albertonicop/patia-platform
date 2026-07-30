@@ -21,9 +21,9 @@
         <span><b>03</b>{{ _("Qué hacer") }}</span>
       </div>
     </div>
-    <a class="btn primary" href="{{ url_for('pro.dashboard') }}">
+    <a class="btn primary" href="{{ url_for('main.reports') }}">
       <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-      {{ _("Abrir Panel ejecutivo") }}
+      {{ _("Explorar resultados") }}
     </a>
   </header>
 
@@ -54,17 +54,104 @@
       <div class="pro-hub-v1__clear">
         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
         <div><h3>{{ _("Todo está en orden por ahora") }}</h3><p>{{ _("PATIA revisó ventas, margen, inventario, crédito y caja sin detectar una acción urgente.") }}</p></div>
-        <a class="btn ghost" href="{{ url_for('pro.dashboard') }}">{{ _("Revisar resultados") }}</a>
+        <a class="btn ghost" href="{{ url_for('main.reports') }}">{{ _("Explorar resultados") }}</a>
       </div>
     {% endif %}
   </section>
 
+  <section class="pro-hub-v1__operations" aria-label="{{ _('Control y actividad del negocio') }}">
+    <article class="pro-hub-v1__operations-panel" aria-labelledby="hub-control-title">
+      <header>
+        <span class="eyebrow">{{ _("Control del negocio") }}</span>
+        <h2 id="hub-control-title">{{ _("Lo esencial para operar con tranquilidad") }}</h2>
+      </header>
+      <div class="pro-hub-v1__control-grid">
+        <a href="{{ executive_control.inventory.url }}">
+          <i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>
+          <div>
+            <span>{{ _("Inventario") }}</span>
+            <strong>{{ executive_control.inventory.value|money }}</strong>
+            <small>
+              {% if executive_control.inventory.low_stock %}
+                {{ _("%(count)s productos requieren atención", count=executive_control.inventory.low_stock) }}
+              {% else %}
+                {{ _("Sin alertas de existencias") }}
+              {% endif %}
+            </small>
+          </div>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </a>
+        <a href="{{ executive_control.credit.url }}">
+          <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>
+          <div>
+            <span>{{ _("Saldos pendientes") }}</span>
+            <strong>{{ executive_control.credit.balance|money }}</strong>
+            <small>
+              {% if executive_control.credit.customers %}
+                {{ _("%(count)s clientes con saldo", count=executive_control.credit.customers) }}
+              {% else %}
+                {{ _("Ningún cliente tiene saldo pendiente") }}
+              {% endif %}
+            </small>
+          </div>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </a>
+        <a href="{{ executive_control.cash.url }}">
+          <i class="fa-solid fa-cash-register" aria-hidden="true"></i>
+          <div>
+            <span>{{ _("Caja del día") }}</span>
+            {% if executive_control.cash.status == "open" %}
+              <strong>{{ executive_control.cash.amount|money }}</strong>
+              <small>{{ _("Efectivo esperado · caja abierta") }}</small>
+            {% else %}
+              <strong>{{ _("Cerrada") }}</strong>
+              <small>
+                {% if executive_control.cash.difference is not none %}
+                  {{ _("Última diferencia: %(amount)s", amount=(executive_control.cash.difference|money)) }}
+                {% else %}
+                  {{ _("Abre la caja antes de cobrar en efectivo") }}
+                {% endif %}
+              </small>
+            {% endif %}
+          </div>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </article>
+
+    {% if team_activity.visible %}
+      <article class="pro-hub-v1__operations-panel" aria-labelledby="hub-team-title">
+        <header>
+          <span class="eyebrow">{{ _("Actividad del equipo") }}</span>
+          <h2 id="hub-team-title">{{ _("Movimientos operativos del periodo") }}</h2>
+          <p>{{ _("Un resumen para entender la operación, no para vigilar personas.") }}</p>
+        </header>
+        <div class="pro-hub-v1__team-grid">
+          {% for item in team_activity["items"] %}
+            <a href="{{ item.url }}">
+              <i class="fa-solid {{ item.icon }}" aria-hidden="true"></i>
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+              <small>
+                {% if item.amount is not none and item.amount %}
+                  {{ item.amount|money }}
+                {% else %}
+                  {{ _("eventos registrados") }}
+                {% endif %}
+              </small>
+            </a>
+          {% endfor %}
+        </div>
+      </article>
+    {% endif %}
+  </section>
+
   <section class="pro-hub-v1__grid" aria-label="{{ _('Herramientas Pro') }}">
-    <a class="pro-hub-v1__card" href="{{ url_for('pro.dashboard') }}">
+    <a class="pro-hub-v1__card" href="{{ url_for('main.reports') }}">
       <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
       <span>{{ _("Resultados") }}</span>
-      <h3>{{ _("Panel ejecutivo") }}</h3>
-      <p>{{ _("Entiende qué cambió, por qué y qué conviene hacer ahora.") }}</p>
+      <h3>{{ _("Reportes") }}</h3>
+      <p>{{ _("Consulta periodos, compara resultados y revisa tu meta mensual.") }}</p>
     </a>
     <a class="pro-hub-v1__card" href="{{ url_for('pro.monthly_reports') }}">
       <i class="fa-solid fa-file-lines" aria-hidden="true"></i>

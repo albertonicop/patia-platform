@@ -925,6 +925,8 @@ def build_smart_alerts(organization, args, *, now_utc=None):
     return {
         "alert_period": data["executive_period"],
         "smart_alerts": alerts,
+        "executive_control": data["executive_control"],
+        "team_activity": data["team_activity"],
         "alert_summary": {
             "total": len(alerts),
             "high": sum(

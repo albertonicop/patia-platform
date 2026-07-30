@@ -82,6 +82,18 @@ function initializeReportCharts() {
                 pointRadius: report.daily.length > 60 ? 0 : 3,
                 tension: .28
             });
+            if (Array.isArray(report.previousDaily) && report.previousDaily.length) {
+                trendDatasets.push({
+                    label: report.labels.previous,
+                    data: report.previousDaily.map(point => point.sales),
+                    borderColor: "#aeb5c5",
+                    backgroundColor: "transparent",
+                    borderDash: [6, 5],
+                    pointRadius: 0,
+                    borderWidth: 1.8,
+                    tension: .28
+                });
+            }
         }
         new Chart(trendCanvas, {
             type: "line",

@@ -269,7 +269,10 @@ class ReportSprint2Tests(unittest.TestCase):
             flask_session["user_id"] = self.user.id
             flask_session["language"] = "en"
         english = english_client.get("/reports?period=today").get_data(as_text=True)
-        self.assertIn("Sales vs Profit", english)
+        self.assertIn(
+            "Sales and profit compared with the previous period",
+            english,
+        )
         self.assertIn("Not available", english)
         self.assertIn(
             "Add the product cost to include it in profit and margin calculations.",

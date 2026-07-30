@@ -109,7 +109,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=127", self.template(name), name)
+            self.assertIn("styles.css') }}?v=128", self.template(name), name)
 
     def test_sidebar_keeps_pro_routes_without_visual_plan_badges(self):
         base = self.template("base.html")

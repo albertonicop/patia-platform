@@ -137,16 +137,13 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         db.session.commit()
         return sale
 
-    def test_starter_sees_pro_preview_without_executive_data(self):
+    def test_starter_legacy_pro_url_redirects_to_reports(self):
         starter, membership = self._owner("starter@pro-dashboard.test")
         client = self._client(starter, membership)
 
         response = client.get("/pro")
-        self.assertEqual(response.status_code, 200)
-        preview = response.get_data(as_text=True)
-        self.assertIn("Panel ejecutivo", preview)
-        self.assertIn("Actualizar a Pro", preview)
-        self.assertNotIn("executiveAnalytics", preview)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, "/reports")
 
         dashboard = client.get("/")
         html = dashboard.get_data(as_text=True)
@@ -158,18 +155,29 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         self.assertIn('href="/team"', html)
         self.assertNotIn("executiveAnalytics", html)
 
-    def test_pro_owner_and_pro_trial_can_open_dashboard(self):
+    def test_pro_owner_and_pro_trial_use_reports_as_analysis_destination(self):
         response = self._client(self.owner, self.membership).get("/pro")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("PATIA PRO", response.get_data(as_text=True))
-        self.assertIn("Dashboard Ejecutivo", response.get_data(as_text=True))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, "/reports")
 
         trial, membership = self._owner(
             "pro-trial@pro-dashboard.test",
             trial_plan="PRO",
         )
         trial_response = self._client(trial, membership).get("/pro")
-        self.assertEqual(trial_response.status_code, 200)
+        self.assertEqual(trial_response.status_code, 302)
+        self.assertEqual(trial_response.location, "/reports")
+
+    def test_legacy_pro_url_preserves_compatible_period_parameters(self):
+        response = self._client(self.owner, self.membership).get(
+            "/pro?period=custom&start=2026-07-01&end=2026-07-20"
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.startswith("/reports?"))
+        self.assertIn("period=custom", response.location)
+        self.assertIn("start=2026-07-01", response.location)
+        self.assertIn("end=2026-07-20", response.location)
 
     def test_analysis_navigation_is_consistent_on_customers_and_credit(self):
         def assert_analysis_navigation(client, path, active_href):
@@ -218,7 +226,9 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         cashier, cashier_membership = self._member("CASHIER")
 
         manager_client = self._client(manager, manager_membership)
-        self.assertEqual(manager_client.get("/pro").status_code, 200)
+        manager_response = manager_client.get("/pro")
+        self.assertEqual(manager_response.status_code, 302)
+        self.assertEqual(manager_response.location, "/reports")
         self.assertEqual(
             manager_client.post(
                 "/pro/monthly-goal",
@@ -232,9 +242,14 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         owner_client = self._client(self.owner, self.membership)
         goal = owner_client.post(
             "/pro/monthly-goal",
-            data={"monthly_sales_goal": "50000.25"},
+            data={
+                "monthly_sales_goal": "50000.25",
+                "return_period": "30d",
+            },
         )
         self.assertEqual(goal.status_code, 302)
+        self.assertIn("/reports?period=30d", goal.location)
+        self.assertTrue(goal.location.endswith("#monthly-goal"))
         db.session.refresh(self.membership.organization)
         self.assertEqual(
             self.membership.organization.monthly_sales_goal,
@@ -304,6 +319,40 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         )
         self.assertIsNone(data["monthly_projection"])
 
+    def test_reports_integrate_goal_projection_and_previous_period(self):
+        now = datetime.utcnow()
+        for index in range(3):
+            self._sale(
+                total="100.00",
+                cost="50.00",
+                created_at=now - timedelta(days=index),
+                ticket_id=f"integrated-{index}",
+            )
+        self.membership.organization.monthly_sales_goal = Decimal("1000.00")
+        db.session.commit()
+
+        response = self._client(self.owner, self.membership).get(
+            "/reports?period=7d"
+        )
+        html = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('id="monthly-goal"', html)
+        self.assertIn("Meta mensual", html)
+        self.assertIn("Proyección", html)
+        self.assertIn("Comparación equivalente", html)
+        self.assertIn("previousDaily", html)
+        self.assertIn("Ventas del periodo anterior", html)
+        self.assertIn('action="/pro/monthly-goal"', html)
+
+        hub = self._client(self.owner, self.membership).get(
+            "/pro/hub"
+        ).get_data(as_text=True)
+        self.assertNotIn("Abrir Panel ejecutivo", hub)
+        self.assertNotIn("Revisar resultados", hub)
+        self.assertNotIn('href="/pro"', hub)
+        self.assertIn('href="/reports"', hub)
+
     def test_organization_isolation_excludes_other_business_sales(self):
         other_owner, other_membership = self._owner(
             "other@pro-dashboard.test",
@@ -338,7 +387,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         db.session.commit()
 
         response = self._client(self.owner, self.membership).get(
-            "/pro?period=7d"
+            "/reports?period=7d"
         )
         html = response.get_data(as_text=True)
         self.assertEqual(response.status_code, 200)
@@ -395,17 +444,17 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         starter_script = starter_html.split("window.reportAnalytics", 1)[1]
         self.assertNotIn('"profit"', starter_script)
 
-    def test_executive_copy_is_translated_to_english(self):
+    def test_executive_report_copy_is_translated_to_english(self):
         response = self._client(
             self.owner,
             self.membership,
             language="en",
-        ).get("/pro")
+        ).get("/reports")
         html = response.get_data(as_text=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Executive Dashboard", html)
         self.assertIn("Monthly goal", html)
-        self.assertNotIn("La perspectiva completa de tu negocio", html)
+        self.assertIn("Estimated month-end", html)
+        self.assertNotIn("Meta mensual", html)
 
     def test_actionable_sections_are_backed_by_current_organization_data(self):
         now = datetime.utcnow()
@@ -594,17 +643,17 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         Product.query.delete()
         db.session.commit()
 
-        response = self._client(self.owner, self.membership).get("/pro")
+        response = self._client(self.owner, self.membership).get("/pro/hub")
         html = response.get_data(as_text=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Aquí aparecerán los principales impulsores", html)
         self.assertIn(
-            "No detectamos situaciones urgentes en este periodo", html
+            "Tu primer reporte mensual está listo para generarse",
+            html,
         )
         self.assertNotIn("Actividad del equipo", html)
         self.assertIn("Control del negocio", html)
-        self.assertIn("Acciones prioritarias", html)
+        self.assertIn("Lo más importante ahora", html)
 
     def test_sprint_1b_excludes_other_organization_controls_and_alerts(self):
         other_owner, other_membership = self._owner(
@@ -656,26 +705,25 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         self.assertEqual(
             data["executive_control"]["inventory"]["low_stock"], 0
         )
-        response = self._client(self.owner, self.membership).get("/pro")
+        response = self._client(self.owner, self.membership).get("/pro/hub")
         html = response.get_data(as_text=True)
         self.assertNotIn("Alerta ajena", html)
         self.assertNotIn("9,999", html)
 
-    def test_sprint_1b_copy_is_translated_to_english(self):
+    def test_decision_center_copy_is_translated_to_english(self):
         Product.query.delete()
         db.session.commit()
         response = self._client(
             self.owner,
             self.membership,
             language="en",
-        ).get("/pro")
+        ).get("/pro/hub")
         html = response.get_data(as_text=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("What drives the result", html)
-        self.assertIn("What needs attention", html)
+        self.assertIn("What matters most right now", html)
         self.assertIn("Business control", html)
-        self.assertIn("Priority actions", html)
-        self.assertNotIn("Qué impulsa el resultado", html)
+        self.assertIn("What to do", html)
+        self.assertNotIn("Lo más importante ahora", html)
 
     def test_sprint_1b_uses_a_bounded_number_of_queries(self):
         for index in range(25):

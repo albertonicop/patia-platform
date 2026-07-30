@@ -6,18 +6,21 @@ from pathlib import Path
 import click
 from flask import (
     Flask,
+    flash,
     has_request_context,
     jsonify,
+    redirect,
     render_template,
     request,
     session,
+    url_for,
 )
 from flask_babel import Babel, gettext
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFError, CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -378,6 +381,32 @@ def create_app():
                 }
             ), 429
         return render_error(status_code)
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(error):
+        if request.path != "/logout":
+            return render_error(400)
+
+        language = session.get("language", "es")
+        if current_user():
+            flash(
+                gettext(
+                    "No pudimos cerrar tu sesión porque la página perdió "
+                    "vigencia. Actualiza la página e inténtalo nuevamente."
+                ),
+                "warning",
+            )
+            return redirect(url_for("main.dashboard"))
+
+        session.clear()
+        session["language"] = (
+            language if language in SUPPORTED_LANGUAGES else "es"
+        )
+        flash(
+            gettext("Tu sesión ya terminó. Inicia sesión nuevamente."),
+            "info",
+        )
+        return redirect(url_for("main.login"))
 
     for status_code in (400, 403, 404, 429):
         app.register_error_handler(

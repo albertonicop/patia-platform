@@ -1,6 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}{{ _("Reportes") }}{% endblock %}
 
+{% macro executive_trend(value, unit="percent") %}
+  {% if value is none %}
+    <span class="reports-v3__trend-chip reports-v3__trend-chip--neutral">
+      {{ _("Sin comparación disponible") }}
+    </span>
+  {% else %}
+    {% set direction = "neutral" if value == 0 else ("up" if value >= 0 else "down") %}
+    <span class="reports-v3__trend-chip reports-v3__trend-chip--{{ direction }}">
+      <i class="fa-solid {{ 'fa-minus' if value == 0 else ('fa-arrow-trend-up' if value >= 0 else 'fa-arrow-trend-down') }}" aria-hidden="true"></i>
+      {% if unit == "points" %}
+        {{ _("%(value)s puntos vs. periodo anterior", value=("%+.1f"|format(value))) }}
+      {% else %}
+        {{ _("%(value)s%% vs. periodo anterior", value=("%+.1f"|format(value))) }}
+      {% endif %}
+    </span>
+  {% endif %}
+{% endmacro %}
+
 {% block content %}
 <div class="reports-v3">
   <nav class="reports-v3__view-tabs" aria-label="{{ _('Secciones de Reportes') }}">
@@ -85,21 +103,25 @@
     <article class="reports-v3__kpi">
       <span>{{ _("Ventas totales") }}</span>
       <strong>{{ report_kpis.sales|money }}</strong>
+      {% if executive_data %}{{ executive_trend(executive_data.executive_kpis.sales_change) }}{% endif %}
       <small>{{ _("Ingresos registrados en el periodo") }}</small>
     </article>
     {% if can_use_advanced_reports %}<article class="reports-v3__kpi reports-v3__kpi--violet">
       <span>{{ _("Utilidad") }}</span>
       <strong>{{ report_kpis.profit|money }}</strong>
+      {% if executive_data %}{{ executive_trend(executive_data.executive_kpis.profit_change) }}{% endif %}
       <small>{{ _("Solo ventas con costo histórico conocido") }}</small>
     </article>{% endif %}
     {% if can_use_advanced_reports %}<article class="reports-v3__kpi reports-v3__kpi--mint">
       <span>{{ _("Margen") }}</span>
       <strong>{% if report_kpis.margin is not none %}{{ "%.1f"|format(report_kpis.margin) }}%{% else %}—{% endif %}</strong>
+      {% if executive_data %}{{ executive_trend(executive_data.executive_kpis.margin_change, "points") }}{% endif %}
       <small>{{ _("Calculado sobre ingresos con costo conocido") }}</small>
     </article>{% endif %}
     <article class="reports-v3__kpi">
       <span>{{ _("Ticket promedio") }}</span>
       <strong>{{ report_kpis.average_ticket|money }}</strong>
+      {% if executive_data %}{{ executive_trend(executive_data.executive_kpis.average_change) }}{% endif %}
       <small>{{ _("Venta promedio por ticket") }}</small>
     </article>
     <article class="reports-v3__kpi">
@@ -109,11 +131,96 @@
     </article>
   </section>
 
+  {% if can_use_advanced_reports and executive_data %}
+    <section id="monthly-goal" class="reports-v3__executive-grid" aria-label="{{ _('Meta y proyección del negocio') }}">
+      <article class="card reports-v3__executive-card reports-v3__executive-card--goal">
+        <header class="reports-v3__panel-head">
+          <div><span>{{ _("Meta mensual") }}</span><h3>{{ _("Avance del mes") }}</h3></div>
+          <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+        </header>
+        {% if executive_data.monthly_goal %}
+          <div class="reports-v3__goal-values">
+            <div><span>{{ _("Ventas del mes") }}</span><strong>{{ executive_data.monthly_sales|money }}</strong></div>
+            <div><span>{{ _("Meta") }}</span><strong>{{ executive_data.monthly_goal|money }}</strong></div>
+          </div>
+          <div class="reports-v3__goal-progress" role="progressbar"
+               aria-label="{{ _('Avance de la meta mensual') }}"
+               aria-valuemin="0" aria-valuemax="100"
+               aria-valuenow="{{ [executive_data.monthly_goal_progress or 0, 100]|min }}">
+            <span style="width: {{ [executive_data.monthly_goal_progress or 0, 100]|min }}%"></span>
+          </div>
+          <p>{{ _("%(progress)s%% de la meta alcanzada", progress=("%.1f"|format(executive_data.monthly_goal_progress or 0))) }}</p>
+        {% else %}
+          <div class="reports-v3__executive-empty">
+            <strong>{{ _("Define cuánto quieres vender este mes") }}</strong>
+            <p>{{ _("PATIA comparará tus ventas reales con ese objetivo.") }}</p>
+          </div>
+        {% endif %}
+
+        {% if can_edit_goal %}
+          <details class="reports-v3__goal-edit">
+            <summary>{{ _("Cambiar meta") if executive_data.monthly_goal else _("Definir meta") }}</summary>
+            <form method="POST" action="{{ url_for('pro.monthly_goal') }}" data-submit-once>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="return_period" value="{{ report_period.period }}">
+              <input type="hidden" name="return_start" value="{{ report_period.custom_start }}">
+              <input type="hidden" name="return_end" value="{{ report_period.custom_end }}">
+              <label for="monthly-sales-goal">
+                {{ _("Meta de ventas mensual") }}
+                <input id="monthly-sales-goal" name="monthly_sales_goal" type="number"
+                       min="0.01" step="0.01" inputmode="decimal"
+                       value="{{ executive_data.monthly_goal if executive_data.monthly_goal is not none else '' }}"
+                       placeholder="50000.00" required>
+              </label>
+              <button class="btn" type="submit">{{ _("Guardar meta") }}</button>
+            </form>
+            {% if executive_data.monthly_goal %}
+              <form method="POST" action="{{ url_for('pro.monthly_goal') }}" data-submit-once>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="monthly_sales_goal" value="">
+                <input type="hidden" name="return_period" value="{{ report_period.period }}">
+                <input type="hidden" name="return_start" value="{{ report_period.custom_start }}">
+                <input type="hidden" name="return_end" value="{{ report_period.custom_end }}">
+                <button class="btn ghost" type="submit">{{ _("Eliminar meta") }}</button>
+              </form>
+            {% endif %}
+          </details>
+        {% endif %}
+      </article>
+
+      <article class="card reports-v3__executive-card reports-v3__executive-card--projection">
+        <header class="reports-v3__panel-head">
+          <div><span>{{ _("Proyección") }}</span><h3>{{ _("Cierre estimado del mes") }}</h3></div>
+          <i class="fa-solid fa-forward" aria-hidden="true"></i>
+        </header>
+        {% if executive_data.monthly_projection is not none %}
+          <strong class="reports-v3__projection-value">{{ executive_data.monthly_projection|money }}</strong>
+          <p>{{ _("Estimación basada en el ritmo de ventas registrado durante el mes. No es una garantía.") }}</p>
+        {% else %}
+          <div class="reports-v3__executive-empty">
+            <strong>{{ _("Aún no hay suficiente actividad para proyectar") }}</strong>
+            <p>{{ _("La proyección aparecerá después de varios días y ventas registradas.") }}</p>
+          </div>
+        {% endif %}
+        <div class="reports-v3__comparison-note">
+          <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+          <p>
+            <strong>{{ _("Comparación equivalente") }}</strong>
+            {{ _("%(start)s — %(end)s", start=executive_data.previous_period.start_date.strftime("%d/%m/%Y"), end=executive_data.previous_period.end_date.strftime("%d/%m/%Y")) }}
+          </p>
+        </div>
+      </article>
+    </section>
+  {% endif %}
+
   {% if report_kpis.ticket_count %}
     <section class="reports-v3__primary-grid">
       <article class="card reports-v3__panel reports-v3__trend">
         <header class="reports-v3__panel-head">
-          <div><span>{{ _("Evolución diaria") }}</span><h3>{{ _("Ventas vs Utilidad") if can_use_advanced_reports else _("Ventas por día") }}</h3></div>
+          <div>
+            <span>{{ _("Evolución diaria") }}</span>
+            <h3>{{ _("Ventas y utilidad frente al periodo anterior") if can_use_advanced_reports else _("Ventas por día") }}</h3>
+          </div>
           <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
         </header>
         <div class="reports-v3__chart reports-v3__chart--line">
@@ -215,10 +322,12 @@
 window.reportAnalytics = {
   advanced: {{ can_use_advanced_reports|tojson }},
   daily: {{ client_daily_report|tojson }},
+  previousDaily: {{ (executive_data.executive_chart.previous if executive_data else [])|tojson }},
   payments: {{ payments_report|tojson }},
   labels: {
     sales: {{ _("Ventas")|tojson }},
     profit: {{ _("Utilidad")|tojson }},
+    previous: {{ _("Ventas del periodo anterior")|tojson }},
     amount: {{ _("Monto")|tojson }},
     tickets: {{ _("Tickets")|tojson }}
   }

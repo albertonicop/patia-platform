@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-29 22:54-0600\n"
+"POT-Creation-Date: 2026-07-30 09:15-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app/__init__.py:376
+#: app/__init__.py:405
 msgid "Demasiados intentos"
+msgstr ""
+
+#: app/__init__.py:420
+msgid ""
+"No pudimos cerrar tu sesión porque la página perdió vigencia. Actualiza "
+"la página e inténtalo nuevamente."
+msgstr ""
+
+#: app/__init__.py:432 app/routes.py:1069
+msgid "Tu sesión ya terminó. Inicia sesión nuevamente."
 msgstr ""
 
 #: app/monthly_reports.py:253
@@ -31,8 +41,7 @@ msgstr ""
 
 #: app/monthly_reports.py:255 app/templates/admin_organization.html:48
 #: app/templates/emails/monthly_owner_report.html:31
-#: app/templates/pro_dashboard.html:93 app/templates/pro_dashboard.html:441
-#: app/templates/pro_monthly_report.html:55 app/templates/reports.html:220
+#: app/templates/pro_monthly_report.html:55 app/templates/reports.html:328
 msgid "Ventas"
 msgstr ""
 
@@ -47,8 +56,7 @@ msgid "Ventas registradas"
 msgstr ""
 
 #: app/monthly_reports.py:258 app/templates/emails/monthly_owner_report.html:45
-#: app/templates/pro_dashboard.html:125
-#: app/templates/pro_monthly_report.html:57 app/templates/reports.html:101
+#: app/templates/pro_monthly_report.html:57 app/templates/reports.html:122
 msgid "Ticket promedio"
 msgstr ""
 
@@ -201,7 +209,7 @@ msgstr ""
 msgid "Tus ventas se mantuvieron estables este mes."
 msgstr ""
 
-#: app/monthly_reports.py:843 app/pro/routes.py:372
+#: app/monthly_reports.py:843 app/pro/routes.py:366
 #, python-format
 msgid "Tu resumen mensual de %(business)s — %(period)s"
 msgstr ""
@@ -210,13 +218,13 @@ msgstr ""
 msgid "Prueba gratuita"
 msgstr ""
 
-#: app/plans.py:222 app/plans.py:260 app/routes.py:4298 app/routes.py:4618
-#: app/templates/admin.html:88
+#: app/plans.py:222 app/plans.py:260 app/routes.py:4331 app/routes.py:4651
+#: app/templates/admin.html:89
 msgid "Starter"
 msgstr ""
 
-#: app/plans.py:223 app/plans.py:278 app/routes.py:4299 app/routes.py:4619
-#: app/templates/admin.html:89
+#: app/plans.py:223 app/plans.py:278 app/routes.py:4332 app/routes.py:4652
+#: app/templates/admin.html:90
 msgid "Pro"
 msgstr ""
 
@@ -224,12 +232,12 @@ msgstr ""
 msgid "Plan actual protegido"
 msgstr ""
 
-#: app/plans.py:225 app/routes.py:4301 app/routes.py:4621
-#: app/templates/admin.html:91 app/templates/admin_organization.html:39
+#: app/plans.py:225 app/routes.py:4334 app/routes.py:4654
+#: app/templates/admin.html:92 app/templates/admin_organization.html:39
 msgid "Acceso manual"
 msgstr ""
 
-#: app/plans.py:227 app/routes.py:4622 app/templates/subscription.html:21
+#: app/plans.py:227 app/routes.py:4655 app/templates/subscription.html:21
 msgid "Plan actual"
 msgstr ""
 
@@ -313,13 +321,13 @@ msgstr ""
 msgid "Activa"
 msgstr ""
 
-#: app/routes.py:322 app/routes.py:4357 app/routes.py:4509
-#: app/templates/admin.html:98 app/templates/admin_organization.html:14
+#: app/routes.py:322 app/routes.py:4390 app/routes.py:4542
+#: app/templates/admin.html:99 app/templates/admin_organization.html:14
 msgid "En prueba"
 msgstr ""
 
-#: app/routes.py:323 app/routes.py:4274 app/routes.py:4354 app/routes.py:4506
-#: app/routes.py:4523 app/templates/admin.html:99 app/templates/admin.html:107
+#: app/routes.py:323 app/routes.py:4307 app/routes.py:4387 app/routes.py:4539
+#: app/routes.py:4556 app/templates/admin.html:100 app/templates/admin.html:108
 #: app/templates/admin_organization.html:36
 msgid "Pago pendiente"
 msgstr ""
@@ -540,296 +548,304 @@ msgstr ""
 msgid "Entrar"
 msgstr ""
 
-#: app/routes.py:1208
+#: app/routes.py:1062
+msgid "Para cerrar sesión de forma segura, utiliza el botón Cerrar sesión."
+msgstr ""
+
+#: app/routes.py:1080
+msgid "Has cerrado sesión correctamente."
+msgstr ""
+
+#: app/routes.py:1227
 #, python-format
 msgid "%(product)s agotado"
 msgstr ""
 
-#: app/routes.py:1209
+#: app/routes.py:1228
 msgid "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
 msgstr ""
 
-#: app/routes.py:1214
+#: app/routes.py:1233
 #, python-format
 msgid "Reordenar %(product)s"
 msgstr ""
 
-#: app/routes.py:1216
+#: app/routes.py:1235
 #, python-format
 msgid "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s."
 msgstr ""
 
-#: app/routes.py:1224
+#: app/routes.py:1243
 #, python-format
 msgid "%(product)s se agotará pronto"
 msgstr ""
 
-#: app/routes.py:1226
+#: app/routes.py:1245
 #, python-format
 msgid ""
 "Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s "
 "días."
 msgstr ""
 
-#: app/routes.py:1233
+#: app/routes.py:1252
 #, python-format
 msgid "Vigilar %(product)s"
 msgstr ""
 
-#: app/routes.py:1234
+#: app/routes.py:1253
 #, python-format
 msgid "Inventario estimado para %(days)s días."
 msgstr ""
 
-#: app/routes.py:1241
+#: app/routes.py:1260
 #, python-format
 msgid ""
 "%(product)s es el producto con más movimiento. Conviene revisar sus "
 "existencias antes de tu próxima compra."
 msgstr ""
 
-#: app/routes.py:1244
+#: app/routes.py:1263
 msgid "Ventas registradas en los últimos 7 días."
 msgstr ""
 
-#: app/routes.py:1246
+#: app/routes.py:1265
 msgid ""
 "Confirma sus existencias, costo y stock mínimo antes de preparar tu "
 "siguiente compra."
 msgstr ""
 
-#: app/routes.py:1248
+#: app/routes.py:1267
 msgid "Abrir producto"
 msgstr ""
 
-#: app/routes.py:1256
+#: app/routes.py:1275
 #, python-format
 msgid "En los últimos 7 días registraste $%(amount)s MXN en ventas."
 msgstr ""
 
-#: app/routes.py:1259
+#: app/routes.py:1278
 msgid "Suma de las ventas registradas en el periodo."
 msgstr ""
 
-#: app/routes.py:1261
+#: app/routes.py:1280
 msgid "Compara los días del periodo para identificar cuándo vendes más."
 msgstr ""
 
-#: app/routes.py:1263
+#: app/routes.py:1282
 msgid "Ver reportes"
 msgstr ""
 
-#: app/routes.py:1269
+#: app/routes.py:1288
 #, python-format
 msgid ""
 "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, "
 "considerando el costo registrado de los productos vendidos."
 msgstr ""
 
-#: app/routes.py:1272
+#: app/routes.py:1291
 msgid "Precio vendido menos costo histórico conocido."
 msgstr ""
 
-#: app/routes.py:1274
+#: app/routes.py:1293
 msgid ""
 "Revisa qué productos aportaron esa utilidad y cuáles necesitan un mejor "
 "margen."
 msgstr ""
 
-#: app/routes.py:1276
+#: app/routes.py:1295
 msgid "Revisar utilidad"
 msgstr ""
 
-#: app/routes.py:1283
+#: app/routes.py:1302
 #, python-format
 msgid ""
 "Tienes %(count)s producto con inventario bajo. Revísalo antes de que "
 "afecte una venta."
 msgstr ""
 
-#: app/routes.py:1288
+#: app/routes.py:1307
 #, python-format
 msgid ""
 "Tienes %(count)s productos con inventario bajo. Revísalos antes de que "
 "afecten una venta."
 msgstr ""
 
-#: app/routes.py:1292
+#: app/routes.py:1311
 msgid "Stock actual comparado con el mínimo de cada producto."
 msgstr ""
 
-#: app/routes.py:1294
+#: app/routes.py:1313
 msgid ""
 "Reabastece primero los productos agotados o más cercanos a quedarse sin "
 "existencias."
 msgstr ""
 
-#: app/routes.py:1296
+#: app/routes.py:1315
 msgid "Ver qué surtir"
 msgstr ""
 
-#: app/routes.py:1349
+#: app/routes.py:1368
 msgid "El periodo solicitado no es válido. Mostramos los últimos 7 días."
 msgstr ""
 
-#: app/routes.py:1373
+#: app/routes.py:1392
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr ""
 
-#: app/routes.py:1375
+#: app/routes.py:1394
 msgid "El rango personalizado no puede superar 366 días."
 msgstr ""
 
-#: app/routes.py:1377
+#: app/routes.py:1396
 msgid "Escribe fechas válidas. Mostramos los últimos 7 días."
 msgstr ""
 
-#: app/routes.py:1672
+#: app/routes.py:1691
 msgid "Completa los datos básicos"
 msgstr ""
 
-#: app/routes.py:1673
+#: app/routes.py:1692
 msgid "Confirma la información principal de tu negocio."
 msgstr ""
 
-#: app/routes.py:1676
+#: app/routes.py:1695
 msgid "Completar datos"
 msgstr ""
 
-#: app/routes.py:1687 app/templates/products.html:24
+#: app/routes.py:1706 app/templates/products.html:24
 #: app/templates/products.html:39
 msgid "Agrega tu primer producto"
 msgstr ""
 
-#: app/routes.py:1688
+#: app/routes.py:1707
 msgid "Captura un producto o importa tu catálogo desde Excel."
 msgstr ""
 
-#: app/routes.py:1690 app/templates/products.html:27
+#: app/routes.py:1709 app/templates/products.html:27
 msgid "Agregar primer producto"
 msgstr ""
 
-#: app/routes.py:1694
+#: app/routes.py:1713
 msgid "Registra tu primera venta"
 msgstr ""
 
-#: app/routes.py:1695
+#: app/routes.py:1714
 msgid "Prueba el punto de venta con un producto de tu catálogo."
 msgstr ""
 
-#: app/routes.py:1697
+#: app/routes.py:1716
 msgid "Registrar primera venta"
 msgstr ""
 
-#: app/routes.py:1701
+#: app/routes.py:1720
 msgid "Revisa tus resultados"
 msgstr ""
 
-#: app/routes.py:1702
+#: app/routes.py:1721
 msgid "Consulta ventas, inventario y alertas en este panel."
 msgstr ""
 
-#: app/routes.py:1809
+#: app/routes.py:1828
 msgid "Productos por agotarse"
 msgstr ""
 
-#: app/routes.py:1811
+#: app/routes.py:1830
 msgid "Productos sin ventas en el periodo"
 msgstr ""
 
-#: app/routes.py:1813
+#: app/routes.py:1832
 msgid "Productos sin costo conocido"
 msgstr ""
 
-#: app/routes.py:1815
+#: app/routes.py:1834
 #, python-format
 msgid "Productos con margen de 15%% o menos"
 msgstr ""
 
-#: app/routes.py:1910 app/routes.py:1951 app/routes.py:2056
+#: app/routes.py:1929 app/routes.py:1970 app/routes.py:2075
 #: app/team/services.py:201
 msgid "Inicia sesión para continuar."
 msgstr ""
 
-#: app/routes.py:1920
+#: app/routes.py:1939
 msgid "Escanea o escribe un código de barras válido."
 msgstr ""
 
-#: app/routes.py:1973 app/routes.py:1988
+#: app/routes.py:1992 app/routes.py:2007
 msgid "Revisa los datos del producto e inténtalo nuevamente."
 msgstr ""
 
-#: app/routes.py:1996
+#: app/routes.py:2015
 msgid "Ese código ya pertenece a un producto de tu inventario."
 msgstr ""
 
-#: app/routes.py:2002
+#: app/routes.py:2021
 msgid "Ese SKU ya está en uso. Escribe uno diferente."
 msgstr ""
 
-#: app/routes.py:2023
+#: app/routes.py:2042
 msgid "Alta mediante carga rápida"
 msgstr ""
 
-#: app/routes.py:2037
+#: app/routes.py:2056
 msgid "El código o el SKU ya fue registrado. Escanéalo de nuevo para continuar."
 msgstr ""
 
-#: app/routes.py:2046
+#: app/routes.py:2065
 #, python-format
 msgid "%(product)s se agregó al inventario."
 msgstr ""
 
-#: app/routes.py:2072 app/routes.py:2688
+#: app/routes.py:2091 app/routes.py:2707
 msgid "La cantidad recibida debe ser mayor que cero."
 msgstr ""
 
-#: app/routes.py:2083
+#: app/routes.py:2102
 msgid "No encontramos ese producto en tu inventario."
 msgstr ""
 
-#: app/routes.py:2090 app/routes.py:2702
+#: app/routes.py:2109 app/routes.py:2721
 msgid "La cantidad recibida supera el límite permitido."
 msgstr ""
 
-#: app/routes.py:2111
+#: app/routes.py:2130
 msgid "Reabastecimiento desde carga rápida"
 msgstr ""
 
-#: app/routes.py:2124 app/routes.py:2736
+#: app/routes.py:2143 app/routes.py:2755
 msgid "No pudimos actualizar el inventario. Inténtalo nuevamente."
 msgstr ""
 
-#: app/routes.py:2130 app/routes.py:2743
+#: app/routes.py:2149 app/routes.py:2762
 #, python-format
 msgid "Se agregaron %(quantity)s unidades a %(product)s."
 msgstr ""
 
-#: app/inventory/routes.py:228 app/routes.py:2147
+#: app/inventory/routes.py:228 app/routes.py:2166
 #: app/templates/edit_product.html:20 app/templates/products.html:51
 #: app/templates/products.html:109 app/templates/quick_load.html:62
 #: app/templates/quick_load.html:98
 msgid "SKU"
 msgstr ""
 
-#: app/routes.py:2148 app/templates/edit_product.html:25
+#: app/routes.py:2167 app/templates/edit_product.html:25
 #: app/templates/products.html:75 app/templates/quick_load.html:33
 #: app/templates/quick_load.html:89
 msgid "Código de barras"
 msgstr ""
 
-#: app/routes.py:2149 app/templates/edit_product.html:16
+#: app/routes.py:2168 app/templates/edit_product.html:16
 #: app/templates/products.html:47
 msgid "Nombre del producto"
 msgstr ""
 
-#: app/routes.py:2150 app/templates/edit_product.html:30
+#: app/routes.py:2169 app/templates/edit_product.html:30
 #: app/templates/products.html:79 app/templates/products.html:207
 #: app/templates/products.html:212 app/templates/quick_load.html:103
 msgid "Categoría"
 msgstr ""
 
-#: app/routes.py:2151 app/templates/edit_product.html:34
+#: app/routes.py:2170 app/templates/edit_product.html:34
 #: app/templates/pro_purchases.html:51 app/templates/products.html:83
 #: app/templates/products.html:207 app/templates/products.html:213
 #: app/templates/quick_load.html:65 app/templates/quick_load.html:110
@@ -838,58 +854,58 @@ msgstr ""
 msgid "Proveedor"
 msgstr ""
 
-#: app/routes.py:2152 app/templates/reports.html:173
+#: app/routes.py:2171 app/templates/reports.html:280
 msgid "Costo"
 msgstr ""
 
-#: app/routes.py:2153 app/templates/edit_product.html:42
+#: app/routes.py:2172 app/templates/edit_product.html:42
 #: app/templates/products.html:61 app/templates/quick_load.html:121
 msgid "Precio de venta"
 msgstr ""
 
-#: app/routes.py:2154
+#: app/routes.py:2173
 msgid "Stock inicial"
 msgstr ""
 
-#: app/routes.py:2155 app/templates/dashboard.html:176
+#: app/routes.py:2174 app/templates/dashboard.html:176
 #: app/templates/edit_product.html:51 app/templates/products.html:87
 #: app/templates/quick_load.html:129
 msgid "Stock mínimo"
 msgstr ""
 
-#: app/routes.py:2161
+#: app/routes.py:2180
 msgid "PRODUCTOS"
 msgstr ""
 
-#: app/routes.py:2166
+#: app/routes.py:2185
 msgid "PATIA - Plantilla oficial de productos"
 msgstr ""
 
-#: app/routes.py:2168
+#: app/routes.py:2187
 msgid ""
 "Llena esta tabla con tus productos. No cambies los nombres de las "
 "columnas."
 msgstr ""
 
-#: app/routes.py:2283
+#: app/routes.py:2302
 msgid ""
 "El archivo no contiene las columnas obligatorias. Descarga la plantilla "
 "PATIA e inténtalo de nuevo."
 msgstr ""
 
-#: app/routes.py:2388
+#: app/routes.py:2407
 msgid "Importación por coincidencia de SKU"
 msgstr ""
 
-#: app/routes.py:2390
+#: app/routes.py:2409
 msgid "Importación por código de barras"
 msgstr ""
 
-#: app/routes.py:2420
+#: app/routes.py:2439
 msgid "Alta mediante importación"
 msgstr ""
 
-#: app/routes.py:2433
+#: app/routes.py:2452
 #, python-format
 msgid ""
 "Importación terminada: %(created)s creados, %(updated)s actualizados, "
@@ -897,228 +913,228 @@ msgid ""
 " con productos existentes."
 msgstr ""
 
-#: app/routes.py:2546
+#: app/routes.py:2565
 msgid "Restauración de producto archivado"
 msgstr ""
 
-#: app/routes.py:2552
+#: app/routes.py:2571
 msgid "Alta manual de producto"
 msgstr ""
 
-#: app/routes.py:2652
+#: app/routes.py:2671
 msgid "Stock actualizado al editar el producto"
 msgstr ""
 
-#: app/routes.py:2685
+#: app/routes.py:2704
 msgid "Ingresa una cantidad recibida válida."
 msgstr ""
 
-#: app/routes.py:2724
+#: app/routes.py:2743
 msgid "Reabastecimiento de inventario"
 msgstr ""
 
-#: app/routes.py:2855 app/routes.py:3080 app/templates/sell.html:37
+#: app/routes.py:2874 app/routes.py:3099 app/templates/sell.html:37
 msgid "Venta registrada"
 msgstr ""
 
-#: app/routes.py:2871
+#: app/routes.py:2890
 #, python-format
 msgid "Venta registrada: %(product)s x%(quantity)s."
 msgstr ""
 
-#: app/routes.py:2920
+#: app/routes.py:2939
 msgid "No autenticado"
 msgstr ""
 
-#: app/credit/routes.py:195 app/customers/routes.py:289 app/routes.py:2930
-#: app/routes.py:2961
+#: app/credit/routes.py:195 app/customers/routes.py:289 app/routes.py:2949
+#: app/routes.py:2980
 msgid "Solicitud inválida"
 msgstr ""
 
-#: app/routes.py:2934
+#: app/routes.py:2953
 msgid "El carrito está vacío"
 msgstr ""
 
-#: app/routes.py:2938
+#: app/routes.py:2957
 msgid "Selecciona un método de pago válido"
 msgstr ""
 
-#: app/routes.py:2944
+#: app/routes.py:2963
 msgid "Abre la caja antes de registrar una venta en efectivo."
 msgstr ""
 
-#: app/routes.py:2967 app/routes.py:2973
+#: app/routes.py:2986 app/routes.py:2992
 msgid "Artículo inválido"
 msgstr ""
 
-#: app/routes.py:2976
+#: app/routes.py:2995
 msgid "La cantidad debe ser mayor a cero"
 msgstr ""
 
-#: app/routes.py:3013
+#: app/routes.py:3032
 msgid "Producto no encontrado"
 msgstr ""
 
-#: app/routes.py:3041
+#: app/routes.py:3060
 #, python-format
 msgid "Stock insuficiente: %(product)s"
 msgstr ""
 
 #: app/customers/services.py:87 app/customers/services.py:100
-#: app/routes.py:3090 app/team/services.py:232
+#: app/routes.py:3109 app/team/services.py:232
 msgid "Acceso no permitido."
 msgstr ""
 
-#: app/routes.py:3094
+#: app/routes.py:3113
 msgid "Selecciona un cliente para vender a crédito."
 msgstr ""
 
-#: app/routes.py:3146
+#: app/routes.py:3165
 msgid "No se pudo procesar la venta"
 msgstr ""
 
-#: app/routes.py:3170
+#: app/routes.py:3189
 msgid "Los periodos y análisis avanzados están incluidos en PATIA Pro."
 msgstr ""
 
-#: app/routes.py:3659
+#: app/routes.py:3692
 #, python-format
 msgid "Tu plan %(plan)s está activo."
 msgstr ""
 
-#: app/routes.py:3676
+#: app/routes.py:3709
 msgid "Venta cancelada. Stock devuelto al inventario."
 msgstr ""
 
-#: app/routes.py:3688
+#: app/routes.py:3721
 msgid "Devolución registrada. Stock devuelto al inventario."
 msgstr ""
 
-#: app/routes.py:3715
+#: app/routes.py:3748
 msgid "Abre la caja antes de devolver una venta en efectivo."
 msgstr ""
 
-#: app/routes.py:3723
+#: app/routes.py:3756
 msgid "La venta a crédito no tiene un cliente asociado."
 msgstr ""
 
-#: app/routes.py:3755
+#: app/routes.py:3788
 msgid "Devolución de venta"
 msgstr ""
 
-#: app/routes.py:3757
+#: app/routes.py:3790
 msgid "Cancelación de venta"
 msgstr ""
 
-#: app/routes.py:3768
+#: app/routes.py:3801
 #, python-format
 msgid "Devolución de %(folio)s"
 msgstr ""
 
-#: app/routes.py:3966
+#: app/routes.py:3999
 msgid ""
 "Starter no incluye encargados. Cambia sus accesos a Cajero antes de "
 "solicitar el cambio."
 msgstr ""
 
-#: app/routes.py:4280
+#: app/routes.py:4313
 #, python-format
 msgid "La prueba vence en %(days)s días"
 msgstr ""
 
-#: app/routes.py:4287 app/routes.py:4355 app/routes.py:4507 app/routes.py:4525
-#: app/templates/admin.html:100 app/templates/admin.html:109
+#: app/routes.py:4320 app/routes.py:4388 app/routes.py:4540 app/routes.py:4558
+#: app/templates/admin.html:101 app/templates/admin.html:110
 #: app/templates/admin_organization.html:38 app/templates/subscription.html:37
 msgid "Cancelación programada"
 msgstr ""
 
-#: app/routes.py:4291
+#: app/routes.py:4324
 msgid "Reporte mensual fallido"
 msgstr ""
 
-#: app/routes.py:4294 app/routes.py:4527 app/templates/admin.html:111
+#: app/routes.py:4327 app/routes.py:4560 app/templates/admin.html:112
 msgid "Cuenta vencida"
 msgstr ""
 
-#: app/routes.py:4297 app/routes.py:4617 app/templates/admin.html:87
+#: app/routes.py:4330 app/routes.py:4650 app/templates/admin.html:88
 msgid "Trial"
 msgstr ""
 
-#: app/routes.py:4300 app/routes.py:4620 app/templates/admin.html:90
+#: app/routes.py:4333 app/routes.py:4653 app/templates/admin.html:91
 msgid "Cliente anterior"
 msgstr ""
 
-#: app/routes.py:4356 app/routes.py:4508 app/templates/admin.html:101
+#: app/routes.py:4389 app/routes.py:4541 app/templates/admin.html:102
 msgid "Vencido"
 msgstr ""
 
-#: app/customers/routes.py:227 app/routes.py:4358 app/routes.py:4505
-#: app/templates/admin.html:97 app/templates/admin_organization.html:14
+#: app/customers/routes.py:227 app/routes.py:4391 app/routes.py:4538
+#: app/templates/admin.html:98 app/templates/admin_organization.html:14
 #: app/templates/admin_organization.html:36 app/templates/quick_load.html:154
 msgid "Activo"
 msgstr ""
 
-#: app/routes.py:4484
+#: app/routes.py:4517
 #, python-format
 msgid "Búsqueda: %(value)s"
 msgstr ""
 
-#: app/routes.py:4491
+#: app/routes.py:4524
 #, python-format
 msgid "Plan: %(value)s"
 msgstr ""
 
-#: app/routes.py:4516
+#: app/routes.py:4549
 #, python-format
 msgid "Estado: %(value)s"
 msgstr ""
 
-#: app/routes.py:4524 app/templates/admin.html:108
+#: app/routes.py:4557 app/templates/admin.html:109
 msgid "Prueba por vencer"
 msgstr ""
 
-#: app/routes.py:4526 app/templates/admin.html:110
+#: app/routes.py:4559 app/templates/admin.html:111
 msgid "Reporte fallido"
 msgstr ""
 
-#: app/routes.py:4534
+#: app/routes.py:4567
 #, python-format
 msgid "Atención: %(value)s"
 msgstr ""
 
-#: app/routes.py:4773
+#: app/routes.py:4806
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del"
 " catálogo conservando su historial."
 msgstr ""
 
-#: app/routes.py:4781
+#: app/routes.py:4814
 #, python-format
 msgid "Eliminamos %(count)s productos del catálogo."
 msgstr ""
 
-#: app/routes.py:4844
+#: app/routes.py:4877
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s seleccionados y retiramos %(protected)s "
 "conservando su historial."
 msgstr ""
 
-#: app/routes.py:4851
+#: app/routes.py:4884
 #, python-format
 msgid "%(count)s productos eliminados."
 msgstr ""
 
-#: app/routes.py:4912 app/routes.py:4939
+#: app/routes.py:4945 app/routes.py:4972
 msgid "El acceso Pro se administra en el propietario de la organización."
 msgstr ""
 
-#: app/routes.py:4920
+#: app/routes.py:4953
 msgid "Acceso manual Pro activado."
 msgstr ""
 
-#: app/routes.py:4947
+#: app/routes.py:4980
 msgid "Acceso manual Pro desactivado."
 msgstr ""
 
@@ -1366,8 +1382,8 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
-#: app/customers/routes.py:214 app/templates/admin.html:94
-#: app/templates/admin.html:146 app/templates/admin_organization.html:36
+#: app/customers/routes.py:214 app/templates/admin.html:95
+#: app/templates/admin.html:147 app/templates/admin_organization.html:36
 #: app/templates/auth.html:101 app/templates/auth.html:102
 #: app/templates/settings.html:63
 msgid "Estado"
@@ -1476,7 +1492,7 @@ msgstr ""
 #: app/templates/pro_purchase_detail.html:31
 #: app/templates/pro_purchases.html:58 app/templates/pro_purchases.html:62
 #: app/templates/products.html:207 app/templates/products.html:211
-#: app/templates/reports.html:154 app/templates/reports.html:173
+#: app/templates/reports.html:261 app/templates/reports.html:280
 #: app/templates/sell.html:100 app/templates/ticket.html:47
 msgid "Producto"
 msgstr ""
@@ -1610,228 +1626,201 @@ msgstr ""
 msgid "Una acción directa para resolver cada situación"
 msgstr ""
 
-#: app/pro/routes.py:69 app/templates/landing.html:58
-#: app/templates/pro_hub.html:66
-msgid "Panel ejecutivo"
-msgstr ""
-
-#: app/pro/routes.py:70
-msgid "Entiende qué cambió y qué conviene hacer"
-msgstr ""
-
-#: app/pro/routes.py:72
-msgid ""
-"PATIA interpreta ventas, utilidad, inventario y operación para convertir "
-"tus datos en decisiones."
-msgstr ""
-
-#: app/pro/routes.py:76
-msgid "Comparaciones contra periodos anteriores"
-msgstr ""
-
-#: app/pro/routes.py:77
-msgid "Proyección y meta mensual"
-msgstr ""
-
-#: app/pro/routes.py:78
-msgid "Acciones respaldadas por datos reales"
-msgstr ""
-
-#: app/pro/routes.py:83 app/templates/admin_organization.html:54
-#: app/templates/pro_hub.html:72
+#: app/pro/routes.py:69 app/templates/admin_organization.html:54
+#: app/templates/pro_hub.html:159
 msgid "Reporte mensual"
 msgstr ""
 
-#: app/pro/routes.py:84
+#: app/pro/routes.py:70
 msgid "Recibe el resumen que le darías a un gerente"
 msgstr ""
 
-#: app/pro/routes.py:86
+#: app/pro/routes.py:72
 msgid ""
 "Conserva una fotografía de cada mes, descárgala en PDF y compártela sin "
 "preparar reportes manuales."
 msgstr ""
 
-#: app/pro/routes.py:90
+#: app/pro/routes.py:76
 msgid "Historial mensual inmutable"
 msgstr ""
 
-#: app/pro/routes.py:91
+#: app/pro/routes.py:77
 msgid "PDF listo para compartir"
 msgstr ""
 
-#: app/pro/routes.py:92
+#: app/pro/routes.py:78
 msgid "Envío y reenvío desde PATIA"
 msgstr ""
 
-#: app/pro/routes.py:97 app/templates/base.html:54
-#: app/templates/pro_hub.html:78 app/templates/pro_purchases.html:2
+#: app/pro/routes.py:83 app/templates/base.html:54
+#: app/templates/pro_hub.html:165 app/templates/pro_purchases.html:2
 msgid "Compras inteligentes"
 msgstr ""
 
-#: app/pro/routes.py:98
+#: app/pro/routes.py:84
 msgid "Compra lo necesario antes de quedarte sin stock"
 msgstr ""
 
-#: app/pro/routes.py:100
+#: app/pro/routes.py:86
 msgid ""
 "PATIA usa existencias y ventas recientes para sugerir qué pedir, cuánto y"
 " a qué proveedor."
 msgstr ""
 
-#: app/pro/routes.py:104
+#: app/pro/routes.py:90
 msgid "Reposición agrupada por proveedor"
 msgstr ""
 
-#: app/pro/routes.py:105
+#: app/pro/routes.py:91
 msgid "Pedidos y recepciones conectados al inventario"
 msgstr ""
 
-#: app/pro/routes.py:106
+#: app/pro/routes.py:92
 msgid "Evidencia detrás de cada sugerencia"
 msgstr ""
 
-#: app/pro/routes.py:111 app/templates/pro_hub.html:84
+#: app/pro/routes.py:97 app/templates/pro_hub.html:171
 msgid "Alertas"
 msgstr ""
 
-#: app/pro/routes.py:112
+#: app/pro/routes.py:98
 msgid "Detecta lo importante antes de que sea urgente"
 msgstr ""
 
-#: app/pro/routes.py:114
+#: app/pro/routes.py:100
 msgid ""
 "Revisa cambios en ventas, margen, stock, crédito y caja con evidencia y "
 "una acción concreta."
 msgstr ""
 
-#: app/pro/routes.py:118
+#: app/pro/routes.py:104
 msgid "Prioridad según impacto"
 msgstr ""
 
-#: app/pro/routes.py:119
+#: app/pro/routes.py:105
 msgid "Evidencia fácil de comprobar"
 msgstr ""
 
-#: app/pro/routes.py:120
+#: app/pro/routes.py:106
 msgid "Acceso directo para resolver cada situación"
 msgstr ""
 
-#: app/pro/routes.py:141
+#: app/pro/routes.py:127
 msgid ""
-"El Dashboard Ejecutivo está incluido en PATIA Pro. Compara los planes "
+"El Centro de decisiones está incluido en PATIA Pro. Compara los planes "
 "para activarlo."
 msgstr ""
 
-#: app/pro/routes.py:184
+#: app/pro/routes.py:160
 msgid "Escribe una meta mensual mayor a cero."
 msgstr ""
 
-#: app/pro/routes.py:191
+#: app/pro/routes.py:175
 msgid "Meta mensual eliminada."
 msgstr ""
 
-#: app/pro/routes.py:193
+#: app/pro/routes.py:177
 msgid "Meta mensual guardada."
 msgstr ""
 
-#: app/pro/routes.py:263
+#: app/pro/routes.py:255
 #, python-format
 msgid "%(count)s productos necesitan reposición"
 msgstr ""
 
-#: app/pro/routes.py:267
+#: app/pro/routes.py:259
 #, python-format
 msgid ""
 "PATIA sugiere pedir %(units)s unidades con base en existencias y ventas "
 "recientes."
 msgstr ""
 
-#: app/pro/routes.py:271
+#: app/pro/routes.py:263
 msgid ""
 "Revisa las cantidades sugeridas y prepara el pedido antes de perder una "
 "venta."
 msgstr ""
 
-#: app/pro/routes.py:273
+#: app/pro/routes.py:265
 msgid "Preparar compra"
 msgstr ""
 
-#: app/pro/routes.py:282
+#: app/pro/routes.py:274
 msgid "Tu primer reporte mensual está listo para generarse"
 msgstr ""
 
-#: app/pro/routes.py:284
+#: app/pro/routes.py:276
 msgid "Guarda una fotografía del mes y descárgala en PDF."
 msgstr ""
 
-#: app/pro/routes.py:287
+#: app/pro/routes.py:279
 msgid ""
 "Crear el resumen ahora te dará una referencia fija para comparar el "
 "siguiente mes."
 msgstr ""
 
-#: app/pro/routes.py:289 app/templates/pro_monthly_reports.html:57
+#: app/pro/routes.py:281 app/templates/pro_monthly_reports.html:57
 msgid "Generar reporte"
 msgstr ""
 
-#: app/pro/routes.py:406
+#: app/pro/routes.py:400
 msgid "No pudimos generar ese reporte mensual."
 msgstr ""
 
-#: app/pro/routes.py:410
+#: app/pro/routes.py:404
 msgid "Reporte mensual generado."
 msgstr ""
 
-#: app/pro/routes.py:467
+#: app/pro/routes.py:461
 msgid "Este reporte todavía no tiene snapshot."
 msgstr ""
 
-#: app/pro/routes.py:501
+#: app/pro/routes.py:495
 msgid "Activa el envío mensual y confirma el correo destinatario."
 msgstr ""
 
-#: app/pro/routes.py:509
+#: app/pro/routes.py:503
 msgid "Reporte reenviado correctamente."
 msgstr ""
 
-#: app/pro/routes.py:513
+#: app/pro/routes.py:507
 msgid "No pudimos reenviar el reporte. Podrás intentarlo de nuevo."
 msgstr ""
 
-#: app/pro/routes.py:570
+#: app/pro/routes.py:564
 msgid "Revisa los productos y cantidades del pedido."
 msgstr ""
 
-#: app/pro/routes.py:574
+#: app/pro/routes.py:568
 msgid "Borrador de pedido creado."
 msgstr ""
 
-#: app/pro/routes.py:629
+#: app/pro/routes.py:623
 msgid "Revisa las cantidades del pedido."
 msgstr ""
 
-#: app/pro/routes.py:631
+#: app/pro/routes.py:625
 msgid "Borrador actualizado."
 msgstr ""
 
-#: app/pro/routes.py:647
+#: app/pro/routes.py:641
 msgid "Este pedido no puede confirmarse."
 msgstr ""
 
-#: app/pro/routes.py:649
+#: app/pro/routes.py:643
 msgid "Pedido confirmado y listo para recibir."
 msgstr ""
 
-#: app/pro/routes.py:679
+#: app/pro/routes.py:673
 msgid "Revisa las cantidades recibidas."
 msgstr ""
 
-#: app/pro/routes.py:685
+#: app/pro/routes.py:679
 msgid "Mercancía recibida e inventario actualizado."
 msgstr ""
 
-#: app/pro/routes.py:687
+#: app/pro/routes.py:681
 msgid "Esta recepción ya había sido registrada."
 msgstr ""
 
@@ -2040,7 +2029,7 @@ msgstr ""
 msgid "Evalúa precio, exhibición o próxima compra."
 msgstr ""
 
-#: app/pro/services.py:652 app/templates/pro_dashboard.html:138
+#: app/pro/services.py:652
 msgid "Revisar inventario"
 msgstr ""
 
@@ -2282,229 +2271,229 @@ msgstr ""
 msgid "Clientes, ingresos y asuntos que necesitan atención, sin ruido técnico."
 msgstr ""
 
-#: app/templates/admin.html:13
+#: app/templates/admin.html:14
 msgid "Resumen comercial"
 msgstr ""
 
-#: app/templates/admin.html:14
+#: app/templates/admin.html:15
 msgid "Negocios totales"
 msgstr ""
 
-#: app/templates/admin.html:15
+#: app/templates/admin.html:16
 msgid "Clientes de pago"
 msgstr ""
 
-#: app/templates/admin.html:16
+#: app/templates/admin.html:17
 msgid "Ingreso mensual estimado"
 msgstr ""
 
-#: app/templates/admin.html:16 app/templates/landing.html:238
+#: app/templates/admin.html:17 app/templates/landing.html:238
 msgid "MXN"
 msgstr ""
 
-#: app/templates/admin.html:17
+#: app/templates/admin.html:18
 msgid "Pruebas activas"
 msgstr ""
 
-#: app/templates/admin.html:18
+#: app/templates/admin.html:19
 msgid "Requieren atención"
 msgstr ""
 
-#: app/templates/admin.html:22
+#: app/templates/admin.html:23
 msgid "Ver más métricas"
 msgstr ""
 
-#: app/templates/admin.html:24
+#: app/templates/admin.html:25
 msgid "Starter activos"
 msgstr ""
 
-#: app/templates/admin.html:25
+#: app/templates/admin.html:26
 msgid "Pro activos"
 msgstr ""
 
-#: app/templates/admin.html:26
+#: app/templates/admin.html:27
 msgid "Clientes anteriores"
 msgstr ""
 
-#: app/templates/admin.html:27
+#: app/templates/admin.html:28
 msgid "Accesos manuales"
 msgstr ""
 
-#: app/templates/admin.html:28
+#: app/templates/admin.html:29
 msgid "Renovaciones próximas"
 msgstr ""
 
-#: app/templates/admin.html:29
+#: app/templates/admin.html:30
 msgid "Cancelaciones"
 msgstr ""
 
-#: app/templates/admin.html:30
+#: app/templates/admin.html:31
 msgid "Reportes enviados"
 msgstr ""
 
-#: app/templates/admin.html:31
+#: app/templates/admin.html:32
 msgid "Reportes fallidos"
 msgstr ""
 
-#: app/templates/admin.html:39
+#: app/templates/admin.html:40
 msgid "Prioridad"
 msgstr ""
 
-#: app/templates/admin.html:40
+#: app/templates/admin.html:41
 msgid "Necesitan atención"
 msgstr ""
 
-#: app/templates/admin.html:42
+#: app/templates/admin.html:43
 #, python-format
 msgid "%(count)s negocio"
 msgstr ""
 
-#: app/templates/admin.html:42
+#: app/templates/admin.html:43
 #, python-format
 msgid "%(count)s negocios"
 msgstr ""
 
-#: app/templates/admin.html:57 app/templates/admin_organization.html:86
+#: app/templates/admin.html:58 app/templates/admin_organization.html:86
 msgid "Contactar"
 msgstr ""
 
-#: app/templates/admin.html:58
+#: app/templates/admin.html:59
 msgid "Revisar"
 msgstr ""
 
-#: app/templates/admin.html:69
+#: app/templates/admin.html:70
 msgid "Directorio"
 msgstr ""
 
-#: app/templates/admin.html:70
+#: app/templates/admin.html:71
 msgid "Negocios"
 msgstr ""
 
-#: app/templates/admin.html:72
+#: app/templates/admin.html:73
 #, python-format
 msgid "%(count)s resultado"
 msgstr ""
 
-#: app/templates/admin.html:72
+#: app/templates/admin.html:73
 #, python-format
 msgid "%(count)s resultados"
 msgstr ""
 
-#: app/templates/admin.html:77
+#: app/templates/admin.html:78
 msgid "Buscar negocio"
 msgstr ""
 
-#: app/templates/admin.html:79
+#: app/templates/admin.html:80
 msgid "Buscar negocio, propietario o correo..."
 msgstr ""
 
-#: app/templates/admin.html:82 app/templates/inventory_kardex.html:53
+#: app/templates/admin.html:83 app/templates/inventory_kardex.html:53
 msgid "Filtrar"
 msgstr ""
 
-#: app/templates/admin.html:84 app/templates/admin.html:145
+#: app/templates/admin.html:85 app/templates/admin.html:146
 #: app/templates/admin_organization.html:34 app/templates/base.html:103
 msgid "Plan"
 msgstr ""
 
-#: app/templates/admin.html:86 app/templates/admin.html:96
+#: app/templates/admin.html:87 app/templates/admin.html:97
 msgid "Todos"
 msgstr ""
 
-#: app/templates/admin.html:104 app/templates/pro_monthly_report.html:74
+#: app/templates/admin.html:105 app/templates/pro_monthly_report.html:74
 msgid "Atención"
 msgstr ""
 
-#: app/templates/admin.html:106
+#: app/templates/admin.html:107
 msgid "Cualquiera"
 msgstr ""
 
-#: app/templates/admin.html:115 app/templates/customers.html:28
+#: app/templates/admin.html:116 app/templates/customers.html:28
 #: app/templates/inventory_kardex.html:61
 msgid "Limpiar"
 msgstr ""
 
-#: app/templates/admin.html:116 app/templates/inventory_kardex.html:60
+#: app/templates/admin.html:117 app/templates/inventory_kardex.html:60
 msgid "Aplicar filtros"
 msgstr ""
 
-#: app/templates/admin.html:120 app/templates/customers.html:27
+#: app/templates/admin.html:121 app/templates/customers.html:27
 #: app/templates/inventory_kardex.html:48 app/templates/quick_load.html:46
 msgid "Buscar"
 msgstr ""
 
-#: app/templates/admin.html:124
+#: app/templates/admin.html:125
 msgid "Filtros aplicados"
 msgstr ""
 
-#: app/templates/admin.html:134
+#: app/templates/admin.html:135
 msgid "Quitar todos"
 msgstr ""
 
-#: app/templates/admin.html:143 app/templates/base.html:61
+#: app/templates/admin.html:144 app/templates/base.html:61
 #: app/templates/settings.html:7 app/templates/subscribe.html:6
 #: app/templates/subscription.html:7 app/templates/team.html:6
 msgid "Negocio"
 msgstr ""
 
-#: app/templates/admin.html:144 app/templates/admin_organization.html:22
+#: app/templates/admin.html:145 app/templates/admin_organization.html:22
 #: app/templates/team.html:79
 msgid "Propietario"
 msgstr ""
 
-#: app/templates/admin.html:147
+#: app/templates/admin.html:148
 msgid "Pago o renovación"
 msgstr ""
 
-#: app/templates/admin.html:148 app/templates/admin_organization.html:27
+#: app/templates/admin.html:149 app/templates/admin_organization.html:27
 msgid "Última actividad"
 msgstr ""
 
-#: app/templates/admin.html:149 app/templates/cash_register.html:120
+#: app/templates/admin.html:150 app/templates/cash_register.html:120
 #: app/templates/customer_detail.html:80 app/templates/customer_detail.html:87
 #: app/templates/customers.html:41 app/templates/sell.html:100
 msgid "Acción"
 msgstr ""
 
-#: app/templates/admin.html:155
+#: app/templates/admin.html:156
 msgid "Sin ciudad"
 msgstr ""
 
-#: app/templates/admin.html:156 app/templates/admin_organization.html:22
+#: app/templates/admin.html:157 app/templates/admin_organization.html:22
 msgid "Sin nombre"
 msgstr ""
 
-#: app/templates/admin.html:159
+#: app/templates/admin.html:160
 #, python-format
 msgid "Prueba hasta %(date)s"
 msgstr ""
 
-#: app/templates/admin.html:160 app/templates/admin_organization.html:27
+#: app/templates/admin.html:161 app/templates/admin_organization.html:27
 msgid "Sin ventas"
 msgstr ""
 
-#: app/templates/admin.html:161 app/templates/admin.html:174
+#: app/templates/admin.html:162 app/templates/admin.html:175
 msgid "Ver negocio"
 msgstr ""
 
-#: app/templates/admin.html:173
+#: app/templates/admin.html:174
 #, python-format
 msgid "Última actividad: %(date)s"
 msgstr ""
 
-#: app/templates/admin.html:173
+#: app/templates/admin.html:174
 msgid "Sin ventas registradas"
 msgstr ""
 
-#: app/templates/admin.html:179
+#: app/templates/admin.html:180
 msgid "No encontramos negocios con estos filtros"
 msgstr ""
 
-#: app/templates/admin.html:179
+#: app/templates/admin.html:180
 msgid "Prueba otra búsqueda o quita alguno de los filtros."
 msgstr ""
 
-#: app/templates/admin.html:179
+#: app/templates/admin.html:180
 msgid "Ver todos los negocios"
 msgstr ""
 
@@ -2883,17 +2872,17 @@ msgstr ""
 
 #: app/templates/base.html:40 app/templates/dashboard.html:154
 #: app/templates/dashboard.html:212 app/templates/edit_product.html:7
-#: app/templates/landing.html:70 app/templates/pro_dashboard.html:322
+#: app/templates/landing.html:70 app/templates/pro_hub.html:72
 msgid "Inventario"
 msgstr ""
 
 #: app/templates/base.html:41 app/templates/cash_register.html:2
-#: app/templates/pro_dashboard.html:352
+#: app/templates/pro_hub.html:102
 msgid "Caja del día"
 msgstr ""
 
 #: app/templates/base.html:43 app/templates/credit_accounts.html:2
-#: app/templates/pro_dashboard.html:337
+#: app/templates/pro_hub.html:87
 msgid "Saldos pendientes"
 msgstr ""
 
@@ -2905,7 +2894,8 @@ msgstr ""
 msgid "Análisis"
 msgstr ""
 
-#: app/templates/base.html:48 app/templates/reports.html:2
+#: app/templates/base.html:48 app/templates/pro_hub.html:153
+#: app/templates/reports.html:2
 msgid "Reportes"
 msgstr ""
 
@@ -3862,7 +3852,7 @@ msgstr ""
 msgid "Rendimiento"
 msgstr ""
 
-#: app/templates/dashboard.html:262 app/templates/reports.html:149
+#: app/templates/dashboard.html:262 app/templates/reports.html:256
 msgid "Productos más vendidos"
 msgstr ""
 
@@ -4169,13 +4159,11 @@ msgstr ""
 msgid "Todos los cambios"
 msgstr ""
 
-#: app/templates/inventory_kardex.html:57 app/templates/pro_dashboard.html:66
-#: app/templates/reports.html:57
+#: app/templates/inventory_kardex.html:57 app/templates/reports.html:75
 msgid "Desde"
 msgstr ""
 
-#: app/templates/inventory_kardex.html:58 app/templates/pro_dashboard.html:71
-#: app/templates/reports.html:62
+#: app/templates/inventory_kardex.html:58 app/templates/reports.html:80
 msgid "Hasta"
 msgstr ""
 
@@ -4312,6 +4300,11 @@ msgstr ""
 msgid "Vista previa del panel PATIA"
 msgstr ""
 
+#: app/templates/emails/monthly_owner_report.html:21
+#: app/templates/landing.html:58
+msgid "Resumen del negocio"
+msgstr ""
+
 #: app/templates/landing.html:63
 msgid "Resumen semanal"
 msgstr ""
@@ -4348,8 +4341,7 @@ msgstr ""
 msgid "Productos con mayor movimiento"
 msgstr ""
 
-#: app/templates/landing.html:74 app/templates/pro_dashboard.html:44
-#: app/templates/reports.html:33
+#: app/templates/landing.html:74 app/templates/reports.html:51
 msgid "Últimos 7 días"
 msgstr ""
 
@@ -4446,7 +4438,7 @@ msgid ""
 msgstr ""
 
 #: app/templates/landing.html:127
-msgid "Panel ejecutivo Pro de PATIA con indicadores y proyección"
+msgid "Reportes Pro de PATIA con indicadores y proyección"
 msgstr ""
 
 #: app/templates/landing.html:131 app/templates/pro_hub.html:8
@@ -4514,7 +4506,7 @@ msgstr ""
 #: app/templates/landing.html:167
 msgid ""
 "Conoce productos con mayor movimiento, ventas semanales y utilidad "
-"estimada desde el panel ejecutivo."
+"estimada desde Reportes."
 msgstr ""
 
 #: app/templates/landing.html:175
@@ -4602,7 +4594,7 @@ msgid "Indicadores para preparar tus compras"
 msgstr ""
 
 #: app/templates/landing.html:207
-msgid "Panel ejecutivo disponible en cualquier momento"
+msgid "Reportes y comparaciones disponibles en cualquier momento"
 msgstr ""
 
 #: app/templates/landing.html:217
@@ -4611,9 +4603,8 @@ msgstr ""
 
 #: app/templates/landing.html:218
 msgid ""
-"Pulso PATIA ordena tus prioridades; el Panel ejecutivo explica "
-"resultados; Compras prepara la reposición y el Reporte mensual conserva "
-"el avance."
+"Pulso PATIA ordena tus prioridades; Reportes explica los resultados; "
+"Compras prepara la reposición y el Reporte mensual conserva el avance."
 msgstr ""
 
 #: app/templates/landing.html:219
@@ -4972,12 +4963,11 @@ msgstr ""
 msgid "30 días"
 msgstr ""
 
-#: app/templates/pro_alerts.html:15 app/templates/pro_dashboard.html:45
-#: app/templates/reports.html:34
+#: app/templates/pro_alerts.html:15 app/templates/reports.html:52
 msgid "Este mes"
 msgstr ""
 
-#: app/templates/pro_alerts.html:15 app/templates/reports.html:41
+#: app/templates/pro_alerts.html:15 app/templates/reports.html:59
 msgid "Mes anterior"
 msgstr ""
 
@@ -5021,316 +5011,6 @@ msgid ""
 "datos que registres."
 msgstr ""
 
-#: app/templates/pro_dashboard.html:2
-msgid "Dashboard Ejecutivo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:7
-msgid "Sin comparación disponible"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:15
-#, python-format
-msgid "%(value)s puntos vs. periodo anterior"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:17
-#, python-format
-msgid "%(value)s%% vs. periodo anterior"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:29
-msgid "PATIA PRO"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:31
-msgid "La perspectiva completa de tu negocio"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:32
-msgid ""
-"Aquí PATIA interpreta tus datos: explica qué cambió, por qué importa y "
-"cuál es el siguiente paso."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:35
-msgid "Periodo analizado"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:37
-msgid "Ver datos detallados en Reportes"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:42
-msgid "Periodo del Dashboard Ejecutivo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:46 app/templates/reports.html:40
-msgid "Últimos 30 días"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:58 app/templates/reports.html:46
-msgid "Rango personalizado"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:75 app/templates/reports.html:66
-msgid "Aplicar rango"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:90
-msgid "Indicadores ejecutivos"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:98
-#, python-format
-msgid "%(tickets)s tickets en el periodo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:103 app/templates/pro_dashboard.html:442
-#: app/templates/reports.html:91 app/templates/reports.html:173
-#: app/templates/reports.html:221
-msgid "Utilidad"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:109
-#, python-format
-msgid "%(coverage)s%% de las ventas tiene costo conocido"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:115 app/templates/products.html:207
-#: app/templates/products.html:216 app/templates/reports.html:96
-#: app/templates/reports.html:173
-msgid "Margen"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:120
-msgid "Calculado con los costos históricos disponibles"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:130
-msgid "Importe promedio de cada venta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:137
-msgid ""
-"Agrega el costo del producto para incluir todas las ventas en utilidad y "
-"margen."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:146
-msgid "Meta mensual"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:147
-msgid "Avance del mes"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:154
-msgid "Ventas del mes"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:155
-msgid "Meta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:160
-#, python-format
-msgid "%(progress)s%% de la meta alcanzada"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:163
-msgid "Define cuánto quieres vender este mes"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:164
-msgid "PATIA comparará tus ventas reales con ese objetivo."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:170
-msgid "Cambiar meta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:170
-msgid "Definir meta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:174
-msgid "Meta de ventas mensual"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:180
-msgid "Guardar meta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:186
-msgid "Eliminar meta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:196
-msgid "Proyección"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:197
-msgid "Cierre estimado del mes"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:203
-msgid ""
-"Estimación basada en el ritmo de ventas registrado durante el mes. No es "
-"una garantía."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:206
-msgid "Aún no hay suficiente actividad para proyectar"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:207
-msgid "La proyección aparecerá después de varios días y ventas registradas."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:215
-msgid "Tendencia"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:216
-msgid "Ventas y utilidad frente al periodo anterior"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:218
-msgid "Comparación equivalente"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:227
-msgid "La gráfica aparecerá cuando registres ventas"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:228
-msgid "Aquí verás ventas, utilidad y el periodo anterior en una sola vista."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:229 app/templates/reports.html:208
-msgid "Registrar una venta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:239
-msgid "Qué impulsa el resultado"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:240
-msgid "Lo que más aportó en el periodo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:245
-#, python-format
-msgid "%(start)s — %(end)s · basado en ventas registradas"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:267
-msgid "Aquí aparecerán los principales impulsores"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:268
-msgid "Registra ventas para identificar productos, días y horarios destacados."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:277
-msgid "Qué requiere atención"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:278
-msgid "Hallazgos respaldados por tus datos"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:302
-msgid "No detectamos situaciones urgentes en este periodo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:303
-msgid ""
-"PATIA seguirá comparando margen, movimiento, existencias y cierres de "
-"caja."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:313
-msgid "Control del negocio"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:314
-msgid "Tres áreas que conviene mantener en orden"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:326
-#, python-format
-msgid "%(count)s productos en o por debajo del mínimo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:328
-#, python-format
-msgid "%(count)s productos activos · sin alertas de stock"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:341
-#, python-format
-msgid "%(count)s clientes con saldo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:343
-msgid "Ningún cliente tiene saldo pendiente"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:355
-msgid "Efectivo esperado · caja abierta"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:357
-msgid "Cerrada"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:360
-#, python-format
-msgid "Última diferencia: %(amount)s"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:362
-msgid "Abre la caja antes de cobrar en efectivo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:376
-msgid "Actividad del equipo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:377
-msgid "Movimientos operativos del periodo"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:382
-msgid "Un resumen para entender la operación, no para vigilar a las personas."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:393
-msgid "eventos registrados"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:404
-msgid "Acciones prioritarias"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:405
-msgid "Qué puedes hacer ahora"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:427
-msgid "No hay acciones prioritarias pendientes"
-msgstr ""
-
-#: app/templates/pro_dashboard.html:428
-msgid "El negocio no presenta alertas accionables con los datos disponibles."
-msgstr ""
-
-#: app/templates/pro_dashboard.html:443
-msgid "Ventas del periodo anterior"
-msgstr ""
-
 #: app/templates/pro_hub.html:11
 #, python-format
 msgid ""
@@ -5354,8 +5034,8 @@ msgstr ""
 msgid "Por qué importa"
 msgstr ""
 
-#: app/templates/pro_hub.html:26
-msgid "Abrir Panel ejecutivo"
+#: app/templates/pro_hub.html:26 app/templates/pro_hub.html:57
+msgid "Explorar resultados"
 msgstr ""
 
 #: app/templates/pro_hub.html:32
@@ -5387,43 +5067,102 @@ msgid ""
 "acción urgente."
 msgstr ""
 
-#: app/templates/pro_hub.html:57
-msgid "Revisar resultados"
-msgstr ""
-
 #: app/templates/pro_hub.html:62
-msgid "Herramientas Pro"
+msgid "Control y actividad del negocio"
 msgstr ""
 
 #: app/templates/pro_hub.html:65
+msgid "Control del negocio"
+msgstr ""
+
+#: app/templates/pro_hub.html:66
+msgid "Lo esencial para operar con tranquilidad"
+msgstr ""
+
+#: app/templates/pro_hub.html:76
+#, python-format
+msgid "%(count)s productos requieren atención"
+msgstr ""
+
+#: app/templates/pro_hub.html:78
+msgid "Sin alertas de existencias"
+msgstr ""
+
+#: app/templates/pro_hub.html:91
+#, python-format
+msgid "%(count)s clientes con saldo"
+msgstr ""
+
+#: app/templates/pro_hub.html:93
+msgid "Ningún cliente tiene saldo pendiente"
+msgstr ""
+
+#: app/templates/pro_hub.html:105
+msgid "Efectivo esperado · caja abierta"
+msgstr ""
+
+#: app/templates/pro_hub.html:107
+msgid "Cerrada"
+msgstr ""
+
+#: app/templates/pro_hub.html:110
+#, python-format
+msgid "Última diferencia: %(amount)s"
+msgstr ""
+
+#: app/templates/pro_hub.html:112
+msgid "Abre la caja antes de cobrar en efectivo"
+msgstr ""
+
+#: app/templates/pro_hub.html:125
+msgid "Actividad del equipo"
+msgstr ""
+
+#: app/templates/pro_hub.html:126
+msgid "Movimientos operativos del periodo"
+msgstr ""
+
+#: app/templates/pro_hub.html:127
+msgid "Un resumen para entender la operación, no para vigilar personas."
+msgstr ""
+
+#: app/templates/pro_hub.html:139
+msgid "eventos registrados"
+msgstr ""
+
+#: app/templates/pro_hub.html:149
+msgid "Herramientas Pro"
+msgstr ""
+
+#: app/templates/pro_hub.html:152
 msgid "Resultados"
 msgstr ""
 
-#: app/templates/pro_hub.html:67
-msgid "Entiende qué cambió, por qué y qué conviene hacer ahora."
+#: app/templates/pro_hub.html:154
+msgid "Consulta periodos, compara resultados y revisa tu meta mensual."
 msgstr ""
 
-#: app/templates/pro_hub.html:71
+#: app/templates/pro_hub.html:158
 msgid "Seguimiento mensual"
 msgstr ""
 
-#: app/templates/pro_hub.html:73
+#: app/templates/pro_hub.html:160
 msgid "Conserva una fotografía inmutable de cada mes y descárgala en PDF."
 msgstr ""
 
-#: app/templates/pro_hub.html:77
+#: app/templates/pro_hub.html:164
 msgid "Reposición"
 msgstr ""
 
-#: app/templates/pro_hub.html:79
+#: app/templates/pro_hub.html:166
 msgid "Prepara pedidos con base en stock, mínimos y ventas recientes."
 msgstr ""
 
-#: app/templates/pro_hub.html:83
+#: app/templates/pro_hub.html:170
 msgid "Seguimiento continuo"
 msgstr ""
 
-#: app/templates/pro_hub.html:85
+#: app/templates/pro_hub.html:172
 msgid "Revisa situaciones priorizadas con evidencia y una acción concreta."
 msgstr ""
 
@@ -5505,8 +5244,8 @@ msgstr ""
 msgid "Datos congelados al generar este reporte."
 msgstr ""
 
-#: app/templates/pro_monthly_report.html:98 app/templates/reports.html:154
-#: app/templates/reports.html:173
+#: app/templates/pro_monthly_report.html:98 app/templates/reports.html:261
+#: app/templates/reports.html:280
 msgid "Unidades"
 msgstr ""
 
@@ -5564,16 +5303,16 @@ msgstr ""
 msgid "Fallido"
 msgstr ""
 
-#: app/templates/pro_monthly_reports.html:12 app/templates/reports.html:6
+#: app/templates/pro_monthly_reports.html:12 app/templates/reports.html:24
 msgid "Secciones de Reportes"
 msgstr ""
 
-#: app/templates/pro_monthly_reports.html:13 app/templates/reports.html:7
+#: app/templates/pro_monthly_reports.html:13 app/templates/reports.html:25
 msgid "Resumen"
 msgstr ""
 
 #: app/templates/pro_monthly_reports.html:14
-#: app/templates/pro_monthly_reports.html:19 app/templates/reports.html:9
+#: app/templates/pro_monthly_reports.html:19 app/templates/reports.html:27
 msgid "Reportes mensuales"
 msgstr ""
 
@@ -6187,6 +5926,11 @@ msgstr ""
 msgid "Stock"
 msgstr ""
 
+#: app/templates/products.html:207 app/templates/products.html:216
+#: app/templates/reports.html:116 app/templates/reports.html:280
+msgid "Margen"
+msgstr ""
+
 #: app/templates/products.html:207 app/templates/products.html:217
 msgid "Valor"
 msgstr ""
@@ -6388,145 +6132,272 @@ msgstr ""
 msgid "No pudimos completar la operación. Inténtalo nuevamente."
 msgstr ""
 
-#: app/templates/reports.html:14
-msgid "Explorador de datos"
+#: app/templates/reports.html:7
+msgid "Sin comparación disponible"
 msgstr ""
 
-#: app/templates/reports.html:15
-msgid "Lo que ocurrió en el periodo"
+#: app/templates/reports.html:14
+#, python-format
+msgid "%(value)s puntos vs. periodo anterior"
 msgstr ""
 
 #: app/templates/reports.html:16
+#, python-format
+msgid "%(value)s%% vs. periodo anterior"
+msgstr ""
+
+#: app/templates/reports.html:32
+msgid "Explorador de datos"
+msgstr ""
+
+#: app/templates/reports.html:33
+msgid "Lo que ocurrió en el periodo"
+msgstr ""
+
+#: app/templates/reports.html:34
 msgid ""
 "Filtra, compara y analiza tus ventas para responder preguntas concretas "
 "sobre la operación."
 msgstr ""
 
-#: app/templates/reports.html:20
+#: app/templates/reports.html:38
 msgid "Ir al Centro de decisiones"
 msgstr ""
 
-#: app/templates/reports.html:30
+#: app/templates/reports.html:48
 msgid "Periodo del reporte"
 msgstr ""
 
-#: app/templates/reports.html:32
+#: app/templates/reports.html:50
 msgid "Hoy"
 msgstr ""
 
-#: app/templates/reports.html:48
+#: app/templates/reports.html:58
+msgid "Últimos 30 días"
+msgstr ""
+
+#: app/templates/reports.html:64
+msgid "Rango personalizado"
+msgstr ""
+
+#: app/templates/reports.html:66
 msgid "Más periodos con Pro"
 msgstr ""
 
-#: app/templates/reports.html:80
+#: app/templates/reports.html:84
+msgid "Aplicar rango"
+msgstr ""
+
+#: app/templates/reports.html:98
 msgid ""
 "Agrega el costo del producto para incluirlo en los cálculos de utilidad y"
 " margen."
 msgstr ""
 
-#: app/templates/reports.html:84
+#: app/templates/reports.html:102
 msgid "Indicadores principales"
 msgstr ""
 
-#: app/templates/reports.html:86
+#: app/templates/reports.html:104
 msgid "Ventas totales"
 msgstr ""
 
-#: app/templates/reports.html:88
+#: app/templates/reports.html:107
 msgid "Ingresos registrados en el periodo"
 msgstr ""
 
-#: app/templates/reports.html:93
+#: app/templates/reports.html:110 app/templates/reports.html:280
+#: app/templates/reports.html:329
+msgid "Utilidad"
+msgstr ""
+
+#: app/templates/reports.html:113
 msgid "Solo ventas con costo histórico conocido"
 msgstr ""
 
-#: app/templates/reports.html:98
+#: app/templates/reports.html:119
 msgid "Calculado sobre ingresos con costo conocido"
 msgstr ""
 
-#: app/templates/reports.html:103
+#: app/templates/reports.html:125
 msgid "Venta promedio por ticket"
 msgstr ""
 
-#: app/templates/reports.html:106
+#: app/templates/reports.html:128
 msgid "Número de tickets"
 msgstr ""
 
-#: app/templates/reports.html:108
+#: app/templates/reports.html:130
 msgid "Operaciones registradas"
 msgstr ""
 
-#: app/templates/reports.html:116
-msgid "Evolución diaria"
+#: app/templates/reports.html:135
+msgid "Meta y proyección del negocio"
 msgstr ""
 
-#: app/templates/reports.html:116
-msgid "Ventas vs Utilidad"
+#: app/templates/reports.html:138
+msgid "Meta mensual"
 msgstr ""
 
-#: app/templates/reports.html:116
-msgid "Ventas por día"
+#: app/templates/reports.html:138
+msgid "Avance del mes"
 msgstr ""
 
-#: app/templates/reports.html:126
-msgid "Composición"
+#: app/templates/reports.html:143
+msgid "Ventas del mes"
 msgstr ""
 
-#: app/templates/reports.html:126
-msgid "Métodos de pago"
+#: app/templates/reports.html:144
+msgid "Meta"
 msgstr ""
 
-#: app/templates/reports.html:137
-msgid "tickets"
+#: app/templates/reports.html:147
+msgid "Avance de la meta mensual"
 msgstr ""
 
-#: app/templates/reports.html:149
-msgid "Volumen"
+#: app/templates/reports.html:152
+#, python-format
+msgid "%(progress)s%% de la meta alcanzada"
 msgstr ""
 
-#: app/templates/reports.html:154 app/templates/reports.html:173
-msgid "Ingresos"
+#: app/templates/reports.html:155
+msgid "Define cuánto quieres vender este mes"
 msgstr ""
 
-#: app/templates/reports.html:168
-msgid "Rentabilidad"
+#: app/templates/reports.html:156
+msgid "PATIA comparará tus ventas reales con ese objetivo."
 msgstr ""
 
-#: app/templates/reports.html:168
-msgid "Productos más rentables"
+#: app/templates/reports.html:162
+msgid "Cambiar meta"
 msgstr ""
 
-#: app/templates/reports.html:181 app/templates/subscription.html:34
-msgid "No disponible"
+#: app/templates/reports.html:162
+msgid "Definir meta"
 msgstr ""
 
-#: app/templates/reports.html:197
-msgid "Rentabilidad detallada"
+#: app/templates/reports.html:169
+msgid "Meta de ventas mensual"
+msgstr ""
+
+#: app/templates/reports.html:175
+msgid "Guardar meta"
+msgstr ""
+
+#: app/templates/reports.html:184
+msgid "Eliminar meta"
+msgstr ""
+
+#: app/templates/reports.html:193
+msgid "Proyección"
+msgstr ""
+
+#: app/templates/reports.html:193
+msgid "Cierre estimado del mes"
 msgstr ""
 
 #: app/templates/reports.html:198
+msgid ""
+"Estimación basada en el ritmo de ventas registrado durante el mes. No es "
+"una garantía."
+msgstr ""
+
+#: app/templates/reports.html:201
+msgid "Aún no hay suficiente actividad para proyectar"
+msgstr ""
+
+#: app/templates/reports.html:202
+msgid "La proyección aparecerá después de varios días y ventas registradas."
+msgstr ""
+
+#: app/templates/reports.html:208
+msgid "Comparación equivalente"
+msgstr ""
+
+#: app/templates/reports.html:209
+#, python-format
+msgid "%(start)s — %(end)s"
+msgstr ""
+
+#: app/templates/reports.html:221
+msgid "Evolución diaria"
+msgstr ""
+
+#: app/templates/reports.html:222
+msgid "Ventas y utilidad frente al periodo anterior"
+msgstr ""
+
+#: app/templates/reports.html:222
+msgid "Ventas por día"
+msgstr ""
+
+#: app/templates/reports.html:233
+msgid "Composición"
+msgstr ""
+
+#: app/templates/reports.html:233
+msgid "Métodos de pago"
+msgstr ""
+
+#: app/templates/reports.html:244
+msgid "tickets"
+msgstr ""
+
+#: app/templates/reports.html:256
+msgid "Volumen"
+msgstr ""
+
+#: app/templates/reports.html:261 app/templates/reports.html:280
+msgid "Ingresos"
+msgstr ""
+
+#: app/templates/reports.html:275
+msgid "Rentabilidad"
+msgstr ""
+
+#: app/templates/reports.html:275
+msgid "Productos más rentables"
+msgstr ""
+
+#: app/templates/reports.html:288 app/templates/subscription.html:34
+msgid "No disponible"
+msgstr ""
+
+#: app/templates/reports.html:304
+msgid "Rentabilidad detallada"
+msgstr ""
+
+#: app/templates/reports.html:305
 msgid "Compara costos, utilidad y margen por producto con PATIA Pro."
 msgstr ""
 
-#: app/templates/reports.html:199
+#: app/templates/reports.html:306
 msgid "Ver Pro"
 msgstr ""
 
-#: app/templates/reports.html:206
+#: app/templates/reports.html:313
 msgid "Aún no hay ventas en este periodo"
 msgstr ""
 
-#: app/templates/reports.html:207
+#: app/templates/reports.html:314
 msgid ""
 "Prueba otro periodo o registra una venta para comenzar a analizar el "
 "desempeño de tu negocio."
 msgstr ""
 
-#: app/templates/reports.html:222
+#: app/templates/reports.html:315
+msgid "Registrar una venta"
+msgstr ""
+
+#: app/templates/reports.html:330
+msgid "Ventas del periodo anterior"
+msgstr ""
+
+#: app/templates/reports.html:331
 msgid "Monto"
 msgstr ""
 
-#: app/templates/reports.html:223
+#: app/templates/reports.html:332
 msgid "Tickets"
 msgstr ""
 
@@ -7672,10 +7543,6 @@ msgstr ""
 
 #: app/templates/verify_email.html:47
 msgid "Corregir correo"
-msgstr ""
-
-#: app/templates/emails/monthly_owner_report.html:21
-msgid "Resumen del negocio"
 msgstr ""
 
 #: app/templates/emails/monthly_owner_report.html:23

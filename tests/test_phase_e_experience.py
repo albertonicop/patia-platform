@@ -172,6 +172,7 @@ class PhaseEExperienceTests(unittest.TestCase):
 
         self.assertIn('method="POST" action="/logout"', html)
         self.assertIn('name="csrf_token"', html)
+        self.assertIn('class="sidebar-v2__logout" data-submit-once', html)
         self.assertNotIn('href="/logout"', html)
 
     def test_trial_and_pro_messages_use_central_access(self):

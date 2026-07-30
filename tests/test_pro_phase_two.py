@@ -216,7 +216,6 @@ class ProPhaseTwoTests(unittest.TestCase):
         )
         client = self._client(starter, membership)
         for path, expected in (
-            ("/pro", "Panel ejecutivo"),
             ("/pro/hub", "Pulso PATIA convierte tus datos en decisiones"),
             ("/pro/monthly-reports", "Reporte mensual"),
             ("/pro/purchases", "Compras inteligentes"),

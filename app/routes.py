@@ -1054,12 +1054,31 @@ def login():
     return render_template("auth.html", title=gettext("Iniciar sesión"), button=gettext("Entrar"), mode="login")
 
 
-@main.route("/logout", methods=["POST"])
+@main.get("/logout")
+def logout_get():
+    if current_user():
+        flash(
+            gettext(
+                "Para cerrar sesión de forma segura, utiliza el botón "
+                "Cerrar sesión."
+            ),
+            "info",
+        )
+        return redirect(url_for("main.dashboard"))
+    flash(
+        gettext("Tu sesión ya terminó. Inicia sesión nuevamente."),
+        "info",
+    )
+    return redirect(url_for("main.login"))
+
+
+@main.post("/logout")
 def logout():
     language = session.get("language", "es")
     session.clear()
     session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
-    return redirect(url_for("main.dashboard"))
+    flash(gettext("Has cerrado sesión correctamente."), "success")
+    return redirect(url_for("main.login"))
 
 
 @main.app_template_filter("money")
@@ -3181,6 +3200,18 @@ def reports():
         report_period,
         timezone_name=timezone_name,
     )
+    executive_data = None
+    if advanced_reports:
+        from .pro.services import build_executive_dashboard
+
+        executive_data = build_executive_dashboard(
+            membership.organization,
+            {
+                "period": report_period["period"],
+                "start": report_period["custom_start"],
+                "end": report_period["custom_end"],
+            },
+        )
     client_daily_report = analytics["daily_report"]
     if not advanced_reports:
         client_daily_report = [
@@ -3191,7 +3222,9 @@ def reports():
         "reports.html",
         user=user,
         can_use_advanced_reports=advanced_reports,
+        can_edit_goal=has_permission(membership, "manage_subscription"),
         client_daily_report=client_daily_report,
+        executive_data=executive_data,
         **analytics,
     )
 

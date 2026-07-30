@@ -42,7 +42,7 @@ from .purchases import (
     receive_purchase_order,
     update_purchase_draft,
 )
-from .services import build_executive_dashboard, build_smart_alerts
+from .services import build_smart_alerts
 
 
 pro = Blueprint("pro", __name__, url_prefix="/pro")
@@ -62,20 +62,6 @@ def _pro_preview(module):
                 gettext("Hasta tres decisiones prioritarias"),
                 gettext("Evidencia verificable detrás de cada decisión"),
                 gettext("Una acción directa para resolver cada situación"),
-            ),
-        },
-        "dashboard": {
-            "icon": "fa-chart-column",
-            "eyebrow": gettext("Panel ejecutivo"),
-            "title": gettext("Entiende qué cambió y qué conviene hacer"),
-            "description": gettext(
-                "PATIA interpreta ventas, utilidad, inventario y operación "
-                "para convertir tus datos en decisiones."
-            ),
-            "benefits": (
-                gettext("Comparaciones contra periodos anteriores"),
-                gettext("Proyección y meta mensual"),
-                gettext("Acciones respaldadas por datos reales"),
             ),
         },
         "monthly": {
@@ -138,7 +124,7 @@ def _pro_access(preview=None):
             )
         flash(
             gettext(
-                "El Dashboard Ejecutivo está incluido en PATIA Pro. "
+                "El Centro de decisiones está incluido en PATIA Pro. "
                 "Compara los planes para activarlo."
             ),
             "info",
@@ -150,22 +136,12 @@ def _pro_access(preview=None):
 @pro.route("", methods=["GET"], strict_slashes=False)
 @require_permission("view_reports")
 def dashboard():
-    user, membership, blocked = _pro_access("dashboard")
-    if blocked:
-        return blocked
-    data = build_executive_dashboard(
-        membership.organization,
-        request.args,
-    )
-    if data["executive_period"]["error"]:
-        flash(data["executive_period"]["error"], "warning")
-    return render_template(
-        "pro_dashboard.html",
-        user=user,
-        organization=membership.organization,
-        can_edit_goal=has_permission(membership, "manage_subscription"),
-        **data,
-    )
+    destination_args = {
+        key: request.args[key]
+        for key in ("period", "start", "end", "show_custom")
+        if request.args.get(key)
+    }
+    return redirect(url_for("main.reports", **destination_args))
 
 
 @pro.route("/monthly-goal", methods=["POST"])
@@ -184,14 +160,30 @@ def monthly_goal():
             gettext("Escribe una meta mensual mayor a cero."),
             "error",
         )
-        return redirect(url_for("pro.dashboard"))
+        return redirect(
+            url_for(
+                "main.reports",
+                period=request.form.get("return_period") or "this_month",
+                start=request.form.get("return_start") or None,
+                end=request.form.get("return_end") or None,
+                _anchor="monthly-goal",
+            )
+        )
     membership.organization.monthly_sales_goal = goal
     db.session.commit()
     if goal is None:
         flash(gettext("Meta mensual eliminada."), "success")
     else:
         flash(gettext("Meta mensual guardada."), "success")
-    return redirect(url_for("pro.dashboard"))
+    return redirect(
+        url_for(
+            "main.reports",
+            period=request.form.get("return_period") or "this_month",
+            start=request.form.get("return_start") or None,
+            end=request.form.get("return_end") or None,
+            _anchor="monthly-goal",
+        )
+    )
 
 
 def _completed_months(organization, count=12):
@@ -299,6 +291,8 @@ def hub():
         business_type=(current_organization_owner(user).business_type or "").strip(),
         latest_report=latest_report,
         priorities=priorities[:3],
+        executive_control=alerts["executive_control"],
+        team_activity=alerts["team_activity"],
     )
 
 
