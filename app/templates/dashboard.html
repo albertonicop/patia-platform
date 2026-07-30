@@ -298,6 +298,7 @@
             <div>
               <p>{{ r.text }}</p>
               <small><strong>{{ _("De dónde sale:") }}</strong> {{ r.source }}</small>
+              {% if r.action %}<small class="dashboard-v2__recommendation-action"><strong>{{ _("Qué hacer:") }}</strong> {{ r.action }}</small>{% endif %}
               <a href="{{ r.url }}">{{ r.label }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
           </div>
@@ -343,7 +344,7 @@
   </aside>
 </section>
 
-<section class="dashboard-v2__panel dashboard-v2__alerts-panel">
+<section id="alertas-operativas" class="dashboard-v2__panel dashboard-v2__alerts-panel">
   <header class="dashboard-v2__section-head">
     <div>
       <span>{{ _("Operación") }}</span>

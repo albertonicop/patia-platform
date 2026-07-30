@@ -12854,6 +12854,554 @@ table {
 
   .pro-monthly-v1__latest > div { grid-column: auto; }
 }
+
+/* =========================================================
+   PATIA · PRODUCT POLISH V1
+   Scoped presentation refinements for landing, app shell and
+   the executive monthly document.
+   ========================================================= */
+
+.landing-polish-v1 {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(94, 73, 226, .055), transparent 26rem),
+    #f6f7fb;
+}
+
+.landing-polish-v1 .landing-v2__header,
+.landing-polish-v1 main > section,
+.landing-polish-v1 .landing-v2__footer {
+  width: min(calc(100% - 40px), 1600px);
+}
+
+.landing-polish-v1 .landing-v2__hero {
+  min-height: min(820px, calc(100vh - 112px));
+  align-items: center;
+  column-gap: clamp(48px, 7vw, 120px);
+  padding-top: clamp(48px, 6vw, 88px);
+  padding-bottom: clamp(64px, 8vw, 112px);
+}
+
+.landing-polish-v1 .landing-v2__hero-copy {
+  max-width: 700px;
+}
+
+.landing-polish-v1 .landing-v2__hero h1 {
+  max-width: 680px;
+  text-wrap: balance;
+}
+
+.landing-polish-v1 .landing-v2__lead {
+  max-width: 620px;
+  font-size: clamp(1rem, 1.25vw, 1.16rem);
+  line-height: 1.75;
+}
+
+.landing-polish-v1 .landing-v5__terms {
+  gap: 10px;
+}
+
+.landing-polish-v1 .landing-v5__terms > span {
+  min-height: 42px;
+  padding: 9px 13px;
+  border-color: #d8dbe7;
+  background: #fff;
+  color: #34394b;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: none;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  transform: none;
+}
+
+.landing-polish-v1 .landing-v5__terms i {
+  font-size: 11px;
+}
+
+.landing-polish-v1 .landing-v5__terms strong {
+  font-weight: 750;
+  letter-spacing: -.005em;
+}
+
+.landing-polish-v1 .landing-v3__product-stage {
+  filter: none;
+}
+
+.landing-polish-v1 .landing-v2__preview {
+  border: 1px solid #e0e3ec;
+  box-shadow: 0 30px 75px rgba(32, 38, 68, .14);
+}
+
+.landing-polish-v1 .landing-v2__section {
+  padding-top: clamp(76px, 9vw, 132px);
+  padding-bottom: clamp(76px, 9vw, 132px);
+}
+
+.landing-polish-v1 .landing-v2__section-head {
+  margin-bottom: clamp(34px, 5vw, 60px);
+}
+
+.landing-polish-v1 .landing-v2__benefits article,
+.landing-polish-v1 .landing-showcase-v1__card {
+  border-color: #e1e4ed;
+  box-shadow: 0 14px 36px rgba(32, 38, 68, .055);
+}
+
+.app-polish-v1 .sidebar-v2__brand {
+  gap: 6px !important;
+  margin-bottom: 24px !important;
+}
+
+.app-polish-v1 .sidebar-v2__brand-copy {
+  color: #858b9c !important;
+  font-size: 9px !important;
+  font-weight: 750;
+  letter-spacing: .14em;
+}
+
+.app-polish-v1 .app-topbar-v2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.app-polish-v1 .app-topbar-v2__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.app-polish-v1 .app-topbar-v2__notification,
+.app-polish-v1 .app-topbar-v2__plan {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--v2-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--v2-ink);
+  text-decoration: none;
+  box-shadow: 0 7px 20px rgba(31, 36, 56, .045);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.app-polish-v1 .app-topbar-v2__notification {
+  padding: 0 14px;
+  font-size: .82rem;
+  font-weight: 750;
+}
+
+.app-polish-v1 .app-topbar-v2__notification i {
+  color: var(--v2-violet);
+}
+
+.app-polish-v1 .app-topbar-v2__plan {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 150px;
+  padding: 7px 14px;
+}
+
+.app-polish-v1 .app-topbar-v2__plan span {
+  color: var(--v2-muted);
+  font-size: .64rem;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.app-polish-v1 .app-topbar-v2__plan strong {
+  font-size: .8rem;
+}
+
+.app-polish-v1 .app-topbar-v2__notification:hover,
+.app-polish-v1 .app-topbar-v2__notification:focus-visible,
+.app-polish-v1 .app-topbar-v2__plan:hover,
+.app-polish-v1 .app-topbar-v2__plan:focus-visible {
+  border-color: #bdb5f6;
+  box-shadow: 0 10px 26px rgba(68, 55, 157, .1);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.app-polish-v1 .dashboard-v2__chart-panel,
+.app-polish-v1 .dashboard-v2__copilot {
+  min-height: 370px !important;
+  padding: 22px !important;
+}
+
+.app-polish-v1 .dashboard-v2__workspace {
+  align-items: start;
+}
+
+.app-polish-v1 .dashboard-v2__chart-panel {
+  min-height: 0 !important;
+}
+
+.app-polish-v1 .dashboard-v2__chart-box,
+.app-polish-v1 .dashboard-v2 #topProducts {
+  height: 265px !important;
+  max-height: 265px !important;
+}
+
+.app-polish-v1 .dashboard-v2__recommendation-action {
+  display: block;
+  margin-top: 8px;
+  color: #3d4355 !important;
+  line-height: 1.5;
+}
+
+.app-polish-v1 .inventory-v2__import-guide {
+  border-left: 3px solid var(--v2-violet);
+}
+
+.app-polish-v1 .inventory-v2__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px 4px;
+  border-top: 1px solid var(--v2-line);
+}
+
+.app-polish-v1 .inventory-v2__pagination > span {
+  color: var(--v2-muted);
+  font-size: .82rem;
+}
+
+.app-polish-v1 .inventory-v2__pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-polish-v1 .inventory-v2__pagination strong {
+  color: var(--v2-ink);
+  font-size: .82rem;
+  white-space: nowrap;
+}
+
+.app-polish-v1 .reports-v3__intro {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--v2-line);
+}
+
+.pro-monthly-v1__back {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.pro-monthly-report-v2 {
+  display: grid;
+  gap: 20px;
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  color: #171a2b;
+}
+
+.pro-monthly-report-v2__back {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  color: #5d6376;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.pro-monthly-report-v2__document {
+  display: grid;
+  gap: 34px;
+}
+
+.pro-monthly-report-v2__page {
+  position: relative;
+  display: grid;
+  min-height: 1080px;
+  gap: 30px;
+  align-content: start;
+  padding: clamp(28px, 5vw, 64px);
+  overflow: hidden;
+  border: 1px solid #dfe2ec;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 65px rgba(31, 36, 56, .09);
+}
+
+.pro-monthly-report-v2__page::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: linear-gradient(90deg, #5c45e8, #806ff2 55%, #2aaf92);
+  content: "";
+}
+
+.pro-monthly-report-v2__masthead,
+.pro-monthly-report-v2__section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7ef;
+}
+
+.pro-monthly-report-v2__masthead h2,
+.pro-monthly-report-v2__section-head h2 {
+  margin: 7px 0 5px;
+  font-size: clamp(1.65rem, 3.5vw, 2.65rem);
+  letter-spacing: -.04em;
+}
+
+.pro-monthly-report-v2__masthead p,
+.pro-monthly-report-v2__section-head p {
+  margin: 0;
+  color: #6a7183;
+}
+
+.pro-monthly-report-v2__headline {
+  max-width: 850px;
+}
+
+.pro-monthly-report-v2__headline > span,
+.pro-monthly-report-v2__reading section > span,
+.pro-monthly-report-v2__opportunities header > span,
+.pro-monthly-report-v2__actions > span {
+  color: #624de1;
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.pro-monthly-report-v2__headline h3 {
+  margin: 10px 0;
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -.035em;
+}
+
+.pro-monthly-report-v2__headline p {
+  margin: 0;
+  color: #676e80;
+  line-height: 1.65;
+}
+
+.pro-monthly-report-v2__reading,
+.pro-monthly-report-v2__rankings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pro-monthly-report-v2__reading section,
+.pro-monthly-report-v2__rankings > section,
+.pro-monthly-report-v2__opportunities,
+.pro-monthly-report-v2__actions {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #e3e6ef;
+  border-radius: 18px;
+  background: #fafaff;
+}
+
+.pro-monthly-report-v2__reading h3,
+.pro-monthly-report-v2__rankings h3,
+.pro-monthly-report-v2__opportunities h3,
+.pro-monthly-report-v2__actions h3 {
+  margin: 7px 0 15px;
+}
+
+.pro-monthly-report-v2__reading ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.55;
+}
+
+.pro-monthly-report-v2__rankings table {
+  min-width: 100%;
+  font-size: .84rem;
+}
+
+.pro-monthly-report-v2__rankings th,
+.pro-monthly-report-v2__rankings td {
+  padding: 11px 9px;
+}
+
+.pro-monthly-report-v2__actions ol {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pro-monthly-report-v2__actions li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.pro-monthly-report-v2__actions li b {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: #ece9ff;
+  color: #563fdb;
+  font-size: .78rem;
+}
+
+.pro-monthly-report-v2__actions li p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.pro-monthly-report-v2__page-number {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7ef;
+  color: #747b8d;
+  font-size: .76rem;
+}
+
+.pro-monthly-report-v2__page-number b {
+  color: #5c45e8;
+  font-size: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .app-polish-v1 .app-main-v2 {
+    padding-inline: 24px !important;
+  }
+
+  .app-polish-v1 .dashboard-v2__workspace {
+    grid-template-columns: minmax(0, 1.3fr) minmax(280px, .8fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-polish-v1 .landing-v2__header,
+  .landing-polish-v1 main > section,
+  .landing-polish-v1 .landing-v2__footer {
+    width: min(calc(100% - 28px), 1600px);
+  }
+
+  .landing-polish-v1 .landing-v2__hero {
+    min-height: 0;
+    padding-top: 42px;
+    padding-bottom: 68px;
+  }
+
+  .landing-polish-v1 .landing-v5__terms {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .landing-polish-v1 .landing-v5__terms > span {
+    width: 100%;
+  }
+
+  .app-polish-v1 .app-topbar-v2 {
+    align-items: flex-start;
+  }
+
+  .app-polish-v1 .app-topbar-v2__notification span,
+  .app-polish-v1 .app-topbar-v2__plan span {
+    display: none;
+  }
+
+  .app-polish-v1 .app-topbar-v2__plan {
+    min-width: 0;
+    align-items: center;
+    padding-inline: 12px;
+  }
+
+  .pro-monthly-report-v2__page {
+    min-height: 0;
+    padding: 28px 22px;
+  }
+
+  .pro-monthly-report-v2__masthead,
+  .pro-monthly-report-v2__section-head,
+  .pro-monthly-report-v2__reading,
+  .pro-monthly-report-v2__rankings {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .pro-monthly-report-v2__masthead .pro-monthly-report-v1__actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-polish-v1 .app-main-v2 {
+    padding-inline: 16px !important;
+  }
+
+  .app-polish-v1 .app-topbar-v2 {
+    gap: 12px;
+  }
+
+  .app-polish-v1 .app-topbar-v2__actions {
+    gap: 6px;
+  }
+
+  .app-polish-v1 .app-topbar-v2__notification {
+    width: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .app-polish-v1 .app-topbar-v2__plan {
+    max-width: 108px;
+  }
+
+  .app-polish-v1 .app-topbar-v2__plan strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-polish-v1 .inventory-v2__pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-polish-v1 .inventory-v2__pagination > div {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .app-polish-v1 .inventory-v2__pagination .btn {
+    width: 100%;
+  }
+
+  .pro-monthly-report-v2__page {
+    padding: 24px 16px;
+    border-radius: 18px;
+  }
+
+  .pro-monthly-report-v1__kpis,
+  .pro-monthly-report-v1__details {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 /* =========================================================
    PATIA PRO · PHASE 2
    Hub, monthly reports, intelligent purchases and alerts.
@@ -14015,6 +14563,18 @@ table {
 .pro-purchases-v1__evidence strong { color: #303548; font-size: .84rem; }
 .pro-purchases-v1__evidence small { max-width: 480px; margin-top: 4px; color: #62697c; line-height: 1.45; }
 .pro-purchases-v1__method small { display: block; margin-top: 8px; color: #6a7183; }
+
+@media (max-width: 680px) {
+  .pro-purchases-v1 td.pro-purchases-v1__evidence {
+    display: block;
+    text-align: left;
+  }
+
+  .pro-purchases-v1 td.pro-purchases-v1__evidence::before {
+    display: block;
+    margin-bottom: 8px;
+  }
+}
 
 /* Landing: real product, stronger type and accessible contrast */
 .landing-v2 {

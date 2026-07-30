@@ -182,7 +182,9 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             self.assertNotIn(">Panel ejecutivo</span>", html)
             self.assertNotIn(">Reporte mensual</span>", html)
             self.assertIn(">Compras inteligentes</span>", html)
-            self.assertNotIn(">Alertas</span>", html)
+            sidebar = html[html.index("<aside"):html.index("</aside>")]
+            self.assertNotIn(">Alertas</span>", sidebar)
+            self.assertIn(">Notificaciones</span>", html)
             self.assertIn(
                 f'href="{active_href}" class="is-active" '
                 'aria-current="page"',

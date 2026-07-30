@@ -19,15 +19,16 @@ class LegalPagesTests(unittest.TestCase):
         cls.app.config.update(TESTING=True, WTF_CSRF_ENABLED=False, RATELIMIT_ENABLED=False)
         cls.client = cls.app.test_client()
 
-    def test_terms_and_privacy_are_public_and_marked_as_drafts(self):
+    def test_terms_and_privacy_are_public_and_production_ready(self):
         for path, title in (("/terminos", "Términos de servicio"), ("/privacidad", "Aviso de privacidad")):
             response = self.client.get(path)
             html = response.get_data(as_text=True)
             self.assertEqual(response.status_code, 200)
             self.assertIn(title, html)
-            self.assertIn("Borrador operativo sujeto a revisión legal", html)
             self.assertIn("Última actualización", html)
-            self.assertIn("PENDIENTE DE DEFINIR", html)
+            self.assertNotIn("Borrador operativo", html)
+            self.assertNotIn("PENDIENTE DE DEFINIR", html)
+            self.assertNotIn("[RAZÓN SOCIAL", html)
 
     def test_public_entry_pages_link_both_documents(self):
         for path in ("/", "/login", "/register"):
@@ -38,7 +39,7 @@ class LegalPagesTests(unittest.TestCase):
     def test_legal_copy_mentions_required_operational_topics(self):
         terms = self.client.get("/terminos").get_data(as_text=True)
         privacy = self.client.get("/privacidad").get_data(as_text=True)
-        for text in ("14 días", "$199 MXN al mes", "cancelarse", "Render", "Stripe", "Resend"):
+        for text in ("14 días", "planes, precios y funciones", "cancelarse", "Render", "Stripe", "Resend"):
             self.assertIn(text, terms)
         for text in ("Datos almacenados", "Cookies y sesiones", "Render", "Stripe", "Resend", "riesgo cero"):
             self.assertIn(text, privacy)

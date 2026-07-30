@@ -19,7 +19,7 @@
       <h2>{{ _("Reportes mensuales") }}</h2>
       <p>{{ _("Consulta el resumen cerrado de cada mes, descárgalo o vuelve a enviarlo.") }}</p>
     </div>
-    <a class="btn ghost" href="{{ url_for('pro.hub') }}">{{ _("Volver a PATIA Pro") }}</a>
+    <a class="btn ghost pro-monthly-v1__back" href="{{ url_for('main.reports') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a Reportes") }}</a>
   </header>
 
   {% if reports %}

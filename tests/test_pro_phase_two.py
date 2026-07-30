@@ -295,6 +295,7 @@ class ProPhaseTwoTests(unittest.TestCase):
         )
         self.assertEqual(pdf.status_code, 200)
         self.assertTrue(pdf.data.startswith(b"%PDF"))
+        self.assertGreaterEqual(pdf.data.count(b"/Type /Page"), 3)
 
         record.snapshot_json = '{"changed":true}'
         with self.assertRaises(ValueError):
@@ -440,6 +441,29 @@ class ProPhaseTwoTests(unittest.TestCase):
                 db.engine, "before_cursor_execute", track
             )
         self.assertLessEqual(len(statements), 4)
+
+    def test_exhausted_product_with_zero_minimum_is_still_suggested(self):
+        product = Product(
+            organization_id=self.organization.id,
+            user_id=self.owner.id,
+            sku="EMPTY-ZERO-MIN",
+            name="Producto agotado sin mínimo",
+            category="General",
+            cost_price=Decimal("2.00"),
+            sale_price=Decimal("4.00"),
+            stock=0,
+            min_stock=0,
+        )
+        db.session.add(product)
+        db.session.commit()
+
+        data = purchase_suggestions(self.organization.id)
+        suggestion = next(
+            item
+            for item in data["suggestions"]
+            if item["product_id"] == product.id
+        )
+        self.assertEqual(suggestion["suggested_quantity"], 1)
 
     def test_order_receipt_updates_stock_and_kardex_once(self):
         order = create_purchase_draft(

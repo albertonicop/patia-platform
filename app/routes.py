@@ -1162,7 +1162,12 @@ def analytics(user=None):
     )
 
     top_products = (
-        db.session.query(Product.name, func.sum(Sale.quantity).label("qty"), func.sum(Sale.total).label("revenue"))
+        db.session.query(
+            Product.id,
+            Product.name,
+            func.sum(Sale.quantity).label("qty"),
+            func.sum(Sale.total).label("revenue"),
+        )
         .join(Sale)
         .filter(Product.organization_id == organization_id)
         .group_by(Product.id)
@@ -1237,8 +1242,13 @@ def analytics(user=None):
                 product=top_products[0].name,
             ),
             "source": gettext("Ventas registradas en los últimos 7 días."),
-            "label": gettext("Revisar inventario"),
-            "url": url_for("main.products"),
+            "action": gettext(
+                "Confirma sus existencias, costo y stock mínimo antes de preparar tu siguiente compra."
+            ),
+            "label": gettext("Abrir producto"),
+            "url": url_for(
+                "main.edit_product", product_id=top_products[0].id
+            ),
         })
     if week_sales > 0:
         recommendations.append({
@@ -1247,6 +1257,9 @@ def analytics(user=None):
                 amount=f"{week_sales:,.0f}",
             ),
             "source": gettext("Suma de las ventas registradas en el periodo."),
+            "action": gettext(
+                "Compara los días del periodo para identificar cuándo vendes más."
+            ),
             "label": gettext("Ver reportes"),
             "url": url_for("main.reports", period="7d"),
         })
@@ -1257,6 +1270,9 @@ def analytics(user=None):
                 amount=f"{profit:,.0f}",
             ),
             "source": gettext("Precio vendido menos costo histórico conocido."),
+            "action": gettext(
+                "Revisa qué productos aportaron esa utilidad y cuáles necesitan un mejor margen."
+            ),
             "label": gettext("Revisar utilidad"),
             "url": url_for("main.reports", period="7d"),
         })
@@ -1274,6 +1290,9 @@ def analytics(user=None):
                 )
             ),
             "source": gettext("Stock actual comparado con el mínimo de cada producto."),
+            "action": gettext(
+                "Reabastece primero los productos agotados o más cercanos a quedarse sin existencias."
+            ),
             "label": gettext("Ver qué surtir"),
             "url": url_for("main.products", low_stock=1),
         })
@@ -1772,7 +1791,19 @@ def products():
             Product.category.ilike(f"%{q}%") |
             Product.sku.ilike(f"%{q}%")
         )
-    products_result = query.order_by(Product.name).all()
+    result_count = query.count()
+    per_page = 100
+    page_count = max(1, (result_count + per_page - 1) // per_page)
+    requested_page = request.args.get("page", 1, type=int) or 1
+    page = min(max(requested_page, 1), page_count)
+    products_result = (
+        query.order_by(Product.name)
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .all()
+    )
+    page_start = ((page - 1) * per_page + 1) if result_count else 0
+    page_end = min(page * per_page, result_count)
     active_filter_label = None
     if low_stock_only:
         active_filter_label = gettext("Productos por agotarse")
@@ -1786,7 +1817,11 @@ def products():
         "products.html",
         products=products_result,
         catalog_count=catalog_count,
-        result_count=len(products_result),
+        result_count=result_count,
+        page=page,
+        page_count=page_count,
+        page_start=page_start,
+        page_end=page_end,
         low_stock_count=low_stock_count,
         low_stock_only=low_stock_only,
         no_sales_only=no_sales_only,

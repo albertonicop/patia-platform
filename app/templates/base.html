@@ -13,18 +13,18 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=126">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=127">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="app-body app-shell-v2{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}">
+<body class="app-body app-shell-v2 app-polish-v1{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}">
   {% include "_language_selector.html" %}
   <aside class="sidebar sidebar-v2">
     <div class="sidebar-v2__head">
       <div class="brand sidebar-v2__brand">
         <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
-        <span class="sidebar-v2__brand-copy">{{ _("Tu negocio claro. Tu siguiente paso también.") }}</span>
+        <span class="sidebar-v2__brand-copy">{{ _("Control diario") }}</span>
       </div>
       <button class="sidebar-v2__toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"
               data-open-label="{{ _('Menú') }}" data-close-label="{{ _('Cerrar') }}">
@@ -83,20 +83,6 @@
         <span>{{ _("Ayuda") }}</span>
     </a>
 
-    <div class="sidebar-card sidebar-v2__footer{% if not has_pro_access %} sidebar-v2__footer--trial{% endif %}">
-      <span class="sidebar-v2__status-dot" aria-hidden="true"></span>
-      <div>
-        {% if current_plan_code == "TRIAL" %}
-          <b>{{ _("Prueba de %(plan)s", plan=current_entitlement_plan_code|title) }}</b>
-          <p>{{ _("%(days)s días restantes", days=trial_days_left if trial_days_left is not none else 0) }}{% if current_plan_price %} · ${{ current_plan_price }} {{ _("MXN/mes después") }}{% endif %}</p>
-          {% if can_manage_subscription %}<a href="/subscribe">{{ _("Comparar planes") }}</a>{% endif %}
-        {% else %}
-          <b>{{ _("Plan actual: %(plan)s", plan=current_plan_label) }}</b>
-          <p>{% if has_pro_access %}{{ _("Acceso activo") }}{% else %}{{ _("Acceso restringido") }}{% endif %}{% if current_plan_price %} · ${{ current_plan_price }} {{ _("MXN/mes") }}{% endif %}</p>
-          {% if can_manage_subscription %}<a href="/subscription">{{ _("Administrar suscripción") }}</a>{% endif %}
-        {% endif %}
-      </div>
-    </div>
   </aside>
 
   <main class="main app-main-v2">
@@ -105,7 +91,26 @@
         <span class="eyebrow">{{ _("Pulso y decisiones") if request.path.startswith('/pro') else _("Tu negocio hoy") }}</span>
         <h1>{% block title %}{% endblock %}</h1>
       </div>
-
+      <div class="app-topbar-v2__actions">
+        {% if can_view_reports %}
+          <a class="app-topbar-v2__notification" href="{{ url_for('pro.alerts') if has_pro_access else url_for('main.dashboard', _anchor='alertas-operativas') }}" aria-label="{{ _('Ver notificaciones') }}">
+            <i class="fa-regular fa-bell" aria-hidden="true"></i>
+            <span>{{ _("Notificaciones") }}</span>
+          </a>
+        {% endif %}
+        {% if can_manage_subscription %}
+          <a class="app-topbar-v2__plan" href="{{ url_for('main.subscription') }}">
+            <span>{{ _("Plan") }}</span>
+            <strong>
+              {% if current_plan_code == "TRIAL" %}
+                {{ _("Prueba · %(days)s días", days=trial_days_left if trial_days_left is not none else 0) }}
+              {% else %}
+                {{ current_plan_label }}
+              {% endif %}
+            </strong>
+          </a>
+        {% endif %}
+      </div>
     </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}

@@ -99,7 +99,7 @@
       <header class="inventory-v2__panel-head">
         <span class="inventory-v2__eyebrow">{{ _("Carga masiva") }}</span>
         <h3>{{ _("Importar desde Excel o CSV") }}</h3>
-        <p>{{ _("Formatos aceptados: .xlsx y .csv, hasta 10 MB.") }}</p>
+        <p>{{ _("La forma más rápida de iniciar con cientos o miles de productos. Para catálogos grandes recomendamos CSV; también aceptamos Excel, hasta 10 MB.") }}</p>
       </header>
 
       <div class="inventory-v2__import-guide">
@@ -109,7 +109,7 @@
           <li>{{ _("Si coincide el") }} <b>{{ _("SKU") }}</b>{{ _(", PATIA suma el stock importado y actualiza precios, stock mínimo y código.") }}</li>
           <li>{{ _("Si no coincide el SKU, busca el") }} <b>{{ _("código de barras") }}</b>{{ _(". Si coincide, reemplaza stock, precios y stock mínimo.") }}</li>
           <li>{{ _("Las filas vacías se omiten y las filas inválidas se cuentan como errores sin detener las demás.") }}</li>
-          <li>{{ _("Puedes cargar catálogos grandes, incluso archivos con 1,000 productos. PATIA valida cada fila y evita el doble envío.") }}</li>
+          <li>{{ _("PATIA procesa cada fila de forma independiente: una fila inválida no detiene las demás y el resumen indica qué corregir.") }}</li>
         </ul>
         <p class="inventory-v2__import-example">
           <strong>{{ _("Ejemplo de ferretería:") }}</strong>
@@ -240,6 +240,26 @@
           </tbody>
         </table>
       </div>
+      {% if page_count > 1 %}
+        <nav class="inventory-v2__pagination" aria-label="{{ _('Páginas del catálogo') }}">
+          <span>{{ _("Mostrando %(start)s–%(end)s de %(count)s", start=page_start, end=page_end, count=result_count) }}</span>
+          <div>
+            {% if page > 1 %}
+              <a class="btn ghost" rel="prev"
+                 href="{{ url_for('main.products', page=page-1, q=q or None, low_stock=1 if low_stock_only else None, no_sales=1 if no_sales_only else None, missing_cost=1 if missing_cost_only else None, low_margin=1 if low_margin_only else None, start=request.args.get('start') or None, end=request.args.get('end') or None, _anchor='catalogo') }}">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Anterior") }}
+              </a>
+            {% endif %}
+            <strong>{{ _("Página %(page)s de %(pages)s", page=page, pages=page_count) }}</strong>
+            {% if page < page_count %}
+              <a class="btn ghost" rel="next"
+                 href="{{ url_for('main.products', page=page+1, q=q or None, low_stock=1 if low_stock_only else None, no_sales=1 if no_sales_only else None, missing_cost=1 if missing_cost_only else None, low_margin=1 if low_margin_only else None, start=request.args.get('start') or None, end=request.args.get('end') or None, _anchor='catalogo') }}">
+                {{ _("Siguiente") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+            {% endif %}
+          </div>
+        </nav>
+      {% endif %}
       {% else %}
         <div class="inventory-v2__search-empty module-empty-v2" role="status">
           {% if low_stock_only and not q %}

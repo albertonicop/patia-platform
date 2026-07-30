@@ -129,6 +129,43 @@ class InventoryImportTests(unittest.TestCase):
         self.assertIn("0 de 1 productos", html)
         self.assertNotIn("Tu catálogo empieza aquí", html)
 
+    def test_large_catalog_is_paginated_without_losing_filters(self):
+        organization_id = self.user.organization_memberships[0].organization_id
+        db.session.add_all(
+            Product(
+                organization_id=organization_id,
+                user_id=self.user.id,
+                sku=f"PAG-{index:03d}",
+                barcode=f"7509999{index:05d}",
+                name=f"Producto paginado {index:03d}",
+                category="Ferretería",
+                cost_price=10,
+                sale_price=20,
+                stock=10,
+                min_stock=2,
+            )
+            for index in range(205)
+        )
+        db.session.commit()
+
+        first_page = self.client.get("/products").get_data(as_text=True)
+        second_page = self.client.get("/products?page=2").get_data(as_text=True)
+        last_page = self.client.get("/products?page=999").get_data(as_text=True)
+        filtered_page = self.client.get(
+            "/products?q=Producto&page=2"
+        ).get_data(as_text=True)
+
+        self.assertEqual(first_page.count("inventory-v3__row-actions"), 100)
+        self.assertIn("Producto paginado 000", first_page)
+        self.assertNotIn("Producto paginado 150", first_page)
+        self.assertIn("Página 1 de 3", first_page)
+        self.assertIn("Mostrando 1–100 de 205", first_page)
+        self.assertIn("Producto paginado 150", second_page)
+        self.assertIn("Página 2 de 3", second_page)
+        self.assertIn("q=Producto", filtered_page)
+        self.assertIn("Producto paginado 204", last_page)
+        self.assertIn("Página 3 de 3", last_page)
+
     def test_required_sku_is_visible_before_advanced_options(self):
         html = self.inventory_html()
 

@@ -109,7 +109,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=126", self.template(name), name)
+            self.assertIn("styles.css') }}?v=127", self.template(name), name)
 
     def test_sidebar_keeps_pro_routes_without_visual_plan_badges(self):
         base = self.template("base.html")
@@ -122,7 +122,9 @@ class PremiumPresentationTests(unittest.TestCase):
             self.assertIn(endpoint, base)
         self.assertNotIn("pro.dashboard", base)
         self.assertNotIn("pro.monthly_reports", base)
-        self.assertNotIn("pro.alerts", base)
+        sidebar = base[base.index("<aside"):base.index("</aside>")]
+        self.assertNotIn("pro.alerts", sidebar)
+        self.assertIn("pro.alerts", base)
         self.assertIn("pro.monthly_reports", reports)
         self.assertNotIn("<small>{{ _(\"Pro\") }}</small>", base)
 

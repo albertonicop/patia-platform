@@ -141,6 +141,9 @@ class PhaseEExperienceTests(unittest.TestCase):
 
         self.assertIn("Lectura de tu negocio", html)
         self.assertIn("De dónde sale:", html)
+        self.assertIn("Qué hacer:", html)
+        self.assertIn("Abrir producto", html)
+        self.assertIn(f'href="/products/{product.id}/edit"', html)
         self.assertIn("Pulso PATIA", html)
         self.assertIn("Ver qué surtir", html)
         self.assertNotIn("Copiloto PATIA", html)
@@ -174,17 +177,16 @@ class PhaseEExperienceTests(unittest.TestCase):
     def test_trial_and_pro_messages_use_central_access(self):
         self.login_user(days_used=4)
         trial_html = self.client.get("/suppliers").get_data(as_text=True)
-        self.assertIn("Prueba de Starter", trial_html)
-        self.assertIn("10 días restantes · $199 MXN/mes después", trial_html)
-        self.assertIn("Comparar planes", trial_html)
+        self.assertIn("Prueba · 10 días", trial_html)
+        self.assertIn('href="/subscription"', trial_html)
         self.assertNotIn("Plan actual: Acceso manual", trial_html)
 
         self.setUp()
         self.login_user(pro=True)
         pro_html = self.client.get("/suppliers").get_data(as_text=True)
-        self.assertIn("Plan actual: Acceso manual", pro_html)
-        self.assertIn("Acceso activo", pro_html)
-        self.assertNotIn("Comparar planes", pro_html)
+        self.assertIn("Acceso manual", pro_html)
+        self.assertIn('href="/subscription"', pro_html)
+        self.assertNotIn("Prueba ·", pro_html)
 
 
 if __name__ == "__main__":

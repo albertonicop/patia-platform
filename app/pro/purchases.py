@@ -102,6 +102,7 @@ def purchase_suggestions(organization_id: int, *, now=None):
         target_stock = max(
             int(product.min_stock) * 2,
             ceil(daily_velocity * TARGET_COVERAGE_DAYS),
+            1 if int(product.stock) <= 0 else 0,
         )
         suggested_quantity = max(target_stock - int(product.stock), 0)
         needs_restock = (

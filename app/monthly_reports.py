@@ -33,6 +33,8 @@ from app.models import (
     MonthlyOwnerReport,
     Organization,
     Product,
+    Sale,
+    SalesTicket,
 )
 from app.money import MONEY_ZERO, money_decimal
 from app.plans import has_entitlement, subscription_access_is_active
@@ -155,6 +157,7 @@ def build_report_snapshot(payload, subject):
                 for item in payload["credit"]["customers"]
             ],
         },
+        "customers": list(payload.get("customers") or []),
         "cash": {
             "count": int(payload["cash"]["count"]),
             "net_difference": _decimal_text(
@@ -228,6 +231,7 @@ def payload_from_snapshot(record):
             "total": Decimal(snapshot["credit"]["total"]),
             "customers": snapshot["credit"]["customers"],
         },
+        "customers": snapshot.get("customers", []),
         "cash": {
             "count": snapshot["cash"]["count"],
             "net_difference": Decimal(
@@ -246,13 +250,25 @@ def monthly_report_pdf(record):
         raise MonthlyReportUnavailable("Report snapshot is unavailable.")
     with force_locale(snapshot.get("language") or "es"):
         labels = {
+            "report": gettext("Reporte mensual ejecutivo"),
+            "summary": gettext("Resumen ejecutivo"),
             "sales": gettext("Ventas"),
             "profit": gettext("Utilidad estimada"),
             "recorded_sales": gettext("Ventas registradas"),
             "average_ticket": gettext("Ticket promedio"),
             "wins": gettext("Lo que salió bien"),
             "attention": gettext("Lo que conviene revisar"),
-            "actions": gettext("Acciones recomendadas"),
+            "top_products": gettext("Productos destacados"),
+            "customers": gettext("Clientes importantes"),
+            "opportunities": gettext("Oportunidades y alertas"),
+            "actions": gettext("Acciones para el siguiente mes"),
+            "inventory": gettext("Valor del inventario"),
+            "credit": gettext("Pendiente por cobrar"),
+            "cash": gettext("Cierres con diferencia"),
+            "no_data": gettext("Sin datos para este periodo."),
+            "generated": gettext(
+                "Documento generado por PATIA a partir de la operación registrada."
+            ),
             "snapshot": gettext(
                 "Snapshot %(hash)s",
                 hash=(record.snapshot_hash or "")[:12],
@@ -264,11 +280,22 @@ def monthly_report_pdf(record):
     left = 54
     y = height - 54
 
+    def page_header(page_number):
+        nonlocal y
+        pdf.setFillColor(HexColor("#5B45E8"))
+        pdf.setFont("Helvetica-Bold", 9)
+        pdf.drawString(left, height - 38, "PATIA PRO")
+        pdf.setFillColor(HexColor("#7A8192"))
+        pdf.setFont("Helvetica", 8)
+        pdf.drawRightString(width - left, height - 38, f"{page_number} / 2")
+        pdf.setStrokeColor(HexColor("#E3E6EF"))
+        pdf.line(left, height - 46, width - left, height - 46)
+        y = height - 70
+
     def line(text, *, size=10, bold=False, color="#171A2B", gap=16):
         nonlocal y
         if y < 60:
-            pdf.showPage()
-            y = height - 54
+            return
         pdf.setFillColor(HexColor(color))
         pdf.setFont("Helvetica-Bold" if bold else "Helvetica", size)
         safe = str(text or "")
@@ -280,10 +307,12 @@ def monthly_report_pdf(record):
             pdf.drawString(left, y, chunk)
             y -= gap
 
-    line("PATIA PRO", size=12, bold=True, color="#5B45E8")
-    line(snapshot["business_name"], size=20, bold=True, gap=24)
-    line(snapshot["period"]["label"], color="#677086", gap=24)
-    line(snapshot["headline"], size=14, bold=True, gap=22)
+    page_header(1)
+    line(labels["report"].upper(), size=9, bold=True, color="#5B45E8")
+    line(snapshot["business_name"], size=22, bold=True, gap=27)
+    line(snapshot["period"]["label"], color="#677086", gap=26)
+    line(labels["summary"], size=13, bold=True, gap=20)
+    line(snapshot["headline"], size=12, bold=True, gap=24)
     kpis = snapshot["kpis"]
     line(
         f"{labels['sales']}: ${Decimal(kpis['sales']):,.2f} MXN",
@@ -299,18 +328,58 @@ def monthly_report_pdf(record):
         f"${Decimal(kpis['average_ticket']):,.2f} MXN",
         gap=24,
     )
+    y -= 5
     line(labels["wins"], size=12, bold=True)
     for item in snapshot["wins"]:
-        line(f"• {item}")
+        line(f"- {item}")
     y -= 8
     line(labels["attention"], size=12, bold=True)
     for item in snapshot["attention"]:
-        line(f"• {item}")
-    y -= 8
-    line(labels["actions"], size=12, bold=True)
+        line(f"- {item}")
+
+    pdf.showPage()
+    page_header(2)
+    line(labels["top_products"], size=13, bold=True, gap=20)
+    products = snapshot.get("profitable_products") or snapshot.get(
+        "top_selling", []
+    )
+    if products:
+        for item in products[:5]:
+            amount = item.get("profit") or item.get("revenue") or "0.00"
+            line(
+                f"{item['name']}  |  {item.get('units', 0)}  |  "
+                f"${Decimal(amount):,.2f} MXN"
+            )
+    else:
+        line(labels["no_data"], color="#677086")
+    y -= 10
+    line(labels["customers"], size=13, bold=True, gap=20)
+    customers = snapshot.get("customers", [])
+    if customers:
+        for item in customers[:5]:
+            line(
+                f"{item['name']}  |  {item['tickets']}  |  "
+                f"${Decimal(item['sales']):,.2f} MXN"
+            )
+    else:
+        line(labels["no_data"], color="#677086")
+    y -= 10
+    line(labels["opportunities"], size=13, bold=True, gap=20)
+    line(
+        f"{labels['inventory']}: "
+        f"${Decimal(snapshot['inventory']['value']):,.2f} MXN"
+    )
+    line(
+        f"{labels['credit']}: "
+        f"${Decimal(snapshot['credit']['total']):,.2f} MXN"
+    )
+    line(f"{labels['cash']}: {snapshot['cash']['count']}")
+    y -= 10
+    line(labels["actions"], size=13, bold=True, gap=20)
     for index, item in enumerate(snapshot["recommendations"], 1):
         line(f"{index}. {item}")
-    y -= 8
+    y -= 10
+    line(labels["generated"], size=8, color="#7A8192")
     line(labels["snapshot"], size=8, color="#7A8192")
     pdf.save()
     output.seek(0)
@@ -463,6 +532,37 @@ def _cash_snapshot(organization_id: int, start_at, end_before):
     }
 
 
+def _customer_sales_snapshot(organization_id: int, start_at, end_before):
+    rows = (
+        db.session.query(
+            Customer.name,
+            func.count(func.distinct(SalesTicket.id)).label("tickets"),
+            func.coalesce(func.sum(Sale.total), 0).label("sales"),
+        )
+        .join(SalesTicket, SalesTicket.customer_id == Customer.id)
+        .join(Sale, Sale.sales_ticket_id == SalesTicket.id)
+        .filter(
+            Customer.organization_id == organization_id,
+            SalesTicket.organization_id == organization_id,
+            Sale.organization_id == organization_id,
+            SalesTicket.created_at >= start_at,
+            SalesTicket.created_at < end_before,
+        )
+        .group_by(Customer.id, Customer.name)
+        .order_by(func.sum(Sale.total).desc(), Customer.name.asc())
+        .limit(5)
+        .all()
+    )
+    return [
+        {
+            "name": row.name,
+            "tickets": int(row.tickets or 0),
+            "sales": _decimal_text(row.sales or 0),
+        }
+        for row in rows
+    ]
+
+
 def report_payload(organization: Organization, year: int, month: int):
     from app.routes import _report_analytics
 
@@ -501,6 +601,9 @@ def report_payload(organization: Organization, year: int, month: int):
     inventory = _inventory_snapshot(organization.id)
     credit = _credit_snapshot(organization.id)
     cash = _cash_snapshot(
+        organization.id, period["start_at"], period["end_before"]
+    )
+    customers = _customer_sales_snapshot(
         organization.id, period["start_at"], period["end_before"]
     )
     recommendations = []
@@ -634,6 +737,7 @@ def report_payload(organization: Organization, year: int, month: int):
         "inventory": inventory,
         "credit": credit,
         "cash": cash,
+        "customers": customers,
         "headline": headline,
         "wins": wins[:3],
         "attention": attention[:3],

@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Reporte mensual Pro") }}{% endblock %}
 {% block content %}
-<div class="pro-monthly-report-v1">
+<div class="pro-monthly-report-v2">
+  <a class="pro-monthly-report-v2__back" href="{{ url_for('pro.monthly_reports') }}">
+    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a Reportes") }}
+  </a>
+
   {% if preview %}
     <div class="pro-monthly-report-v1__preview" role="status">
       <strong>{{ _("Vista previa de PATIA Pro") }}</strong>
@@ -11,76 +15,144 @@
   {% endif %}
 
   {% if snapshot %}
-    <header class="pro-monthly-report-v1__header">
-      <div>
-        <span class="eyebrow">{{ snapshot.period.label }}</span>
-        <h2>{{ snapshot.headline }}</h2>
-        <p>
-          {{ _("Resumen inmutable de %(business)s", business=snapshot.business_name) }}
-          ·
-          {% if snapshot.get("language", "es") == "en" %}
-            {{ _("Idioma del documento: Inglés") }}
-          {% else %}
-            {{ _("Idioma del documento: Español") }}
+    <article class="pro-monthly-report-v2__document">
+      <section class="pro-monthly-report-v2__page" aria-labelledby="monthly-report-title">
+        <header class="pro-monthly-report-v2__masthead">
+          <div>
+            <span class="eyebrow">{{ _("PATIA Pro · Reporte mensual ejecutivo") }}</span>
+            <h2 id="monthly-report-title">{{ snapshot.business_name }}</h2>
+            <p>{{ snapshot.period.label }}</p>
+            <small>
+              {% if snapshot.get("language", "es") == "en" %}
+                {{ _("Idioma del documento: Inglés") }}
+              {% else %}
+                {{ _("Idioma del documento: Español") }}
+              {% endif %}
+            </small>
+          </div>
+          {% if record %}
+            <div class="pro-monthly-report-v1__actions">
+              <a class="btn ghost" href="{{ url_for('pro.monthly_report_download', report_id=record.id) }}">
+                <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>{{ _("Descargar PDF") }}
+              </a>
+              {% if can_resend %}
+                <form method="POST" action="{{ url_for('pro.monthly_report_resend', report_id=record.id) }}" data-submit-once>
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>{{ _("Reenviar") }}</button>
+                </form>
+              {% endif %}
+            </div>
           {% endif %}
-        </p>
-      </div>
-      {% if record %}
-        <div class="pro-monthly-report-v1__actions">
-          <a class="btn ghost" href="{{ url_for('pro.monthly_report_download', report_id=record.id) }}">
-            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>{{ _("Descargar PDF") }}
-          </a>
-          {% if can_resend %}
-            <form method="POST" action="{{ url_for('pro.monthly_report_resend', report_id=record.id) }}" data-submit-once>
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>{{ _("Reenviar") }}</button>
-            </form>
-          {% endif %}
+        </header>
+
+        <div class="pro-monthly-report-v2__headline">
+          <span>{{ _("Resumen ejecutivo") }}</span>
+          <h3>{{ snapshot.headline }}</h3>
+          <p>{{ _("Una lectura cerrada del mes para entender el resultado antes de decidir el siguiente paso.") }}</p>
         </div>
-      {% endif %}
-    </header>
 
-    <section class="pro-monthly-report-v1__kpis">
-      <article><span>{{ _("Ventas") }}</span><strong>{{ snapshot.kpis.sales|money }}</strong></article>
-      <article><span>{{ _("Utilidad estimada") }}</span><strong>{{ snapshot.kpis.profit|money }}</strong></article>
-      <article><span>{{ _("Ventas registradas") }}</span><strong>{{ snapshot.kpis.ticket_count }}</strong></article>
-      <article><span>{{ _("Ticket promedio") }}</span><strong>{{ snapshot.kpis.average_ticket|money }}</strong></article>
-    </section>
+        <section class="pro-monthly-report-v1__kpis" aria-label="{{ _('Indicadores del mes') }}">
+          <article><span>{{ _("Ventas") }}</span><strong>{{ snapshot.kpis.sales|money }}</strong></article>
+          <article><span>{{ _("Utilidad estimada") }}</span><strong>{{ snapshot.kpis.profit|money }}</strong></article>
+          <article><span>{{ _("Ticket promedio") }}</span><strong>{{ snapshot.kpis.average_ticket|money }}</strong></article>
+          <article><span>{{ _("Ventas registradas") }}</span><strong>{{ snapshot.kpis.ticket_count }}</strong></article>
+        </section>
 
-    {% if snapshot.kpis.unknown_cost_lines %}
-      <div class="reports-v3__notice reports-v3__notice--warning" role="alert">
-        {{ _("La utilidad no incluye %(count)s ventas con costo desconocido.", count=snapshot.kpis.unknown_cost_lines) }}
-      </div>
-    {% endif %}
+        {% if snapshot.kpis.unknown_cost_lines %}
+          <div class="reports-v3__notice reports-v3__notice--warning" role="alert">
+            {{ _("La utilidad no incluye %(count)s ventas con costo desconocido.", count=snapshot.kpis.unknown_cost_lines) }}
+          </div>
+        {% endif %}
 
-    <div class="pro-monthly-report-v1__columns">
-      <section>
-        <h3>{{ _("Lo que salió bien") }}</h3>
-        <ul>{% for item in snapshot.wins %}<li>{{ item }}</li>{% endfor %}</ul>
+        <div class="pro-monthly-report-v2__reading">
+          <section>
+            <span>{{ _("Avances") }}</span>
+            <h3>{{ _("Lo que salió bien") }}</h3>
+            <ul>{% for item in snapshot.wins %}<li>{{ item }}</li>{% endfor %}</ul>
+          </section>
+          <section>
+            <span>{{ _("Atención") }}</span>
+            <h3>{{ _("Lo que conviene revisar") }}</h3>
+            <ul>{% for item in snapshot.attention %}<li>{{ item }}</li>{% endfor %}</ul>
+          </section>
+        </div>
+
+        <footer class="pro-monthly-report-v2__page-number">
+          <span>{{ _("Resumen y resultados") }}</span><b>01</b>
+        </footer>
       </section>
-      <section>
-        <h3>{{ _("Lo que conviene revisar") }}</h3>
-        <ul>{% for item in snapshot.attention %}<li>{{ item }}</li>{% endfor %}</ul>
+
+      <section class="pro-monthly-report-v2__page" aria-label="{{ _('Detalle y plan del siguiente mes') }}">
+        <header class="pro-monthly-report-v2__section-head">
+          <div><span class="eyebrow">{{ _("Detalle del mes") }}</span><h2>{{ _("Qué destacó y qué sigue") }}</h2></div>
+          <p>{{ _("Datos congelados al generar este reporte.") }}</p>
+        </header>
+
+        <div class="pro-monthly-report-v2__rankings">
+          <section>
+            <h3>{{ _("Productos destacados") }}</h3>
+            {% set highlighted_products = snapshot.get("profitable_products", []) or snapshot.get("top_selling", []) %}
+            {% if highlighted_products %}
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Unidades") }}</th><th>{{ _("Resultado") }}</th></tr></thead>
+                  <tbody>
+                    {% for product in highlighted_products[:5] %}
+                      <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.units }}</td>
+                        <td>{{ (product.profit if product.profit is defined and product.profit is not none else product.revenue)|money }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="reports-text">{{ _("Sin datos suficientes para destacar productos este mes.") }}</p>
+            {% endif %}
+          </section>
+
+          <section>
+            <h3>{{ _("Clientes importantes") }}</h3>
+            {% if snapshot.get("customers") %}
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>{{ _("Cliente") }}</th><th>{{ _("Compras") }}</th><th>{{ _("Total") }}</th></tr></thead>
+                  <tbody>
+                    {% for customer in snapshot.customers %}
+                      <tr><td>{{ customer.name }}</td><td>{{ customer.tickets }}</td><td>{{ customer.sales|money }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="reports-text">{{ _("No hubo ventas vinculadas a clientes durante este mes.") }}</p>
+            {% endif %}
+          </section>
+        </div>
+
+        <section class="pro-monthly-report-v2__opportunities">
+          <header><span>{{ _("Oportunidades y alertas") }}</span><h3>{{ _("Dónde conviene poner atención") }}</h3></header>
+          <div class="pro-monthly-report-v1__details">
+            <article><span>{{ _("Valor del inventario") }}</span><strong>{{ snapshot.inventory.value|money }}</strong></article>
+            <article><span>{{ _("Pendiente por cobrar") }}</span><strong>{{ snapshot.credit.total|money }}</strong></article>
+            <article><span>{{ _("Cierres con diferencia") }}</span><strong>{{ snapshot.cash.count }}</strong></article>
+          </div>
+        </section>
+
+        <section class="pro-monthly-report-v2__actions">
+          <span>{{ _("Conclusión y siguiente paso") }}</span>
+          <h3>{{ _("Acciones sugeridas para el próximo mes") }}</h3>
+          <ol>{% for item in snapshot.recommendations %}<li><b>{{ "%02d"|format(loop.index) }}</b><p>{{ item }}</p></li>{% endfor %}</ol>
+        </section>
+
+        <footer class="pro-monthly-report-v2__page-number">
+          <span>
+            {% if record %}{{ _("Snapshot protegido") }} · {{ (record.snapshot_hash or "")[:12] }}{% else %}{{ _("Vista previa no guardada") }}{% endif %}
+          </span><b>02</b>
+        </footer>
       </section>
-    </div>
-
-    <section class="pro-monthly-report-v1__recommendations">
-      <h3>{{ _("Qué hacer el próximo mes") }}</h3>
-      <ol>{% for item in snapshot.recommendations %}<li>{{ item }}</li>{% endfor %}</ol>
-    </section>
-
-    <section class="pro-monthly-report-v1__details">
-      <article><span>{{ _("Valor del inventario") }}</span><strong>{{ snapshot.inventory.value|money }}</strong></article>
-      <article><span>{{ _("Pendiente por cobrar") }}</span><strong>{{ snapshot.credit.total|money }}</strong></article>
-      <article><span>{{ _("Cierres con diferencia") }}</span><strong>{{ snapshot.cash.count }}</strong></article>
-    </section>
-
-    {% if record %}
-      <footer class="pro-monthly-report-v1__integrity">
-        <i class="fa-solid fa-lock" aria-hidden="true"></i>
-        <span>{{ _("Snapshot protegido") }} · {{ (record.snapshot_hash or "")[:12] }}</span>
-      </footer>
-    {% endif %}
+    </article>
   {% else %}
     <section class="empty-state-v2">
       <h3>{{ _("Este reporte no tiene un snapshot disponible") }}</h3>
