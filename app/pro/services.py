@@ -419,7 +419,11 @@ def _team_activity(organization_id, period, cash_difference):
                 "count": int(movement_rows.get("SALE_CANCELLATION", 0)),
                 "amount": None,
                 "url": _internal_url(
-                    "inventory.index", type="SALE_CANCELLATION"
+                    "inventory.index",
+                    type="SALE_CANCELLATION",
+                    date_from=period["start_date"].isoformat(),
+                    date_to=period["end_date"].isoformat(),
+                    source="decisions",
                 ),
                 "icon": "fa-rotate-left",
             },
@@ -428,7 +432,13 @@ def _team_activity(organization_id, period, cash_difference):
                 "label": gettext("Correcciones de inventario"),
                 "count": int(corrections),
                 "amount": None,
-                "url": _internal_url("inventory.index"),
+                "url": _internal_url(
+                    "inventory.index",
+                    group="corrections",
+                    date_from=period["start_date"].isoformat(),
+                    date_to=period["end_date"].isoformat(),
+                    source="decisions",
+                ),
                 "icon": "fa-boxes-stacked",
             },
             {
@@ -436,7 +446,13 @@ def _team_activity(organization_id, period, cash_difference):
                 "label": gettext("Retiros de caja"),
                 "count": int(withdrawal.count or 0),
                 "amount": money_decimal(withdrawal.amount or 0),
-                "url": _internal_url("cash.index"),
+                "url": _internal_url(
+                    "cash.index",
+                    movements="withdrawals",
+                    start=period["start_date"].isoformat(),
+                    end=period["end_date"].isoformat(),
+                    source="decisions",
+                ),
                 "icon": "fa-money-bill-transfer",
             },
             {
@@ -444,7 +460,13 @@ def _team_activity(organization_id, period, cash_difference):
                 "label": gettext("Cierres con diferencia"),
                 "count": cash_difference["count"],
                 "amount": cash_difference["amount"],
-                "url": _internal_url("cash.index"),
+                "url": _internal_url(
+                    "cash.index",
+                    differences=1,
+                    start=period["start_date"].isoformat(),
+                    end=period["end_date"].isoformat(),
+                    source="decisions",
+                ),
                 "icon": "fa-scale-balanced",
             },
         ],
@@ -567,7 +589,7 @@ def _actionable_snapshot(
                 "action": gettext(
                     "Revisa precios y costos de los productos vendidos."
                 ),
-                "url": _internal_url("main.products", low_margin=1),
+                "url": _internal_url("main.products", low_margin=1, source="decisions"),
                 "action_label": gettext("Revisar productos"),
                 "icon": "fa-percent",
                 "tone": "warning",
@@ -590,7 +612,7 @@ def _actionable_snapshot(
                 "action": gettext(
                     "Agrega los costos faltantes para recuperar una lectura confiable del margen."
                 ),
-                "url": _internal_url("main.products", missing_cost=1),
+                "url": _internal_url("main.products", missing_cost=1, source="decisions"),
                 "action_label": gettext("Completar costos"),
                 "icon": "fa-circle-dollar-to-slot",
                 "tone": "warning",
@@ -616,7 +638,7 @@ def _actionable_snapshot(
                 "action": gettext(
                     "Prioriza la mercancía que ya alcanzó su mínimo."
                 ),
-                "url": _internal_url("main.products", low_stock=1),
+                "url": _internal_url("main.products", low_stock=1, source="decisions"),
                 "action_label": gettext("Ver productos"),
                 "icon": "fa-box-open",
                 "tone": "danger",
@@ -647,6 +669,7 @@ def _actionable_snapshot(
                         no_sales=1,
                         start=period["start_date"].isoformat(),
                         end=period["end_date"].isoformat(),
+                        source="decisions",
                     )
                 ),
                 "action_label": gettext("Revisar inventario"),
@@ -670,7 +693,7 @@ def _actionable_snapshot(
                 "action": gettext(
                     "Da seguimiento a los saldos con mayor antigüedad."
                 ),
-                "url": _internal_url("credit.index"),
+                "url": _internal_url("credit.index", source="decisions"),
                 "action_label": gettext("Ver saldos pendientes"),
                 "icon": "fa-hand-holding-dollar",
                 "tone": "warning",
@@ -699,7 +722,13 @@ def _actionable_snapshot(
                 "action": gettext(
                     "Compara el efectivo esperado con los cierres registrados."
                 ),
-                "url": _internal_url("cash.index"),
+                "url": _internal_url(
+                    "cash.index",
+                    differences=1,
+                    start=period["start_date"].isoformat(),
+                    end=period["end_date"].isoformat(),
+                    source="decisions",
+                ),
                 "action_label": gettext("Abrir Caja del día"),
                 "icon": "fa-cash-register",
                 "tone": "warning",

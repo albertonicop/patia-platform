@@ -47,8 +47,8 @@
 
         <div class="pro-monthly-report-v2__headline">
           <span>{{ _("Resumen ejecutivo") }}</span>
-          <h3>{{ snapshot.headline }}</h3>
-          <p>{{ _("Una lectura cerrada del mes para entender el resultado antes de decidir el siguiente paso.") }}</p>
+          <h3>{{ snapshot.get("narrative", {}).get("summary", snapshot.headline) }}</h3>
+          <p>{{ snapshot.get("narrative", {}).get("why_it_matters", _("Una lectura cerrada del mes para entender el resultado antes de decidir el siguiente paso.")) }}</p>
         </div>
 
         <section class="pro-monthly-report-v1__kpis" aria-label="{{ _('Indicadores del mes') }}">
@@ -143,7 +143,8 @@
         <section class="pro-monthly-report-v2__actions">
           <span>{{ _("Conclusión y siguiente paso") }}</span>
           <h3>{{ _("Acciones sugeridas para el próximo mes") }}</h3>
-          <ol>{% for item in snapshot.recommendations %}<li><b>{{ "%02d"|format(loop.index) }}</b><p>{{ item }}</p></li>{% endfor %}</ol>
+          {% set report_actions = snapshot.get("narrative", {}).get("recommended_actions", snapshot.recommendations) %}
+          <ol>{% for item in report_actions %}<li><b>{{ "%02d"|format(loop.index) }}</b><p>{{ item }}</p></li>{% endfor %}</ol>
         </section>
 
         <footer class="pro-monthly-report-v2__page-number">

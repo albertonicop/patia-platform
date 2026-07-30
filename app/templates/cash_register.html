@@ -2,6 +2,19 @@
 {% block title %}{{ _("Caja del día") }}{% endblock %}
 {% block content %}
 <div class="cash-v2">
+  {% if differences_only %}
+    <section class="inventory-final-v1__decision-context" role="status">
+      <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
+      <div><strong>{{ _("Cierres con diferencia") }}</strong><span>{{ _("Abierto desde Centro de decisiones · %(count)s cierres mostrados", count=history|length) }}</span></div>
+      <a href="{{ url_for('cash.index') }}">{{ _("Limpiar filtro") }}</a>
+    </section>
+  {% elif withdrawals_only %}
+    <section class="inventory-final-v1__decision-context" role="status">
+      <i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i>
+      <div><strong>{{ _("Retiros de caja") }}</strong><span>{{ _("Abierto desde Centro de decisiones · %(count)s cierres con retiros", count=history|length) }}</span></div>
+      <a href="{{ url_for('cash.index') }}">{{ _("Limpiar filtro") }}</a>
+    </section>
+  {% endif %}
   <header class="module-intro-v2 cash-v2__intro">
     <p>{{ _("Controla el efectivo que entra y sale durante el día.") }}</p>
   </header>
@@ -107,7 +120,7 @@
     </section>
   {% endif %}
 
-  {% if cash_session and can_view_history and history %}
+  {% if can_view_history and history %}
     <details class="card cash-v2__history">
       <summary>
         <span><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> {{ _("Ver cierres anteriores") }}</span>

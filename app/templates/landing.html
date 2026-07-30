@@ -7,7 +7,7 @@
   <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
   <meta name="description" content="{{ _('Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=128">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=129">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/landing-motion.css') }}?v=1">
 </head>
 
@@ -34,7 +34,7 @@
         <p class="landing-v2__lead">
           {{ _("Administra inventario, ventas y reportes desde un solo lugar. PATIA convierte lo que ocurre en decisiones claras para tu negocio.") }}
         </p>
-        <div class="landing-v5__terms" aria-label="{{ _('Condiciones de PATIA') }}">
+        <div class="landing-v5__terms landing-final-v1__trust-line" aria-label="{{ _('Condiciones de PATIA') }}">
           <span><i class="fa-solid fa-gift" aria-hidden="true"></i><strong>{{ _("14 días gratis") }}</strong></span>
           <span><i class="fa-solid fa-tag" aria-hidden="true"></i><strong>{{ _("Después, planes desde $199 MXN al mes") }}</strong></span>
           <span><i class="fa-solid fa-circle-check" aria-hidden="true"></i><strong>{{ _("Cancela cuando quieras") }}</strong></span>
@@ -81,6 +81,7 @@
           <div><strong>{{ _("2 productos requieren atención") }}</strong><span>{{ _("Revisa existencias antes de tu próximo pedido.") }}</span></div>
         </div>
       </div>
+      <p class="landing-final-v1__preview-caption"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> {{ _("Información clara para operar hoy y decidir qué sigue.") }}</p>
       </div>
     </section>
 

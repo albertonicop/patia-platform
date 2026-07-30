@@ -86,6 +86,9 @@ def _movement_query(
     movement_type = (
         request.args.get("type", "").strip() if advanced_history else ""
     )
+    movement_group = (
+        request.args.get("group", "").strip() if advanced_history else ""
+    )
     date_from = (
         _parse_date(request.args.get("date_from"))
         if advanced_history
@@ -100,6 +103,12 @@ def _movement_query(
         query = query.filter(InventoryMovement.product_id == product_id)
     if movement_type in MOVEMENT_LABELS:
         query = query.filter(InventoryMovement.movement_type == movement_type)
+    elif movement_group == "corrections":
+        query = query.filter(
+            InventoryMovement.movement_type.in_(
+                ("ADJUSTMENT_IN", "ADJUSTMENT_OUT", "PHYSICAL_COUNT")
+            )
+        )
     if date_from:
         start_local = datetime.combine(
             date_from, time.min, tzinfo=ZoneInfo(timezone_name)
@@ -126,6 +135,8 @@ def _movement_query(
     return query, {
         "product_id": product_id,
         "movement_type": movement_type,
+        "movement_group": movement_group,
+        "source": request.args.get("source", "") if advanced_history else "",
         "date_from": (
             request.args.get("date_from", "") if advanced_history else ""
         ),

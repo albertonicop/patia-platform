@@ -13,8 +13,9 @@ from flask import (
     send_file,
     url_for,
 )
-from flask_babel import format_date, gettext
+from flask_babel import format_date, get_locale, gettext
 from app import db
+from app.ai_narratives import controlled_narrative
 from app.models import MonthlyOwnerReport, PurchaseOrder
 from app.money import money_decimal
 from app.monthly_reports import (
@@ -35,6 +36,7 @@ from app.team.services import (
 from app.timezones import local_today, safe_timezone_name, utc_to_local
 
 from .purchases import (
+    cancel_purchase_order,
     confirm_purchase_order,
     create_purchase_draft,
     purchase_order_query,
@@ -42,7 +44,7 @@ from .purchases import (
     receive_purchase_order,
     update_purchase_draft,
 )
-from .services import build_smart_alerts
+from .services import build_executive_dashboard, build_smart_alerts
 
 
 pro = Blueprint("pro", __name__, url_prefix="/pro")
@@ -136,12 +138,22 @@ def _pro_access(preview=None):
 @pro.route("", methods=["GET"], strict_slashes=False)
 @require_permission("view_reports")
 def dashboard():
-    destination_args = {
-        key: request.args[key]
-        for key in ("period", "start", "end", "show_custom")
-        if request.args.get(key)
-    }
-    return redirect(url_for("main.reports", **destination_args))
+    user, membership, blocked = _pro_access("hub")
+    if blocked:
+        return blocked
+    data = build_executive_dashboard(
+        membership.organization,
+        request.args,
+    )
+    if data["executive_period"]["error"]:
+        flash(data["executive_period"]["error"], "warning")
+    return render_template(
+        "pro_dashboard.html",
+        user=user,
+        organization=membership.organization,
+        can_edit_goal=has_permission(membership, "manage_subscription"),
+        **data,
+    )
 
 
 @pro.route("/monthly-goal", methods=["POST"])
@@ -160,30 +172,25 @@ def monthly_goal():
             gettext("Escribe una meta mensual mayor a cero."),
             "error",
         )
-        return redirect(
-            url_for(
-                "main.reports",
-                period=request.form.get("return_period") or "this_month",
-                start=request.form.get("return_start") or None,
-                end=request.form.get("return_end") or None,
-                _anchor="monthly-goal",
-            )
-        )
+        return redirect(_monthly_goal_return_url())
     membership.organization.monthly_sales_goal = goal
     db.session.commit()
     if goal is None:
         flash(gettext("Meta mensual eliminada."), "success")
     else:
         flash(gettext("Meta mensual guardada."), "success")
-    return redirect(
-        url_for(
-            "main.reports",
-            period=request.form.get("return_period") or "this_month",
-            start=request.form.get("return_start") or None,
-            end=request.form.get("return_end") or None,
-            _anchor="monthly-goal",
-        )
-    )
+    return redirect(_monthly_goal_return_url())
+
+
+def _monthly_goal_return_url():
+    period = (request.form.get("return_period") or "").strip()
+    if period not in {"7d", "30d", "this_month", "custom"}:
+        return url_for("pro.dashboard", _anchor="monthly-goal")
+    values = {"period": period, "_anchor": "monthly-goal"}
+    if period == "custom":
+        values["start"] = (request.form.get("return_start") or "").strip()
+        values["end"] = (request.form.get("return_end") or "").strip()
+    return url_for("pro.dashboard", **values)
 
 
 def _completed_months(organization, count=12):
@@ -284,6 +291,75 @@ def hub():
                 "tone": "neutral",
             }
         )
+    language = str(get_locale() or "es").split("_")[0]
+    if priorities:
+        primary = priorities[0]
+        pulse_fallback = {
+            "summary": gettext(
+                "PATIA ordenó la operación y encontró una acción principal."
+            ),
+            "what_happened": primary["title"],
+            "why_it_matters": primary["evidence"],
+            "recommended_actions": [primary["impact"]],
+            "limitations": [],
+            "data_period": local_today(
+                safe_timezone_name(membership.organization.timezone)
+            ).strftime("%Y-%m"),
+        }
+    else:
+        pulse_fallback = {
+            "summary": gettext(
+                "La operación se mantiene estable con los datos disponibles."
+            ),
+            "what_happened": gettext(
+                "No se detectó una situación urgente en ventas, margen, inventario, crédito o caja."
+            ),
+            "why_it_matters": gettext(
+                "Puedes concentrarte en vender y mantener actualizados costos y existencias."
+            ),
+            "recommended_actions": [
+                gettext("Continúa registrando la operación diaria.")
+            ],
+            "limitations": [],
+            "data_period": local_today(
+                safe_timezone_name(membership.organization.timezone)
+            ).strftime("%Y-%m"),
+        }
+    pulse_metrics = {
+        "priority_count": len(priorities),
+        "priorities": [
+            {
+                "title": item["title"],
+                "evidence": item["evidence"],
+                "action": item["impact"],
+            }
+            for item in priorities[:3]
+        ],
+        "inventory": {
+            "low_stock": alerts["executive_control"]["inventory"][
+                "low_stock"
+            ],
+        },
+        "credit": {
+            "customers": alerts["executive_control"]["credit"]["customers"],
+            "balance": str(
+                alerts["executive_control"]["credit"]["balance"]
+            ),
+        },
+        "cash": {
+            "status": alerts["executive_control"]["cash"]["status"],
+        },
+    }
+    pulse_narrative, pulse_source = controlled_narrative(
+        organization_id=membership.organization_id,
+        feature="pulse",
+        language=language,
+        period=pulse_fallback["data_period"],
+        metrics=pulse_metrics,
+        fallback=pulse_fallback,
+    )
+    if db.session.new or db.session.dirty:
+        db.session.commit()
     return render_template(
         "pro_hub.html",
         user=user,
@@ -293,6 +369,8 @@ def hub():
         priorities=priorities[:3],
         executive_control=alerts["executive_control"],
         team_activity=alerts["team_activity"],
+        pulse_narrative=pulse_narrative,
+        pulse_source=pulse_source,
     )
 
 
@@ -685,3 +763,24 @@ def purchase_receive(order_id):
     return redirect(
         url_for("pro.purchase_detail", order_id=order.id)
     )
+
+
+@pro.route("/purchases/<int:order_id>/cancel", methods=["POST"])
+@require_permission("manage_inventory")
+def purchase_cancel(order_id):
+    user, membership, blocked = _pro_access()
+    if blocked:
+        return blocked
+    order = _purchase_for_membership(order_id, membership)
+    try:
+        cancel_purchase_order(order)
+    except ValueError:
+        flash(gettext("Este pedido ya no puede cancelarse."), "error")
+    else:
+        flash(
+            gettext(
+                "Pedido cancelado. La mercancía recibida anteriormente no cambió."
+            ),
+            "success",
+        )
+    return redirect(url_for("pro.purchase_detail", order_id=order.id))

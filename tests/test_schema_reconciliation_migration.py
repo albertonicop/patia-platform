@@ -73,8 +73,20 @@ CURRENT_WEBHOOK_COLUMNS = {
 class SchemaReconciliationMigrationTests(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory(prefix="patia-schema-")
+        self.engines = []
+        self.original_create_engine = sa.create_engine
+
+        def tracked_create_engine(*args, **kwargs):
+            engine = self.original_create_engine(*args, **kwargs)
+            self.engines.append(engine)
+            return engine
+
+        sa.create_engine = tracked_create_engine
 
     def tearDown(self):
+        sa.create_engine = self.original_create_engine
+        for engine in self.engines:
+            engine.dispose()
         self.temp_dir.cleanup()
 
     def database_path(self, name):
@@ -315,6 +327,9 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "number",
                 "public_id",
                 "payment_method",
+                "amount_received",
+                "change_amount",
+                "cashier_member_id",
                 "customer_id",
                 "cash_register_session_id",
                 "created_at",
@@ -346,7 +361,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260727_22",
+                "20260730_24",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -504,7 +519,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260727_22",
+                "20260730_24",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
@@ -696,7 +711,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 connection.execute(
                     sa.text("SELECT version_num FROM alembic_version")
                 ).scalar_one(),
-                "20260727_22",
+                "20260730_24",
             )
             self.assertEqual(
                 connection.execute(

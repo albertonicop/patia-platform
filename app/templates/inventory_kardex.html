@@ -3,6 +3,16 @@
 
 {% block content %}
 <div class="inventory-history-v3">
+  {% if filters.source == "decisions" %}
+    <section class="inventory-final-v1__decision-context" role="status">
+      <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+      <div>
+        <strong>{% if filters.movement_group == "corrections" %}{{ _("Correcciones de inventario") }}{% elif filters.movement_type == "SALE_CANCELLATION" %}{{ _("Ventas canceladas") }}{% else %}{{ _("Cambios de inventario") }}{% endif %}</strong>
+        <span>{{ _("Abierto desde Centro de decisiones · %(count)s movimientos mostrados", count=movements|length) }}</span>
+      </div>
+      <a href="{{ url_for('inventory.index') }}">{{ _("Limpiar filtro") }}</a>
+    </section>
+  {% endif %}
   <header class="module-intro-v2 inventory-history-v3__intro">
     <a href="{{ url_for('main.products') }}" class="module-back-v2"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a Inventario") }}</a>
     <span>{{ _("Consulta de existencias") }}</span>
@@ -38,6 +48,8 @@
 
   <section class="card inventory-history-v3__tools">
     <form class="inventory-history-v3__search" method="get" action="{{ url_for('inventory.index') }}">
+      {% if filters.movement_group %}<input type="hidden" name="group" value="{{ filters.movement_group }}">{% endif %}
+      {% if filters.source %}<input type="hidden" name="source" value="{{ filters.source }}">{% endif %}
       <div>
         <label for="history-product">{{ _("Buscar producto") }}</label>
         <select id="history-product" name="product_id">
@@ -49,10 +61,12 @@
     </form>
 
     {% if advanced_history %}
-      <details class="inventory-history-v3__filters"{% if filters.movement_type or filters.date_from or filters.date_to %} open{% endif %}>
+      <details class="inventory-history-v3__filters"{% if filters.movement_type or filters.movement_group or filters.date_from or filters.date_to %} open{% endif %}>
         <summary class="btn ghost"><i class="fa-solid fa-sliders" aria-hidden="true"></i> {{ _("Filtrar") }}</summary>
         <form method="get" action="{{ url_for('inventory.index') }}">
           {% if filters.product_id %}<input type="hidden" name="product_id" value="{{ filters.product_id }}">{% endif %}
+          {% if filters.movement_group %}<input type="hidden" name="group" value="{{ filters.movement_group }}">{% endif %}
+          {% if filters.source %}<input type="hidden" name="source" value="{{ filters.source }}">{% endif %}
           <div><label for="history-type">{{ _("Qué ocurrió") }}</label><select id="history-type" name="type"><option value="">{{ _("Todos los cambios") }}</option>{% for key, label in movement_labels.items() %}<option value="{{ key }}"{% if filters.movement_type == key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
           <div><label for="history-from">{{ _("Desde") }}</label><input id="history-from" name="date_from" type="date" value="{{ filters.date_from }}"></div>
           <div><label for="history-to">{{ _("Hasta") }}</label><input id="history-to" name="date_to" type="date" value="{{ filters.date_to }}"></div>
@@ -108,7 +122,7 @@
       </div>
     {% else %}
       <div class="module-empty-v2"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
-        {% if filters.product_id or filters.movement_type or filters.date_from or filters.date_to %}
+        {% if filters.product_id or filters.movement_type or filters.movement_group or filters.date_from or filters.date_to %}
           <h4>{{ _("No hay cambios con estos filtros") }}</h4><p>{{ _("Prueba con otro producto o periodo.") }}</p>
         {% else %}
           <h4>{{ _("Todavía no hay cambios de inventario.") }}</h4><p>{{ _("Las ventas, recepciones y correcciones aparecerán aquí.") }}</p>

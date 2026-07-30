@@ -1,8 +1,10 @@
 import io
+import json
 import os
 import re
 import time
 import unittest
+from openpyxl import load_workbook
 
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -13,7 +15,7 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_patia")
 os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
-from app.models import Product, Sale, User
+from app.models import InventoryMovement, Product, Sale, User
 from app.team.services import ensure_owner_organization
 
 
@@ -44,6 +46,7 @@ class InventoryImportTests(unittest.TestCase):
 
     def setUp(self):
         db.session.rollback()
+        InventoryMovement.query.delete()
         Sale.query.delete()
         Product.query.delete()
         User.query.delete()
@@ -104,7 +107,22 @@ class InventoryImportTests(unittest.TestCase):
         self.assertNotIn("Buscar producto…", html)
         self.assertNotIn("Seleccionar productos", html)
         self.assertNotIn("Borrar todo el catálogo", html)
-        self.assertNotIn("<table>", html)
+        self.assertNotIn('id="catalogo"', html)
+
+    def test_downloadable_template_includes_hardware_store_example(self):
+        response = self.client.get("/download-template")
+        self.assertEqual(response.status_code, 200)
+        workbook = load_workbook(
+            io.BytesIO(response.data),
+            read_only=True,
+            data_only=True,
+        )
+        self.assertIn("PRODUCTOS", workbook.sheetnames)
+        self.assertIn("EJEMPLO FERRETERÍA", workbook.sheetnames)
+        example = workbook["EJEMPLO FERRETERÍA"]
+        self.assertEqual(example["A2"].value, "FER-0001")
+        self.assertEqual(example["B2"].value, "07501234560001")
+        workbook.close()
 
     def test_inventory_with_products_keeps_catalog_controls(self):
         self.add_product()
@@ -145,6 +163,28 @@ class InventoryImportTests(unittest.TestCase):
                 min_stock=2,
             )
             for index in range(205)
+        )
+
+    def preview_catalog(self, rows, filename="catalog.csv", mapping=None):
+        content = (CSV_HEADER + rows).encode("utf-8")
+        data = {"catalog_file": (io.BytesIO(content), filename)}
+        if mapping is not None:
+            data["mapping"] = json.dumps(mapping)
+        return self.client.post(
+            "/api/products/import/preview",
+            data=data,
+            content_type="multipart/form-data",
+        ), content
+
+    def commit_catalog(self, content, preview, filename="catalog.csv"):
+        return self.client.post(
+            "/api/products/import/commit",
+            data={
+                "catalog_file": (io.BytesIO(content), filename),
+                "mapping": json.dumps(preview["mapping"]),
+                "digest": preview["digest"],
+            },
+            content_type="multipart/form-data",
         )
         db.session.commit()
 
@@ -485,13 +525,112 @@ class InventoryImportTests(unittest.TestCase):
         )
         self.assertLess(elapsed, 30)
 
+    def test_professional_preview_maps_headers_and_preserves_leading_zeroes(self):
+        rows = (
+            'PIN-001,0007500123456,"Pintura acrílica blanca 19 L",'
+            'Pinturas,Distribuidora Centro,"$1,250.50","2.499,90",'
+            "12,3\n"
+        )
+        response, content = self.preview_catalog(rows)
+        self.assertEqual(response.status_code, 200)
+        preview = response.get_json()
+        self.assertTrue(preview["ready"])
+        self.assertEqual(preview["summary"]["new"], 1)
+        self.assertEqual(preview["rows"][0]["barcode"], "0007500123456")
+        self.assertEqual(preview["rows"][0]["cost_price"], "1250.50")
+        self.assertEqual(preview["rows"][0]["sale_price"], "2499.90")
+        committed = self.commit_catalog(content, preview)
+        self.assertEqual(committed.status_code, 200)
+        product = Product.query.filter_by(sku="PIN-001").one()
+        self.assertEqual(product.barcode, "0007500123456")
+        self.assertEqual(product.supplier, "Distribuidora Centro")
+
+    def test_professional_import_is_idempotent_and_does_not_duplicate_stock(self):
+        rows = "IDEM-001,0001,Martillo,Herrajes,,50,90,14,3\n"
+        preview_response, content = self.preview_catalog(rows)
+        preview = preview_response.get_json()
+        self.assertEqual(self.commit_catalog(content, preview).status_code, 200)
+        first_movement_count = InventoryMovement.query.count()
+        repeated_response, repeated_content = self.preview_catalog(rows)
+        repeated = repeated_response.get_json()
+        self.assertEqual(repeated["summary"]["updated"], 1)
+        self.assertEqual(
+            self.commit_catalog(repeated_content, repeated).status_code,
+            200,
+        )
+        self.assertEqual(Product.query.filter_by(sku="IDEM-001").count(), 1)
+        self.assertEqual(Product.query.filter_by(sku="IDEM-001").one().stock, 14)
+        self.assertEqual(InventoryMovement.query.count(), first_movement_count)
+
+    def test_professional_preview_rejects_duplicates_and_rolls_back_all_rows(self):
+        rows = (
+            "DUP-001,0001,Taladro,Herramientas,,500,900,2,1\n"
+            "DUP-001,0002,Segundo,Herramientas,,100,200,3,1\n"
+        )
+        response, content = self.preview_catalog(rows)
+        preview = response.get_json()
+        self.assertFalse(preview["ready"])
+        self.assertEqual(preview["summary"]["duplicates"], 1)
+        committed = self.commit_catalog(content, preview)
+        self.assertEqual(committed.status_code, 409)
+        self.assertEqual(Product.query.count(), 0)
+        self.assertIn("repetido", preview["errors"][0]["message"])
+
+    def test_professional_import_is_isolated_between_organizations(self):
+        rows = "SHARED-001,0007,Llave inglesa,Herramientas,,70,130,5,2\n"
+        first_preview, first_content = self.preview_catalog(rows)
+        self.assertEqual(
+            self.commit_catalog(first_content, first_preview.get_json()).status_code,
+            200,
+        )
+        other = User(
+            email="other-import@patia.test",
+            company_name="Otra ferretería",
+            email_verified=True,
+        )
+        other.set_password("Password123")
+        db.session.add(other)
+        db.session.flush()
+        ensure_owner_organization(other)
+        db.session.commit()
+        with self.client.session_transaction() as session:
+            session["user_id"] = other.id
+        second_preview, second_content = self.preview_catalog(rows)
+        self.assertEqual(second_preview.get_json()["summary"]["new"], 1)
+        self.assertEqual(
+            self.commit_catalog(
+                second_content, second_preview.get_json()
+            ).status_code,
+            200,
+        )
+        self.assertEqual(Product.query.filter_by(sku="SHARED-001").count(), 2)
+
+    def test_professional_import_handles_five_thousand_products_in_one_transaction(self):
+        rows = "".join(
+            f"BIG-{index:05d},{index:013d},Producto ferretería {index},"
+            f"Herramientas,Proveedor Mayorista,10.25,18.50,20,4\n"
+            for index in range(5000)
+        )
+        started = time.perf_counter()
+        preview_response, content = self.preview_catalog(rows)
+        preview = preview_response.get_json()
+        self.assertEqual(preview["summary"]["valid"], 5000)
+        committed = self.commit_catalog(content, preview)
+        elapsed = time.perf_counter() - started
+        self.assertEqual(committed.status_code, 200)
+        self.assertEqual(Product.query.count(), 5000)
+        self.assertEqual(InventoryMovement.query.count(), 5000)
+        self.assertLess(elapsed, 45)
+
     def test_import_form_blocks_double_submission(self):
         html = self.inventory_html()
 
         self.assertIn("let importSubmitting = false", html)
         self.assertIn("if (importSubmitting)", html)
         self.assertIn("importButton.disabled = true", html)
-        self.assertIn("Validando e importando el catálogo…", html)
+        self.assertIn(r"Validando cat\u00e1logo", html)
+        self.assertIn("/api/products/import/preview", html)
+        self.assertIn("/api/products/import/commit", html)
 
 
 if __name__ == "__main__":

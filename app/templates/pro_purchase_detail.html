@@ -79,6 +79,13 @@
     </section>
   {% endif %}
 
+  {% if order.status in ("DRAFT", "ORDERED", "PARTIALLY_RECEIVED") %}
+    <form class="pro-purchase-detail-v1__cancel" method="POST" action="{{ url_for('pro.purchase_cancel', order_id=order.id) }}" data-submit-once onsubmit="return confirm({{ _('¿Cancelar este pedido? Las unidades ya recibidas permanecerán en inventario.')|tojson }});">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn ghost" type="submit">{{ _("Cancelar pedido") }}</button>
+    </form>
+  {% endif %}
+
   {% if order.receipts %}
     <section class="pro-purchase-detail-v1__history">
       <h3>{{ _("Recepciones") }}</h3>

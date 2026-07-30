@@ -41,6 +41,7 @@ from app.monthly_reports import (
     run_monthly_reports,
 )
 from app.pro.purchases import (
+    cancel_purchase_order,
     confirm_purchase_order,
     create_purchase_draft,
     purchase_suggestions,
@@ -541,6 +542,31 @@ class ProPhaseTwoTests(unittest.TestCase):
             other_membership, {other_product.id: 2}
         )
         self.assertEqual(other_order.number, "PED-000001")
+
+    def test_cancel_order_preserves_received_stock_and_kardex(self):
+        order = create_purchase_draft(
+            self.membership, {self.product.id: 8}
+        )
+        confirm_purchase_order(order)
+        receive_purchase_order(
+            order,
+            self.membership,
+            {order.items[0].id: 3},
+            request_id="partial-before-cancel",
+        )
+        stock_after_receipt = self.product.stock
+        movement_count = InventoryMovement.query.count()
+
+        cancel_purchase_order(order)
+
+        self.assertEqual(order.status, "CANCELLED")
+        self.assertEqual(self.product.stock, stock_after_receipt)
+        self.assertEqual(
+            InventoryMovement.query.count(),
+            movement_count,
+        )
+        with self.assertRaisesRegex(ValueError, "order_not_cancellable"):
+            cancel_purchase_order(order)
 
     def test_purchase_isolation_and_cashier_block(self):
         other, other_membership = self._owner(

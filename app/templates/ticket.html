@@ -28,7 +28,7 @@
 
   <div class="ticket-page-v2__layout">
     {% set payment_key = sales[0].sales_ticket.payment_method if sales[0].sales_ticket else sales[0].payment_method %}
-    <article id="printable-ticket" class="ticket-print-v2 ticket-print-v2--80" aria-label="Ticket de venta {{ folio }}">
+    <article id="printable-ticket" class="ticket-print-v2 ticket-print-v3 ticket-print-v2--80" aria-label="{{ _('Ticket de venta %(folio)s', folio=folio) }}">
       <header class="ticket-print-v2__business">
         <h1>{{ user.company_name or _("Mi negocio") }}</h1>
         {% if business_address %}<p>{{ business_address }}</p>{% endif %}
@@ -40,6 +40,9 @@
         <p><span>{{ _("Folio") }}</span><strong>{{ folio }}</strong></p>
         <p><span>{{ _("Fecha") }}</span><strong>{{ ticket_created_at.strftime('%d/%m/%Y') }}</strong></p>
         <p><span>{{ _("Hora") }}</span><strong>{{ ticket_created_at.strftime('%H:%M') }}</strong></p>
+        {% if ticket_cashier_name %}
+          <p><span>{{ _("Atendió") }}</span><strong>{{ ticket_cashier_name }}</strong></p>
+        {% endif %}
       </div>
 
       <table class="ticket-print-v2__items">
@@ -59,23 +62,29 @@
 
       <dl class="ticket-print-v2__totals">
         <div><dt>{{ _("Subtotal") }}</dt><dd>{{ ticket_subtotal|money }}</dd></div>
-        {# IVA y descuentos permanecerán ocultos hasta existir datos reales. #}
+        {# Descuentos e impuestos se muestran solo cuando exista un dato real. #}
         <div class="ticket-print-v2__total"><dt>{{ _("Total") }}</dt><dd>{{ ticket_total|money }}</dd></div>
       </dl>
 
       <div class="ticket-print-v2__payment" aria-label="{{ _('Método de pago') }}">
-        <span>{{ _("Pago") }}</span>
+        <span>{{ _("Método de pago") }}</span>
         <strong>
-          <i class="fa-solid {% if payment_key == 'card' %}fa-credit-card{% elif payment_key == 'cash' %}fa-money-bill-wave{% elif payment_key == 'transfer' %}fa-building-columns{% else %}fa-wallet{% endif %}" aria-hidden="true"></i>
           {{ payment_method }}
         </strong>
+        {% if payment_key == "cash" and amount_received is not none %}
+          <span>{{ _("Recibido") }}</span><strong>{{ amount_received|money }}</strong>
+          <span>{{ _("Cambio") }}</span><strong>{{ change_amount|money }}</strong>
+        {% endif %}
       </div>
+      {% if payment_key == "credit" and ticket_customer %}
+        <div class="ticket-print-v3__credit">
+          <span>{{ _("Cliente") }}</span><strong>{{ ticket_customer.name }}</strong>
+          <small>{{ _("Venta registrada en su saldo pendiente") }}</small>
+        </div>
+      {% endif %}
 
       <footer class="ticket-print-v2__footer">
         <strong>{{ _("Gracias por su compra.") }}</strong>
-        <small>{{ _("Powered by PATIA") }}</small>
-        <small>{{ _("Control inteligente para PyMEs") }}</small>
-        <span class="ticket-print-v2__future-qr" aria-hidden="true"></span>
       </footer>
     </article>
 
@@ -87,7 +96,7 @@
         <label><input type="radio" name="ticket_width" value="58"> {{ _("58 mm") }}</label>
         <label><input type="radio" name="ticket_width" value="80" checked> {{ _("80 mm") }}</label>
       </fieldset>
-      <p id="pdf-help" class="ticket-page-v2__help">{{ _("En el diálogo de impresión selecciona “Guardar como PDF” como destino.") }}</p>
+      <p id="pdf-help" class="ticket-page-v2__help">{{ _("En el diálogo de impresión usa escala completa y desactiva encabezados y pies si el navegador los ofrece.") }}</p>
     </aside>
   </div>
 </div>

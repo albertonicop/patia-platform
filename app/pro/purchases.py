@@ -317,6 +317,16 @@ def confirm_purchase_order(order: PurchaseOrder):
     return order
 
 
+def cancel_purchase_order(order: PurchaseOrder):
+    """Cancel only the outstanding purchase; received stock remains untouched."""
+    if order.status not in {"DRAFT", "ORDERED", "PARTIALLY_RECEIVED"}:
+        raise ValueError("order_not_cancellable")
+    order.status = "CANCELLED"
+    order.updated_at = datetime.utcnow()
+    db.session.commit()
+    return order
+
+
 def receive_purchase_order(
     order: PurchaseOrder,
     membership,

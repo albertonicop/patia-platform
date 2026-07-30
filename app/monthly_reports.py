@@ -20,12 +20,24 @@ from flask_babel import (
 )
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.units import mm
+from reportlab.platypus import (
+    KeepTogether,
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app import db
+from app.ai_narratives import controlled_narrative
 from app.models import (
     CashRegisterSession,
     Customer,
@@ -52,7 +64,7 @@ RETRY_DELAYS = (
     timedelta(days=1),
 )
 
-SNAPSHOT_VERSION = 1
+SNAPSHOT_VERSION = 2
 
 
 def _decimal_text(value):
@@ -168,6 +180,66 @@ def build_report_snapshot(payload, subject):
     return snapshot
 
 
+def enrich_snapshot_narrative(snapshot, organization_id):
+    """Attach one immutable, verified executive narrative to a snapshot."""
+    fallback = {
+        "summary": snapshot["headline"],
+        "what_happened": (
+            snapshot["wins"][0]
+            if snapshot["wins"]
+            else snapshot["headline"]
+        ),
+        "why_it_matters": (
+            snapshot["attention"][0]
+            if snapshot["attention"]
+            else gettext(
+                "El registro constante permite comparar el negocio con "
+                "periodos futuros."
+            )
+        ),
+        "recommended_actions": list(snapshot["recommendations"][:3]),
+        "limitations": (
+            [
+                gettext(
+                    "La utilidad es parcial porque existen ventas sin costo conocido."
+                )
+            ]
+            if snapshot["kpis"]["unknown_cost_lines"]
+            else []
+        ),
+        "data_period": (
+            f"{snapshot['period']['start']}..{snapshot['period']['end']}"
+        ),
+    }
+    metrics = {
+        "sales": snapshot["kpis"]["sales"],
+        "profit": snapshot["kpis"]["profit"],
+        "margin": snapshot["kpis"]["margin"],
+        "ticket_count": snapshot["kpis"]["ticket_count"],
+        "average_ticket": snapshot["kpis"]["average_ticket"],
+        "sales_change": snapshot["comparison"],
+        "profit_change": snapshot["profit_comparison"],
+        "unknown_cost_lines": snapshot["kpis"]["unknown_cost_lines"],
+        "low_stock_count": len(snapshot["inventory"]["low_stock"]),
+        "credit_total": snapshot["credit"]["total"],
+        "credit_customer_count": len(snapshot["credit"]["customers"]),
+        "cash_closures": snapshot["cash"]["count"],
+        "cash_net_difference": snapshot["cash"]["net_difference"],
+    }
+    narrative, source = controlled_narrative(
+        organization_id=organization_id,
+        feature="monthly_report",
+        language=snapshot["language"],
+        period=fallback["data_period"],
+        metrics=metrics,
+        fallback=fallback,
+        ttl_hours=24 * 40,
+    )
+    snapshot["narrative"] = narrative
+    snapshot["narrative_source"] = source
+    return snapshot
+
+
 def serialize_snapshot(snapshot):
     return json.dumps(
         snapshot,
@@ -195,10 +267,14 @@ def payload_from_snapshot(record):
             name=snapshot["business_name"]
         ),
         "period_label": snapshot["period"]["label"],
-        "headline": snapshot["headline"],
+        "headline": (snapshot.get("narrative") or {}).get(
+            "summary", snapshot["headline"]
+        ),
         "wins": snapshot["wins"],
         "attention": snapshot["attention"],
-        "recommendations": snapshot["recommendations"],
+        "recommendations": (snapshot.get("narrative") or {}).get(
+            "recommended_actions", snapshot["recommendations"]
+        ),
         "analytics": {
             "report_kpis": {
                 "sales": Decimal(kpis["sales"]),
@@ -244,7 +320,7 @@ def payload_from_snapshot(record):
 
 
 def monthly_report_pdf(record):
-    """Render a compact PDF exclusively from the immutable snapshot."""
+    """Render a professional executive document from the immutable snapshot."""
     snapshot = report_snapshot(record)
     if not snapshot:
         raise MonthlyReportUnavailable("Report snapshot is unavailable.")
@@ -273,116 +349,197 @@ def monthly_report_pdf(record):
                 "Snapshot %(hash)s",
                 hash=(record.snapshot_hash or "")[:12],
             ),
+            "monthly_results": gettext("Resultados del mes"),
+            "monthly_results_help": gettext(
+                "Ventas, rentabilidad y productos que explican el periodo."
+            ),
+            "product": gettext("Producto"),
+            "units": gettext("Unidades"),
+            "result": gettext("Resultado"),
+            "customer": gettext("Cliente"),
+            "purchases": gettext("Compras"),
+            "total": gettext("Total"),
+            "no_customer_sales": gettext(
+                "No hubo ventas vinculadas a clientes durante este mes."
+            ),
+            "control_next": gettext("Control y siguiente paso"),
+            "control_next_help": gettext(
+                "Inventario, saldos y caja para preparar el próximo mes."
+            ),
+            "no_recommendations": gettext(
+                "Registra actividad durante el mes para recibir acciones específicas."
+            ),
         }
     output = BytesIO()
-    pdf = canvas.Canvas(output, pagesize=letter)
-    width, height = letter
-    left = 54
-    y = height - 54
+    document = SimpleDocTemplate(
+        output,
+        pagesize=letter,
+        leftMargin=18 * mm,
+        rightMargin=18 * mm,
+        topMargin=20 * mm,
+        bottomMargin=18 * mm,
+        title=f"{labels['report']} · {snapshot['business_name']}",
+        author="PATIA",
+    )
+    styles = getSampleStyleSheet()
+    title = ParagraphStyle("PatiaTitle", parent=styles["Title"], fontName="Helvetica-Bold", fontSize=24, leading=28, textColor=HexColor("#171A2B"), spaceAfter=6)
+    h1 = ParagraphStyle("PatiaH1", parent=styles["Heading1"], fontName="Helvetica-Bold", fontSize=15, leading=19, textColor=HexColor("#171A2B"), spaceBefore=8, spaceAfter=9)
+    h2 = ParagraphStyle("PatiaH2", parent=styles["Heading2"], fontName="Helvetica-Bold", fontSize=11, leading=14, textColor=HexColor("#5B45E8"), spaceBefore=7, spaceAfter=6)
+    body = ParagraphStyle("PatiaBody", parent=styles["BodyText"], fontName="Helvetica", fontSize=9, leading=13, textColor=HexColor("#424A5D"), spaceAfter=5)
+    small = ParagraphStyle("PatiaSmall", parent=body, fontSize=7.5, leading=10, textColor=HexColor("#7A8192"))
+    number = ParagraphStyle("PatiaNumber", parent=body, alignment=TA_RIGHT, fontName="Helvetica-Bold", textColor=HexColor("#171A2B"))
 
-    def page_header(page_number):
-        nonlocal y
+    def money_value(value):
+        return f"${Decimal(value):,.2f} MXN"
+
+    def section(heading, items):
+        values = list(items or [])
+        if not values:
+            values = [labels["no_data"]]
+        return KeepTogether([
+            Paragraph(heading, h1),
+            *[Paragraph(f"• {value}", body) for value in values],
+        ])
+
+    def on_page(pdf, doc):
+        pdf.saveState()
         pdf.setFillColor(HexColor("#5B45E8"))
-        pdf.setFont("Helvetica-Bold", 9)
-        pdf.drawString(left, height - 38, "PATIA PRO")
+        pdf.setFont("Helvetica-Bold", 8)
+        pdf.drawString(18 * mm, letter[1] - 12 * mm, "PATIA PRO")
         pdf.setFillColor(HexColor("#7A8192"))
-        pdf.setFont("Helvetica", 8)
-        pdf.drawRightString(width - left, height - 38, f"{page_number} / 2")
+        pdf.setFont("Helvetica", 7)
+        pdf.drawRightString(letter[0] - 18 * mm, letter[1] - 12 * mm, snapshot["period"]["label"])
         pdf.setStrokeColor(HexColor("#E3E6EF"))
-        pdf.line(left, height - 46, width - left, height - 46)
-        y = height - 70
+        pdf.line(18 * mm, 13 * mm, letter[0] - 18 * mm, 13 * mm)
+        pdf.drawString(18 * mm, 8 * mm, labels["generated"])
+        pdf.drawRightString(letter[0] - 18 * mm, 8 * mm, str(doc.page))
+        pdf.restoreState()
 
-    def line(text, *, size=10, bold=False, color="#171A2B", gap=16):
-        nonlocal y
-        if y < 60:
-            return
-        pdf.setFillColor(HexColor(color))
-        pdf.setFont("Helvetica-Bold" if bold else "Helvetica", size)
-        safe = str(text or "")
-        chunks = [
-            safe[index:index + 92]
-            for index in range(0, len(safe), 92)
-        ] or [""]
-        for chunk in chunks:
-            pdf.drawString(left, y, chunk)
-            y -= gap
-
-    page_header(1)
-    line(labels["report"].upper(), size=9, bold=True, color="#5B45E8")
-    line(snapshot["business_name"], size=22, bold=True, gap=27)
-    line(snapshot["period"]["label"], color="#677086", gap=26)
-    line(labels["summary"], size=13, bold=True, gap=20)
-    line(snapshot["headline"], size=12, bold=True, gap=24)
     kpis = snapshot["kpis"]
-    line(
-        f"{labels['sales']}: ${Decimal(kpis['sales']):,.2f} MXN",
-        size=12,
-        bold=True,
-    )
-    line(
-        f"{labels['profit']}: ${Decimal(kpis['profit']):,.2f} MXN"
-    )
-    line(f"{labels['recorded_sales']}: {kpis['ticket_count']}")
-    line(
-        f"{labels['average_ticket']}: "
-        f"${Decimal(kpis['average_ticket']):,.2f} MXN",
-        gap=24,
-    )
-    y -= 5
-    line(labels["wins"], size=12, bold=True)
-    for item in snapshot["wins"]:
-        line(f"- {item}")
-    y -= 8
-    line(labels["attention"], size=12, bold=True)
-    for item in snapshot["attention"]:
-        line(f"- {item}")
+    kpi_data = [
+        [Paragraph(labels["sales"], small), Paragraph(labels["profit"], small), Paragraph(labels["average_ticket"], small), Paragraph(labels["recorded_sales"], small)],
+        [Paragraph(money_value(kpis["sales"]), number), Paragraph(money_value(kpis["profit"]), number), Paragraph(money_value(kpis["average_ticket"]), number), Paragraph(str(kpis["ticket_count"]), number)],
+    ]
+    kpi_table = Table(kpi_data, colWidths=[document.width / 4] * 4, rowHeights=[8 * mm, 12 * mm])
+    kpi_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), HexColor("#F5F4FC")),
+        ("BOX", (0, 0), (-1, -1), .5, HexColor("#DED9F8")),
+        ("INNERGRID", (0, 0), (-1, -1), .5, HexColor("#E7E4F6")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+    ]))
 
-    pdf.showPage()
-    page_header(2)
-    line(labels["top_products"], size=13, bold=True, gap=20)
-    products = snapshot.get("profitable_products") or snapshot.get(
-        "top_selling", []
+    story = [
+        Spacer(1, 5 * mm),
+        Paragraph(labels["report"].upper(), h2),
+        Paragraph(snapshot["business_name"], title),
+        Paragraph(snapshot["period"]["label"], body),
+        Spacer(1, 7 * mm),
+        Paragraph(labels["summary"], h1),
+        Paragraph(
+            (snapshot.get("narrative") or {}).get(
+                "summary", snapshot["headline"]
+            ),
+            ParagraphStyle(
+                "Headline",
+                parent=h1,
+                fontSize=13,
+                leading=18,
+                textColor=HexColor("#34304F"),
+            ),
+        ),
+        Paragraph(
+            (snapshot.get("narrative") or {}).get(
+                "why_it_matters", snapshot["headline"]
+            ),
+            body,
+        ),
+        Spacer(1, 4 * mm),
+        kpi_table,
+        Spacer(1, 7 * mm),
+        section(labels["wins"], snapshot["wins"]),
+        Spacer(1, 4 * mm),
+        section(labels["attention"], snapshot["attention"]),
+        PageBreak(),
+        Paragraph(labels["monthly_results"], title),
+        Paragraph(labels["monthly_results_help"], body),
+        Spacer(1, 4 * mm),
+        Paragraph(labels["top_products"], h1),
+    ]
+    products = snapshot.get("profitable_products") or snapshot.get("top_selling", [])
+    product_rows = [[Paragraph(labels["product"], small), Paragraph(labels["units"], small), Paragraph(labels["result"], small)]]
+    for item in products[:7]:
+        amount = item.get("profit") or item.get("revenue") or "0.00"
+        product_rows.append([Paragraph(item["name"], body), Paragraph(str(item.get("units", 0)), number), Paragraph(money_value(amount), number)])
+    if len(product_rows) == 1:
+        product_rows.append([Paragraph(labels["no_data"], body), "", ""])
+    product_table = Table(product_rows, colWidths=[document.width * .55, document.width * .17, document.width * .28], repeatRows=1)
+    product_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), HexColor("#25213F")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), HexColor("#FFFFFF")),
+        ("LINEBELOW", (0, 1), (-1, -1), .4, HexColor("#E3E6EF")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+    ]))
+    story.extend([
+        product_table,
+        Spacer(1, 7 * mm),
+        Paragraph(labels["customers"], h1),
+    ])
+    customer_rows = [[Paragraph(labels["customer"], small), Paragraph(labels["purchases"], small), Paragraph(labels["total"], small)]]
+    for item in snapshot.get("customers", [])[:6]:
+        customer_rows.append([Paragraph(item["name"], body), Paragraph(str(item["tickets"]), number), Paragraph(money_value(item["sales"]), number)])
+    if len(customer_rows) == 1:
+        customer_rows.append([Paragraph(labels["no_customer_sales"], body), "", ""])
+    customer_table = Table(customer_rows, colWidths=[document.width * .55, document.width * .17, document.width * .28], repeatRows=1)
+    customer_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), HexColor("#F0EEFC")),
+        ("LINEBELOW", (0, 0), (-1, -1), .4, HexColor("#E3E6EF")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+    ]))
+    story.extend([
+        customer_table,
+        PageBreak(),
+        Paragraph(labels["control_next"], title),
+        Paragraph(labels["control_next_help"], body),
+        Spacer(1, 5 * mm),
+    ])
+    control_data = [
+        [Paragraph(labels["inventory"], small), Paragraph(labels["credit"], small), Paragraph(labels["cash"], small)],
+        [Paragraph(money_value(snapshot["inventory"]["value"]), number), Paragraph(money_value(snapshot["credit"]["total"]), number), Paragraph(str(snapshot["cash"]["count"]), number)],
+    ]
+    control_table = Table(control_data, colWidths=[document.width / 3] * 3, rowHeights=[8 * mm, 12 * mm])
+    control_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), HexColor("#F4FAF8")),
+        ("BOX", (0, 0), (-1, -1), .5, HexColor("#CDE9E1")),
+        ("INNERGRID", (0, 0), (-1, -1), .5, HexColor("#DDEFEA")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    story.extend([
+        control_table,
+        Spacer(1, 7 * mm),
+        section(labels["opportunities"], snapshot.get("attention", [])),
+        Spacer(1, 5 * mm),
+        Paragraph(labels["actions"], h1),
+    ])
+    recommendations = (
+        (snapshot.get("narrative") or {}).get("recommended_actions")
+        or snapshot.get("recommendations")
+        or [labels["no_recommendations"]]
     )
-    if products:
-        for item in products[:5]:
-            amount = item.get("profit") or item.get("revenue") or "0.00"
-            line(
-                f"{item['name']}  |  {item.get('units', 0)}  |  "
-                f"${Decimal(amount):,.2f} MXN"
-            )
-    else:
-        line(labels["no_data"], color="#677086")
-    y -= 10
-    line(labels["customers"], size=13, bold=True, gap=20)
-    customers = snapshot.get("customers", [])
-    if customers:
-        for item in customers[:5]:
-            line(
-                f"{item['name']}  |  {item['tickets']}  |  "
-                f"${Decimal(item['sales']):,.2f} MXN"
-            )
-    else:
-        line(labels["no_data"], color="#677086")
-    y -= 10
-    line(labels["opportunities"], size=13, bold=True, gap=20)
-    line(
-        f"{labels['inventory']}: "
-        f"${Decimal(snapshot['inventory']['value']):,.2f} MXN"
-    )
-    line(
-        f"{labels['credit']}: "
-        f"${Decimal(snapshot['credit']['total']):,.2f} MXN"
-    )
-    line(f"{labels['cash']}: {snapshot['cash']['count']}")
-    y -= 10
-    line(labels["actions"], size=13, bold=True, gap=20)
-    for index, item in enumerate(snapshot["recommendations"], 1):
-        line(f"{index}. {item}")
-    y -= 10
-    line(labels["generated"], size=8, color="#7A8192")
-    line(labels["snapshot"], size=8, color="#7A8192")
-    pdf.save()
-    output.seek(0)
+    for index, item in enumerate(recommendations[:5], 1):
+        action_table = Table(
+            [[Paragraph(f"{index:02d}", ParagraphStyle("Index", parent=number, fontSize=12, textColor=HexColor("#5B45E8"))), Paragraph(item, body)]],
+            colWidths=[14 * mm, document.width - 14 * mm],
+        )
+        action_table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("BOTTOMPADDING", (0, 0), (-1, -1), 6)]))
+        story.append(action_table)
+    story.extend([Spacer(1, 8 * mm), Paragraph(labels["snapshot"], small)])
+    document.build(story, onFirstPage=on_page, onLaterPages=on_page)
     return output.getvalue()
 
 
@@ -847,6 +1004,9 @@ def generate_monthly_report(
                     snapshot = build_report_snapshot(
                         live_payload, subject
                     )
+                    snapshot = enrich_snapshot_narrative(
+                        snapshot, organization.id
+                    )
                     serialized = serialize_snapshot(snapshot)
                     record.snapshot_json = serialized
                     record.snapshot_hash = sha256(
@@ -858,6 +1018,12 @@ def generate_monthly_report(
                     )
                     record.manual_generation = bool(manual_generation)
                     record.generated_at = datetime.utcnow()
+                    live_payload["headline"] = snapshot["narrative"][
+                        "summary"
+                    ]
+                    live_payload["recommendations"] = snapshot[
+                        "narrative"
+                    ]["recommended_actions"]
                     payload = {
                         "subject": subject,
                         "snapshot": snapshot,

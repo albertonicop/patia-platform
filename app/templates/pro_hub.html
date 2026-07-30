@@ -6,19 +6,11 @@
     <div class="pro-hub-v1__pulse-copy">
       <span class="pro-hub-v1__pulse-mark"><i class="fa-solid fa-bolt" aria-hidden="true"></i> {{ _("Pulso PATIA") }}</span>
       <h2>{{ _("Tu negocio claro. Tu siguiente paso también.") }}</h2>
-      <p>
-        {% if business_type %}
-          {{ _("PATIA revisó la operación de tu %(business_type)s y ordenó lo que conviene atender primero.", business_type=business_type|lower) }}
-        {% else %}
-          {{ _("PATIA revisó tu operación y ordenó lo que conviene atender primero.") }}
-        {% endif %}
-      </p>
-      <div class="pro-hub-v1__pulse-language" aria-label="{{ _('Cómo leer Pulso PATIA') }}">
-        <span><b>01</b>{{ _("Qué pasó") }}</span>
-        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        <span><b>02</b>{{ _("Por qué importa") }}</span>
-        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        <span><b>03</b>{{ _("Qué hacer") }}</span>
+      <p>{{ pulse_narrative.summary }}</p>
+      <div class="pro-hub-v1__pulse-language pro-hub-v1__pulse-reading" aria-label="{{ _('Lectura de tu negocio') }}">
+        <span><b>{{ _("Qué pasó") }}</b>{{ pulse_narrative.what_happened }}</span>
+        <span><b>{{ _("Por qué importa") }}</b>{{ pulse_narrative.why_it_matters }}</span>
+        <span><b>{{ _("Qué hacer") }}</b>{{ pulse_narrative.recommended_actions[0] if pulse_narrative.recommended_actions else _("Continúa registrando tu operación.") }}</span>
       </div>
     </div>
     <a class="btn primary" href="{{ url_for('main.reports') }}">

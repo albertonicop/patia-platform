@@ -132,7 +132,7 @@ class ProfessionalTicketTests(unittest.TestCase):
         self.assertNotIn("000-000-0000", html)
         self.assertNotIn("Ticket:", html)
         self.assertIn("Gracias por su compra", html)
-        self.assertIn("Powered by PATIA", html)
+        self.assertNotIn("Powered by PATIA", html)
 
     def test_ticket_has_print_pdf_actions_and_thermal_styles(self):
         ticket_id, _ = self.grouped_sale()
@@ -149,6 +149,7 @@ class ProfessionalTicketTests(unittest.TestCase):
         self.assertIn("@media print", css)
         self.assertIn("@page ticket58", css)
         self.assertIn("@page ticket80", css)
+        self.assertIn("body.app-body .ticket-print-v3", css)
         self.assertIn(".sidebar-v2", css)
         self.assertIn(".no-print-v2", css)
 

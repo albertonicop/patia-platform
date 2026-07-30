@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_babel import gettext
@@ -8,7 +8,11 @@ from sqlalchemy.orm import selectinload
 from app import db
 from app.models import CashMovement, CashRegisterSession, OrganizationMember
 from app.money import money_decimal
-from app.timezones import safe_timezone_name, utc_to_local
+from app.timezones import (
+    local_date_bounds_utc,
+    safe_timezone_name,
+    utc_to_local,
+)
 from app.team.services import (
     active_membership,
     has_permission,
@@ -61,12 +65,62 @@ def index():
     )
     can_view_history = has_permission(membership, "view_cash_history")
     history = []
-    if can_view_history and current:
-        history = (
-            CashRegisterSession.query.filter_by(
-                organization_id=membership.organization_id,
-                status="CLOSED",
+    timezone_name = safe_timezone_name(membership.organization.timezone)
+    differences_only = request.args.get("differences") == "1"
+    withdrawals_only = request.args.get("movements") == "withdrawals"
+    filter_start = request.args.get("start", "").strip()
+    filter_end = request.args.get("end", "").strip()
+    if can_view_history and (current or differences_only or withdrawals_only):
+        history_query = CashRegisterSession.query.filter_by(
+            organization_id=membership.organization_id,
+            status="CLOSED",
+        )
+        if differences_only:
+            history_query = history_query.filter(
+                CashRegisterSession.difference.is_not(None),
+                CashRegisterSession.difference != 0,
             )
+            try:
+                start_date = datetime.strptime(filter_start, "%Y-%m-%d").date()
+                end_date = datetime.strptime(filter_end, "%Y-%m-%d").date()
+                if start_date <= end_date:
+                    start_at, end_before = local_date_bounds_utc(
+                        start_date,
+                        end_date + timedelta(days=1),
+                        timezone_name,
+                    )
+                    history_query = history_query.filter(
+                        CashRegisterSession.closed_at >= start_at,
+                        CashRegisterSession.closed_at < end_before,
+                    )
+            except (TypeError, ValueError):
+                filter_start = ""
+                filter_end = ""
+        elif withdrawals_only:
+            history_query = history_query.join(
+                CashMovement,
+                CashMovement.cash_register_session_id
+                == CashRegisterSession.id,
+            ).filter(CashMovement.movement_type == "WITHDRAWAL")
+            try:
+                start_date = datetime.strptime(filter_start, "%Y-%m-%d").date()
+                end_date = datetime.strptime(filter_end, "%Y-%m-%d").date()
+                if start_date <= end_date:
+                    start_at, end_before = local_date_bounds_utc(
+                        start_date,
+                        end_date + timedelta(days=1),
+                        timezone_name,
+                    )
+                    history_query = history_query.filter(
+                        CashMovement.created_at >= start_at,
+                        CashMovement.created_at < end_before,
+                    )
+            except (TypeError, ValueError):
+                filter_start = ""
+                filter_end = ""
+            history_query = history_query.distinct()
+        history = (
+            history_query
             .order_by(
                 CashRegisterSession.closed_at.desc(),
                 CashRegisterSession.id.desc(),
@@ -74,7 +128,6 @@ def index():
             .limit(30)
             .all()
         )
-    timezone_name = safe_timezone_name(membership.organization.timezone)
     if current:
         current.opened_at_local = utc_to_local(
             current.opened_at, timezone_name
@@ -123,6 +176,11 @@ def index():
                 for movement in current.movements
             )
         ),
+        differences_only=differences_only,
+        withdrawals_only=withdrawals_only,
+        filter_source=request.args.get("source"),
+        filter_start=filter_start,
+        filter_end=filter_end,
     )
 
 

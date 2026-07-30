@@ -51,6 +51,7 @@ class SalesTicketFoundationTests(unittest.TestCase):
         user = User(
             email=email,
             company_name=f"Empresa {email}",
+            first_name="Alberto",
             email_verified=True,
         )
         user.set_password("Password123")
@@ -193,6 +194,58 @@ class SalesTicketFoundationTests(unittest.TestCase):
             [sale.payment_method for sale in Sale.query.order_by(Sale.id)],
             ["cash", "card", "transfer", "other"],
         )
+
+    def test_cash_ticket_persists_received_change_and_cashier_for_reprint(self):
+        user = self.add_user("cash-detail@patia.test")
+        product = self.add_product(user, price=Decimal("75.25"))
+        client = self.client_for(user)
+        client.post("/cash-register/open", data={"opening_cash": "0.00"})
+
+        response = client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "cash",
+                "amount_received": "100.00",
+                "items": [{"product_id": product.id, "quantity": 1}],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        ticket = SalesTicket.query.one()
+        self.assertEqual(ticket.amount_received, Decimal("100.00"))
+        self.assertEqual(ticket.change_amount, Decimal("24.75"))
+        self.assertIsNotNone(ticket.cashier_member_id)
+        html = client.get(response.get_json()["ticket_url"]).get_data(
+            as_text=True
+        )
+        self.assertIn("Recibido", html)
+        self.assertIn("$100.00", html)
+        self.assertIn("Cambio", html)
+        self.assertIn("$24.75", html)
+        self.assertIn("Atendi", html)
+        self.assertIn("Alberto", html)
+
+    def test_cash_sale_rejects_an_insufficient_received_amount(self):
+        user = self.add_user("cash-short@patia.test")
+        product = self.add_product(user, price=Decimal("75.25"))
+        client = self.client_for(user)
+        client.post("/cash-register/open", data={"opening_cash": "0.00"})
+
+        response = client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "cash",
+                "amount_received": "50.00",
+                "items": [{"product_id": product.id, "quantity": 1}],
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(SalesTicket.query.count(), 0)
+        db.session.refresh(product)
+        self.assertEqual(product.stock, 20)
 
     def test_unknown_historical_cost_remains_null_for_new_sale(self):
         user = self.add_user("unknown-cost@patia.test")

@@ -128,6 +128,27 @@ def create_app():
         ),
         RESEND_API_KEY=os.environ.get("RESEND_API_KEY"),
         RESEND_FROM=os.environ.get("RESEND_FROM"),
+        OPENAI_API_KEY=os.environ.get("OPENAI_API_KEY"),
+        PATIA_AI_ENABLED=_env_flag("PATIA_AI_ENABLED", default=False),
+        PATIA_AI_MODEL=os.environ.get("PATIA_AI_MODEL", "gpt-5-mini"),
+        PATIA_AI_TIMEOUT_SECONDS=float(
+            os.environ.get("PATIA_AI_TIMEOUT_SECONDS", "12")
+        ),
+        PATIA_AI_MAX_OUTPUT_TOKENS=int(
+            os.environ.get("PATIA_AI_MAX_OUTPUT_TOKENS", "500")
+        ),
+        PATIA_AI_INPUT_USD_PER_MILLION=os.environ.get(
+            "PATIA_AI_INPUT_USD_PER_MILLION"
+        ),
+        PATIA_AI_OUTPUT_USD_PER_MILLION=os.environ.get(
+            "PATIA_AI_OUTPUT_USD_PER_MILLION"
+        ),
+        PATIA_AI_GLOBAL_MONTHLY_USD=os.environ.get(
+            "PATIA_AI_GLOBAL_MONTHLY_USD", "0"
+        ),
+        PATIA_AI_ORGANIZATION_MONTHLY_USD=os.environ.get(
+            "PATIA_AI_ORGANIZATION_MONTHLY_USD", "0"
+        ),
         PATIA_DEMO_VIDEO_AVAILABLE=_env_flag(
             "PATIA_DEMO_VIDEO_AVAILABLE",
             default=True,
@@ -188,7 +209,6 @@ def create_app():
     from .pro.routes import pro
 
     app.register_blueprint(pro)
-
     @app.context_processor
     def inject_pro_access():
         user = current_user()

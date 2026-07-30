@@ -114,6 +114,11 @@
           </select>
           <small>{{ _("Selecciona cómo pagó el cliente. Este dato se usará para registrar la venta.") }}</small>
         </div>
+        <div id="cash-tender-field" class="pos-v2__payment-method">
+          <label for="amount-received">{{ _("Monto recibido") }}</label>
+          <input id="amount-received" type="number" min="0" step="0.01" inputmode="decimal" placeholder="{{ _('Igual al total') }}">
+          <small>{{ _("Déjalo vacío si recibiste el importe exacto.") }}</small>
+        </div>
         <div><span>{{ _("Total de la venta") }}</span><strong id="cart-total">{{ _("$0.00 MXN") }}</strong></div>
         <button class="btn" id="checkout-button" type="button" disabled>{{ _("Registrar venta") }}</button>
       </footer>
@@ -276,6 +281,8 @@ const cartCount = document.getElementById("cart-count");
 const cartTotal = document.getElementById("cart-total");
 const checkoutButton = document.getElementById("checkout-button");
 const paymentMethod = document.getElementById("payment-method");
+const cashTenderField = document.getElementById("cash-tender-field");
+const amountReceived = document.getElementById("amount-received");
 const checkoutError = document.getElementById("checkout-error");
 let cart = [];
 let visibleResults = [];
@@ -754,7 +761,7 @@ async function submitCartSale(requestId, creditOverride = false, overridePin = "
         "Content-Type": "application/json",
         "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
       },
-      body: JSON.stringify({items, request_id: requestId, payment_method: paymentMethod.value, customer_id: selectedCustomer ? selectedCustomer.id : null, credit_override: creditOverride, override_pin: overridePin})
+      body: JSON.stringify({items, request_id: requestId, payment_method: paymentMethod.value, amount_received: paymentMethod.value === "cash" ? amountReceived.value : null, customer_id: selectedCustomer ? selectedCustomer.id : null, credit_override: creditOverride, override_pin: overridePin})
     });
     const data = await response.json();
     if (!response.ok && data.error_code === "credit_not_enabled") {
@@ -802,6 +809,12 @@ checkoutButton.addEventListener("click", async () => {
   }
   await submitCartSale(requestId);
 });
+
+function syncCashTender() {
+  cashTenderField.hidden = paymentMethod.value !== "cash";
+}
+paymentMethod.addEventListener("change", syncCashTender);
+syncCashTender();
 
 const storedConfirmation = sessionStorage.getItem("patia_sale_confirmation");
 if (storedConfirmation) {

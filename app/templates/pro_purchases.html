@@ -80,6 +80,14 @@
                     <td data-label="{{ _('Costo estimado') }}">{{ item.estimated_cost|money }}</td>
                     <td data-label="{{ _('Pedir') }}"><input aria-label="{{ _('Cantidad para %(product)s', product=item.name) }}" type="number" min="1" step="1" name="quantity_{{ item.product_id }}" value="{{ item.suggested_quantity }}" required></td>
                   </tr>
+                  {% if not item.supplier_name or not item.unit_cost %}
+                    <tr class="pro-purchases-v1__data-warning">
+                      <td colspan="4">
+                        {% if not item.supplier_name %}{{ _("Agrega un proveedor para preparar el pedido con la empresa correcta.") }}{% endif %}
+                        {% if not item.unit_cost %}{{ _("Agrega el costo para obtener una estimación de compra confiable.") }}{% endif %}
+                      </td>
+                    </tr>
+                  {% endif %}
                 {% endfor %}
               </tbody>
             </table>

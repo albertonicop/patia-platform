@@ -8,6 +8,7 @@ import stripe
 import secrets
 import uuid
 import re
+import json
 from decimal import Decimal, InvalidOperation
 from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort, has_request_context
 from flask_babel import force_locale, gettext
@@ -47,6 +48,11 @@ from .cash.services import (
 from .inventory.services import (
     record_inventory_movement,
     record_opening_balance,
+)
+from .inventory.imports import (
+    MAX_IMPORT_ROWS,
+    apply_catalog,
+    inspect_catalog,
 )
 from .credit.services import (
     CreditError,
@@ -223,6 +229,7 @@ def _create_sales_ticket(actor, payment_method, *, ticket_id=None):
         number=next_number - 1,
         public_id=ticket_id or str(uuid.uuid4()),
         payment_method=payment_method,
+        cashier_member_id=active_membership(actor).id,
     )
     db.session.add(ticket)
     db.session.flush()
@@ -1824,6 +1831,7 @@ def products():
     page_start = ((page - 1) * per_page + 1) if result_count else 0
     page_end = min(page * per_page, result_count)
     active_filter_label = None
+    filter_source = request.args.get("source")
     if low_stock_only:
         active_filter_label = gettext("Productos por agotarse")
     elif no_sales_only:
@@ -1847,6 +1855,7 @@ def products():
         missing_cost_only=missing_cost_only,
         low_margin_only=low_margin_only,
         active_filter_label=active_filter_label,
+        filter_source=filter_source,
         q=q,
         user=user,
     )
@@ -2174,11 +2183,53 @@ def download_template():
         gettext("Stock mínimo"),
     ]
     df = pd.DataFrame(columns=columns)
+    example_rows = [
+        [
+            "FER-0001",
+            "07501234560001",
+            gettext("Taladro percutor 1/2 pulgada"),
+            gettext("Herramientas eléctricas"),
+            gettext("Proveedor de ejemplo"),
+            "850.00",
+            "1299.00",
+            8,
+            3,
+        ],
+        [
+            "PIN-0001",
+            "07501234560002",
+            gettext("Pintura vinílica blanca 19 L"),
+            gettext("Pinturas"),
+            gettext("Proveedor de ejemplo"),
+            "620.00",
+            "899.00",
+            12,
+            4,
+        ],
+        [
+            "TOR-0001",
+            "00012345678905",
+            gettext("Tornillo galvanizado 1/4 x 2"),
+            gettext("Tornillería"),
+            gettext("Proveedor de ejemplo"),
+            "1.15",
+            "2.50",
+            500,
+            100,
+        ],
+    ]
+    examples = pd.DataFrame(example_rows, columns=columns)
     output = BytesIO()
 
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         sheet_name = gettext("PRODUCTOS")
         df.to_excel(writer, index=False, sheet_name=sheet_name, startrow=3)
+        example_sheet_name = gettext("EJEMPLO FERRETERÍA")
+        examples.to_excel(
+            writer,
+            index=False,
+            sheet_name=example_sheet_name,
+        )
         workbook = writer.book
         ws = writer.sheets[sheet_name]
 
@@ -2223,6 +2274,15 @@ def download_template():
         for col, width in widths.items():
             ws.column_dimensions[col].width = width
         ws.freeze_panes = "A5"
+
+        example_ws = writer.sheets[example_sheet_name]
+        for cell in example_ws[1]:
+            cell.fill = header_fill
+            cell.font = dark_font
+            cell.alignment = center
+        for col, width in widths.items():
+            example_ws.column_dimensions[col].width = width
+        example_ws.freeze_panes = "A2"
 
     output.seek(0)
     return send_file(output, as_attachment=True, download_name="plantilla_productos_PATIA.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -2462,6 +2522,177 @@ def import_products():
         )
 
     return redirect(url_for("main.products") + "#importar-catalogo")
+
+
+def _catalog_upload():
+    upload = request.files.get("catalog_file")
+    if not upload or not upload.filename:
+        raise ValueError("missing_file")
+    content = upload.read()
+    if len(content) > 12 * 1024 * 1024:
+        raise ValueError("file_too_large")
+    return upload.filename, content
+
+
+def _catalog_error_message(code):
+    messages = {
+        "missing_file": gettext("Selecciona un archivo CSV o Excel."),
+        "empty_file": gettext("El archivo está vacío."),
+        "file_too_large": gettext("El archivo supera el límite de 12 MB."),
+        "unsupported_file": gettext("Usa un archivo CSV o Excel .xlsx."),
+        "too_many_rows": gettext(
+            "El archivo supera el límite de %(limit)s productos.",
+            limit=MAX_IMPORT_ROWS,
+        ),
+    }
+    return messages.get(code, gettext("No pudimos leer el catálogo. Revisa el archivo e inténtalo nuevamente."))
+
+
+def _catalog_row_error_message(code):
+    messages = {
+        "invalid_number": gettext("Revisa el costo o precio."),
+        "invalid_integer": gettext(
+            "Stock y stock mínimo deben ser números enteros no negativos."
+        ),
+        "missing_identity": gettext("Agrega SKU y nombre del producto."),
+        "duplicate_in_file": gettext(
+            "El SKU o código de barras está repetido dentro del archivo."
+        ),
+        "conflicting_identity": gettext(
+            "El SKU y el código pertenecen a productos distintos."
+        ),
+    }
+    return messages.get(
+        code,
+        gettext("Revisa los datos de esta fila."),
+    )
+
+
+@main.post("/api/products/import/preview")
+@require_permission("manage_inventory")
+def import_products_preview():
+    user = current_user()
+    if not user:
+        return jsonify({"ok": False, "error": gettext("Inicia sesión para continuar.")}), 401
+    access_block = _trial_access_response(user, json_response=True)
+    if access_block:
+        return access_block
+    try:
+        filename, content = _catalog_upload()
+        raw_mapping = request.form.get("mapping")
+        mapping = json.loads(raw_mapping) if raw_mapping else None
+        existing = Product.query.filter_by(
+            organization_id=current_organization_id(user)
+        ).all()
+        imported = inspect_catalog(filename, content, mapping, existing)
+        preview_rows = []
+        for row in imported.rows[:20]:
+            preview_rows.append({
+                **row,
+                "cost_price": str(row["cost_price"]),
+                "sale_price": str(row["sale_price"]),
+            })
+        return jsonify({
+            "ok": True,
+            "filename": filename,
+            "digest": imported.digest,
+            "headers": imported.headers,
+            "mapping": imported.mapping,
+            "required_fields": ["sku", "name", "sale_price", "stock"],
+            "summary": imported.summary,
+            "rows": preview_rows,
+            "errors": [
+                {
+                    **error,
+                    "message": _catalog_row_error_message(error["code"]),
+                }
+                for error in imported.errors[:100]
+            ],
+            "ready": not imported.errors and all(
+                key in imported.mapping
+                for key in ("sku", "name", "sale_price", "stock")
+            ),
+        })
+    except (ValueError, json.JSONDecodeError) as exc:
+        return jsonify({"ok": False, "error": _catalog_error_message(str(exc))}), 400
+
+
+@main.post("/api/products/import/commit")
+@require_permission("manage_inventory")
+def import_products_commit():
+    user = current_user()
+    if not user:
+        return jsonify({"ok": False, "error": gettext("Inicia sesión para continuar.")}), 401
+    access_block = _trial_access_response(user, json_response=True)
+    if access_block:
+        return access_block
+    try:
+        filename, content = _catalog_upload()
+        mapping = json.loads(request.form.get("mapping") or "{}")
+        expected_digest = request.form.get("digest") or ""
+        organization_id = current_organization_id(user)
+        imported = inspect_catalog(
+            filename,
+            content,
+            mapping,
+            Product.query.filter_by(organization_id=organization_id).all(),
+        )
+        if not secrets.compare_digest(imported.digest, expected_digest):
+            raise ValueError("file_changed")
+        if imported.errors or not all(
+            field in imported.mapping
+            for field in ("sku", "name", "sale_price", "stock")
+        ):
+            return jsonify({
+                "ok": False,
+                "error": gettext("Corrige las filas inválidas antes de importar."),
+                "errors": [
+                    {
+                        **error,
+                        "message": _catalog_row_error_message(error["code"]),
+                    }
+                    for error in imported.errors[:500]
+                ],
+            }), 409
+        summary = apply_catalog(
+            imported,
+            organization_id,
+            current_organization_owner(user).id,
+            active_membership(user),
+        )
+        db.session.commit()
+        return jsonify({
+            "ok": True,
+            "summary": summary,
+            "message": gettext(
+                "Catálogo listo: %(created)s productos creados y %(updated)s actualizados.",
+                **summary,
+            ),
+        })
+    except (ValueError, json.JSONDecodeError) as exc:
+        db.session.rollback()
+        message = (
+            gettext("El archivo cambió después de la vista previa. Vuelve a validarlo.")
+            if str(exc) == "file_changed"
+            else _catalog_error_message(str(exc))
+        )
+        return jsonify({"ok": False, "error": message}), 400
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({
+            "ok": False,
+            "error": gettext("Otro proceso registró un SKU o código de barras durante la importación. Vuelve a validar el archivo."),
+        }), 409
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "Error al confirmar importación para organization_id=%s",
+            current_organization_id(user),
+        )
+        return jsonify({
+            "ok": False,
+            "error": gettext("No pudimos completar la importación. Ningún cambio parcial fue guardado."),
+        }), 500
 
 
 @main.route("/products/new", methods=["POST"])
@@ -2964,6 +3195,20 @@ def sell_cart():
             ),
             "cash_register_url": url_for("cash.index"),
         }), 409
+    amount_received = None
+    if payment_method == "cash" and data.get("amount_received") not in (None, ""):
+        try:
+            amount_received = money_decimal(data.get("amount_received"))
+        except (TypeError, ValueError):
+            return jsonify({
+                "ok": False,
+                "error": gettext("Ingresa un monto recibido válido."),
+            }), 400
+        if amount_received < 0:
+            return jsonify({
+                "ok": False,
+                "error": gettext("El monto recibido no puede ser negativo."),
+            }), 400
     try:
         customer = _selected_customer(
             organization_id,
@@ -3031,6 +3276,22 @@ def sell_cart():
         if len(products) != len(requested_items):
             return jsonify({"ok": False, "error": gettext("Producto no encontrado")}), 404
 
+        expected_total = money_sum(
+            products[product_id].sale_price * quantity
+            for product_id, quantity in requested_items.items()
+        )
+        if payment_method == "cash":
+            amount_received = (
+                expected_total if amount_received is None else amount_received
+            )
+            if amount_received < expected_total:
+                return jsonify({
+                    "ok": False,
+                    "error": gettext(
+                        "El monto recibido debe cubrir el total de la venta."
+                    ),
+                }), 400
+
         # Repetir la verificación tras bloquear inventario evita que dos workers
         # procesen simultáneamente el mismo request_id.
         if request_id:
@@ -3069,6 +3330,9 @@ def sell_cart():
             cash_session.id if cash_session else None
         )
         ticket.customer_id = customer.id if customer else None
+        if payment_method == "cash":
+            ticket.amount_received = amount_received
+            ticket.change_amount = amount_received - expected_total
         ticket_id = ticket.public_id
         sales = []
         for product_id, quantity in requested_items.items():
@@ -5117,6 +5381,37 @@ def ticket(ticket_ref):
             sales[0].sales_ticket.payment_method
             if sales[0].sales_ticket
             else sales[0].payment_method
+        ),
+        ticket_customer=(
+            sales[0].sales_ticket.customer
+            if sales[0].sales_ticket
+            else None
+        ),
+        ticket_cashier_name=(
+            " ".join(
+                value
+                for value in (
+                    sales[0].sales_ticket.cashier_member.user.first_name,
+                    sales[0].sales_ticket.cashier_member.user.last_name,
+                )
+                if value
+            )
+            if (
+                sales[0].sales_ticket
+                and sales[0].sales_ticket.cashier_member
+                and sales[0].sales_ticket.cashier_member.user
+            )
+            else None
+        ),
+        amount_received=(
+            sales[0].sales_ticket.amount_received
+            if sales[0].sales_ticket
+            else None
+        ),
+        change_amount=(
+            sales[0].sales_ticket.change_amount
+            if sales[0].sales_ticket
+            else None
         ),
         business_address=", ".join(address_parts),
         business_phone=_ticket_business_value(owner.phone),

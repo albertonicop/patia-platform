@@ -99,17 +99,17 @@
       <header class="inventory-v2__panel-head">
         <span class="inventory-v2__eyebrow">{{ _("Carga masiva") }}</span>
         <h3>{{ _("Importar desde Excel o CSV") }}</h3>
-        <p>{{ _("La forma más rápida de iniciar con cientos o miles de productos. Para catálogos grandes recomendamos CSV; también aceptamos Excel, hasta 10 MB.") }}</p>
+        <p>{{ _("Valida y revisa hasta 5,000 productos antes de guardar un solo cambio.") }}</p>
       </header>
 
       <div class="inventory-v2__import-guide">
         <h4>{{ _("Antes de importar") }}</h4>
         <ul>
-          <li>{{ _("Columnas obligatorias: SKU, Nombre del producto, Costo, Precio de venta y Stock inicial.") }}</li>
-          <li>{{ _("Si coincide el") }} <b>{{ _("SKU") }}</b>{{ _(", PATIA suma el stock importado y actualiza precios, stock mínimo y código.") }}</li>
-          <li>{{ _("Si no coincide el SKU, busca el") }} <b>{{ _("código de barras") }}</b>{{ _(". Si coincide, reemplaza stock, precios y stock mínimo.") }}</li>
-          <li>{{ _("Las filas vacías se omiten y las filas inválidas se cuentan como errores sin detener las demás.") }}</li>
-          <li>{{ _("PATIA procesa cada fila de forma independiente: una fila inválida no detiene las demás y el resumen indica qué corregir.") }}</li>
+          <li>{{ _("PATIA detecta tus encabezados y te permite corregir el mapeo.") }}</li>
+          <li>{{ _("Antes de importar verás productos nuevos, actualizaciones, duplicados y errores.") }}</li>
+          <li>{{ _("SKU o código de barras identifican productos existentes dentro de tu empresa.") }}</li>
+          <li>{{ _("Al actualizar, la existencia del archivo reemplaza la actual; repetir el archivo no duplica stock.") }}</li>
+          <li>{{ _("Si existe una fila inválida, PATIA no guarda cambios hasta que la corrijas.") }}</li>
         </ul>
         <p class="inventory-v2__import-example">
           <strong>{{ _("Ejemplo de ferretería:") }}</strong>
@@ -121,13 +121,26 @@
         <i class="fa-solid fa-download" aria-hidden="true"></i> {{ _("Descargar plantilla PATIA") }}
       </a>
 
-      <form id="catalog-import-form" class="inventory-v2__import-form" method="POST" action="/import-products" enctype="multipart/form-data">
+      <form id="catalog-import-form" class="inventory-v2__import-form" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="catalog-file">{{ _("Selecciona tu archivo") }} <span>*</span></label>
         <input id="catalog-file" type="file" name="catalog_file" accept=".csv,.xlsx" required>
-        <button id="catalog-import-submit" class="btn" type="submit">{{ _("Importar archivo") }}</button>
-        <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden>{{ _("Validando e importando el catálogo… Los archivos grandes pueden tardar unos minutos. No cierres esta ventana.") }}</p>
+        <button id="catalog-import-submit" class="btn" type="submit">{{ _("Revisar archivo") }}</button>
+        <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden></p>
       </form>
+
+      <dialog id="catalog-import-dialog" class="inventory-import-v3" aria-labelledby="catalog-import-title">
+        <div class="inventory-import-v3__head">
+          <div><span>{{ _("Vista previa") }}</span><h3 id="catalog-import-title">{{ _("Revisa tu catálogo antes de importarlo") }}</h3><p id="catalog-import-file"></p></div>
+          <button type="button" data-import-close aria-label="{{ _('Cerrar') }}"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="catalog-import-mapping" class="inventory-import-v3__mapping"></div>
+        <div id="catalog-import-summary" class="inventory-import-v3__summary" aria-live="polite"></div>
+        <div class="table-wrap inventory-import-v3__preview"><table><thead><tr><th>{{ _("Fila") }}</th><th>{{ _("Producto") }}</th><th>{{ _("SKU") }}</th><th>{{ _("Precio") }}</th><th>{{ _("Stock") }}</th><th>{{ _("Acción") }}</th></tr></thead><tbody id="catalog-import-preview"></tbody></table></div>
+        <section id="catalog-import-errors" class="inventory-import-v3__errors" hidden><h4>{{ _("Filas que debes corregir") }}</h4><ul></ul><button id="catalog-errors-download" class="btn ghost" type="button">{{ _("Descargar errores CSV") }}</button></section>
+        <p id="catalog-import-dialog-status" role="status" aria-live="polite"></p>
+        <div class="inventory-import-v3__actions"><button class="btn ghost" type="button" data-import-close>{{ _("Cancelar") }}</button><button id="catalog-import-confirm" class="btn" type="button" disabled>{{ _("Confirmar importación") }}</button></div>
+      </dialog>
     </section>
   </div>
 
@@ -180,6 +193,20 @@
           </a>
         {% endif %}
       </div>
+      {% if filter_source == "decisions" and active_filter_label %}
+        <div class="inventory-final-v1__decision-context" role="status">
+          <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+          <div>
+            <strong>{{ _("Abierto desde Centro de decisiones") }}</strong>
+            <span>{{ active_filter_label }} · {{ _("%(count)s productos mostrados", count=result_count) }}
+              {% if no_sales_only and request.args.get("start") and request.args.get("end") %}
+                · {{ request.args.get("start") }} — {{ request.args.get("end") }}
+              {% endif %}
+            </span>
+          </div>
+          <a href="{{ url_for('main.products') }}#catalogo">{{ _("Limpiar filtro") }}</a>
+        </div>
+      {% endif %}
 
       {% if low_stock_count == 0 and not low_stock_only %}
         <div class="inventory-v2__stock-ok module-empty-v2" role="status">
@@ -280,7 +307,23 @@
 
 <script>
 const INVENTORY_I18N = {
-  importing: {{ _("Importando catálogo…")|tojson }}{% if catalog_count > 0 %},
+  validating: {{ _("Validando catálogo…")|tojson }},
+  importing: {{ _("Importando catálogo…")|tojson }},
+  validateAgain: {{ _("Volver a validar")|tojson }},
+  create: {{ _("Nuevo")|tojson }},
+  update: {{ _("Actualizar")|tojson }},
+  mapped: {{ _("Columna del archivo")|tojson }},
+  unmapped: {{ _("No usar")|tojson }},
+  completeMapping: {{ _("Asigna SKU, nombre, precio de venta y stock para continuar.")|tojson }},
+  importReady: {{ _("Todo está listo para importar.")|tojson }},
+  importDone: {{ _("Catálogo importado correctamente.")|tojson }},
+  fields: {
+    sku: {{ _("SKU")|tojson }}, barcode: {{ _("Código de barras")|tojson }},
+    name: {{ _("Nombre")|tojson }}, category: {{ _("Categoría")|tojson }},
+    supplier: {{ _("Proveedor")|tojson }}, cost_price: {{ _("Costo")|tojson }},
+    sale_price: {{ _("Precio de venta")|tojson }}, stock: {{ _("Stock")|tojson }},
+    min_stock: {{ _("Stock mínimo")|tojson }}
+  }{% if catalog_count > 0 %},
   cancelSelection: {{ _("Cancelar selección")|tojson }},
   selectProducts: {{ _("Seleccionar productos")|tojson }},
   deleteSelected: {{ _("¿Eliminar %(count)s productos seleccionados?", count="__COUNT__")|tojson }}{% endif %}
@@ -289,17 +332,127 @@ const importForm = document.getElementById("catalog-import-form");
 const importButton = document.getElementById("catalog-import-submit");
 const importStatus = document.getElementById("catalog-import-status");
 let importSubmitting = false;
+const importDialog = document.getElementById("catalog-import-dialog");
+const importMapping = document.getElementById("catalog-import-mapping");
+const importSummary = document.getElementById("catalog-import-summary");
+const importPreview = document.getElementById("catalog-import-preview");
+const importErrors = document.getElementById("catalog-import-errors");
+const importDialogStatus = document.getElementById("catalog-import-dialog-status");
+const importConfirm = document.getElementById("catalog-import-confirm");
+let importInspection = null;
 
-importForm.addEventListener("submit", function(event) {
-  if (importSubmitting) {
-    event.preventDefault();
-    return;
+function currentImportMapping() {
+  return Object.fromEntries([...importMapping.querySelectorAll("select")]
+    .filter(select => select.value)
+    .map(select => [select.dataset.field, select.value]));
+}
+
+function renderImportInspection(data) {
+  importInspection = data;
+  document.getElementById("catalog-import-file").textContent = data.filename;
+  importMapping.replaceChildren();
+  Object.entries(INVENTORY_I18N.fields).forEach(([field, label]) => {
+    const wrapper = document.createElement("label");
+    wrapper.textContent = label + (data.required_fields.includes(field) ? " *" : "");
+    const select = document.createElement("select");
+    select.dataset.field = field;
+    const empty = document.createElement("option");
+    empty.value = ""; empty.textContent = INVENTORY_I18N.unmapped;
+    select.appendChild(empty);
+    data.headers.forEach(header => {
+      const option = document.createElement("option");
+      option.value = header; option.textContent = header;
+      option.selected = data.mapping[field] === header;
+      select.appendChild(option);
+    });
+    select.addEventListener("change", () => inspectImport(currentImportMapping()));
+    wrapper.appendChild(select);
+    importMapping.appendChild(wrapper);
+  });
+  const cards = [
+    [data.summary.total, {{ _("Filas leídas")|tojson }}],
+    [data.summary.valid, {{ _("Válidas")|tojson }}],
+    [data.summary.new, {{ _("Nuevas")|tojson }}],
+    [data.summary.updated, {{ _("A actualizar")|tojson }}],
+    [data.summary.invalid, {{ _("Con errores")|tojson }}]
+  ];
+  importSummary.replaceChildren(...cards.map(([value, label]) => {
+    const article = document.createElement("article");
+    const strong = document.createElement("strong"); strong.textContent = value;
+    const span = document.createElement("span"); span.textContent = label;
+    article.append(strong, span); return article;
+  }));
+  importPreview.replaceChildren(...data.rows.map(row => {
+    const tr = document.createElement("tr");
+    [row.row, row.name, row.sku, `$${row.sale_price}`, row.stock, row.action === "create" ? INVENTORY_I18N.create : INVENTORY_I18N.update].forEach(value => {
+      const td = document.createElement("td"); td.textContent = value; tr.appendChild(td);
+    });
+    return tr;
+  }));
+  const errorList = importErrors.querySelector("ul");
+  errorList.replaceChildren(...data.errors.map(error => {
+    const li = document.createElement("li");
+    li.textContent = `${error.row}: ${error.sku || "—"} ${error.name || ""} · ${error.message}`;
+    return li;
+  }));
+  importErrors.hidden = !data.errors.length;
+  importConfirm.disabled = !data.ready;
+  importDialogStatus.textContent = data.ready ? INVENTORY_I18N.importReady : INVENTORY_I18N.completeMapping;
+}
+
+async function inspectImport(mapping = null) {
+  if (importSubmitting) return;
+  const file = document.getElementById("catalog-file").files[0];
+  if (!file) return;
+  importSubmitting = true; importButton.disabled = true;
+  importButton.textContent = INVENTORY_I18N.validating;
+  importStatus.hidden = false; importStatus.textContent = INVENTORY_I18N.validating;
+  const body = new FormData();
+  body.append("catalog_file", file);
+  if (mapping) body.append("mapping", JSON.stringify(mapping));
+  try {
+    const response = await fetch("/api/products/import/preview", {method: "POST", headers: {"X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content}, body});
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error);
+    renderImportInspection(data);
+    if (!importDialog.open) importDialog.showModal();
+    importStatus.hidden = true;
+  } catch (error) {
+    importStatus.textContent = error.message;
+  } finally {
+    importSubmitting = false; importButton.disabled = false;
+    importButton.textContent = INVENTORY_I18N.validateAgain;
   }
-  importSubmitting = true;
-  importButton.disabled = true;
-  importButton.textContent = INVENTORY_I18N.importing;
-  importStatus.hidden = false;
-  importForm.setAttribute("aria-busy", "true");
+}
+
+importForm.addEventListener("submit", event => { event.preventDefault(); inspectImport(); });
+document.querySelectorAll("[data-import-close]").forEach(button => button.addEventListener("click", () => importDialog.close()));
+importDialog.addEventListener("click", event => { if (event.target === importDialog) importDialog.close(); });
+importConfirm.addEventListener("click", async () => {
+  if (!importInspection || importSubmitting) return;
+  importSubmitting = true; importConfirm.disabled = true; importConfirm.textContent = INVENTORY_I18N.importing;
+  const body = new FormData();
+  body.append("catalog_file", document.getElementById("catalog-file").files[0]);
+  body.append("mapping", JSON.stringify(currentImportMapping()));
+  body.append("digest", importInspection.digest);
+  try {
+    const response = await fetch("/api/products/import/commit", {method: "POST", headers: {"X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content}, body});
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error);
+    importDialogStatus.textContent = data.message;
+    window.location.assign("{{ url_for('main.products') }}#catalogo");
+  } catch (error) {
+    importDialogStatus.textContent = error.message;
+    importConfirm.disabled = false; importConfirm.textContent = {{ _("Confirmar importación")|tojson }};
+  } finally { importSubmitting = false; }
+});
+document.getElementById("catalog-errors-download").addEventListener("click", () => {
+  if (!importInspection) return;
+  const rows = [["row","sku","name","error"], ...importInspection.errors.map(item => [item.row, item.sku, item.name, item.message])];
+  const csv = rows.map(row => row.map(value => `"${String(value || "").replaceAll('"','""')}"`).join(",")).join("\n");
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], {type: "text/csv;charset=utf-8"}));
+  link.download = "errores_importacion_patia.csv"; link.click(); URL.revokeObjectURL(link.href);
 });
 
 {% if catalog_count > 0 %}

@@ -7,8 +7,19 @@
 <section class="dashboard-v2__intro">
   <div class="dashboard-v2__intro-copy">
     <span class="dashboard-v2__kicker">{{ _("Resumen de hoy") }}</span>
-    <h2>{{ _("Esto es lo que necesita tu atención.") }}</h2>
-    <p>{{ _("Ventas, efectivo, productos por surtir y pagos pendientes en una sola vista.") }}</p>
+    {% if not cash_session %}
+      <h2>{{ _("Abre la caja para comenzar a vender hoy.") }}</h2>
+      <p>{{ _("Tu inventario y saldos están listos; el siguiente paso operativo es preparar la caja del día.") }}</p>
+    {% elif low_stock %}
+      <h2>{% trans count=low_stock %}Hay {{ count }} producto que conviene surtir.{% pluralize %}Hay {{ count }} productos que conviene surtir.{% endtrans %}</h2>
+      <p>{{ _("Revísalos antes del próximo pedido para reducir el riesgo de perder ventas.") }}</p>
+    {% elif total_credit_pending > 0 %}
+      <h2>{{ _("La operación está al día; hay saldos por cobrar.") }}</h2>
+      <p>{{ _("Revisa quién tiene pagos pendientes y registra los abonos recibidos.") }}</p>
+    {% else %}
+      <h2>{{ _("Tu operación está en orden para continuar.") }}</h2>
+      <p>{{ _("La caja está abierta y no detectamos faltantes ni cobros pendientes que requieran atención inmediata.") }}</p>
+    {% endif %}
 
     <a class="btn dashboard-v2__sell-primary" href="{{ url_for('main.sell') }}">
       <i class="fa-solid fa-cash-register" aria-hidden="true"></i>

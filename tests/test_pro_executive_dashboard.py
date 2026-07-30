@@ -137,13 +137,14 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         db.session.commit()
         return sale
 
-    def test_starter_legacy_pro_url_redirects_to_reports(self):
+    def test_starter_pro_url_shows_commercial_preview(self):
         starter, membership = self._owner("starter@pro-dashboard.test")
         client = self._client(starter, membership)
 
         response = client.get("/pro")
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.location, "/reports")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Dashboard Ejecutivo", response.get_data(as_text=True))
+        self.assertNotIn("executiveAnalytics", response.get_data(as_text=True))
 
         dashboard = client.get("/")
         html = dashboard.get_data(as_text=True)
@@ -155,29 +156,35 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         self.assertIn('href="/team"', html)
         self.assertNotIn("executiveAnalytics", html)
 
-    def test_pro_owner_and_pro_trial_use_reports_as_analysis_destination(self):
+    def test_pro_owner_and_pro_trial_open_executive_dashboard(self):
         response = self._client(self.owner, self.membership).get("/pro")
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.location, "/reports")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "pro-dashboard-v1",
+            response.get_data(as_text=True),
+        )
 
         trial, membership = self._owner(
             "pro-trial@pro-dashboard.test",
             trial_plan="PRO",
         )
         trial_response = self._client(trial, membership).get("/pro")
-        self.assertEqual(trial_response.status_code, 302)
-        self.assertEqual(trial_response.location, "/reports")
+        self.assertEqual(trial_response.status_code, 200)
+        self.assertIn(
+            "pro-dashboard-v1",
+            trial_response.get_data(as_text=True),
+        )
 
-    def test_legacy_pro_url_preserves_compatible_period_parameters(self):
+    def test_pro_url_uses_compatible_period_parameters(self):
         response = self._client(self.owner, self.membership).get(
             "/pro?period=custom&start=2026-07-01&end=2026-07-20"
         )
 
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.location.startswith("/reports?"))
-        self.assertIn("period=custom", response.location)
-        self.assertIn("start=2026-07-01", response.location)
-        self.assertIn("end=2026-07-20", response.location)
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn('name="period" value="custom"', html)
+        self.assertIn('value="2026-07-01"', html)
+        self.assertIn('value="2026-07-20"', html)
 
     def test_analysis_navigation_is_consistent_on_customers_and_credit(self):
         def assert_analysis_navigation(client, path, active_href):
@@ -187,7 +194,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             self.assertIn("Análisis", html)
             self.assertIn(">Reportes</span>", html)
             self.assertIn(">Centro de decisiones</span>", html)
-            self.assertNotIn(">Panel ejecutivo</span>", html)
+            self.assertIn(">Dashboard Ejecutivo</span>", html)
             self.assertNotIn(">Reporte mensual</span>", html)
             self.assertIn(">Compras inteligentes</span>", html)
             sidebar = html[html.index("<aside"):html.index("</aside>")]
@@ -227,8 +234,11 @@ class ProExecutiveDashboardTests(unittest.TestCase):
 
         manager_client = self._client(manager, manager_membership)
         manager_response = manager_client.get("/pro")
-        self.assertEqual(manager_response.status_code, 302)
-        self.assertEqual(manager_response.location, "/reports")
+        self.assertEqual(manager_response.status_code, 200)
+        self.assertIn(
+            "pro-dashboard-v1",
+            manager_response.get_data(as_text=True),
+        )
         self.assertEqual(
             manager_client.post(
                 "/pro/monthly-goal",
@@ -248,7 +258,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             },
         )
         self.assertEqual(goal.status_code, 302)
-        self.assertIn("/reports?period=30d", goal.location)
+        self.assertIn("/pro?period=30d", goal.location)
         self.assertTrue(goal.location.endswith("#monthly-goal"))
         db.session.refresh(self.membership.organization)
         self.assertEqual(
@@ -350,7 +360,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         ).get_data(as_text=True)
         self.assertNotIn("Abrir Panel ejecutivo", hub)
         self.assertNotIn("Revisar resultados", hub)
-        self.assertNotIn('href="/pro"', hub)
+        self.assertIn('href="/pro"', hub)
         self.assertIn('href="/reports"', hub)
 
     def test_organization_isolation_excludes_other_business_sales(self):
@@ -638,6 +648,29 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         self.assertEqual(
             activity["differences"]["amount"], Decimal("5.00")
         )
+        self.assertIn("type=SALE_CANCELLATION", activity["cancellations"]["url"])
+        self.assertIn("group=corrections", activity["corrections"]["url"])
+        self.assertIn("movements=withdrawals", activity["withdrawals"]["url"])
+        self.assertIn("differences=1", activity["differences"]["url"])
+        for item in activity.values():
+            self.assertIn("source=decisions", item["url"])
+            self.assertIn("2026-", item["url"])
+        client = self._client(self.owner, self.membership)
+        corrections = client.get(activity["corrections"]["url"])
+        withdrawals = client.get(activity["withdrawals"]["url"])
+        differences = client.get(activity["differences"]["url"])
+        self.assertEqual(corrections.status_code, 200)
+        self.assertIn(
+            "1 movimientos mostrados", corrections.get_data(as_text=True)
+        )
+        self.assertEqual(withdrawals.status_code, 200)
+        self.assertIn(
+            "1 cierres con retiros", withdrawals.get_data(as_text=True)
+        )
+        self.assertEqual(differences.status_code, 200)
+        self.assertIn(
+            "1 cierres mostrados", differences.get_data(as_text=True)
+        )
 
     def test_sprint_1b_empty_states_render_without_team_or_sales(self):
         Product.query.delete()
@@ -772,6 +805,99 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             30,
             f"Executive dashboard issued {len(statements)} SELECTs",
         )
+
+    def test_decision_links_open_exact_inventory_and_cash_results(self):
+        now = datetime.utcnow()
+        moving = Product(
+            organization_id=self.membership.organization_id,
+            user_id=self.owner.id,
+            sku="MOVING",
+            name="Producto con venta",
+            category="General",
+            cost_price=Decimal("10.00"),
+            sale_price=Decimal("20.00"),
+            stock=20,
+            min_stock=1,
+        )
+        still = Product(
+            organization_id=self.membership.organization_id,
+            user_id=self.owner.id,
+            sku="STILL",
+            name="Producto sin movimiento",
+            category="General",
+            cost_price=Decimal("10.00"),
+            sale_price=Decimal("20.00"),
+            stock=20,
+            min_stock=1,
+        )
+        db.session.add_all((moving, still))
+        db.session.flush()
+        db.session.add(
+            Sale(
+                organization_id=self.membership.organization_id,
+                user_id=self.owner.id,
+                product_id=moving.id,
+                quantity=1,
+                unit_price=Decimal("20.00"),
+                unit_cost=Decimal("10.00"),
+                total=Decimal("20.00"),
+                created_at=now,
+                ticket_id="decision-moving",
+            )
+        )
+        recent = CashRegisterSession(
+            organization_id=self.membership.organization_id,
+            register_key="MAIN",
+            status="CLOSED",
+            opening_cash=Decimal("0"),
+            expected_cash_at_close=Decimal("100"),
+            counted_cash=Decimal("90"),
+            difference=Decimal("-10"),
+            closing_notes="Diferencia reciente exacta",
+            opened_at=now - timedelta(hours=2),
+            closed_at=now - timedelta(hours=1),
+        )
+        old = CashRegisterSession(
+            organization_id=self.membership.organization_id,
+            register_key="OLD",
+            status="CLOSED",
+            opening_cash=Decimal("0"),
+            expected_cash_at_close=Decimal("100"),
+            counted_cash=Decimal("80"),
+            difference=Decimal("-20"),
+            closing_notes="Diferencia fuera del periodo",
+            opened_at=now - timedelta(days=61),
+            closed_at=now - timedelta(days=60),
+        )
+        db.session.add_all((recent, old))
+        db.session.commit()
+
+        data = build_executive_dashboard(
+            self.membership.organization,
+            {"period": "7d"},
+        )
+        movement = next(
+            item
+            for item in data["executive_attention"]
+            if item["key"] == "movement"
+        )
+        inventory_html = self._client(
+            self.owner, self.membership
+        ).get(movement["url"]).get_data(as_text=True)
+        self.assertIn("Abierto desde Centro de decisiones", inventory_html)
+        self.assertIn("Producto sin movimiento", inventory_html)
+        self.assertNotIn(">Producto con venta<", inventory_html)
+
+        cash = next(
+            item
+            for item in data["executive_attention"]
+            if item["key"] == "cash"
+        )
+        cash_html = self._client(
+            self.owner, self.membership
+        ).get(cash["url"]).get_data(as_text=True)
+        self.assertIn(f"/cash-register/{recent.id}", cash_html)
+        self.assertNotIn(f"/cash-register/{old.id}", cash_html)
 
 
 if __name__ == "__main__":

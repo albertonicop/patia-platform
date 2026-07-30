@@ -570,6 +570,14 @@ class SalesTicket(db.Model):
     number = db.Column(db.Integer, nullable=False)
     public_id = db.Column(db.String(36), nullable=False)
     payment_method = db.Column(db.String(20), nullable=True)
+    amount_received = db.Column(db.Numeric(14, 2), nullable=True)
+    change_amount = db.Column(db.Numeric(14, 2), nullable=True)
+    cashier_member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization_member.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     customer_id = db.Column(
         db.Integer,
         db.ForeignKey("customer.id", ondelete="SET NULL"),
@@ -598,6 +606,10 @@ class SalesTicket(db.Model):
         back_populates="sales_tickets",
     )
     customer = db.relationship("Customer", back_populates="sales_tickets")
+    cashier_member = db.relationship(
+        "OrganizationMember",
+        foreign_keys=[cashier_member_id],
+    )
 
     @property
     def folio(self):
@@ -1239,6 +1251,19 @@ class MonthlyOwnerReport(db.Model):
 
 def _prevent_monthly_snapshot_mutation(mapper, connection, target):
     state = inspect(target)
+    snapshot_history = state.attrs.snapshot_json.history
+    if (
+        snapshot_history.has_changes()
+        and snapshot_history.added
+        and snapshot_history.added[0] is not None
+        and (
+            not snapshot_history.deleted
+            or snapshot_history.deleted[0] is None
+        )
+    ):
+        # A report row is claimed before its snapshot is generated. Allow
+        # that one-time initialization, but never replacement afterwards.
+        return
     for attribute_name in (
         "snapshot_json",
         "snapshot_hash",
@@ -1485,3 +1510,59 @@ class PurchaseReceiptItem(db.Model):
         "PurchaseOrderItem", back_populates="receipt_items"
     )
     restock_event = db.relationship("InventoryRestockEvent")
+
+
+class AiNarrativeRun(db.Model):
+    """Tenant-scoped audit, cache and cost record for controlled AI copy."""
+
+    __tablename__ = "ai_narrative_run"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id",
+            "feature_name",
+            "language",
+            "data_hash",
+            name="uq_ai_narrative_cache",
+        ),
+        db.CheckConstraint(
+            "status IN ('SUCCESS', 'FAILED', 'FALLBACK', 'LIMITED')",
+            name="ck_ai_narrative_status",
+        ),
+        db.Index(
+            "ix_ai_narrative_org_feature_created",
+            "organization_id",
+            "feature_name",
+            "created_at",
+        ),
+        db.Index(
+            "ix_ai_narrative_created_status",
+            "created_at",
+            "status",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    feature_name = db.Column(db.String(40), nullable=False)
+    language = db.Column(db.String(5), nullable=False, default="es")
+    data_hash = db.Column(db.String(64), nullable=False)
+    data_period = db.Column(db.String(80), nullable=False)
+    model = db.Column(db.String(80), nullable=True)
+    status = db.Column(db.String(16), nullable=False)
+    output_json = db.Column(db.Text, nullable=False)
+    input_tokens = db.Column(db.Integer, nullable=False, default=0)
+    output_tokens = db.Column(db.Integer, nullable=False, default=0)
+    estimated_cost_microusd = db.Column(
+        db.BigInteger, nullable=False, default=0
+    )
+    latency_ms = db.Column(db.Integer, nullable=False, default=0)
+    error_code = db.Column(db.String(80), nullable=True)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow
+    )
+    expires_at = db.Column(db.DateTime, nullable=False)

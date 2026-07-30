@@ -12477,16 +12477,6 @@ table {
   background: linear-gradient(135deg, rgba(103, 85, 220, .1), rgba(37, 160, 132, .07));
 }
 
-.app-shell-v2 .sidebar-v2__pulse-link::after {
-  width: 7px;
-  height: 7px;
-  margin-left: auto;
-  border-radius: 50%;
-  background: #23a77f;
-  box-shadow: 0 0 0 4px rgba(35, 167, 127, .11);
-  content: "";
-}
-
 .app-shell-v2 .sidebar-v2__pulse-link.is-active {
   border-color: rgba(103, 85, 220, .42);
   background: linear-gradient(135deg, #6552db, #5140c5);
@@ -12946,6 +12936,141 @@ table {
 .landing-polish-v1 .landing-showcase-v1__card {
   border-color: #e1e4ed;
   box-shadow: 0 14px 36px rgba(32, 38, 68, .055);
+}
+
+/* Final presentation pass: stronger PATIA identity without adding noise. */
+.landing-polish-v1 .landing-v2__header {
+  min-height: 86px;
+  border-bottom-color: rgba(30, 35, 57, .1);
+}
+
+.landing-polish-v1 .landing-v2__hero {
+  min-height: auto;
+  grid-template-columns: minmax(420px, .88fr) minmax(540px, 1.12fr);
+  padding-top: clamp(54px, 6vw, 84px);
+  padding-bottom: clamp(60px, 7vw, 96px);
+}
+
+.landing-polish-v1 .landing-v2__hero h1 {
+  font-size: clamp(3.35rem, 5.55vw, 6.2rem);
+  line-height: .94;
+}
+
+.landing-polish-v1 .landing-v2__actions {
+  align-items: center;
+  margin-top: 26px;
+}
+
+.landing-polish-v1 .landing-v2__button--primary {
+  min-height: 54px;
+  padding-inline: 24px;
+  box-shadow: 0 14px 30px rgba(89, 68, 225, .18);
+}
+
+.landing-polish-v1 .landing-v2__button--secondary {
+  min-height: 50px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.landing-polish-v1 .landing-final-v1__trust-line {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 24px;
+  border-top: 1px solid #dde0e9;
+  border-bottom: 1px solid #dde0e9;
+}
+
+.landing-polish-v1 .landing-final-v1__trust-line > span {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.landing-polish-v1 .landing-final-v1__trust-line > span + span {
+  border-left: 1px solid #dde0e9;
+}
+
+.landing-final-v1__preview-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  color: #697087;
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+.landing-final-v1__preview-caption i { color: #6652df; }
+
+.app-polish-v1 .sidebar-v2__brand-copy {
+  max-width: 130px;
+  letter-spacing: .09em;
+  line-height: 1.3;
+}
+
+.app-shell-v2 .pro-dashboard-final-v1__health dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 4px 0 18px;
+}
+
+.app-shell-v2 .pro-dashboard-final-v1__health dl div {
+  padding: 14px;
+  border-radius: 12px;
+  background: #f7f7fb;
+}
+
+.app-shell-v2 .pro-dashboard-final-v1__health dt {
+  color: var(--v2-muted);
+  font-size: 11px;
+}
+
+.app-shell-v2 .pro-dashboard-final-v1__health dd {
+  margin: 6px 0 0;
+  color: var(--v2-ink);
+  font-weight: 800;
+}
+
+.app-shell-v2 .pro-dashboard-final-v1__health > p {
+  color: var(--v2-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 1024px) {
+  .landing-polish-v1 .landing-v2__hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .landing-polish-v1 .landing-v2__hero h1 {
+    font-size: clamp(2.8rem, 14vw, 4.2rem);
+  }
+
+  .landing-polish-v1 .landing-final-v1__trust-line {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .landing-polish-v1 .landing-final-v1__trust-line > span + span {
+    border-top: 1px solid #dde0e9;
+    border-left: 0;
+  }
+
+  .landing-polish-v1 .landing-v2__actions {
+    align-items: stretch;
+  }
+
+  .app-shell-v2 .pro-dashboard-final-v1__health dl {
+    grid-template-columns: 1fr;
+  }
 }
 
 .app-polish-v1 .sidebar-v2__brand {
@@ -14989,4 +15114,131 @@ table {
 
 @media (prefers-reduced-motion: reduce) {
   .landing-showcase-v1__image img { transition: none; }
+}
+
+/* Thermal receipt V3: compact, legible and authoritative print rules. */
+.ticket-print-v3 {
+  box-sizing: border-box;
+  padding: 5mm 4mm;
+  border: 0;
+  border-radius: 2mm;
+  background: #fff;
+  color: #111827;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 16px 42px rgba(26, 31, 50, .12);
+}
+.ticket-print-v3 .ticket-print-v2__business { padding-bottom: 3mm; border-bottom: 1px solid #cfd4dc; }
+.ticket-print-v3 .ticket-print-v2__business h1 { margin: 0; font-size: 16px; line-height: 1.15; letter-spacing: -.02em; }
+.ticket-print-v3 .ticket-print-v2__business p { margin-top: .8mm; color: #4b5563; font-size: 8.5px; line-height: 1.28; }
+.ticket-print-v3 .ticket-print-v2__meta { gap: 1mm; margin: 0; padding: 3mm 0; border-bottom: 1px solid #cfd4dc; font-size: 8.5px; }
+.ticket-print-v3 .ticket-print-v2__meta p { min-height: 0; }
+.ticket-print-v3 .ticket-print-v2__items { margin: 2mm 0 0; table-layout: fixed; border-collapse: collapse; font-size: 8.5px; line-height: 1.28; }
+.ticket-print-v3 .ticket-print-v2__items th { padding: 1.8mm .7mm; border-bottom: 1px solid #9ca3af; color: #4b5563; font-size: 7.3px; font-weight: 800; letter-spacing: .035em; text-transform: uppercase; white-space: nowrap; }
+.ticket-print-v3 .ticket-print-v2__items td { padding: 2mm .7mm; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+.ticket-print-v3 .ticket-print-v2__items td:nth-child(2) { overflow-wrap: anywhere; hyphens: auto; }
+.ticket-print-v3 .ticket-print-v2__items th:nth-child(n+3),
+.ticket-print-v3 .ticket-print-v2__items td:nth-child(n+3) { text-align: right; }
+.ticket-print-v3 .ticket-print-v2__totals { gap: 1.3mm; padding: 3mm 0; border-bottom: 1px solid #9ca3af; font-size: 9px; }
+.ticket-print-v3 .ticket-print-v2__total { margin-top: 1mm; padding-top: 2.2mm; border-top: 2px solid #111827; font-size: 15px; line-height: 1; }
+.ticket-print-v3 .ticket-print-v2__total dd { font-size: 16px; letter-spacing: -.025em; }
+.ticket-print-v3 .ticket-print-v2__payment,
+.ticket-print-v3__credit { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1mm 3mm; padding: 3mm 0; border-bottom: 1px solid #cfd4dc; font-size: 8.5px; }
+.ticket-print-v3__credit small { grid-column: 1 / -1; color: #4b5563; }
+.ticket-print-v3 .ticket-print-v2__footer { gap: 1.2mm; padding-top: 4mm; }
+.ticket-print-v3 .ticket-print-v2__footer strong { font-size: 10px; }
+.ticket-print-v3__folio { color: #6b7280 !important; font-size: 7.5px !important; }
+.ticket-print-v3.ticket-print-v2--58 { padding: 4mm 2.5mm; }
+.ticket-print-v3.ticket-print-v2--58 .ticket-print-v2__business h1 { font-size: 14px; }
+.ticket-print-v3.ticket-print-v2--58 .ticket-print-v2__items { font-size: 7.6px; }
+.ticket-print-v3.ticket-print-v2--58 .ticket-print-v2__items th { font-size: 6.4px; }
+.ticket-print-v3.ticket-print-v2--58 .ticket-print-v2__items th,
+.ticket-print-v3.ticket-print-v2--58 .ticket-print-v2__items td { padding-right: .35mm; padding-left: .35mm; }
+
+.inventory-final-v1__decision-context {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid #cfc8fa;
+  border-radius: 13px;
+  background: #f6f4ff;
+  color: #332b6c;
+}
+.inventory-final-v1__decision-context > i { color: #6652df; }
+.inventory-final-v1__decision-context strong,
+.inventory-final-v1__decision-context span { display: block; }
+.inventory-final-v1__decision-context span { margin-top: 3px; color: #68627e; font-size: 11px; }
+.inventory-final-v1__decision-context a { color: #5140c5; font-size: 12px; font-weight: 800; }
+
+.inventory-import-v3 {
+  width: min(1120px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  overflow: auto;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  color: var(--v2-ink);
+  box-shadow: 0 28px 80px rgba(20, 24, 43, .28);
+}
+.inventory-import-v3::backdrop { background: rgba(14, 17, 31, .58); backdrop-filter: blur(4px); }
+.inventory-import-v3__head { position: sticky; z-index: 3; top: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 24px 26px; border-bottom: 1px solid var(--v2-line); background: rgba(255,255,255,.96); }
+.inventory-import-v3__head span { color: var(--v2-violet); font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+.inventory-import-v3__head h3 { margin: 5px 0; font-size: 24px; }
+.inventory-import-v3__head p { margin: 0; color: var(--v2-muted); font-size: 12px; }
+.inventory-import-v3__head > button { width: 42px; height: 42px; border: 1px solid var(--v2-line); border-radius: 12px; background: #fff; color: var(--v2-ink); }
+.inventory-import-v3__mapping { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 22px 26px; background: #f8f8fb; }
+.inventory-import-v3__mapping label { min-width: 0; color: #4f5669; font-size: 11px; font-weight: 750; }
+.inventory-import-v3__mapping select { width: 100%; margin-top: 6px; }
+.inventory-import-v3__summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 22px 26px 12px; }
+.inventory-import-v3__summary article { padding: 14px; border: 1px solid var(--v2-line); border-radius: 12px; background: #fff; }
+.inventory-import-v3__summary strong,
+.inventory-import-v3__summary span { display: block; }
+.inventory-import-v3__summary strong { font-size: 22px; }
+.inventory-import-v3__summary span { margin-top: 3px; color: var(--v2-muted); font-size: 10px; }
+.inventory-import-v3__preview { max-height: 320px; margin: 10px 26px; overflow: auto; border: 1px solid var(--v2-line); border-radius: 12px; }
+.inventory-import-v3__errors { margin: 16px 26px; padding: 16px; border: 1px solid #f2c8c8; border-radius: 12px; background: #fff7f7; }
+.inventory-import-v3__errors h4 { margin: 0; color: #9e3434; }
+.inventory-import-v3__errors ul { max-height: 140px; overflow: auto; color: #763e3e; font-size: 11px; }
+.inventory-import-v3 > [role="status"] { min-height: 20px; margin: 14px 26px; color: #4f5669; font-size: 12px; }
+.inventory-import-v3__actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 18px 26px; border-top: 1px solid var(--v2-line); background: rgba(255,255,255,.96); }
+@media (max-width: 760px) {
+  .inventory-import-v3__mapping { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .inventory-import-v3__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .inventory-import-v3 { width: calc(100vw - 16px); max-height: calc(100vh - 16px); border-radius: 15px; }
+  .inventory-import-v3__head,
+  .inventory-import-v3__mapping,
+  .inventory-import-v3__summary { padding-right: 16px; padding-left: 16px; }
+  .inventory-import-v3__mapping { grid-template-columns: 1fr; }
+  .inventory-import-v3__preview,
+  .inventory-import-v3__errors { margin-right: 16px; margin-left: 16px; }
+  .inventory-import-v3__actions { padding: 14px 16px; }
+}
+@media (max-width: 560px) {
+  .inventory-final-v1__decision-context { grid-template-columns: auto minmax(0, 1fr); }
+  .inventory-final-v1__decision-context a { grid-column: 2; }
+}
+
+@media print {
+  @page { margin: 0; }
+  html,
+  body.app-body { display: block !important; width: auto !important; min-width: 0 !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  body.app-body .app-main-v2,
+  body.app-body .ticket-page-v2,
+  body.app-body .ticket-page-v2__layout { display: block !important; position: static !important; width: auto !important; min-width: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; }
+  body.app-body * { visibility: hidden !important; }
+  body.app-body .ticket-print-v3,
+  body.app-body .ticket-print-v3 * { visibility: visible !important; }
+  .ticket-print-v3 { position: absolute !important; top: 0 !important; left: 0 !important; width: 80mm !important; min-height: 0 !important; margin: 0 !important; padding: 4mm 3mm !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .ticket-print-v3.ticket-print-v2--58 { width: 58mm !important; padding: 3mm 2mm !important; }
+  .ticket-print-v3 tr,
+  .ticket-print-v3__credit,
+  .ticket-print-v3 .ticket-print-v2__totals,
+  .ticket-print-v3 .ticket-print-v2__payment,
+  .ticket-print-v3 .ticket-print-v2__footer { break-inside: avoid; page-break-inside: avoid; }
 }
