@@ -150,7 +150,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
 
         dashboard = client.get("/")
         html = dashboard.get_data(as_text=True)
-        self.assertIn("Panel ejecutivo", html)
+        self.assertIn("Centro de decisiones", html)
         self.assertNotIn(">Pro</small>", html)
         self.assertGreaterEqual(
             html.count('class="sidebar-v2__section-label"'), 3
@@ -162,7 +162,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         response = self._client(self.owner, self.membership).get("/pro")
         self.assertEqual(response.status_code, 200)
         self.assertIn("PATIA PRO", response.get_data(as_text=True))
-        self.assertIn("Panel ejecutivo", response.get_data(as_text=True))
+        self.assertIn("Dashboard Ejecutivo", response.get_data(as_text=True))
 
         trial, membership = self._owner(
             "pro-trial@pro-dashboard.test",
@@ -178,10 +178,11 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             html = response.get_data(as_text=True)
             self.assertIn("Análisis", html)
             self.assertIn(">Reportes</span>", html)
-            self.assertIn(">Panel ejecutivo</span>", html)
-            self.assertIn(">Reporte mensual</span>", html)
+            self.assertIn(">Centro de decisiones</span>", html)
+            self.assertNotIn(">Panel ejecutivo</span>", html)
+            self.assertNotIn(">Reporte mensual</span>", html)
             self.assertIn(">Compras inteligentes</span>", html)
-            self.assertIn(">Alertas</span>", html)
+            self.assertNotIn(">Alertas</span>", html)
             self.assertIn(
                 f'href="{active_href}" class="is-active" '
                 'aria-current="page"',

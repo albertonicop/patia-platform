@@ -32,9 +32,9 @@
             <span>{{ _("Prioridad %(priority)s", priority=alert.priority_label) }}</span>
             <h3>{{ alert.title }}</h3>
             <p><strong>{{ _("Evidencia:") }}</strong> {{ alert.evidence }}</p>
-            <p>{{ alert.action }}</p>
+            <p><strong>{{ _("Por qué importa:") }}</strong> {{ alert.action }}</p>
           </div>
-          <a class="btn ghost" href="{{ alert.url }}">{{ alert.action_label }}</a>
+          <a class="btn ghost" href="{{ alert.url }}"><span>{{ _("Qué hacer") }}</span>{{ alert.action_label }}</a>
         </article>
       {% endfor %}
     </div>

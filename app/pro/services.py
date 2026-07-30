@@ -567,14 +567,32 @@ def _actionable_snapshot(
                 "action": gettext(
                     "Revisa precios y costos de los productos vendidos."
                 ),
-                "url": _internal_url(
-                    "main.reports",
-                    period=period["period"],
-                    start=period["custom_start"],
-                    end=period["custom_end"],
-                ),
-                "action_label": gettext("Analizar rentabilidad"),
+                "url": _internal_url("main.products", low_margin=1),
+                "action_label": gettext("Revisar productos"),
                 "icon": "fa-percent",
+                "tone": "warning",
+            }
+        )
+    if current["unknown_cost_lines"]:
+        attention.append(
+            {
+                "key": "cost",
+                "priority": 72 + current["unknown_cost_lines"],
+                "title": ngettext(
+                    "%(count)s venta no tiene costo conocido",
+                    "%(count)s ventas no tienen costo conocido",
+                    current["unknown_cost_lines"],
+                    count=current["unknown_cost_lines"],
+                ),
+                "evidence": gettext(
+                    "La utilidad no puede calcularse completamente sin el costo del producto."
+                ),
+                "action": gettext(
+                    "Agrega los costos faltantes para recuperar una lectura confiable del margen."
+                ),
+                "url": _internal_url("main.products", missing_cost=1),
+                "action_label": gettext("Completar costos"),
+                "icon": "fa-circle-dollar-to-slot",
                 "tone": "warning",
             }
         )
@@ -626,10 +644,10 @@ def _actionable_snapshot(
                 "url": (
                     _internal_url(
                         "main.products",
-                        q=no_movement["examples"][0]["name"],
+                        no_sales=1,
+                        start=period["start_date"].isoformat(),
+                        end=period["end_date"].isoformat(),
                     )
-                    if no_movement["examples"]
-                    else _internal_url("main.products")
                 ),
                 "action_label": gettext("Revisar inventario"),
                 "icon": "fa-box-archive",

@@ -308,7 +308,12 @@ class CashRegisterTests(unittest.TestCase):
         self.open_register(client, "20.00")
         body = client.get("/cash-register").get_data(as_text=True)
         self.assertIn("En caja debería haber", body)
-        self.assertIn("Efectivo inicial", body)
+        self.assertIn("Todavía no hay ventas en efectivo", body)
+        self.assertIn(
+            "El resumen aparecerá después de la primera operación.",
+            body,
+        )
+        self.assertNotIn("Efectivo inicial", body)
         self.assertNotIn("Ventas en efectivo", body)
         self.assertIn("Todo cuadra.", body)
         self.assertIn("Faltan", body)

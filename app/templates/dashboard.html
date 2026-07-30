@@ -10,24 +10,6 @@
     <h2>{{ _("Esto es lo que necesita tu atención.") }}</h2>
     <p>{{ _("Ventas, efectivo, productos por surtir y pagos pendientes en una sola vista.") }}</p>
 
-    {% if has_pro_access %}
-      <div class="plan-status pro dashboard-v2__plan">
-        <i class="fa-solid fa-circle-check"></i>
-        {{ _("Plan actual: PRO") }}
-      </div>
-    {% else %}
-      <div class="plan-status trial dashboard-v2__plan">
-        <span>
-          <i class="fa-solid fa-clock"></i>
-          {{ _("Prueba gratuita · Te quedan %(days)s días", days=trial_days_left) }}
-        </span>
-
-        <a href="/subscribe" class="btn upgrade-btn">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          {{ _("Actualizar a PRO") }}
-        </a>
-      </div>
-    {% endif %}
     <a class="btn dashboard-v2__sell-primary" href="{{ url_for('main.sell') }}">
       <i class="fa-solid fa-cash-register" aria-hidden="true"></i>
       {{ _("Hacer una venta") }}
@@ -302,10 +284,10 @@
   <aside class="dashboard-v2__panel dashboard-v2__copilot">
     <header class="dashboard-v2__section-head">
       <div>
-        <span>{{ _("Inteligencia comercial") }}</span>
-        <h3>{{ _("Copiloto PATIA") }}</h3>
+        <span>{{ _("Datos explicados") }}</span>
+        <h3>{{ _("Lectura de tu negocio") }}</h3>
       </div>
-      <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+      <i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i>
     </header>
 
     <div class="dashboard-v2__recommendations">
@@ -313,16 +295,28 @@
         {% for r in recommendations %}
           <div class="dashboard-v2__recommendation">
             <span aria-hidden="true"></span>
-            <div><p>{{ r }}</p><small>{{ _("Basado en tus ventas e inventario registrados en PATIA.") }}</small></div>
+            <div>
+              <p>{{ r.text }}</p>
+              <small><strong>{{ _("De dónde sale:") }}</strong> {{ r.source }}</small>
+              <a href="{{ r.url }}">{{ r.label }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
           </div>
         {% endfor %}
       {% else %}
         <div class="dashboard-v2__empty dashboard-v2__empty--compact module-empty-v2">
-          <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+          <i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i>
           <div><h4>{{ _("Necesitamos conocer un poco más tu negocio") }}</h4><p>{{ _("Agrega productos y registra ventas. Con esos datos PATIA podrá darte recomendaciones útiles y explicables.") }}</p></div>
         </div>
       {% endif %}
     </div>
+
+    {% if has_pro_access %}
+      <a class="dashboard-v2__pulse-cta" href="{{ url_for('pro.hub') }}">
+        <span><i class="fa-solid fa-bolt" aria-hidden="true"></i> {{ _("Pulso PATIA") }}</span>
+        <strong>{{ _("Ver qué pasó, por qué importa y qué hacer ahora") }}</strong>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </a>
+    {% endif %}
 
     {% if profit > 0 %}
       <p class="dashboard-v2__method-note">

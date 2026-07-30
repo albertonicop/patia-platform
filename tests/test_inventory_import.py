@@ -1,6 +1,7 @@
 import io
 import os
 import re
+import time
 import unittest
 
 
@@ -124,8 +125,8 @@ class InventoryImportTests(unittest.TestCase):
         html = self.client.get("/products?q=no-existe").get_data(as_text=True)
 
         self.assertIn("No encontramos productos", html)
-        self.assertIn("Limpiar búsqueda", html)
-        self.assertIn("Productos en catálogo", html)
+        self.assertIn("Limpiar filtros", html)
+        self.assertIn("0 de 1 productos", html)
         self.assertNotIn("Tu catálogo empieza aquí", html)
 
     def test_required_sku_is_visible_before_advanced_options(self):
@@ -426,13 +427,34 @@ class InventoryImportTests(unittest.TestCase):
             response.get_data(as_text=True),
         )
 
+    def test_imports_one_thousand_products_in_one_safe_batch(self):
+        rows = "".join(
+            f"FER-{index:04d},{7500000000000 + index},Producto {index},"
+            f"Ferretería,Proveedor Uno,1.25,2.50,10,2\n"
+            for index in range(1000)
+        )
+
+        started_at = time.perf_counter()
+        response = self.import_csv(rows)
+        elapsed = time.perf_counter() - started_at
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("1000 creados", response.get_data(as_text=True))
+        self.assertEqual(
+            Product.query.filter_by(
+                organization_id=self.user.organization_memberships[0].organization_id
+            ).count(),
+            1000,
+        )
+        self.assertLess(elapsed, 30)
+
     def test_import_form_blocks_double_submission(self):
         html = self.inventory_html()
 
         self.assertIn("let importSubmitting = false", html)
         self.assertIn("if (importSubmitting)", html)
         self.assertIn("importButton.disabled = true", html)
-        self.assertIn("Importando catálogo…", html)
+        self.assertIn("Validando e importando el catálogo…", html)
 
 
 if __name__ == "__main__":

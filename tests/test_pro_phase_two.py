@@ -182,7 +182,11 @@ class ProPhaseTwoTests(unittest.TestCase):
         ).get("/pro/hub")
         self.assertEqual(owner_response.status_code, 200)
         html = owner_response.get_data(as_text=True)
-        self.assertIn("Centro de decisiones", html)
+        self.assertIn("Pulso PATIA", html)
+        self.assertIn("Qué pasó", html)
+        self.assertIn("Evidencia", html)
+        self.assertIn("Por qué importa", html)
+        self.assertIn("Qué hacer", html)
         self.assertIn("/pro/monthly-reports", html)
         self.assertIn("/pro/purchases", html)
         self.assertIn("/pro/alerts", html)
@@ -203,7 +207,7 @@ class ProPhaseTwoTests(unittest.TestCase):
         ).get("/pro/hub")
         self.assertEqual(starter_response.status_code, 200)
         starter_html = starter_response.get_data(as_text=True)
-        self.assertIn("Tu centro de decisiones", starter_html)
+        self.assertIn("Pulso PATIA convierte tus datos en decisiones", starter_html)
         self.assertIn("Actualizar a Pro", starter_html)
 
     def test_starter_can_preview_every_pro_entry_point(self):
@@ -213,7 +217,7 @@ class ProPhaseTwoTests(unittest.TestCase):
         client = self._client(starter, membership)
         for path, expected in (
             ("/pro", "Panel ejecutivo"),
-            ("/pro/hub", "Tu centro de decisiones"),
+            ("/pro/hub", "Pulso PATIA convierte tus datos en decisiones"),
             ("/pro/monthly-reports", "Reporte mensual"),
             ("/pro/purchases", "Compras inteligentes"),
             ("/pro/alerts", "Detecta lo importante"),

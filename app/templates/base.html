@@ -13,7 +13,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=125">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=126">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -24,7 +24,7 @@
     <div class="sidebar-v2__head">
       <div class="brand sidebar-v2__brand">
         <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
-        <span class="sidebar-v2__brand-copy">{{ _("Gestión inteligente") }}</span>
+        <span class="sidebar-v2__brand-copy">{{ _("Tu negocio claro. Tu siguiente paso también.") }}</span>
       </div>
       <button class="sidebar-v2__toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"
               data-open-label="{{ _('Menú') }}" data-close-label="{{ _('Cerrar') }}">
@@ -46,20 +46,14 @@
     {% if can_view_reports %}
       <div class="sidebar-v2__section-label">{{ _("Análisis") }}</div>
       <a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes") }}</span></a>
-      <a href="{{ url_for('pro.dashboard') }}"{% if request.path == '/pro' or request.path == '/pro/' %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
-        <i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>{{ _("Panel ejecutivo") }}</span>
-      </a>
-      <a href="{{ url_for('pro.monthly_reports') }}"{% if request.path.startswith('/pro/monthly-reports') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
-        <i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>{{ _("Reporte mensual") }}</span>
+      <a href="{{ url_for('pro.hub') }}"{% if request.path == '/pro/hub' %} class="is-active sidebar-v2__pro-link sidebar-v2__pulse-link" aria-current="page"{% else %} class="sidebar-v2__pro-link sidebar-v2__pulse-link"{% endif %}>
+        <i class="fa-solid fa-bolt" aria-hidden="true"></i><span>{{ _("Centro de decisiones") }}</span>
       </a>
       {% if can_manage_inventory %}
         <a href="{{ url_for('pro.purchases') }}"{% if request.path.startswith('/pro/purchases') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
           <i class="fa-solid fa-truck-ramp-box" aria-hidden="true"></i><span>{{ _("Compras inteligentes") }}</span>
         </a>
       {% endif %}
-      <a href="{{ url_for('pro.alerts') }}"{% if request.path.startswith('/pro/alerts') %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
-        <i class="fa-solid fa-bell" aria-hidden="true"></i><span>{{ _("Alertas") }}</span>
-      </a>
     {% endif %}
 
     {% if can_manage_subscription or can_manage_team %}
@@ -108,7 +102,7 @@
   <main class="main app-main-v2">
     <header class="topbar app-topbar-v2">
       <div>
-        <span class="eyebrow">{{ _("Visión ejecutiva") if request.path.startswith('/pro') else _("Tu negocio hoy") }}</span>
+        <span class="eyebrow">{{ _("Pulso y decisiones") if request.path.startswith('/pro') else _("Tu negocio hoy") }}</span>
         <h1>{% block title %}{% endblock %}</h1>
       </div>
 

@@ -3,15 +3,21 @@
 
 {% block content %}
 <div class="reports-v3">
+  <nav class="reports-v3__view-tabs" aria-label="{{ _('Secciones de Reportes') }}">
+    <a class="is-active" aria-current="page" href="{{ url_for('main.reports') }}">{{ _("Resumen") }}</a>
+    {% if can_use_advanced_reports %}
+      <a href="{{ url_for('pro.monthly_reports') }}">{{ _("Reportes mensuales") }}</a>
+    {% endif %}
+  </nav>
   <header class="reports-v3__intro">
     <div>
       <span>{{ _("Datos del negocio") }}</span>
       <h2>{{ _("Lo que ocurrió en el periodo") }}</h2>
-      <p>{{ _("Consulta ventas, utilidad, productos y formas de pago con los datos registrados. Para entender por qué cambió y qué hacer ahora, abre el Panel ejecutivo.") }}</p>
+      <p>{{ _("Consulta y analiza los datos detallados de tu negocio.") }}</p>
     </div>
     <div class="reports-v3__heading-actions">
       {% if can_use_advanced_reports %}
-        <a class="btn ghost" href="{{ url_for('pro.dashboard') }}">{{ _("Interpretar en Panel ejecutivo") }}</a>
+        <a class="btn ghost" href="{{ url_for('pro.dashboard') }}">{{ _("Ver interpretación en Panel ejecutivo") }}</a>
       {% endif %}
       <p class="reports-v3__range">
         <i class="fa-regular fa-calendar" aria-hidden="true"></i>

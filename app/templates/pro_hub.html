@@ -1,12 +1,25 @@
 {% extends "base.html" %}
-{% block title %}{{ _("PATIA Pro") }}{% endblock %}
+{% block title %}{{ _("Centro de decisiones") }}{% endblock %}
 {% block content %}
 <div class="pro-hub-v1">
-  <header class="pro-hub-v1__hero">
-    <div>
-      <span class="eyebrow">{{ _("Centro de decisiones") }}</span>
-      <h2>{{ _("PATIA administra el negocio contigo") }}</h2>
-      <p>{{ _("Revisa resultados, prioridades, compras y tu resumen mensual desde un solo lugar.") }}</p>
+  <header class="pro-hub-v1__hero pro-hub-v1__pulse">
+    <div class="pro-hub-v1__pulse-copy">
+      <span class="pro-hub-v1__pulse-mark"><i class="fa-solid fa-bolt" aria-hidden="true"></i> {{ _("Pulso PATIA") }}</span>
+      <h2>{{ _("Tu negocio claro. Tu siguiente paso también.") }}</h2>
+      <p>
+        {% if business_type %}
+          {{ _("PATIA revisó la operación de tu %(business_type)s y ordenó lo que conviene atender primero.", business_type=business_type|lower) }}
+        {% else %}
+          {{ _("PATIA revisó tu operación y ordenó lo que conviene atender primero.") }}
+        {% endif %}
+      </p>
+      <div class="pro-hub-v1__pulse-language" aria-label="{{ _('Cómo leer Pulso PATIA') }}">
+        <span><b>01</b>{{ _("Qué pasó") }}</span>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        <span><b>02</b>{{ _("Por qué importa") }}</span>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        <span><b>03</b>{{ _("Qué hacer") }}</span>
+      </div>
     </div>
     <a class="btn primary" href="{{ url_for('pro.dashboard') }}">
       <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
@@ -16,24 +29,31 @@
 
   <section class="pro-hub-v1__priorities" aria-labelledby="hub-priorities-title">
     <header>
-      <span class="eyebrow">{{ _("Tu enfoque para hoy") }}</span>
-      <h2 id="hub-priorities-title">{{ _("Lo más importante hoy") }}</h2>
-      <p>{{ _("Hasta tres acciones ordenadas por impacto, cada una con la evidencia que la explica.") }}</p>
+      <span class="eyebrow">{{ _("Decisiones respaldadas por tus datos") }}</span>
+      <h2 id="hub-priorities-title">{{ _("Lo más importante ahora") }}</h2>
+      <p>{{ _("Hasta tres decisiones ordenadas por impacto. Nada se presenta sin evidencia.") }}</p>
     </header>
     {% if priorities %}
       <div class="pro-hub-v1__priority-list">
         {% for item in priorities %}
           <article class="pro-hub-v1__priority pro-hub-v1__priority--{{ item.tone }}">
             <span aria-hidden="true"><i class="fa-solid {{ item.icon }}"></i></span>
-            <div><h3>{{ item.title }}</h3><p>{{ item.evidence }}</p></div>
-            <a class="btn ghost" href="{{ item.url }}">{{ item.label }}</a>
+            <div class="pro-hub-v1__decision">
+              <span>{{ _("Qué pasó") }}</span>
+              <h3>{{ item.title }}</h3>
+              <dl>
+                <div><dt>{{ _("Evidencia") }}</dt><dd>{{ item.evidence }}</dd></div>
+                <div><dt>{{ _("Por qué importa") }}</dt><dd>{{ item.impact }}</dd></div>
+              </dl>
+            </div>
+            <a class="btn ghost" href="{{ item.url }}"><span>{{ _("Qué hacer") }}</span>{{ item.label }}</a>
           </article>
         {% endfor %}
       </div>
     {% else %}
       <div class="pro-hub-v1__clear">
         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-        <div><h3>{{ _("Todo está en orden por ahora") }}</h3><p>{{ _("No detectamos una acción urgente con los datos registrados.") }}</p></div>
+        <div><h3>{{ _("Todo está en orden por ahora") }}</h3><p>{{ _("PATIA revisó ventas, margen, inventario, crédito y caja sin detectar una acción urgente.") }}</p></div>
         <a class="btn ghost" href="{{ url_for('pro.dashboard') }}">{{ _("Revisar resultados") }}</a>
       </div>
     {% endif %}

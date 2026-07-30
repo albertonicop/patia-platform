@@ -13,7 +13,7 @@
     <div>
       <span class="eyebrow">{{ _("Compra lo necesario, a tiempo") }}</span>
       <h2>{{ _("Reposición sugerida") }}</h2>
-      <p>{{ _("PATIA revisa cuánto tienes, cuánto vendiste y el mínimo que definiste. Te propone una cantidad; tú siempre decides qué pedir.") }}</p>
+      <p>{{ _("PATIA analiza las ventas de los últimos 30 días, el stock actual, el stock mínimo y la cobertura estimada. Te propone una cantidad; tú siempre decides qué pedir.") }}</p>
     </div>
     <a class="btn ghost" href="{{ url_for('pro.hub') }}">{{ _("Volver a PATIA Pro") }}</a>
   </header>
@@ -55,7 +55,7 @@
           </header>
           <div class="table-responsive">
             <table>
-              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Evidencia") }}</th><th>{{ _("Pedir") }}</th></tr></thead>
+              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Evidencia") }}</th><th>{{ _("Costo estimado") }}</th><th>{{ _("Pedir") }}</th></tr></thead>
               <tbody>
                 {% for item in group["items"] %}
                   <tr>
@@ -69,7 +69,15 @@
                           {{ _("Sin ventas recientes; la sugerencia se basa en el stock mínimo.") }}
                         {% endif %}
                       </small>
+                      <small><strong>{{ _("Motivo:") }}</strong>
+                        {% if item.stock <= item.min_stock %}
+                          {{ _("El producto alcanzó o quedó debajo de su stock mínimo.") }}
+                        {% else %}
+                          {{ _("La cobertura estimada es de 14 días o menos.") }}
+                        {% endif %}
+                      </small>
                     </td>
+                    <td data-label="{{ _('Costo estimado') }}">{{ item.estimated_cost|money }}</td>
                     <td data-label="{{ _('Pedir') }}"><input aria-label="{{ _('Cantidad para %(product)s', product=item.name) }}" type="number" min="1" step="1" name="quantity_{{ item.product_id }}" value="{{ item.suggested_quantity }}" required></td>
                   </tr>
                 {% endfor %}

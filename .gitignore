@@ -12,6 +12,9 @@ instance/
 *.db
 *.sqlite
 *.sqlite3
+*-wal
+*-shm
+*-journal
 
 # Secrets and local configuration
 .env

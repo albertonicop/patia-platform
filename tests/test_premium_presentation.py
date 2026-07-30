@@ -46,7 +46,6 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertIn("Menos decisiones a ciegas", landing)
         self.assertIn("PATIA Pro", landing)
         self.assertIn("patia-starter.jpg", landing)
-        self.assertIn("patia-pos.jpg", landing)
         self.assertIn("patia-pro.jpg", landing)
         self.assertIn('loading="lazy"', landing)
         self.assertIn("pantallas reales de PATIA", landing)
@@ -110,18 +109,21 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=125", self.template(name), name)
+            self.assertIn("styles.css') }}?v=126", self.template(name), name)
 
     def test_sidebar_keeps_pro_routes_without_visual_plan_badges(self):
         base = self.template("base.html")
+        reports = self.template("reports.html")
 
         for endpoint in (
-            "pro.dashboard",
-            "pro.monthly_reports",
+            "pro.hub",
             "pro.purchases",
-            "pro.alerts",
         ):
             self.assertIn(endpoint, base)
+        self.assertNotIn("pro.dashboard", base)
+        self.assertNotIn("pro.monthly_reports", base)
+        self.assertNotIn("pro.alerts", base)
+        self.assertIn("pro.monthly_reports", reports)
         self.assertNotIn("<small>{{ _(\"Pro\") }}</small>", base)
 
 

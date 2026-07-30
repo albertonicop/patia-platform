@@ -201,6 +201,17 @@
     line-height: 1.55;
 }
 
+.app-shell-v2 .inventory-v2__import-example {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border: 1px solid rgba(99, 102, 241, 0.16);
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.05);
+    color: var(--v2-ink);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 .app-shell-v2 .inventory-v2__template-link {
     gap: 8px;
     margin-bottom: 18px;
@@ -12454,6 +12465,395 @@ table {
     gap: 5px;
   }
 }
+
+/* =========================================================
+   PATIA PULSE · PRODUCT SIGNATURE
+   One visual language for situation, evidence and action.
+   ========================================================= */
+
+.app-shell-v2 .sidebar-v2__pulse-link {
+  position: relative;
+  border: 1px solid rgba(103, 85, 220, .2);
+  background: linear-gradient(135deg, rgba(103, 85, 220, .1), rgba(37, 160, 132, .07));
+}
+
+.app-shell-v2 .sidebar-v2__pulse-link::after {
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #23a77f;
+  box-shadow: 0 0 0 4px rgba(35, 167, 127, .11);
+  content: "";
+}
+
+.app-shell-v2 .sidebar-v2__pulse-link.is-active {
+  border-color: rgba(103, 85, 220, .42);
+  background: linear-gradient(135deg, #6552db, #5140c5);
+  color: #fff;
+}
+
+.pro-hub-v1__pulse {
+  position: relative;
+  isolation: isolate;
+  min-height: 280px;
+  align-items: center;
+  border-color: rgba(126, 107, 237, .38);
+  background:
+    radial-gradient(circle at 86% 12%, rgba(45, 205, 167, .28), transparent 27%),
+    radial-gradient(circle at 69% 88%, rgba(99, 79, 224, .3), transparent 32%),
+    linear-gradient(135deg, #17152d 0%, #292059 56%, #173d42 100%);
+  color: #fff;
+  box-shadow: 0 28px 68px rgba(36, 29, 84, .24);
+}
+
+.pro-hub-v1__pulse::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: .16;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .18) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(90deg, #000, transparent 84%);
+  content: "";
+  pointer-events: none;
+}
+
+.pro-hub-v1__pulse-copy {
+  display: grid;
+  gap: 14px;
+  max-width: 760px;
+}
+
+.pro-hub-v1__pulse-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 9px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  color: #dcd7ff;
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.pro-hub-v1__pulse h2 {
+  max-width: 690px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2rem, 4.8vw, 4rem);
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+
+.pro-hub-v1__pulse p {
+  color: #d6d5e8;
+  font-size: 1rem;
+}
+
+.pro-hub-v1__pulse > .btn {
+  min-height: 50px;
+  border: 1px solid rgba(255, 255, 255, .32);
+  background: #fff;
+  color: #262047;
+  box-shadow: 0 12px 30px rgba(9, 7, 31, .24);
+}
+
+.pro-hub-v1__pulse-language {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.pro-hub-v1__pulse-language > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.pro-hub-v1__pulse-language b {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .14);
+  color: #8fe2cd;
+  font-size: .65rem;
+}
+
+.pro-hub-v1__pulse-language > i {
+  color: rgba(255, 255, 255, .38);
+  font-size: .7rem;
+}
+
+.app-shell-v2 .dashboard-v2__recommendation > div {
+  min-width: 0;
+}
+
+.app-shell-v2 .dashboard-v2__recommendation small {
+  display: block;
+  margin-top: 7px;
+}
+
+.app-shell-v2 .dashboard-v2__recommendation small strong {
+  color: #4f5668;
+}
+
+.app-shell-v2 .dashboard-v2__recommendation a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  margin-top: 7px;
+  color: #5140c5;
+  font-size: .82rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.app-shell-v2 .dashboard-v2__recommendation a:hover,
+.app-shell-v2 .dashboard-v2__recommendation a:focus-visible {
+  color: #34249f;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.app-shell-v2 .dashboard-v2__pulse-cta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 14px;
+  min-height: 64px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid #d9d3ff;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f5f2ff, #eefaf7);
+  color: #272339;
+  text-decoration: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.app-shell-v2 .dashboard-v2__pulse-cta > span {
+  color: #604bd7;
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.app-shell-v2 .dashboard-v2__pulse-cta > strong {
+  grid-column: 1;
+  line-height: 1.35;
+}
+
+.app-shell-v2 .dashboard-v2__pulse-cta > i {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: #604bd7;
+}
+
+.app-shell-v2 .dashboard-v2__pulse-cta:hover,
+.app-shell-v2 .dashboard-v2__pulse-cta:focus-visible {
+  transform: translateY(-2px);
+  border-color: #a99df6;
+  box-shadow: 0 12px 28px rgba(71, 55, 157, .12);
+}
+
+.pro-hub-v1__decision {
+  min-width: 0;
+}
+
+.pro-hub-v1__decision > span {
+  color: #6654d9;
+  font-size: .7rem;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.pro-hub-v1__decision dl {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+}
+
+.pro-hub-v1__decision dl > div {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.pro-hub-v1__decision dt {
+  color: #72798b;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pro-hub-v1__decision dd {
+  margin: 0;
+  color: var(--pro-muted);
+  line-height: 1.45;
+}
+
+.pro-hub-v1__priority > .btn,
+.pro-alerts-v1__alert > .btn {
+  display: inline-grid;
+  gap: 2px;
+  min-width: 142px;
+}
+
+.pro-hub-v1__priority > .btn span,
+.pro-alerts-v1__alert > .btn span {
+  color: inherit;
+  font-size: .65rem;
+  font-weight: 850;
+  letter-spacing: .07em;
+  opacity: .68;
+  text-transform: uppercase;
+}
+
+@media (max-width: 680px) {
+  .pro-hub-v1__pulse {
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .pro-hub-v1__pulse-language {
+    display: grid;
+    align-items: start;
+  }
+
+  .pro-hub-v1__pulse-language > i {
+    display: none;
+  }
+
+  .pro-hub-v1__decision dl > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .pro-hub-v1__priority > .btn,
+  .pro-alerts-v1__alert > .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell-v2 .dashboard-v2__pulse-cta {
+    transition: none;
+  }
+}
+
+/* Reports navigation and concise monthly experience */
+.app-shell-v2 .reports-v3__view-tabs {
+  display: flex;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px;
+  overflow-x: auto;
+  border: 1px solid #dfe2eb;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.app-shell-v2 .reports-v3__view-tabs a {
+  min-height: 44px;
+  padding: 11px 15px;
+  border-radius: 9px;
+  color: #5b6275;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-shell-v2 .reports-v3__view-tabs a.is-active {
+  background: #efedff;
+  color: #4e3bc9;
+}
+
+.app-shell-v2 .pro-dashboard-v1__range a {
+  color: #5b46d6;
+  font-size: .78rem;
+  font-weight: 800;
+  text-underline-offset: 3px;
+}
+
+.pro-monthly-v1__latest {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) repeat(3, auto);
+  align-items: center;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid #dcd7fb;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fff, #f6f4ff);
+  box-shadow: 0 14px 34px rgba(51, 42, 107, .08);
+}
+
+.pro-monthly-v1__latest h3 {
+  margin: 4px 0 8px;
+  font-size: 1.55rem;
+}
+
+.pro-monthly-v1__latest > form { margin: 0; }
+.pro-monthly-v1__manual { padding: 16px 18px; border: 1px solid #e2e4ec; border-radius: 16px; background: #fff; }
+.pro-monthly-v1__manual > summary { cursor: pointer; color: #555d70; font-weight: 800; }
+.pro-monthly-v1__manual[open] > summary { margin-bottom: 18px; }
+
+.app-shell-v2 .inventory-v2__active-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f1efff;
+  color: #5040bc;
+  font-size: .8rem;
+  font-weight: 800;
+}
+
+/* Keep commercial text crisp in Chromium/Edge: no transform on primary copy. */
+.landing-v2__hero-copy h1,
+.landing-v2__hero-copy .landing-v2__lead,
+.landing-v2__hero-copy .landing-v2__eyebrow {
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 860px) {
+  .pro-monthly-v1__latest {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pro-monthly-v1__latest > div { grid-column: 1 / -1; }
+  .pro-monthly-v1__latest .btn { width: 100%; }
+}
+
+@media (max-width: 520px) {
+  .pro-monthly-v1__latest {
+    grid-template-columns: 1fr;
+  }
+
+  .pro-monthly-v1__latest > div { grid-column: auto; }
+}
 /* =========================================================
    PATIA PRO · PHASE 2
    Hub, monthly reports, intelligent purchases and alerts.
@@ -12518,6 +12918,30 @@ table {
   display: inline-flex;
   align-items: center;
   gap: 9px;
+}
+
+/* Pulso PATIA is the product signature; keep it distinct from generic Pro heroes. */
+.pro-hub-v1__hero.pro-hub-v1__pulse {
+  border-color: rgba(126, 107, 237, .38);
+  background:
+    radial-gradient(circle at 86% 12%, rgba(45, 205, 167, .28), transparent 27%),
+    radial-gradient(circle at 69% 88%, rgba(99, 79, 224, .3), transparent 32%),
+    linear-gradient(135deg, #17152d 0%, #292059 56%, #173d42 100%);
+  color: #fff;
+  box-shadow: 0 28px 68px rgba(36, 29, 84, .24);
+}
+
+.pro-hub-v1__hero.pro-hub-v1__pulse h2 {
+  max-width: 690px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2rem, 4.8vw, 4rem);
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+
+.pro-hub-v1__hero.pro-hub-v1__pulse p {
+  color: #d6d5e8;
 }
 
 .pro-hub-v1__grid {

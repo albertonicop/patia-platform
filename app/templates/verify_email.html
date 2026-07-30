@@ -36,6 +36,17 @@
         <button class="btn ghost" type="submit">{{ _("Reenviar código") }}</button>
       </form>
     </div>
+
+    <details class="verify-v2__change-email">
+      <summary>{{ _("¿Escribiste mal tu correo?") }}</summary>
+      <form method="POST" action="{{ url_for('main.change_verification_email') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="corrected-email">{{ _("Correo correcto") }}</label>
+        <input id="corrected-email" name="email" type="email" value="{{ user.email }}" autocomplete="email" required>
+        <small>{{ _("Enviaremos un código nuevo y el anterior dejará de funcionar.") }}</small>
+        <button class="btn ghost" type="submit">{{ _("Corregir correo") }}</button>
+      </form>
+    </details>
   </div>
 </main>
 

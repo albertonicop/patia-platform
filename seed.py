@@ -1,4 +1,5 @@
 from app import create_app, db
+from app.database_safety import assert_safe_ephemeral_database
 from app.models import Product, Sale, Supplier, User
 from datetime import datetime, timedelta
 import random
@@ -7,6 +8,7 @@ import random
 def seed_data():
     app = create_app()
     with app.app_context():
+        assert_safe_ephemeral_database(app)
         existing_records = any(
             model.query.first() is not None
             for model in (User, Product, Sale, Supplier)

@@ -9,19 +9,42 @@
   "failed": _("Fallido")
 } %}
 <div class="pro-monthly-v1">
+  <nav class="reports-v3__view-tabs" aria-label="{{ _('Secciones de Reportes') }}">
+    <a href="{{ url_for('main.reports') }}">{{ _("Resumen") }}</a>
+    <a class="is-active" aria-current="page" href="{{ url_for('pro.monthly_reports') }}">{{ _("Reportes mensuales") }}</a>
+  </nav>
   <header class="module-heading-v2">
     <div>
       <span class="eyebrow">{{ _("Tu negocio, explicado cada mes") }}</span>
-      <h2>{{ _("Historial de reportes mensuales") }}</h2>
-      <p>{{ _("Cada reporte conserva las cifras exactas del momento en que fue generado.") }}</p>
+      <h2>{{ _("Reportes mensuales") }}</h2>
+      <p>{{ _("Consulta el resumen cerrado de cada mes, descárgalo o vuelve a enviarlo.") }}</p>
     </div>
     <a class="btn ghost" href="{{ url_for('pro.hub') }}">{{ _("Volver a PATIA Pro") }}</a>
   </header>
 
+  {% if reports %}
+    {% set latest = reports[0] %}
+    <section class="pro-monthly-v1__latest">
+      <div>
+        <span>{{ _("Último reporte") }}</span>
+        <h3>{{ latest.period_label }}</h3>
+        <small class="status-badge status-badge--{{ latest.status }}">{{ report_status_labels.get(latest.status, latest.status) }}</small>
+      </div>
+      <a class="btn primary" href="{{ url_for('pro.monthly_report_detail', report_id=latest.id) }}">{{ _("Ver reporte") }}</a>
+      <a class="btn ghost" href="{{ url_for('pro.monthly_report_download', report_id=latest.id) }}">{{ _("Descargar PDF") }}</a>
+      <form method="POST" action="{{ url_for('pro.monthly_report_resend', report_id=latest.id) }}" data-submit-once>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn ghost" type="submit">{{ _("Enviar nuevamente") }}</button>
+      </form>
+    </section>
+  {% endif %}
+
+  <details class="pro-monthly-v1__manual">
+    <summary>{{ _("No aparece un mes cerrado") }}</summary>
   <section class="pro-monthly-v1__generate">
     <div>
-      <h3>{{ _("Generar reporte manual") }}</h3>
-      <p>{{ _("Selecciona un mes terminado. Si ya existe, PATIA abrirá el mismo snapshot sin cambiar sus cifras.") }}</p>
+      <h3>{{ _("Generar un reporte faltante") }}</h3>
+      <p>{{ _("Usa esta opción solo cuando un mes terminado todavía no aparezca en el historial.") }}</p>
     </div>
     <form method="POST" action="{{ url_for('pro.monthly_report_generate') }}" data-submit-once>
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -34,13 +57,14 @@
       <button class="btn primary" type="submit">{{ _("Generar reporte") }}</button>
     </form>
   </section>
+  </details>
 
   {% if reports %}
     <div class="pro-monthly-v1__history">
       {% for report in reports %}
         <a href="{{ url_for('pro.monthly_report_detail', report_id=report.id) }}">
           <div>
-            <span>{{ _("%(year)s-%(month)02d", year=report.report_year, month=report.report_month) }}</span>
+            <span>{{ report.period_label }}</span>
             <h3>{{ _("Resumen mensual de %(business)s", business=organization.name) }}</h3>
             <small>{{ _("Generado %(date)s", date=(report.generated_at_local.strftime("%d/%m/%Y") if report.generated_at_local else "—")) }}</small>
           </div>

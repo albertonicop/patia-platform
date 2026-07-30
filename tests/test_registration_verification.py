@@ -179,6 +179,52 @@ class RegistrationVerificationTests(unittest.TestCase):
         self.assertIn("Completa todos los campos obligatorios", response.get_data(as_text=True))
         self.assertEqual(User.query.count(), 0)
 
+    def test_unverified_owner_can_correct_email_without_orphaning_business(self):
+        old_email = "wrong@patia.test"
+        new_email = "correct@patia.test"
+        self.register(old_email)
+        user = User.query.filter_by(email=old_email).one()
+        membership_id = user.organization_memberships[0].id
+        old_code = user.verification_code
+
+        with (
+            patch("app.routes.validate_email"),
+            patch("app.routes.send_email", return_value=True) as send_email,
+        ):
+            response = self.client.post(
+                "/verification/change-email",
+                data={"email": new_email},
+            )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/verify-email"))
+        db.session.refresh(user)
+        self.assertEqual(user.email, new_email)
+        self.assertNotEqual(user.verification_code, old_code)
+        self.assertEqual(user.organization_memberships[0].id, membership_id)
+        self.assertEqual(User.query.count(), 1)
+        send_email.assert_called_once()
+
+    def test_email_correction_rejects_an_email_owned_by_another_account(self):
+        self.register("wrong@patia.test")
+        other = User(email="used@patia.test", company_name="Otro negocio")
+        other.set_password("Password123")
+        db.session.add(other)
+        db.session.commit()
+
+        with patch("app.routes.validate_email"):
+            response = self.client.post(
+                "/verification/change-email",
+                data={"email": "used@patia.test"},
+                follow_redirects=True,
+            )
+
+        self.assertIn(
+            "Ese correo ya pertenece a otra cuenta",
+            response.get_data(as_text=True),
+        )
+        self.assertIsNotNone(User.query.filter_by(email="wrong@patia.test").first())
+
 
 if __name__ == "__main__":
     unittest.main()

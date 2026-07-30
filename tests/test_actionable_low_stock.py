@@ -135,10 +135,10 @@ class ActionableLowStockTests(unittest.TestCase):
         self.assertIn("Necesita compra", filtered)
         self.assertNotIn("Existencia suficiente", filtered)
         self.assertIn('aria-current="true"', filtered)
-        self.assertIn("Quitar filtro", filtered)
+        self.assertIn("Limpiar filtros", filtered)
         self.assertIn("Necesita compra", unfiltered)
         self.assertIn("Existencia suficiente", unfiltered)
-        self.assertNotIn("Quitar filtro", unfiltered)
+        self.assertNotIn("Limpiar filtros", unfiltered)
 
     def test_product_exactly_at_minimum_is_in_filter(self):
         self.add_product(self.owner, "LIMIT-2", "Justo en mínimo", 3, 3)
@@ -165,7 +165,7 @@ class ActionableLowStockTests(unittest.TestCase):
         self.assertIn("Quantity received", dashboard)
         self.assertIn("New stock", dashboard)
         self.assertIn("View low-stock products (1)", inventory)
-        self.assertIn("Remove filter", inventory)
+        self.assertIn("Clear filters", inventory)
 
     def test_restock_increases_stock_and_records_audit_event(self):
         product = self.add_product(

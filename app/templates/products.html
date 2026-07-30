@@ -109,7 +109,12 @@
           <li>{{ _("Si coincide el") }} <b>{{ _("SKU") }}</b>{{ _(", PATIA suma el stock importado y actualiza precios, stock mínimo y código.") }}</li>
           <li>{{ _("Si no coincide el SKU, busca el") }} <b>{{ _("código de barras") }}</b>{{ _(". Si coincide, reemplaza stock, precios y stock mínimo.") }}</li>
           <li>{{ _("Las filas vacías se omiten y las filas inválidas se cuentan como errores sin detener las demás.") }}</li>
+          <li>{{ _("Puedes cargar catálogos grandes, incluso archivos con 1,000 productos. PATIA valida cada fila y evita el doble envío.") }}</li>
         </ul>
+        <p class="inventory-v2__import-example">
+          <strong>{{ _("Ejemplo de ferretería:") }}</strong>
+          {{ _("SKU TOR-001 · Tornillo galvanizado 1/4 · Costo 1.50 · Precio 3.00 · Stock 500.") }}
+        </p>
       </div>
 
       <a href="/download-template" class="btn ghost inventory-v2__template-link">
@@ -121,7 +126,7 @@
         <label for="catalog-file">{{ _("Selecciona tu archivo") }} <span>*</span></label>
         <input id="catalog-file" type="file" name="catalog_file" accept=".csv,.xlsx" required>
         <button id="catalog-import-submit" class="btn" type="submit">{{ _("Importar archivo") }}</button>
-        <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden>{{ _("Importando catálogo… No cierres esta ventana.") }}</p>
+        <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden>{{ _("Validando e importando el catálogo… Los archivos grandes pueden tardar unos minutos. No cierres esta ventana.") }}</p>
       </form>
     </section>
   </div>
@@ -129,8 +134,8 @@
   {% if catalog_count > 0 %}
     <section class="card inventory-v2__summary" aria-label="{{ _('Resumen de inventario') }}">
       <div>
-        <span>{{ _("Productos en catálogo") }}</span>
-        <strong>{{ catalog_count }}</strong>
+        <span>{{ _("Productos mostrados") }}</span>
+        <strong>{{ _("%(shown)s de %(total)s productos", shown=result_count, total=catalog_count) }}</strong>
       </div>
       {% if can_view_inventory_history %}
         <a class="btn ghost" href="{{ url_for('inventory.index') }}">
@@ -147,6 +152,11 @@
           <label class="sr-only" for="catalog-search">{{ _("Buscar producto") }}</label>
           <input id="catalog-search" name="q" value="{{ q }}" placeholder="{{ _('Buscar producto…') }}" aria-describedby="catalog-search-help">
           {% if low_stock_only %}<input type="hidden" name="low_stock" value="1">{% endif %}
+          {% if no_sales_only %}<input type="hidden" name="no_sales" value="1">{% endif %}
+          {% if missing_cost_only %}<input type="hidden" name="missing_cost" value="1">{% endif %}
+          {% if low_margin_only %}<input type="hidden" name="low_margin" value="1">{% endif %}
+          {% if request.args.get("start") %}<input type="hidden" name="start" value="{{ request.args.get('start') }}">{% endif %}
+          {% if request.args.get("end") %}<input type="hidden" name="end" value="{{ request.args.get('end') }}">{% endif %}
           <small id="catalog-search-help">{{ _("Busca por nombre, SKU o categoría.") }}</small>
         </form>
       </div>
@@ -158,10 +168,15 @@
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           {{ _("Ver productos con stock bajo (%(count)s)", count=low_stock_count) }}
         </a>
-        {% if low_stock_only %}
-          <a class="inventory-v2__clear-filter" href="{{ url_for('main.products', q=q or None) }}#catalogo">
+        {% if active_filter_label or q %}
+          <span class="inventory-v2__active-filter">
+            <i class="fa-solid fa-filter" aria-hidden="true"></i>
+            {% if active_filter_label %}{{ active_filter_label }}{% endif %}
+            {% if q %}{{ _("Búsqueda: “%(query)s”", query=q) }}{% endif %}
+          </span>
+          <a class="inventory-v2__clear-filter" href="{{ url_for('main.products') }}#catalogo">
             <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-            {{ _("Quitar filtro") }}
+            {{ _("Limpiar filtros") }}
           </a>
         {% endif %}
       </div>
@@ -235,7 +250,7 @@
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
             <h4>{{ _("No encontramos productos para “%(query)s”", query=q) }}</h4>
             <p>{{ _("Prueba con otro nombre, SKU o categoría.") }}</p>
-            <a class="btn ghost" href="{{ url_for('main.products', low_stock=1 if low_stock_only else None) }}#catalogo">{{ _("Limpiar búsqueda") }}</a>
+            <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">{{ _("Limpiar filtros") }}</a>
           {% endif %}
         </div>
       {% endif %}

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import date, timedelta
 from io import BytesIO
 import uuid
 
@@ -13,7 +13,7 @@ from flask import (
     send_file,
     url_for,
 )
-from flask_babel import gettext
+from flask_babel import format_date, gettext
 from app import db
 from app.models import MonthlyOwnerReport, PurchaseOrder
 from app.money import money_decimal
@@ -53,15 +53,15 @@ def _pro_preview(module):
         "hub": {
             "icon": "fa-gem",
             "eyebrow": gettext("PATIA Pro"),
-            "title": gettext("Tu centro de decisiones, en un solo lugar"),
+            "title": gettext("Pulso PATIA convierte tus datos en decisiones"),
             "description": gettext(
-                "Reúne resultados, alertas, compras y resúmenes mensuales "
-                "para que sepas qué atender primero."
+                "Te muestra qué pasó, por qué importa y qué hacer ahora, "
+                "con evidencia de tu propio negocio."
             ),
             "benefits": (
-                gettext("Prioridades claras para el día"),
-                gettext("Acceso directo a cada herramienta Pro"),
-                gettext("Menos tiempo buscando información"),
+                gettext("Hasta tres decisiones prioritarias"),
+                gettext("Evidencia verificable detrás de cada decisión"),
+                gettext("Una acción directa para resolver cada situación"),
             ),
         },
         "dashboard": {
@@ -244,6 +244,7 @@ def hub():
         {
             "title": item["title"],
             "evidence": item["evidence"],
+            "impact": item["action"],
             "label": item["action_label"],
             "url": item["url"],
             "icon": item["icon"],
@@ -266,6 +267,9 @@ def hub():
                     "PATIA sugiere pedir %(units)s unidades con base en existencias y ventas recientes.",
                     units=purchases["summary"]["units"],
                 ),
+                "impact": gettext(
+                    "Revisa las cantidades sugeridas y prepara el pedido antes de perder una venta."
+                ),
                 "label": gettext("Preparar compra"),
                 "url": url_for("pro.purchases"),
                 "icon": "fa-truck-ramp-box",
@@ -279,6 +283,9 @@ def hub():
                 "evidence": gettext(
                     "Guarda una fotografía del mes y descárgala en PDF."
                 ),
+                "impact": gettext(
+                    "Crear el resumen ahora te dará una referencia fija para comparar el siguiente mes."
+                ),
                 "label": gettext("Generar reporte"),
                 "url": url_for("pro.monthly_reports"),
                 "icon": "fa-file-lines",
@@ -289,6 +296,7 @@ def hub():
         "pro_hub.html",
         user=user,
         organization=membership.organization,
+        business_type=(current_organization_owner(user).business_type or "").strip(),
         latest_report=latest_report,
         priorities=priorities[:3],
     )
@@ -332,6 +340,10 @@ def monthly_reports():
         report.generated_at_local = utc_to_local(
             report.generated_at, timezone_name
         )
+        report.period_label = format_date(
+            date(report.report_year, report.report_month, 1),
+            format="LLLL yyyy",
+        ).capitalize()
     return render_template(
         "pro_monthly_reports.html",
         user=user,

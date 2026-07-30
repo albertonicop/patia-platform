@@ -34,6 +34,7 @@
     <div class="pro-dashboard-v1__range">
       <span>{{ _("Periodo analizado") }}</span>
       <strong>{{ executive_period.start_date.strftime("%d/%m/%Y") }} — {{ executive_period.end_date.strftime("%d/%m/%Y") }}</strong>
+      <a href="{{ url_for('main.reports', period=executive_period.period, start=executive_period.custom_start, end=executive_period.custom_end) }}">{{ _("Ver datos detallados en Reportes") }}</a>
     </div>
   </header>
 

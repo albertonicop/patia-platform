@@ -108,6 +108,43 @@ class PhaseEExperienceTests(unittest.TestCase):
         html = self.client.get("/reports").get_data(as_text=True)
         self.assertIn("Aún no hay ventas en este periodo", html)
 
+    def test_dashboard_explains_data_without_claiming_an_ai_copilot(self):
+        user = self.login_user(pro=True)
+        organization_id = user.organization_memberships[0].organization_id
+        product = Product(
+            organization_id=organization_id,
+            user_id=user.id,
+            sku="PULSE-1",
+            name="Producto Pulso",
+            category="Prueba",
+            cost_price=10,
+            sale_price=20,
+            stock=2,
+            min_stock=3,
+        )
+        db.session.add(product)
+        db.session.flush()
+        db.session.add(
+            Sale(
+                organization_id=organization_id,
+                user_id=user.id,
+                product_id=product.id,
+                quantity=1,
+                unit_price=20,
+                unit_cost=10,
+                total=20,
+            )
+        )
+        db.session.commit()
+
+        html = self.client.get("/").get_data(as_text=True)
+
+        self.assertIn("Lectura de tu negocio", html)
+        self.assertIn("De dónde sale:", html)
+        self.assertIn("Pulso PATIA", html)
+        self.assertIn("Ver qué surtir", html)
+        self.assertNotIn("Copiloto PATIA", html)
+
     def test_navigation_marks_active_section_and_has_mobile_toggle(self):
         self.login_user()
         html = self.client.get("/suppliers").get_data(as_text=True)

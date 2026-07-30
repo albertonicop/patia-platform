@@ -11,7 +11,7 @@
       <div>
         <span class="cash-v2__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> {{ _("Caja abierta") }}</span>
         <h3 id="expected-cash-title">{{ _("En caja debería haber") }}</h3>
-        <strong>{{ expected_cash|money }}</strong>
+        <strong>{{ expected_cash|compact_money }}</strong>
         <p>{{ _("PATIA calcula esta cantidad con el efectivo inicial, las ventas, los pagos, los gastos y los retiros.") }}</p>
       </div>
       <dl>
@@ -19,10 +19,10 @@
       </dl>
     </section>
 
-    {% if cash_summary %}
+    {% if cash_summary and has_cash_activity %}
       <section class="cash-v2__summary" aria-label="{{ _('Resumen de caja') }}">
         {% for item in cash_summary.values() %}
-          <div><span>{{ item.label }}</span><strong>{{ item.amount|money }}</strong></div>
+          <div><span>{{ item.label }}</span><strong>{{ item.amount|compact_money }}</strong></div>
         {% endfor %}
       </section>
     {% endif %}
@@ -31,8 +31,8 @@
       <section class="cash-v2__empty" aria-labelledby="cash-empty-title">
         <span aria-hidden="true"><i class="fa-solid fa-receipt"></i></span>
         <div>
-          <h3 id="cash-empty-title">{{ _("No existen movimientos") }}</h3>
-          <p>{{ _("Las ventas en efectivo y los movimientos que registres aparecerán aquí.") }}</p>
+          <h3 id="cash-empty-title">{{ _("Todavía no hay ventas en efectivo") }}</h3>
+          <p>{{ _("El resumen aparecerá después de la primera operación.") }}</p>
         </div>
         {% if can_manage_movements %}<a class="btn ghost" href="#cash-actions">{{ _("Registrar movimiento") }}</a>{% endif %}
       </section>
@@ -79,7 +79,7 @@
         <label for="counted-cash">{{ _("¿Cuánto efectivo contaste?") }}</label>
         <input id="counted-cash" name="counted_cash" type="number" min="0" step="0.01" required>
         <div class="cash-v2__reconciliation" aria-live="polite">
-          <div><span>{{ _("PATIA calculó") }}</span><strong>{{ expected_cash|money }}</strong></div>
+          <div><span>{{ _("PATIA calculó") }}</span><strong>{{ expected_cash|compact_money }}</strong></div>
           <div><span>{{ _("Tú contaste") }}</span><strong data-counted-output>—</strong></div>
           <div><span>{{ _("Diferencia") }}</span><strong data-difference-output>—</strong></div>
         </div>

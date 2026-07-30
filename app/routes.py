@@ -11,7 +11,7 @@ import re
 from decimal import Decimal, InvalidOperation
 from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort, has_request_context
 from flask_babel import force_locale, gettext
-from sqlalchemy import case, func, update
+from sqlalchemy import case, exists, func, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from urllib.parse import urljoin, urlparse
@@ -877,6 +877,72 @@ def resend_verification():
     return redirect(url_for("main.verify_email"))
 
 
+@main.route("/verification/change-email", methods=["POST"])
+@limiter.limit("3 per 15 minutes")
+def change_verification_email():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    if user.email_verified:
+        return redirect(url_for("main.dashboard"))
+
+    new_email = request.form.get("email", "").strip().lower()
+    try:
+        validate_email(new_email, check_deliverability=True)
+    except EmailNotValidError:
+        flash(gettext("El correo no es válido o no existe."), "danger")
+        return redirect(url_for("main.verify_email"))
+
+    duplicate = User.query.filter(
+        func.lower(User.email) == new_email,
+        User.id != user.id,
+    ).first()
+    if duplicate:
+        flash(
+            gettext("Ese correo ya pertenece a otra cuenta de PATIA."),
+            "danger",
+        )
+        return redirect(url_for("main.verify_email"))
+
+    code = "".join(secrets.choice(string.digits) for _ in range(6))
+    user.email = new_email
+    user.verification_code = code
+    user.verification_code_expires = datetime.utcnow() + timedelta(minutes=30)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        flash(
+            gettext("Ese correo ya pertenece a otra cuenta de PATIA."),
+            "danger",
+        )
+        return redirect(url_for("main.verify_email"))
+
+    with force_locale(user.preferred_language):
+        email_sent = send_email(
+            to=user.email,
+            subject=gettext("Verifica tu correo en PATIA"),
+            html=gettext(
+                "Tu nuevo código de verificación es: %(code)s",
+                code=code,
+            ),
+            language=user.preferred_language,
+        )
+    if email_sent:
+        flash(
+            gettext("Actualizamos tu correo y enviamos un código nuevo."),
+            "success",
+        )
+    else:
+        flash(
+            gettext(
+                "Actualizamos tu correo, pero no pudimos enviar el código. Intenta reenviarlo."
+            ),
+            "danger",
+        )
+    return redirect(url_for("main.verify_email"))
+
+
 @main.route("/forgot-password", methods=["GET", "POST"])
 @limiter.limit("5 per hour", methods=["POST"])
 def forgot_password():
@@ -999,6 +1065,13 @@ def logout():
 @main.app_template_filter("money")
 def money_filter(value):
     return money(value or 0)
+
+
+@main.app_template_filter("compact_money")
+def compact_money_filter(value):
+    amount = money_decimal(value or 0, nonnegative=False)
+    decimals = 0 if amount == amount.to_integral_value() else 2
+    return f"${amount:,.{decimals}f} MXN"
 
 
 def analytics(user=None):
@@ -1158,32 +1231,52 @@ def analytics(user=None):
 
     recommendations = []
     if top_products:
-        recommendations.append(gettext(
-            "%(product)s es el producto con más movimiento. Conviene revisar sus existencias antes de tu próxima compra.",
-            product=top_products[0].name,
-        ))
+        recommendations.append({
+            "text": gettext(
+                "%(product)s es el producto con más movimiento. Conviene revisar sus existencias antes de tu próxima compra.",
+                product=top_products[0].name,
+            ),
+            "source": gettext("Ventas registradas en los últimos 7 días."),
+            "label": gettext("Revisar inventario"),
+            "url": url_for("main.products"),
+        })
     if week_sales > 0:
-        recommendations.append(gettext(
-            "En los últimos 7 días registraste $%(amount)s MXN en ventas.",
-            amount=f"{week_sales:,.0f}",
-        ))
+        recommendations.append({
+            "text": gettext(
+                "En los últimos 7 días registraste $%(amount)s MXN en ventas.",
+                amount=f"{week_sales:,.0f}",
+            ),
+            "source": gettext("Suma de las ventas registradas en el periodo."),
+            "label": gettext("Ver reportes"),
+            "url": url_for("main.reports", period="7d"),
+        })
     if profit > 0:
-        recommendations.append(gettext(
-            "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, considerando el costo registrado de los productos vendidos.",
-            amount=f"{profit:,.0f}",
-        ))
+        recommendations.append({
+            "text": gettext(
+                "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, considerando el costo registrado de los productos vendidos.",
+                amount=f"{profit:,.0f}",
+            ),
+            "source": gettext("Precio vendido menos costo histórico conocido."),
+            "label": gettext("Revisar utilidad"),
+            "url": url_for("main.reports", period="7d"),
+        })
     if low_stock:
-        recommendations.append(
-            gettext(
-                "Tienes %(count)s producto con inventario bajo. Revísalo antes de que afecte una venta.",
-                count=low_stock,
-            )
-            if low_stock == 1
-            else gettext(
-                "Tienes %(count)s productos con inventario bajo. Revísalos antes de que afecten una venta.",
-                count=low_stock,
-            )
-        )
+        recommendations.append({
+            "text": (
+                gettext(
+                    "Tienes %(count)s producto con inventario bajo. Revísalo antes de que afecte una venta.",
+                    count=low_stock,
+                )
+                if low_stock == 1
+                else gettext(
+                    "Tienes %(count)s productos con inventario bajo. Revísalos antes de que afecten una venta.",
+                    count=low_stock,
+                )
+            ),
+            "source": gettext("Stock actual comparado con el mínimo de cada producto."),
+            "label": gettext("Ver qué surtir"),
+            "url": url_for("main.products", low_stock=1),
+        })
 
     alerts = alerts[:5]
     return dict(
@@ -1621,6 +1714,9 @@ def products():
     organization_id = current_organization_id(user)
     q = request.args.get("q", "").strip()
     low_stock_only = request.args.get("low_stock") == "1"
+    no_sales_only = request.args.get("no_sales") == "1"
+    missing_cost_only = request.args.get("missing_cost") == "1"
+    low_margin_only = request.args.get("low_margin") == "1"
     catalog_query = Product.query.filter(
         Product.organization_id == organization_id,
         Product.is_active.is_(True),
@@ -1632,18 +1728,71 @@ def products():
     query = catalog_query
     if low_stock_only:
         query = query.filter(Product.stock <= Product.min_stock)
+    if no_sales_only:
+        timezone_name = safe_timezone_name(
+            active_membership(user).organization.timezone
+        )
+        today = local_today(timezone_name)
+        try:
+            start_date = datetime.strptime(
+                request.args.get("start", ""), "%Y-%m-%d"
+            ).date()
+            end_date = datetime.strptime(
+                request.args.get("end", ""), "%Y-%m-%d"
+            ).date()
+        except (TypeError, ValueError):
+            start_date = today - timedelta(days=29)
+            end_date = today
+        start_at, end_before = local_date_bounds_utc(
+            start_date,
+            end_date + timedelta(days=1),
+            timezone_name,
+        )
+        sold_in_period = exists().where(
+            Sale.organization_id == organization_id,
+            Sale.product_id == Product.id,
+            Sale.created_at >= start_at,
+            Sale.created_at < end_before,
+        )
+        query = query.filter(~sold_in_period)
+    if missing_cost_only:
+        query = query.filter(
+            (Product.cost_price.is_(None)) | (Product.cost_price <= 0)
+        )
+    if low_margin_only:
+        query = query.filter(
+            Product.sale_price > 0,
+            Product.cost_price.is_not(None),
+            ((Product.sale_price - Product.cost_price) / Product.sale_price)
+            <= Decimal("0.15"),
+        )
     if q:
         query = query.filter(
             Product.name.ilike(f"%{q}%") |
             Product.category.ilike(f"%{q}%") |
             Product.sku.ilike(f"%{q}%")
         )
+    products_result = query.order_by(Product.name).all()
+    active_filter_label = None
+    if low_stock_only:
+        active_filter_label = gettext("Productos por agotarse")
+    elif no_sales_only:
+        active_filter_label = gettext("Productos sin ventas en el periodo")
+    elif missing_cost_only:
+        active_filter_label = gettext("Productos sin costo conocido")
+    elif low_margin_only:
+        active_filter_label = gettext("Productos con margen de 15%% o menos")
     return render_template(
         "products.html",
-        products=query.order_by(Product.name).all(),
+        products=products_result,
         catalog_count=catalog_count,
+        result_count=len(products_result),
         low_stock_count=low_stock_count,
         low_stock_only=low_stock_only,
+        no_sales_only=no_sales_only,
+        missing_cost_only=missing_cost_only,
+        low_margin_only=low_margin_only,
+        active_filter_label=active_filter_label,
         q=q,
         user=user,
     )
@@ -2102,7 +2251,24 @@ def import_products():
             )
             return redirect(url_for("main.products") + "#importar-catalogo")
 
-        summary = {"created": 0, "updated": 0, "omitted": 0, "errors": 0}
+        summary = {
+            "created": 0,
+            "updated": 0,
+            "omitted": 0,
+            "errors": 0,
+            "matched": 0,
+        }
+        existing_products = Product.query.filter_by(
+            organization_id=organization_id
+        ).all()
+        products_by_sku = {
+            product.sku: product for product in existing_products if product.sku
+        }
+        products_by_barcode = {
+            product.barcode: product
+            for product in existing_products
+            if product.barcode
+        }
 
         def text_value(value, default=""):
             if pd.isna(value):
@@ -2153,24 +2319,16 @@ def import_products():
                 existing = None
                 matched_by_sku = False
                 if sku:
-                    existing = Product.query.filter_by(
-                        organization_id=organization_id, sku=sku
-                    ).with_for_update().first()
+                    existing = products_by_sku.get(sku)
                     matched_by_sku = existing is not None
 
                 if not existing and barcode:
-                    existing = Product.query.filter_by(
-                        organization_id=organization_id, barcode=barcode
-                    ).with_for_update().first()
+                    existing = products_by_barcode.get(barcode)
 
                 if existing:
                     if matched_by_sku and barcode:
-                        barcode_owner = Product.query.filter(
-                            Product.organization_id == organization_id,
-                            Product.barcode == barcode,
-                            Product.id != existing.id,
-                        ).first()
-                        if barcode_owner:
+                        barcode_owner = products_by_barcode.get(barcode)
+                        if barcode_owner and barcode_owner is not existing:
                             raise ValueError("barcode belongs to another product")
                     existing.is_active = True
                     # Política existente: SKU suma stock; código lo reemplaza.
@@ -2180,7 +2338,11 @@ def import_products():
                     existing.cost_price = cost_price
                     existing.min_stock = min_stock
                     if matched_by_sku:
+                        if existing.barcode:
+                            products_by_barcode.pop(existing.barcode, None)
                         existing.barcode = barcode
+                        if barcode:
+                            products_by_barcode[barcode] = existing
                     record_inventory_movement(
                         existing,
                         membership,
@@ -2194,6 +2356,7 @@ def import_products():
                         ),
                     )
                     summary["updated"] += 1
+                    summary["matched"] += 1
                     continue
 
                 if not sku or not name:
@@ -2213,6 +2376,9 @@ def import_products():
                     min_stock=min_stock,
                 )
                 db.session.add(imported_product)
+                products_by_sku[sku] = imported_product
+                if barcode:
+                    products_by_barcode[barcode] = imported_product
                 record_opening_balance(
                     imported_product,
                     membership,
@@ -2229,7 +2395,7 @@ def import_products():
 
         db.session.commit()
         flash(gettext(
-            "Importación terminada: %(created)s creados, %(updated)s actualizados, %(omitted)s omitidos y %(errors)s errores.",
+            "Importación terminada: %(created)s creados, %(updated)s actualizados, %(omitted)s omitidos y %(errors)s errores. %(matched)s filas coincidieron con productos existentes.",
             **summary,
         ), "success")
 

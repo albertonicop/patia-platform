@@ -21,7 +21,19 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
-db = SQLAlchemy()
+class SafeCreateAllSQLAlchemy(SQLAlchemy):
+    """Protect persistent local data from manual ``create_all`` calls."""
+
+    def create_all(self, bind_key="__all__"):
+        from flask import current_app
+
+        from .database_safety import assert_safe_ephemeral_database
+
+        assert_safe_ephemeral_database(current_app)
+        return super().create_all(bind_key=bind_key)
+
+
+db = SafeCreateAllSQLAlchemy()
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address, default_limits=[])
 migrate = Migrate()
