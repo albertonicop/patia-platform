@@ -132,9 +132,90 @@ class OrganizationMemberTests(unittest.TestCase):
         self.assertIn("/login?next=/", response.location)
         login = client.get(response.location)
         self.assertIn(
-            "se inició sesión en otro dispositivo",
+            "se inició otra sesión con tu cuenta",
             login.get_data(as_text=True),
         )
+
+    def test_second_login_invalidates_first_with_precise_message(self):
+        user = self.add_user("second-login@patia.test", "Segunda sesión")
+        ensure_owner_organization(user)
+        db.session.commit()
+        first_client = self.app.test_client()
+        second_client = self.app.test_client()
+
+        first_client.post(
+            "/login",
+            data={"email": user.email, "password": "Password123"},
+        )
+        self.assertEqual(first_client.get("/").status_code, 200)
+
+        second_client.post(
+            "/login",
+            data={"email": user.email, "password": "Password123"},
+        )
+        revoked = first_client.get("/", follow_redirects=False)
+        self.assertEqual(revoked.status_code, 302)
+        self.assertIn("/login?next=/", revoked.location)
+
+        login = first_client.get(revoked.location)
+        html = login.get_data(as_text=True)
+        self.assertIn("se inició otra sesión con tu cuenta", html)
+        self.assertNotIn("otro dispositivo", html)
+        self.assertEqual(second_client.get("/").status_code, 200)
+
+    def test_revoked_session_message_is_precise_in_english(self):
+        user = self.add_user("second-login-en@patia.test", "Second session")
+        user.preferred_language = "en"
+        ensure_owner_organization(user)
+        db.session.commit()
+        first_client = self.app.test_client()
+        second_client = self.app.test_client()
+        for client in (first_client, second_client):
+            client.post(
+                "/login",
+                data={"email": user.email, "password": "Password123"},
+            )
+
+        revoked = first_client.get("/", follow_redirects=False)
+        login = first_client.get(revoked.location)
+        html = login.get_data(as_text=True)
+        self.assertIn(
+            "Your session ended because another session was started with your account.",
+            html,
+        )
+        self.assertNotIn("another device", html)
+
+    def test_normal_logout_clears_browser_session_without_revocation_warning(self):
+        user = self.add_user("logout@patia.test", "Cerrar sesión")
+        ensure_owner_organization(user)
+        db.session.commit()
+        client = self.app.test_client()
+        client.post(
+            "/login",
+            data={"email": user.email, "password": "Password123"},
+        )
+
+        response = client.post("/logout", follow_redirects=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("otra sesión con tu cuenta", response.get_data(as_text=True))
+        with client.session_transaction() as flask_session:
+            self.assertNotIn("user_id", flask_session)
+            self.assertNotIn("session_token", flask_session)
+
+    def test_multiple_tabs_sharing_browser_cookie_remain_authenticated(self):
+        user = self.add_user("tabs@patia.test", "Varias pestañas")
+        ensure_owner_organization(user)
+        db.session.commit()
+        client = self.app.test_client()
+        client.post(
+            "/login",
+            data={"email": user.email, "password": "Password123"},
+        )
+
+        for path in ("/", "/reports", "/products") * 3:
+            response = client.get(path, follow_redirects=False)
+            self.assertEqual(response.status_code, 200, path)
 
     def test_memberships_are_isolated_between_organizations(self):
         first_user = self.add_user("first@patia.test", "Primera")

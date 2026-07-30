@@ -191,7 +191,7 @@ def authentication_required_response():
         reason = "membership_disabled"
     elif revoked:
         message = gettext(
-            "Tu sesión terminó porque se inició sesión en otro dispositivo."
+            "Tu sesión terminó porque se inició otra sesión con tu cuenta."
         )
         reason = "session_revoked"
     elif expired:

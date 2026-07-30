@@ -2148,8 +2148,8 @@ msgid "Tu acceso a esta empresa fue desactivado. Contacta al propietario."
 msgstr "Your access to this business is deactivated. Contact the owner."
 
 #: app/team/services.py:194
-msgid "Tu sesión terminó porque se inició sesión en otro dispositivo."
-msgstr "Your session ended because the account was used on another device."
+msgid "Tu sesión terminó porque se inició otra sesión con tu cuenta."
+msgstr "Your session ended because another session was started with your account."
 
 #: app/team/services.py:198
 msgid "Tu sesión expiró. Inicia sesión para continuar."
