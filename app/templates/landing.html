@@ -7,7 +7,7 @@
   <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
   <meta name="description" content="{{ _('Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=129">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=130">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/landing-motion.css') }}?v=1">
 </head>
 
@@ -52,47 +52,17 @@
       </div>
 
       <div class="landing-v3__product-stage">
-      <div class="landing-v2__preview" aria-label="{{ _('Vista previa del panel PATIA') }}">
+      <div class="landing-v2__preview landing-v6__real-product" aria-label="{{ _('Vista previa real del panel PATIA') }}">
         <div class="landing-v3__preview-browser" aria-hidden="true">
           <span><i></i><i></i><i></i></span>
-          <strong>{{ _("Resumen del negocio") }}</strong>
+          <strong>{{ _("PATIA · Tu negocio hoy") }}</strong>
           <small>{{ "patiaapp.com" }}</small>
         </div>
-        <div class="landing-v2__preview-top">
-          <div>
-            <span>{{ _("Resumen semanal") }}</span>
-            <strong>{{ _("Negocio en orden") }}</strong>
-          </div>
-          <span class="landing-v2__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> {{ _("Actualizado") }}</span>
-        </div>
-        <div class="landing-v2__preview-metrics">
-          <article><span>{{ _("Ventas 7 días") }}</span><strong>$18,430</strong><small>{{ _("Actividad registrada") }}</small></article>
-          <article><span>{{ _("Inventario") }}</span><strong>$82,400</strong><small>{{ _("Valor estimado") }}</small></article>
-          <article><span>{{ _("Stock bajo") }}</span><strong>3</strong><small>{{ _("Productos por atender") }}</small></article>
-        </div>
-        <div class="landing-v2__preview-chart">
-          <div class="landing-v2__preview-chart-head"><span>{{ _("Productos con mayor movimiento") }}</span><small>{{ _("Últimos 7 días") }}</small></div>
-          <div class="landing-v2__bars" aria-hidden="true">
-            <span></span><span></span><span></span><span></span><span></span>
-          </div>
-        </div>
-        <div class="landing-v2__preview-alert">
-          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-          <div><strong>{{ _("2 productos requieren atención") }}</strong><span>{{ _("Revisa existencias antes de tu próximo pedido.") }}</span></div>
-        </div>
+        <img src="{{ url_for('static', filename='img/landing/patia-starter.jpg') }}"
+             width="1160" height="770" fetchpriority="high" decoding="async"
+             alt="{{ _('Dashboard real de PATIA con ventas, caja e inventario') }}">
       </div>
-      <p class="landing-final-v1__preview-caption"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> {{ _("Información clara para operar hoy y decidir qué sigue.") }}</p>
-      </div>
-    </section>
-
-    <section class="landing-v2__trust" aria-label="{{ _('Sectores objetivo') }}">
-        <span>{{ _("Hecho para negocios como el tuyo") }}</span>
-      <div>
-        <span><i class="fa-solid fa-store" aria-hidden="true"></i> {{ _("Abarrotes") }}</span>
-        <span><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> {{ _("Minisúpers") }}</span>
-        <span><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> {{ _("Ferreterías") }}</span>
-        <span><i class="fa-solid fa-capsules" aria-hidden="true"></i> {{ _("Farmacias") }}</span>
-        <span><i class="fa-solid fa-truck" aria-hidden="true"></i> {{ _("Distribuidoras") }}</span>
+      <p class="landing-final-v1__preview-caption"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ _("Producto real. Información clara desde el primer día.") }}</p>
       </div>
     </section>
 

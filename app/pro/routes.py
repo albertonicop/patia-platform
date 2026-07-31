@@ -44,7 +44,7 @@ from .purchases import (
     receive_purchase_order,
     update_purchase_draft,
 )
-from .services import build_executive_dashboard, build_smart_alerts
+from .services import build_smart_alerts
 
 
 pro = Blueprint("pro", __name__, url_prefix="/pro")
@@ -138,22 +138,13 @@ def _pro_access(preview=None):
 @pro.route("", methods=["GET"], strict_slashes=False)
 @require_permission("view_reports")
 def dashboard():
-    user, membership, blocked = _pro_access("hub")
-    if blocked:
-        return blocked
-    data = build_executive_dashboard(
-        membership.organization,
-        request.args,
-    )
-    if data["executive_period"]["error"]:
-        flash(data["executive_period"]["error"], "warning")
-    return render_template(
-        "pro_dashboard.html",
-        user=user,
-        organization=membership.organization,
-        can_edit_goal=has_permission(membership, "manage_subscription"),
-        **data,
-    )
+    values = {
+        key: request.args.get(key)
+        for key in ("period", "start", "end")
+        if request.args.get(key)
+    }
+    values["_anchor"] = "resumen"
+    return redirect(url_for("main.reports", **values), code=302)
 
 
 @pro.route("/monthly-goal", methods=["POST"])
@@ -185,12 +176,12 @@ def monthly_goal():
 def _monthly_goal_return_url():
     period = (request.form.get("return_period") or "").strip()
     if period not in {"7d", "30d", "this_month", "custom"}:
-        return url_for("pro.dashboard", _anchor="monthly-goal")
+        return url_for("main.reports", _anchor="monthly-goal")
     values = {"period": period, "_anchor": "monthly-goal"}
     if period == "custom":
         values["start"] = (request.form.get("return_start") or "").strip()
         values["end"] = (request.form.get("return_end") or "").strip()
-    return url_for("pro.dashboard", **values)
+    return url_for("main.reports", **values)
 
 
 def _completed_months(organization, count=12):

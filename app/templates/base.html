@@ -13,12 +13,12 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=129">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=130">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="app-body app-shell-v2 app-polish-v1{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}">
+<body class="app-body app-shell-v2 app-polish-v1{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}{% if request.path == '/sell' and session.get('cashier_mode') %} app-shell-v2--cashier-mode{% endif %}">
   {% include "_language_selector.html" %}
   <aside class="sidebar sidebar-v2">
     <div class="sidebar-v2__head">
@@ -46,9 +46,6 @@
     {% if can_view_reports %}
       <div class="sidebar-v2__section-label">{{ _("Análisis") }}</div>
       <a href="/reports"{% if request.path.startswith('/reports') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{{ _("Reportes") }}</span></a>
-      <a href="{{ url_for('pro.dashboard') }}"{% if request.path == '/pro' or request.path == '/pro/' %} class="is-active sidebar-v2__pro-link" aria-current="page"{% else %} class="sidebar-v2__pro-link"{% endif %}>
-        <i class="fa-solid fa-chart-area" aria-hidden="true"></i><span>{{ _("Dashboard Ejecutivo") }}</span>
-      </a>
       <a href="{{ url_for('pro.hub') }}"{% if request.path == '/pro/hub' %} class="is-active sidebar-v2__pro-link sidebar-v2__pulse-link" aria-current="page"{% else %} class="sidebar-v2__pro-link sidebar-v2__pulse-link"{% endif %}>
         <i class="fa-solid fa-bolt" aria-hidden="true"></i><span>{{ _("Centro de decisiones") }}</span>
       </a>

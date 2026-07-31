@@ -1759,6 +1759,8 @@ def products():
     organization_id = current_organization_id(user)
     q = request.args.get("q", "").strip()
     low_stock_only = request.args.get("low_stock") == "1"
+    in_stock_only = request.args.get("in_stock") == "1"
+    out_of_stock_only = request.args.get("out_of_stock") == "1"
     no_sales_only = request.args.get("no_sales") == "1"
     missing_cost_only = request.args.get("missing_cost") == "1"
     low_margin_only = request.args.get("low_margin") == "1"
@@ -1773,6 +1775,10 @@ def products():
     query = catalog_query
     if low_stock_only:
         query = query.filter(Product.stock <= Product.min_stock)
+        if in_stock_only:
+            query = query.filter(Product.stock > 0)
+    if out_of_stock_only:
+        query = query.filter(Product.stock <= 0)
     if no_sales_only:
         timezone_name = safe_timezone_name(
             active_membership(user).organization.timezone
@@ -1832,7 +1838,9 @@ def products():
     page_end = min(page * per_page, result_count)
     active_filter_label = None
     filter_source = request.args.get("source")
-    if low_stock_only:
+    if out_of_stock_only:
+        active_filter_label = gettext("Productos agotados")
+    elif low_stock_only:
         active_filter_label = gettext("Productos por agotarse")
     elif no_sales_only:
         active_filter_label = gettext("Productos sin ventas en el periodo")
@@ -1851,6 +1859,8 @@ def products():
         page_end=page_end,
         low_stock_count=low_stock_count,
         low_stock_only=low_stock_only,
+        in_stock_only=in_stock_only,
+        out_of_stock_only=out_of_stock_only,
         no_sales_only=no_sales_only,
         missing_cost_only=missing_cost_only,
         low_margin_only=low_margin_only,
@@ -2554,7 +2564,7 @@ def _catalog_row_error_message(code):
         "invalid_integer": gettext(
             "Stock y stock mínimo deben ser números enteros no negativos."
         ),
-        "missing_identity": gettext("Agrega SKU y nombre del producto."),
+        "missing_identity": gettext("Agrega el nombre del producto."),
         "duplicate_in_file": gettext(
             "El SKU o código de barras está repetido dentro del archivo."
         ),
@@ -2598,7 +2608,8 @@ def import_products_preview():
             "digest": imported.digest,
             "headers": imported.headers,
             "mapping": imported.mapping,
-            "required_fields": ["sku", "name", "sale_price", "stock"],
+            "mapping_confidence": imported.mapping_confidence,
+            "required_fields": ["name", "sale_price", "stock"],
             "summary": imported.summary,
             "rows": preview_rows,
             "errors": [
@@ -2608,9 +2619,9 @@ def import_products_preview():
                 }
                 for error in imported.errors[:100]
             ],
-            "ready": not imported.errors and all(
+            "ready": imported.summary["valid"] > 0 and all(
                 key in imported.mapping
-                for key in ("sku", "name", "sale_price", "stock")
+                for key in ("name", "sale_price", "stock")
             ),
         })
     except (ValueError, json.JSONDecodeError) as exc:
@@ -2639,13 +2650,13 @@ def import_products_commit():
         )
         if not secrets.compare_digest(imported.digest, expected_digest):
             raise ValueError("file_changed")
-        if imported.errors or not all(
+        if not imported.rows or not all(
             field in imported.mapping
-            for field in ("sku", "name", "sale_price", "stock")
+            for field in ("name", "sale_price", "stock")
         ):
             return jsonify({
                 "ok": False,
-                "error": gettext("Corrige las filas inválidas antes de importar."),
+                "error": gettext("No encontramos filas válidas para importar."),
                 "errors": [
                     {
                         **error,
@@ -2665,9 +2676,17 @@ def import_products_commit():
             "ok": True,
             "summary": summary,
             "message": gettext(
-                "Catálogo listo: %(created)s productos creados y %(updated)s actualizados.",
+                "Catálogo listo: %(created)s creados, %(updated)s actualizados "
+                "y %(errors)s rechazados.",
                 **summary,
             ),
+            "errors": [
+                {
+                    **error,
+                    "message": _catalog_row_error_message(error["code"]),
+                }
+                for error in imported.errors
+            ],
         })
     except (ValueError, json.JSONDecodeError) as exc:
         db.session.rollback()
@@ -3152,7 +3171,19 @@ def sell():
         user=user,
         payment_method_labels=_translated_payment_method_labels(),
         cash_session=cash_session,
+        cashier_mode=bool(session.get("cashier_mode")),
     )
+
+
+@main.post("/sell/cashier-mode")
+@require_permission("use_pos")
+def sell_cashier_mode():
+    user = current_user()
+    if not user:
+        return redirect(url_for("main.login"))
+    session["cashier_mode"] = request.form.get("enabled") == "1"
+    session.modified = True
+    return redirect(url_for("main.sell"))
 
 
 @main.route("/sell-cart", methods=["POST"])
@@ -3196,7 +3227,12 @@ def sell_cart():
             "cash_register_url": url_for("cash.index"),
         }), 409
     amount_received = None
-    if payment_method == "cash" and data.get("amount_received") not in (None, ""):
+    if payment_method == "cash" and data.get("amount_received") in (None, ""):
+        return jsonify({
+            "ok": False,
+            "error": gettext("Ingresa el efectivo recibido para continuar."),
+        }), 400
+    if payment_method == "cash":
         try:
             amount_received = money_decimal(data.get("amount_received"))
         except (TypeError, ValueError):
@@ -3281,14 +3317,12 @@ def sell_cart():
             for product_id, quantity in requested_items.items()
         )
         if payment_method == "cash":
-            amount_received = (
-                expected_total if amount_received is None else amount_received
-            )
             if amount_received < expected_total:
                 return jsonify({
                     "ok": False,
                     "error": gettext(
-                        "El monto recibido debe cubrir el total de la venta."
+                        "Faltan %(amount)s para completar el pago.",
+                        amount=money_json(expected_total - amount_received),
                     ),
                 }), 400
 

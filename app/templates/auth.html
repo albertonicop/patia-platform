@@ -6,7 +6,7 @@
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <title>{{ title }} | PATIA</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=129">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=130">
 </head>
 
 <body class="auth-body auth-v2">
@@ -57,7 +57,7 @@
           {% endif %}
         {% endwith %}
 
-        <form method="POST" class="auth-form auth-v2__form">
+        <form method="POST" class="auth-form auth-v2__form" data-submit-once>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           {% if request.args.get("plan") == "pro" %}
             <input type="hidden" name="plan" value="pro">

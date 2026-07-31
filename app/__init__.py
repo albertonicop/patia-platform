@@ -404,6 +404,21 @@ def create_app():
 
     @app.errorhandler(CSRFError)
     def handle_csrf_error(error):
+        if request.path == "/login":
+            language = session.get("language", "es")
+            session.clear()
+            session["language"] = (
+                language if language in SUPPORTED_LANGUAGES else "es"
+            )
+            flash(
+                gettext(
+                    "La página de inicio de sesión perdió vigencia. "
+                    "Ingresa tus datos nuevamente."
+                ),
+                "warning",
+            )
+            return redirect(url_for("main.login"))
+
         if request.path != "/logout":
             return render_error(400)
 

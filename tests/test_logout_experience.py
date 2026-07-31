@@ -105,6 +105,26 @@ class LogoutExperienceTests(unittest.TestCase):
             raise AssertionError("CSRF token not found")
         return match.group(1)
 
+    def test_expired_login_form_redirects_instead_of_showing_generic_400(self):
+        client = self.app.test_client()
+        response = client.post(
+            "/login",
+            data={
+                "csrf_token": "expired-token",
+                "email": self.owner.email,
+                "password": "Password123",
+            },
+            follow_redirects=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn(
+            "La página de inicio de sesión perdió vigencia", html
+        )
+        self.assertNotIn("ERROR 400", html)
+        self.assertIn("data-submit-once", html)
+
     def _page_token(self, client, path="/products"):
         # The suite keeps one application context open per test case. Clear
         # Flask-WTF's request token cache so every simulated browser receives

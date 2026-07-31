@@ -137,14 +137,13 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         db.session.commit()
         return sale
 
-    def test_starter_pro_url_shows_commercial_preview(self):
+    def test_starter_pro_url_redirects_to_reports_without_orphan_screen(self):
         starter, membership = self._owner("starter@pro-dashboard.test")
         client = self._client(starter, membership)
 
         response = client.get("/pro")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Dashboard Ejecutivo", response.get_data(as_text=True))
-        self.assertNotIn("executiveAnalytics", response.get_data(as_text=True))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/reports#resumen"))
 
         dashboard = client.get("/")
         html = dashboard.get_data(as_text=True)
@@ -155,24 +154,21 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         )
         self.assertIn('href="/team"', html)
         self.assertNotIn("executiveAnalytics", html)
+        self.assertNotIn(">Dashboard Ejecutivo</span>", html)
 
-    def test_pro_owner_and_pro_trial_open_executive_dashboard(self):
+    def test_pro_owner_and_pro_trial_redirect_to_reports(self):
         response = self._client(self.owner, self.membership).get("/pro")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            "pro-dashboard-v1",
-            response.get_data(as_text=True),
-        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/reports#resumen"))
 
         trial, membership = self._owner(
             "pro-trial@pro-dashboard.test",
             trial_plan="PRO",
         )
         trial_response = self._client(trial, membership).get("/pro")
-        self.assertEqual(trial_response.status_code, 200)
-        self.assertIn(
-            "pro-dashboard-v1",
-            trial_response.get_data(as_text=True),
+        self.assertEqual(trial_response.status_code, 302)
+        self.assertTrue(
+            trial_response.location.endswith("/reports#resumen")
         )
 
     def test_pro_url_uses_compatible_period_parameters(self):
@@ -180,11 +176,11 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             "/pro?period=custom&start=2026-07-01&end=2026-07-20"
         )
 
-        self.assertEqual(response.status_code, 200)
-        html = response.get_data(as_text=True)
-        self.assertIn('name="period" value="custom"', html)
-        self.assertIn('value="2026-07-01"', html)
-        self.assertIn('value="2026-07-20"', html)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("period=custom", response.location)
+        self.assertIn("start=2026-07-01", response.location)
+        self.assertIn("end=2026-07-20", response.location)
+        self.assertTrue(response.location.endswith("#resumen"))
 
     def test_analysis_navigation_is_consistent_on_customers_and_credit(self):
         def assert_analysis_navigation(client, path, active_href):
@@ -194,7 +190,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             self.assertIn("Análisis", html)
             self.assertIn(">Reportes</span>", html)
             self.assertIn(">Centro de decisiones</span>", html)
-            self.assertIn(">Dashboard Ejecutivo</span>", html)
+            self.assertNotIn(">Dashboard Ejecutivo</span>", html)
             self.assertNotIn(">Reporte mensual</span>", html)
             self.assertIn(">Compras inteligentes</span>", html)
             sidebar = html[html.index("<aside"):html.index("</aside>")]
@@ -234,10 +230,9 @@ class ProExecutiveDashboardTests(unittest.TestCase):
 
         manager_client = self._client(manager, manager_membership)
         manager_response = manager_client.get("/pro")
-        self.assertEqual(manager_response.status_code, 200)
-        self.assertIn(
-            "pro-dashboard-v1",
-            manager_response.get_data(as_text=True),
+        self.assertEqual(manager_response.status_code, 302)
+        self.assertTrue(
+            manager_response.location.endswith("/reports#resumen")
         )
         self.assertEqual(
             manager_client.post(
@@ -258,7 +253,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             },
         )
         self.assertEqual(goal.status_code, 302)
-        self.assertIn("/pro?period=30d", goal.location)
+        self.assertIn("/reports?period=30d", goal.location)
         self.assertTrue(goal.location.endswith("#monthly-goal"))
         db.session.refresh(self.membership.organization)
         self.assertEqual(
@@ -360,7 +355,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         ).get_data(as_text=True)
         self.assertNotIn("Abrir Panel ejecutivo", hub)
         self.assertNotIn("Revisar resultados", hub)
-        self.assertIn('href="/pro"', hub)
+        self.assertNotIn('href="/pro"', hub)
         self.assertIn('href="/reports"', hub)
 
     def test_organization_isolation_excludes_other_business_sales(self):
@@ -830,7 +825,18 @@ class ProExecutiveDashboardTests(unittest.TestCase):
             stock=20,
             min_stock=1,
         )
-        db.session.add_all((moving, still))
+        exhausted = Product(
+            organization_id=self.membership.organization_id,
+            user_id=self.owner.id,
+            sku="EMPTY",
+            name="Producto agotado exacto",
+            category="General",
+            cost_price=Decimal("10.00"),
+            sale_price=Decimal("20.00"),
+            stock=0,
+            min_stock=2,
+        )
+        db.session.add_all((moving, still, exhausted))
         db.session.flush()
         db.session.add(
             Sale(
@@ -888,6 +894,18 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         self.assertIn("Producto sin movimiento", inventory_html)
         self.assertNotIn(">Producto con venta<", inventory_html)
 
+        out_of_stock = next(
+            item
+            for item in data["executive_attention"]
+            if item["key"] == "out_of_stock"
+        )
+        exhausted_html = self._client(
+            self.owner, self.membership
+        ).get(out_of_stock["url"]).get_data(as_text=True)
+        self.assertIn("Producto agotado exacto", exhausted_html)
+        self.assertNotIn(">Producto con venta<", exhausted_html)
+        self.assertIn("reabastecer primero", out_of_stock["action"])
+
         cash = next(
             item
             for item in data["executive_attention"]
@@ -898,6 +916,17 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         ).get(cash["url"]).get_data(as_text=True)
         self.assertIn(f"/cash-register/{recent.id}", cash_html)
         self.assertNotIn(f"/cash-register/{old.id}", cash_html)
+
+        exhausted.stock = 5
+        db.session.commit()
+        refreshed = build_executive_dashboard(
+            self.membership.organization,
+            {"period": "7d"},
+        )
+        self.assertNotIn(
+            "out_of_stock",
+            {item["key"] for item in refreshed["executive_attention"]},
+        )
 
 
 if __name__ == "__main__":

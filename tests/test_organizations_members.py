@@ -550,6 +550,14 @@ class OrganizationMemberTests(unittest.TestCase):
         sell_html = sell_response.get_data(as_text=True)
         self.assertIn("Producto propio", sell_html)
         self.assertNotIn("Producto ajeno", sell_html)
+        self.assertEqual(
+            client.post(
+                "/sell/cashier-mode", data={"enabled": "1"}
+            ).status_code,
+            302,
+        )
+        with client.session_transaction() as browser_session:
+            self.assertTrue(browser_session["cashier_mode"])
         self.assertEqual(client.get("/").location, "/sell")
         denied_requests = (
             ("get", "/products"),
@@ -591,6 +599,14 @@ class OrganizationMemberTests(unittest.TestCase):
         self.assertEqual(client.get("/products").status_code, 200)
         self.assertEqual(client.get("/suppliers").status_code, 200)
         self.assertEqual(client.get("/sell").status_code, 200)
+        self.assertEqual(
+            client.post(
+                "/sell/cashier-mode", data={"enabled": "1"}
+            ).status_code,
+            302,
+        )
+        with client.session_transaction() as browser_session:
+            self.assertTrue(browser_session["cashier_mode"])
         self.assertEqual(client.get("/team").status_code, 403)
         self.assertEqual(client.get("/subscription").status_code, 403)
         db.session.refresh(manager_user)

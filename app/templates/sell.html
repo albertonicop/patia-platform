@@ -3,6 +3,20 @@
 {% block content %}
 
 <div class="pos-v2">
+  <div class="pos-v2__mode-bar">
+    <div>
+      <i class="fa-solid fa-display" aria-hidden="true"></i>
+      <span>{{ _("Modo caja activo") if cashier_mode else _("Venta rápida y sin distracciones") }}</span>
+    </div>
+    <form method="POST" action="{{ url_for('main.sell_cashier_mode') }}" data-submit-once>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="enabled" value="{{ '0' if cashier_mode else '1' }}">
+      <button class="btn ghost" type="submit">
+        <i class="fa-solid {{ 'fa-compress' if cashier_mode else 'fa-expand' }}" aria-hidden="true"></i>
+        {{ _("Salir de Modo caja") if cashier_mode else _("Modo caja") }}
+      </button>
+    </form>
+  </div>
   {% if cash_session %}
     <div class="cash-pos-status cash-pos-status--open" role="status">
       <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
@@ -103,6 +117,10 @@
       </div>
 
       <footer class="pos-v2__checkout">
+        <div class="pos-v2__checkout-total">
+          <span>{{ _("Total") }}</span>
+          <strong id="cart-total">{{ _("$0.00 MXN") }}</strong>
+        </div>
         <div class="pos-v2__payment-method">
           <label for="payment-method">{{ _("Método de pago") }}</label>
           <select id="payment-method">
@@ -114,12 +132,19 @@
           </select>
           <small>{{ _("Selecciona cómo pagó el cliente. Este dato se usará para registrar la venta.") }}</small>
         </div>
-        <div id="cash-tender-field" class="pos-v2__payment-method">
-          <label for="amount-received">{{ _("Monto recibido") }}</label>
-          <input id="amount-received" type="number" min="0" step="0.01" inputmode="decimal" placeholder="{{ _('Igual al total') }}">
-          <small>{{ _("Déjalo vacío si recibiste el importe exacto.") }}</small>
+        <div id="cash-tender-field" class="pos-v2__cash-tender">
+          <label for="amount-received">{{ _("Efectivo recibido") }}</label>
+          <div class="pos-v2__cash-input"><span>$</span><input id="amount-received" type="number" min="0" step="0.01" inputmode="decimal" autocomplete="off" required placeholder="0.00"></div>
+          <div class="pos-v2__cash-quick" aria-label="{{ _('Cantidades rápidas') }}">
+            <button type="button" data-tender="exact">{{ _("Pago exacto") }}</button>
+            <button type="button" data-tender-extra="50">+ $50</button>
+            <button type="button" data-tender-extra="100">+ $100</button>
+            <button type="button" data-tender="next-hundred">{{ _("Siguiente $100") }}</button>
+          </div>
+          <output id="cash-result" class="pos-v2__cash-result" aria-live="polite">
+            <span>{{ _("Ingresa cuánto entregó el cliente.") }}</span>
+          </output>
         </div>
-        <div><span>{{ _("Total de la venta") }}</span><strong id="cart-total">{{ _("$0.00 MXN") }}</strong></div>
         <button class="btn" id="checkout-button" type="button" disabled>{{ _("Registrar venta") }}</button>
       </footer>
       <p id="checkout-error" class="pos-v2__checkout-error" role="alert" hidden></p>
@@ -257,6 +282,9 @@ const POS_I18N = {
   ,savingCredit: {{ _("Guardando crédito…")|tojson }}
   ,saveCredit: {{ _("Guardar y continuar")|tojson }}
   ,creditActivationError: {{ _("No se pudo activar el crédito. Inténtalo nuevamente.")|tojson }}
+  ,cashPrompt: {{ _("Ingresa cuánto entregó el cliente.")|tojson }}
+  ,cashChange: {{ _("Cambio: %(amount)s", amount="__AMOUNT__")|tojson }}
+  ,cashMissing: {{ _("Faltan %(amount)s", amount="__AMOUNT__")|tojson }}
 };
 const PRODUCTS = [
   {% for product in products %}
@@ -283,12 +311,50 @@ const checkoutButton = document.getElementById("checkout-button");
 const paymentMethod = document.getElementById("payment-method");
 const cashTenderField = document.getElementById("cash-tender-field");
 const amountReceived = document.getElementById("amount-received");
+const cashResult = document.getElementById("cash-result");
 const checkoutError = document.getElementById("checkout-error");
 let cart = [];
 let visibleResults = [];
 let activeResultIndex = -1;
 let saleSubmitting = false;
 let selectedCustomer = null;
+
+function cartAmount() {
+  return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+}
+
+function formatMoney(value) {
+  return Number(value).toLocaleString(
+    {{ ("en-US" if current_language == "en" else "es-MX")|tojson }},
+    {style: "currency", currency: "MXN"}
+  );
+}
+
+function cashPaymentIsReady() {
+  if (paymentMethod.value !== "cash") return true;
+  const received = Number.parseFloat(amountReceived.value);
+  return Number.isFinite(received) && received >= cartAmount() && cartAmount() > 0;
+}
+
+function updateCashTender() {
+  const total = cartAmount();
+  const received = Number.parseFloat(amountReceived.value);
+  cashResult.classList.remove("is-change", "is-short");
+  if (!Number.isFinite(received)) {
+    cashResult.textContent = POS_I18N.cashPrompt;
+  } else if (received < total) {
+    cashResult.textContent = POS_I18N.cashMissing.replace(
+      "__AMOUNT__", formatMoney(total - received)
+    );
+    cashResult.classList.add("is-short");
+  } else {
+    cashResult.textContent = POS_I18N.cashChange.replace(
+      "__AMOUNT__", formatMoney(received - total)
+    );
+    cashResult.classList.add("is-change");
+  }
+  checkoutButton.disabled = cart.length === 0 || saleSubmitting || !cashPaymentIsReady();
+}
 
 function normalizeSearch(value) {
   return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -701,12 +767,14 @@ function updateQuantity(productId, value) {
 function renderCart() {
   cartBody.replaceChildren();
   const articleCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cartAmount();
   cartCount.textContent = `${articleCount} ${articleCount === 1 ? POS_I18N.item : POS_I18N.items}`;
   cartTotal.textContent = total.toLocaleString({{ ("en-US" if current_language == "en" else "es-MX")|tojson }}, {style: "currency", currency: "MXN"}) + " MXN";
   cartEmpty.hidden = cart.length > 0;
   cartTableWrap.hidden = cart.length === 0;
-  checkoutButton.disabled = cart.length === 0 || saleSubmitting;
+  checkoutButton.disabled = (
+    cart.length === 0 || saleSubmitting || !cashPaymentIsReady()
+  );
 
   cart.forEach(item => {
     const row = document.createElement("tr");
@@ -745,6 +813,7 @@ function renderCart() {
     row.append(nameCell, priceCell, quantityCell, subtotalCell, actionCell);
     cartBody.appendChild(row);
   });
+  updateCashTender();
 }
 
 function newRequestId() {
@@ -785,7 +854,7 @@ async function submitCartSale(requestId, creditOverride = false, overridePin = "
     window.location.reload();
   } catch (error) {
     saleSubmitting = false;
-    checkoutButton.disabled = false;
+    checkoutButton.disabled = !cashPaymentIsReady();
     checkoutButton.textContent = POS_I18N.submit;
     checkoutError.textContent = error.message || POS_I18N.retryError;
     checkoutError.hidden = false;
@@ -793,7 +862,7 @@ async function submitCartSale(requestId, creditOverride = false, overridePin = "
 }
 
 checkoutButton.addEventListener("click", async () => {
-  if (!cart.length || saleSubmitting) return;
+  if (!cart.length || saleSubmitting || !cashPaymentIsReady()) return;
   saleSubmitting = true;
   checkoutButton.disabled = true;
   checkoutButton.textContent = POS_I18N.submitting;
@@ -812,8 +881,24 @@ checkoutButton.addEventListener("click", async () => {
 
 function syncCashTender() {
   cashTenderField.hidden = paymentMethod.value !== "cash";
+  amountReceived.required = paymentMethod.value === "cash";
+  updateCashTender();
 }
 paymentMethod.addEventListener("change", syncCashTender);
+amountReceived.addEventListener("input", updateCashTender);
+document.querySelectorAll("[data-tender]").forEach(button => button.addEventListener("click", () => {
+  const total = cartAmount();
+  amountReceived.value = button.dataset.tender === "next-hundred"
+    ? String(Math.ceil(total / 100) * 100)
+    : total.toFixed(2);
+  updateCashTender();
+  amountReceived.focus();
+}));
+document.querySelectorAll("[data-tender-extra]").forEach(button => button.addEventListener("click", () => {
+  amountReceived.value = (cartAmount() + Number(button.dataset.tenderExtra)).toFixed(2);
+  updateCashTender();
+  amountReceived.focus();
+}));
 syncCashTender();
 
 const storedConfirmation = sessionStorage.getItem("patia_sale_confirmation");

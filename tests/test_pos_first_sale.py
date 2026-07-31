@@ -124,7 +124,10 @@ class PosFirstSaleTests(unittest.TestCase):
         html = self.pos_html()
 
         self.assertIn('id="checkout-button" type="button" disabled', html)
-        self.assertIn("if (!cart.length || saleSubmitting) return", html)
+        self.assertIn(
+            "if (!cart.length || saleSubmitting || !cashPaymentIsReady()) return",
+            html,
+        )
         self.assertIn("saleSubmitting = true", html)
         self.assertIn("checkoutButton.textContent = POS_I18N.submitting", html)
         self.assertIn("saleSubmitting = false", html)
@@ -192,6 +195,49 @@ class PosFirstSaleTests(unittest.TestCase):
             html,
         )
         self.assertIn("payment_method: paymentMethod.value", html)
+
+    def test_cash_checkout_requires_received_amount_and_explains_change(self):
+        product = self.add_product()
+        self.client.post(
+            "/cash-register/open", data={"opening_cash": "0.00"}
+        )
+        response = self.client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "cash",
+                "items": [{"product_id": product.id, "quantity": 1}],
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("efectivo recibido", response.get_json()["error"])
+        self.assertEqual(Sale.query.count(), 0)
+        html = self.pos_html()
+        self.assertIn("Efectivo recibido", html)
+        self.assertIn("Pago exacto", html)
+        self.assertIn("Siguiente $100", html)
+        self.assertIn("cashPaymentIsReady", html)
+        self.assertIn("Cambio:", html)
+        self.assertIn("Faltan", html)
+
+    def test_cashier_mode_persists_in_session_and_logout_clears_it(self):
+        self.add_product()
+        enabled = self.client.post(
+            "/sell/cashier-mode", data={"enabled": "1"}
+        )
+        self.assertEqual(enabled.status_code, 302)
+        html = self.pos_html()
+        self.assertIn("app-shell-v2--cashier-mode", html)
+        self.assertIn("Salir de Modo caja", html)
+        with self.client.session_transaction() as browser_session:
+            self.assertTrue(browser_session["cashier_mode"])
+
+        logout = self.client.post("/logout")
+        self.assertEqual(logout.status_code, 302)
+        self.assertEqual(logout.location, "/login")
+        with self.client.session_transaction() as browser_session:
+            self.assertNotIn("cashier_mode", browser_session)
 
 
     def test_repeated_request_id_does_not_charge_twice(self):

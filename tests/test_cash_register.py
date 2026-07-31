@@ -119,6 +119,11 @@ class CashRegisterTests(unittest.TestCase):
             json={
                 "request_id": str(uuid.uuid4()),
                 "payment_method": method,
+                "amount_received": (
+                    str(self.product.sale_price * quantity)
+                    if method == "cash"
+                    else None
+                ),
                 "items": [
                     {"product_id": self.product.id, "quantity": quantity}
                 ],

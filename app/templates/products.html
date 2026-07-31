@@ -98,48 +98,44 @@
     <section id="importar-catalogo" class="card inventory-v2__panel inventory-v2__import">
       <header class="inventory-v2__panel-head">
         <span class="inventory-v2__eyebrow">{{ _("Carga masiva") }}</span>
-        <h3>{{ _("Importar desde Excel o CSV") }}</h3>
-        <p>{{ _("Valida y revisa hasta 5,000 productos antes de guardar un solo cambio.") }}</p>
+        <h3>{{ _("Trae el archivo que ya usas") }}</h3>
+        <p>{{ _("PATIA reconoce tus columnas, te muestra el resultado y carga hasta 5,000 productos sin obligarte a rehacer tu Excel.") }}</p>
       </header>
 
-      <div class="inventory-v2__import-guide">
-        <h4>{{ _("Antes de importar") }}</h4>
-        <ul>
-          <li>{{ _("PATIA detecta tus encabezados y te permite corregir el mapeo.") }}</li>
-          <li>{{ _("Antes de importar verás productos nuevos, actualizaciones, duplicados y errores.") }}</li>
-          <li>{{ _("SKU o código de barras identifican productos existentes dentro de tu empresa.") }}</li>
-          <li>{{ _("Al actualizar, la existencia del archivo reemplaza la actual; repetir el archivo no duplica stock.") }}</li>
-          <li>{{ _("Si existe una fila inválida, PATIA no guarda cambios hasta que la corrijas.") }}</li>
-        </ul>
-        <p class="inventory-v2__import-example">
-          <strong>{{ _("Ejemplo de ferretería:") }}</strong>
-          {{ _("SKU TOR-001 · Tornillo galvanizado 1/4 · Costo 1.50 · Precio 3.00 · Stock 500.") }}
-        </p>
+      <div class="inventory-v2__import-steps" aria-label="{{ _('Proceso de importación') }}">
+        <div><b>1</b><span><strong>{{ _("Sube tu archivo") }}</strong><small>{{ _("Excel o CSV, aunque sus columnas tengan otros nombres.") }}</small></span></div>
+        <div><b>2</b><span><strong>{{ _("Confirma las columnas") }}</strong><small>{{ _("PATIA propone el mapeo; tú conservas el control.") }}</small></span></div>
+        <div><b>3</b><span><strong>{{ _("Importa lo válido") }}</strong><small>{{ _("Los errores se separan en un archivo para corregirlos después.") }}</small></span></div>
       </div>
-
-      <a href="/download-template" class="btn ghost inventory-v2__template-link">
-        <i class="fa-solid fa-download" aria-hidden="true"></i> {{ _("Descargar plantilla PATIA") }}
-      </a>
 
       <form id="catalog-import-form" class="inventory-v2__import-form" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="catalog-file">{{ _("Selecciona tu archivo") }} <span>*</span></label>
+        <label for="catalog-file">{{ _("Selecciona tu Excel o CSV actual") }} <span>*</span></label>
         <input id="catalog-file" type="file" name="catalog_file" accept=".csv,.xlsx" required>
-        <button id="catalog-import-submit" class="btn" type="submit">{{ _("Revisar archivo") }}</button>
+        <button id="catalog-import-submit" class="btn" type="submit">{{ _("Detectar y revisar") }}</button>
         <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden></p>
       </form>
+      <a href="/download-template" class="inventory-v2__template-help">
+        {{ _("¿Empiezas desde cero? Descarga la plantilla opcional.") }}
+      </a>
 
       <dialog id="catalog-import-dialog" class="inventory-import-v3" aria-labelledby="catalog-import-title">
         <div class="inventory-import-v3__head">
           <div><span>{{ _("Vista previa") }}</span><h3 id="catalog-import-title">{{ _("Revisa tu catálogo antes de importarlo") }}</h3><p id="catalog-import-file"></p></div>
           <button type="button" data-import-close aria-label="{{ _('Cerrar') }}"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div id="catalog-import-mapping" class="inventory-import-v3__mapping"></div>
+        <section class="inventory-import-v3__stage" aria-labelledby="import-map-title">
+          <div class="inventory-import-v3__stage-title"><b>1</b><div><h4 id="import-map-title">{{ _("Confirma cómo leeremos tus columnas") }}</h4><p>{{ _("Las coincidencias detectadas aparecen seleccionadas. Revisa solo lo necesario.") }}</p></div></div>
+          <div id="catalog-import-mapping" class="inventory-import-v3__mapping"></div>
+        </section>
+        <section class="inventory-import-v3__stage" aria-labelledby="import-preview-title">
+          <div class="inventory-import-v3__stage-title"><b>2</b><div><h4 id="import-preview-title">{{ _("Revisa el resultado antes de guardar") }}</h4><p>{{ _("Verás qué se creará, actualizará o rechazará.") }}</p></div></div>
         <div id="catalog-import-summary" class="inventory-import-v3__summary" aria-live="polite"></div>
         <div class="table-wrap inventory-import-v3__preview"><table><thead><tr><th>{{ _("Fila") }}</th><th>{{ _("Producto") }}</th><th>{{ _("SKU") }}</th><th>{{ _("Precio") }}</th><th>{{ _("Stock") }}</th><th>{{ _("Acción") }}</th></tr></thead><tbody id="catalog-import-preview"></tbody></table></div>
-        <section id="catalog-import-errors" class="inventory-import-v3__errors" hidden><h4>{{ _("Filas que debes corregir") }}</h4><ul></ul><button id="catalog-errors-download" class="btn ghost" type="button">{{ _("Descargar errores CSV") }}</button></section>
+        </section>
+        <section id="catalog-import-errors" class="inventory-import-v3__errors" hidden><h4>{{ _("Filas separadas para corregir") }}</h4><p>{{ _("Puedes importar las filas válidas ahora y descargar únicamente las rechazadas.") }}</p><ul></ul><button id="catalog-errors-download" class="btn ghost" type="button">{{ _("Descargar filas con errores") }}</button></section>
         <p id="catalog-import-dialog-status" role="status" aria-live="polite"></p>
-        <div class="inventory-import-v3__actions"><button class="btn ghost" type="button" data-import-close>{{ _("Cancelar") }}</button><button id="catalog-import-confirm" class="btn" type="button" disabled>{{ _("Confirmar importación") }}</button></div>
+        <div class="inventory-import-v3__actions"><button class="btn ghost" type="button" data-import-close>{{ _("Cancelar") }}</button><a id="catalog-import-finish" class="btn ghost" href="{{ url_for('main.products') }}#catalogo" hidden>{{ _("Ver inventario") }}</a><button id="catalog-import-confirm" class="btn" type="button" disabled>{{ _("Importar filas válidas") }}</button></div>
       </dialog>
     </section>
   </div>
@@ -164,7 +160,9 @@
         <form method="GET" action="{{ url_for('main.products') }}#catalogo" role="search">
           <label class="sr-only" for="catalog-search">{{ _("Buscar producto") }}</label>
           <input id="catalog-search" name="q" value="{{ q }}" placeholder="{{ _('Buscar producto…') }}" aria-describedby="catalog-search-help">
-          {% if low_stock_only %}<input type="hidden" name="low_stock" value="1">{% endif %}
+           {% if low_stock_only %}<input type="hidden" name="low_stock" value="1">{% endif %}
+           {% if in_stock_only %}<input type="hidden" name="in_stock" value="1">{% endif %}
+           {% if out_of_stock_only %}<input type="hidden" name="out_of_stock" value="1">{% endif %}
           {% if no_sales_only %}<input type="hidden" name="no_sales" value="1">{% endif %}
           {% if missing_cost_only %}<input type="hidden" name="missing_cost" value="1">{% endif %}
           {% if low_margin_only %}<input type="hidden" name="low_margin" value="1">{% endif %}
@@ -273,14 +271,14 @@
           <div>
             {% if page > 1 %}
               <a class="btn ghost" rel="prev"
-                 href="{{ url_for('main.products', page=page-1, q=q or None, low_stock=1 if low_stock_only else None, no_sales=1 if no_sales_only else None, missing_cost=1 if missing_cost_only else None, low_margin=1 if low_margin_only else None, start=request.args.get('start') or None, end=request.args.get('end') or None, _anchor='catalogo') }}">
+                 href="{{ url_for('main.products', page=page-1, q=q or None, low_stock=1 if low_stock_only else None, in_stock=1 if in_stock_only else None, out_of_stock=1 if out_of_stock_only else None, no_sales=1 if no_sales_only else None, missing_cost=1 if missing_cost_only else None, low_margin=1 if low_margin_only else None, start=request.args.get('start') or None, end=request.args.get('end') or None, source=filter_source or None, _anchor='catalogo') }}">
                 <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Anterior") }}
               </a>
             {% endif %}
             <strong>{{ _("Página %(page)s de %(pages)s", page=page, pages=page_count) }}</strong>
             {% if page < page_count %}
               <a class="btn ghost" rel="next"
-                 href="{{ url_for('main.products', page=page+1, q=q or None, low_stock=1 if low_stock_only else None, no_sales=1 if no_sales_only else None, missing_cost=1 if missing_cost_only else None, low_margin=1 if low_margin_only else None, start=request.args.get('start') or None, end=request.args.get('end') or None, _anchor='catalogo') }}">
+                 href="{{ url_for('main.products', page=page+1, q=q or None, low_stock=1 if low_stock_only else None, in_stock=1 if in_stock_only else None, out_of_stock=1 if out_of_stock_only else None, no_sales=1 if no_sales_only else None, missing_cost=1 if missing_cost_only else None, low_margin=1 if low_margin_only else None, start=request.args.get('start') or None, end=request.args.get('end') or None, source=filter_source or None, _anchor='catalogo') }}">
                 {{ _("Siguiente") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
               </a>
             {% endif %}
@@ -289,7 +287,7 @@
       {% endif %}
       {% else %}
         <div class="inventory-v2__search-empty module-empty-v2" role="status">
-          {% if low_stock_only and not q %}
+          {% if (low_stock_only or out_of_stock_only) and not q %}
             <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
             <h4>{{ _("Tu inventario está en orden. No hay productos que requieran reabastecimiento.") }}</h4>
             <a class="btn ghost" href="{{ url_for('main.products') }}#catalogo">{{ _("Ver todos los productos") }}</a>
@@ -314,8 +312,8 @@ const INVENTORY_I18N = {
   update: {{ _("Actualizar")|tojson }},
   mapped: {{ _("Columna del archivo")|tojson }},
   unmapped: {{ _("No usar")|tojson }},
-  completeMapping: {{ _("Asigna SKU, nombre, precio de venta y stock para continuar.")|tojson }},
-  importReady: {{ _("Todo está listo para importar.")|tojson }},
+  completeMapping: {{ _("Asigna nombre, precio de venta y stock para continuar.")|tojson }},
+  importReady: {{ _("La vista previa está lista. Puedes importar las filas válidas.")|tojson }},
   importDone: {{ _("Catálogo importado correctamente.")|tojson }},
   fields: {
     sku: {{ _("SKU")|tojson }}, barcode: {{ _("Código de barras")|tojson }},
@@ -354,6 +352,15 @@ function renderImportInspection(data) {
   Object.entries(INVENTORY_I18N.fields).forEach(([field, label]) => {
     const wrapper = document.createElement("label");
     wrapper.textContent = label + (data.required_fields.includes(field) ? " *" : "");
+    const confidence = data.mapping_confidence?.[field];
+    if (data.mapping[field] && confidence) {
+      const badge = document.createElement("small");
+      badge.className = confidence >= 0.9 ? "is-confident" : "needs-review";
+      badge.textContent = confidence >= 0.9
+        ? {{ _("Detectada automáticamente")|tojson }}
+        : {{ _("Revisa esta coincidencia")|tojson }};
+      wrapper.appendChild(badge);
+    }
     const select = document.createElement("select");
     select.dataset.field = field;
     const empty = document.createElement("option");
@@ -397,7 +404,12 @@ function renderImportInspection(data) {
   }));
   importErrors.hidden = !data.errors.length;
   importConfirm.disabled = !data.ready;
-  importDialogStatus.textContent = data.ready ? INVENTORY_I18N.importReady : INVENTORY_I18N.completeMapping;
+  importDialogStatus.textContent = data.ready
+    ? (data.errors.length
+      ? {{ _("%(valid)s filas válidas están listas; %(invalid)s se separarán para corregir.", valid="__VALID__", invalid="__INVALID__")|tojson }}
+          .replace("__VALID__", data.summary.valid).replace("__INVALID__", data.summary.invalid)
+      : INVENTORY_I18N.importReady)
+    : INVENTORY_I18N.completeMapping;
 }
 
 async function inspectImport(mapping = null) {
@@ -439,8 +451,20 @@ importConfirm.addEventListener("click", async () => {
     const response = await fetch("/api/products/import/commit", {method: "POST", headers: {"X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content}, body});
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error);
+    importInspection.errors = data.errors || [];
+    importInspection.summary = data.summary;
     importDialogStatus.textContent = data.message;
-    window.location.assign("{{ url_for('main.products') }}#catalogo");
+    importConfirm.hidden = true;
+    document.getElementById("catalog-import-finish").hidden = false;
+    if (data.errors?.length) {
+      const errorList = importErrors.querySelector("ul");
+      errorList.replaceChildren(...data.errors.map(error => {
+        const li = document.createElement("li");
+        li.textContent = `${error.row}: ${error.sku || "—"} ${error.name || ""} · ${error.message}`;
+        return li;
+      }));
+      importErrors.hidden = false;
+    }
   } catch (error) {
     importDialogStatus.textContent = error.message;
     importConfirm.disabled = false; importConfirm.textContent = {{ _("Confirmar importación")|tojson }};

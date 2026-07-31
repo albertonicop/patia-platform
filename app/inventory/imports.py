@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from difflib import SequenceMatcher
 from hashlib import sha256
 from io import BytesIO
+import csv
 import re
+from io import StringIO
 import unicodedata
 
 import pandas as pd
@@ -22,17 +25,34 @@ FIELDS = (
     "sku", "barcode", "name", "category", "supplier",
     "cost_price", "sale_price", "stock", "min_stock",
 )
-REQUIRED_FIELDS = frozenset({"sku", "name", "sale_price", "stock"})
+REQUIRED_FIELDS = frozenset({"name", "sale_price", "stock"})
 ALIASES = {
-    "sku": {"sku", "clave", "codigo interno", "id producto", "product sku"},
-    "barcode": {"codigo de barras", "barcode", "ean", "upc", "gtin"},
-    "name": {"nombre", "nombre del producto", "producto", "product name", "description", "descripcion"},
-    "category": {"categoria", "category", "departamento", "familia"},
-    "supplier": {"proveedor", "supplier", "vendor"},
-    "cost_price": {"costo", "precio de compra", "cost", "cost price"},
-    "sale_price": {"precio", "precio de venta", "sale price", "retail price"},
-    "stock": {"stock", "stock inicial", "existencias", "cantidad", "initial stock"},
-    "min_stock": {"stock minimo", "minimo", "minimum stock", "reorder point"},
+    "sku": {
+        "sku", "clave", "clave producto", "codigo interno", "id producto",
+        "product sku", "item number", "no articulo", "numero articulo",
+        "numero de articulo",
+    },
+    "barcode": {
+        "codigo de barras", "barcode", "ean", "upc", "gtin",
+        "codigo universal", "gtin ean", "ean upc",
+    },
+    "name": {
+        "nombre", "nombre del producto", "producto", "articulo", "item",
+        "product name", "description", "descripcion",
+        "descripcion comercial",
+    },
+    "category": {
+        "categoria", "category", "departamento", "familia", "linea",
+        "familia de articulos",
+    },
+    "supplier": {"proveedor", "supplier", "vendor", "marca proveedor"},
+    "cost_price": {"costo", "precio de compra", "costo unitario", "cost", "cost price", "purchase price"},
+    "sale_price": {"precio", "precio de venta", "precio publico", "p venta", "sale price", "retail price", "unit price"},
+    "stock": {"stock", "stock inicial", "existencias", "existencia", "cantidad", "inventario", "initial stock", "on hand"},
+    "min_stock": {
+        "stock minimo", "minimo", "existencia minima", "minimum stock",
+        "reorder point", "reorder level", "punto de reorden",
+    },
 }
 
 
@@ -42,43 +62,115 @@ def _normalized(value) -> str:
     return re.sub(r"[^a-z0-9]+", " ", text.casefold()).strip()
 
 
+def _header_score(values) -> float:
+    known = {alias for values in ALIASES.values() for alias in values}
+    normalized = [_normalized(value) for value in values]
+    return sum(
+        1
+        for header in normalized
+        if header in known
+        or any(SequenceMatcher(None, header, alias).ratio() >= 0.82 for alias in known)
+    )
+
+
+def _frame_with_detected_header(raw: pd.DataFrame) -> pd.DataFrame:
+    if raw.empty:
+        return raw
+    header_row = max(
+        range(min(15, len(raw.index))),
+        key=lambda index: _header_score(raw.iloc[index].tolist()),
+    )
+    frame = raw.iloc[header_row + 1:].copy()
+    frame.columns = [
+        str(value).strip() or f"column_{position + 1}"
+        for position, value in enumerate(raw.iloc[header_row].tolist())
+    ]
+    frame = frame.reset_index(drop=True)
+    frame.attrs["source_header_row"] = header_row + 1
+    return frame
+
+
 def _read_frame(filename: str, content: bytes) -> pd.DataFrame:
     lower = (filename or "").casefold()
     if lower.endswith(".csv"):
         try:
-            return pd.read_csv(
-                BytesIO(content), dtype=str, keep_default_na=False,
-                encoding="utf-8-sig", sep=None, engine="python",
-            )
+            text = content.decode("utf-8-sig")
         except UnicodeDecodeError:
-            return pd.read_csv(
-                BytesIO(content), dtype=str, keep_default_na=False,
-                encoding="latin-1", sep=None, engine="python",
-            )
+            text = content.decode("latin-1")
+        sample = text[:8192]
+        lines = [line for line in sample.splitlines()[:20] if line.strip()]
+        delimiter = max(
+            (",", ";", "\t", "|"),
+            key=lambda candidate: sum(
+                line.count(candidate) for line in lines
+            ),
+        )
+        try:
+            dialect = csv.Sniffer().sniff(sample, delimiters=delimiter)
+        except csv.Error:
+            reader = csv.reader(StringIO(text), delimiter=delimiter)
+        else:
+            reader = csv.reader(StringIO(text), dialect)
+        records = list(reader)
+        width = max((len(row) for row in records), default=0)
+        raw = pd.DataFrame(
+            [row + [""] * (width - len(row)) for row in records],
+            dtype=str,
+        )
+        return _frame_with_detected_header(raw)
     if not lower.endswith(".xlsx"):
         raise ValueError("unsupported_file")
     raw = pd.read_excel(BytesIO(content), dtype=str, header=None, keep_default_na=False)
-    header_row = 0
-    best_matches = -1
-    known = {alias for values in ALIASES.values() for alias in values}
-    for index in range(min(12, len(raw.index))):
-        matches = sum(_normalized(value) in known for value in raw.iloc[index].tolist())
-        if matches > best_matches:
-            header_row, best_matches = index, matches
-    frame = raw.iloc[header_row + 1:].copy()
-    frame.columns = [str(value).strip() for value in raw.iloc[header_row].tolist()]
-    return frame.reset_index(drop=True)
+    return _frame_with_detected_header(raw)
+
+
+def auto_mapping_details(headers) -> tuple[dict[str, str], dict[str, float]]:
+    normalized_headers = {
+        _normalized(header): str(header)
+        for header in headers
+        if str(header).strip()
+    }
+    mapping, confidence = {}, {}
+    used_headers = set()
+
+    # Reserve exact matches first. A weak fuzzy match such as "Artículo" ->
+    # "número de artículo" must never steal the header from the exact
+    # product-name alias that follows it.
+    for field, aliases in ALIASES.items():
+        exact_headers = [
+            original_header
+            for normalized_header, original_header in normalized_headers.items()
+            if normalized_header in aliases and original_header not in used_headers
+        ]
+        if exact_headers:
+            mapping[field] = exact_headers[0]
+            confidence[field] = 1.0
+            used_headers.add(exact_headers[0])
+
+    for field, aliases in ALIASES.items():
+        if field in mapping:
+            continue
+        candidates = []
+        for normalized_header, original_header in normalized_headers.items():
+            if original_header in used_headers:
+                continue
+            score = max(
+                SequenceMatcher(None, normalized_header, alias).ratio()
+                for alias in aliases
+            )
+            candidates.append((score, original_header))
+        if not candidates:
+            continue
+        score, original_header = max(candidates)
+        if score >= 0.72 and original_header not in used_headers:
+            mapping[field] = original_header
+            confidence[field] = round(score, 2)
+            used_headers.add(original_header)
+    return mapping, confidence
 
 
 def auto_mapping(headers) -> dict[str, str]:
-    normalized_headers = {_normalized(header): str(header) for header in headers if str(header).strip()}
-    mapping = {}
-    for field, aliases in ALIASES.items():
-        for alias in aliases:
-            if alias in normalized_headers:
-                mapping[field] = normalized_headers[alias]
-                break
-    return mapping
+    return auto_mapping_details(headers)[0]
 
 
 def _text(value, limit=255):
@@ -135,6 +227,7 @@ class CatalogImport:
     digest: str
     headers: list[str]
     mapping: dict[str, str]
+    mapping_confidence: dict[str, float]
     rows: list[dict]
     errors: list[dict]
     summary: dict
@@ -147,16 +240,30 @@ def inspect_catalog(filename, content, mapping=None, existing_products=()):
     if len(frame.index) > MAX_IMPORT_ROWS:
         raise ValueError("too_many_rows")
     headers = [str(column).strip() for column in frame.columns if str(column).strip()]
-    chosen = {key: value for key, value in (mapping or auto_mapping(headers)).items() if key in FIELDS and value in headers}
+    suggested, confidence = auto_mapping_details(headers)
+    chosen = {
+        key: value
+        for key, value in (mapping or suggested).items()
+        if key in FIELDS and value in headers
+    }
+    if mapping:
+        confidence = {
+            field: (1.0 if suggested.get(field) == header else 0.0)
+            for field, header in chosen.items()
+        }
+    digest = sha256(content).hexdigest()
     existing_sku = {item.sku: item for item in existing_products if item.sku}
     existing_barcode = {item.barcode: item for item in existing_products if item.barcode}
     seen_sku, seen_barcode = set(), set()
     rows, errors = [], []
     summary = {"total": 0, "valid": 0, "invalid": 0, "new": 0, "updated": 0, "duplicates": 0, "blank": 0}
     if not REQUIRED_FIELDS.issubset(chosen):
-        return CatalogImport(filename, sha256(content).hexdigest(), headers, chosen, [], [], summary)
+        return CatalogImport(
+            filename, digest, headers, chosen, confidence, [], [], summary
+        )
 
-    for offset, (_, source) in enumerate(frame.iterrows(), 2):
+    first_data_row = int(frame.attrs.get("source_header_row", 1)) + 1
+    for offset, (_, source) in enumerate(frame.iterrows(), first_data_row):
         values = [str(value or "").strip() for value in source.tolist()]
         if not any(values):
             summary["blank"] += 1
@@ -175,9 +282,16 @@ def inspect_catalog(filename, content, mapping=None, existing_products=()):
                 "stock": _integer(_row_value(source, chosen, "stock")),
                 "min_stock": _integer(_row_value(source, chosen, "min_stock"), default=5),
             }
-            if not item["sku"] or not item["name"]:
+            if not item["name"]:
                 raise ValueError("missing_identity")
-            if item["sku"] in seen_sku or (item["barcode"] and item["barcode"] in seen_barcode):
+            if not item["sku"]:
+                item["sku"] = f"IMP-{digest[:8].upper()}-{offset:05d}"
+                item["sku_generated"] = True
+            else:
+                item["sku_generated"] = False
+            if item["sku"] in seen_sku or (
+                item["barcode"] and item["barcode"] in seen_barcode
+            ):
                 summary["duplicates"] += 1
                 raise ValueError("duplicate_in_file")
             seen_sku.add(item["sku"])
@@ -187,7 +301,10 @@ def inspect_catalog(filename, content, mapping=None, existing_products=()):
             by_barcode = existing_barcode.get(item["barcode"]) if item["barcode"] else None
             if by_sku and by_barcode and by_sku.id != by_barcode.id:
                 raise ValueError("conflicting_identity")
-            item["action"] = "update" if by_sku or by_barcode else "create"
+            matched = by_sku or by_barcode
+            if matched and item["sku_generated"]:
+                item["sku"] = matched.sku
+            item["action"] = "update" if matched else "create"
             item["product_id"] = (by_sku or by_barcode).id if (by_sku or by_barcode) else None
             summary["updated" if item["action"] == "update" else "new"] += 1
             summary["valid"] += 1
@@ -195,7 +312,9 @@ def inspect_catalog(filename, content, mapping=None, existing_products=()):
         except ValueError as exc:
             summary["invalid"] += 1
             errors.append({"row": offset, "code": str(exc), "sku": _text(_row_value(source, chosen, "sku"), 64), "name": _text(_row_value(source, chosen, "name"), 160)})
-    return CatalogImport(filename, sha256(content).hexdigest(), headers, chosen, rows, errors, summary)
+    return CatalogImport(
+        filename, digest, headers, chosen, confidence, rows, errors, summary
+    )
 
 
 def apply_catalog(imported, organization_id, owner_id, membership):

@@ -84,13 +84,18 @@ class SalesTicketFoundationTests(unittest.TestCase):
         return client
 
     def sell(self, user, product, payment_method="card", quantity=1):
+        payload = {
+            "request_id": str(uuid.uuid4()),
+            "payment_method": payment_method,
+            "items": [{"product_id": product.id, "quantity": quantity}],
+        }
+        if payment_method == "cash":
+            payload["amount_received"] = str(
+                Decimal(str(product.sale_price)) * quantity
+            )
         return self.client_for(user).post(
             "/sell-cart",
-            json={
-                "request_id": str(uuid.uuid4()),
-                "payment_method": payment_method,
-                "items": [{"product_id": product.id, "quantity": quantity}],
-            },
+            json=payload,
         )
 
     def test_companies_have_independent_sequences_and_isolated_public_tickets(self):
@@ -154,6 +159,7 @@ class SalesTicketFoundationTests(unittest.TestCase):
             json={
                 "request_id": str(uuid.uuid4()),
                 "payment_method": "cash",
+                "amount_received": "0.30",
                 "items": [{"product_id": product.id, "quantity": 3}],
             },
         )

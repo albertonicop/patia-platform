@@ -562,19 +562,89 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual(Product.query.filter_by(sku="IDEM-001").one().stock, 14)
         self.assertEqual(InventoryMovement.query.count(), first_movement_count)
 
-    def test_professional_preview_rejects_duplicates_and_rolls_back_all_rows(self):
+    def test_professional_preview_imports_valid_rows_and_separates_duplicates(self):
         rows = (
             "DUP-001,0001,Taladro,Herramientas,,500,900,2,1\n"
             "DUP-001,0002,Segundo,Herramientas,,100,200,3,1\n"
         )
         response, content = self.preview_catalog(rows)
         preview = response.get_json()
-        self.assertFalse(preview["ready"])
+        self.assertTrue(preview["ready"])
         self.assertEqual(preview["summary"]["duplicates"], 1)
         committed = self.commit_catalog(content, preview)
-        self.assertEqual(committed.status_code, 409)
-        self.assertEqual(Product.query.count(), 0)
+        self.assertEqual(committed.status_code, 200)
+        self.assertEqual(Product.query.count(), 1)
+        self.assertEqual(committed.get_json()["summary"]["errors"], 1)
         self.assertIn("repetido", preview["errors"][0]["message"])
+
+    def test_existing_non_patia_file_is_detected_and_missing_sku_is_generated(self):
+        content = (
+            "Catálogo Ferretería Puebla;;;;\n"
+            "Artículo;Código Universal;Familia;Costo Unitario;Precio Público;Existencia;Existencia Mínima\n"
+            "Martillo carpintero;0007500999001;Herramientas;80.50;149.90;25;4\n"
+        ).encode("utf-8")
+        response = self.client.post(
+            "/api/products/import/preview",
+            data={"catalog_file": (io.BytesIO(content), "mi_inventario.csv")},
+            content_type="multipart/form-data",
+        )
+        preview = response.get_json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(preview["ready"])
+        self.assertEqual(preview["mapping"]["name"], "Artículo")
+        self.assertEqual(preview["mapping"]["barcode"], "Código Universal")
+        self.assertEqual(preview["mapping"]["sale_price"], "Precio Público")
+        self.assertTrue(preview["rows"][0]["sku"].startswith("IMP-"))
+        committed = self.commit_catalog(
+            content, preview, filename="mi_inventario.csv"
+        )
+        self.assertEqual(committed.status_code, 200)
+        product = Product.query.one()
+        self.assertEqual(product.barcode, "0007500999001")
+        self.assertEqual(product.name, "Martillo carpintero")
+
+    def test_external_erp_headers_map_identifiers_and_reorder_point(self):
+        existing = self.add_product(
+            sku="OLD-000001",
+            barcode="7500000000001",
+            stock=2,
+        )
+        content = (
+            "CATALOGO EXPORTADO DEL SISTEMA ANTERIOR;;;;;;;;\n"
+            "No. articulo;GTIN / EAN;Descripcion comercial;"
+            "Familia de articulos;Marca proveedor;Precio compra;"
+            "Precio publico;Existencia;Punto de reorden\n"
+            "OLD-000001;7500000000001;Martillo actualizado;"
+            "Herramientas;Proveedor Norte;45.20;99.90;18;6\n"
+        ).encode("utf-8")
+
+        response = self.client.post(
+            "/api/products/import/preview",
+            data={"catalog_file": (io.BytesIO(content), "exportacion-erp.csv")},
+            content_type="multipart/form-data",
+        )
+        preview = response.get_json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(preview["mapping"]["sku"], "No. articulo")
+        self.assertEqual(preview["mapping"]["barcode"], "GTIN / EAN")
+        self.assertEqual(
+            preview["mapping"]["name"], "Descripcion comercial"
+        )
+        self.assertEqual(
+            preview["mapping"]["min_stock"], "Punto de reorden"
+        )
+        self.assertEqual(preview["summary"]["updated"], 1)
+        self.assertEqual(
+            self.commit_catalog(
+                content, preview, filename="exportacion-erp.csv"
+            ).status_code,
+            200,
+        )
+        db.session.refresh(existing)
+        self.assertEqual(existing.stock, 18)
+        self.assertEqual(existing.min_stock, 6)
 
     def test_professional_import_is_isolated_between_organizations(self):
         rows = "SHARED-001,0007,Llave inglesa,Herramientas,,70,130,5,2\n"

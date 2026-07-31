@@ -239,6 +239,10 @@ def _inventory_control(organization_id):
                 0,
             ).label("low_stock"),
             func.coalesce(
+                func.sum(case((Product.stock <= 0, 1), else_=0)),
+                0,
+            ).label("out_of_stock"),
+            func.coalesce(
                 func.sum(
                     case(
                         (
@@ -261,6 +265,7 @@ def _inventory_control(organization_id):
         "products": int(row.products or 0),
         "value": money_decimal(row.value or 0),
         "low_stock": int(row.low_stock or 0),
+        "out_of_stock": int(row.out_of_stock or 0),
         "suggested_units": int(row.suggested_units or 0),
     }
 
@@ -618,16 +623,44 @@ def _actionable_snapshot(
                 "tone": "warning",
             }
         )
-    if inventory["low_stock"]:
+    if inventory["out_of_stock"]:
+        attention.append(
+            {
+                "key": "out_of_stock",
+                "priority": 125 + inventory["out_of_stock"],
+                "title": ngettext(
+                    "%(count)s producto está agotado",
+                    "%(count)s productos están agotados",
+                    inventory["out_of_stock"],
+                    count=inventory["out_of_stock"],
+                ),
+                "evidence": gettext(
+                    "Estos productos ya no tienen unidades disponibles."
+                ),
+                "action": gettext(
+                    "Define cuáles reabastecer primero para recuperar ventas."
+                ),
+                "url": _internal_url(
+                    "main.products", out_of_stock=1, source="decisions"
+                ),
+                "action_label": gettext("Reabastecer productos agotados"),
+                "icon": "fa-box-open",
+                "tone": "danger",
+            }
+        )
+    low_stock_available = (
+        inventory["low_stock"] - inventory["out_of_stock"]
+    )
+    if low_stock_available:
         attention.append(
             {
                 "key": "stock",
-                "priority": 90 + inventory["low_stock"],
+                "priority": 90 + low_stock_available,
                 "title": ngettext(
                     "%(count)s producto puede agotarse",
                     "%(count)s productos pueden agotarse",
-                    inventory["low_stock"],
-                    count=inventory["low_stock"],
+                    low_stock_available,
+                    count=low_stock_available,
                 ),
                 "evidence": ngettext(
                     "La reposición sugerida suma %(units)s unidad.",
@@ -638,8 +671,13 @@ def _actionable_snapshot(
                 "action": gettext(
                     "Prioriza la mercancía que ya alcanzó su mínimo."
                 ),
-                "url": _internal_url("main.products", low_stock=1, source="decisions"),
-                "action_label": gettext("Ver productos"),
+                "url": _internal_url(
+                    "main.products",
+                    low_stock=1,
+                    in_stock=1,
+                    source="decisions",
+                ),
+                "action_label": gettext("Preparar reabastecimiento"),
                 "icon": "fa-box-open",
                 "tone": "danger",
             }
@@ -672,7 +710,9 @@ def _actionable_snapshot(
                         source="decisions",
                     )
                 ),
-                "action_label": gettext("Revisar inventario"),
+                "action_label": gettext(
+                    "Decidir qué promover o dejar de comprar"
+                ),
                 "icon": "fa-box-archive",
                 "tone": "neutral",
             }
