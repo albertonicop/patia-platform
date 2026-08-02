@@ -8420,3 +8420,50 @@ msgstr "The invitation expires in 48 hours."
 
 #~ msgid "Total de la venta"
 #~ msgstr "Sale total"
+
+
+msgid "Ventas acumuladas desde el inicio del mes"
+msgstr "Sales accumulated since the start of the month"
+
+msgid "Objetivo definido para este mes"
+msgstr "Goal set for this month"
+
+msgid "Editar meta"
+msgstr "Edit goal"
+
+msgid "Proyección de cierre"
+msgstr "Projected month-end sales"
+
+#, python-format
+msgid "%(change)s%% vs. periodo anterior"
+msgstr "%(change)s%% vs. previous period"
+
+msgid "Ver proyección"
+msgstr "View projection"
+
+msgid "Ventas de los últimos 7 días"
+msgstr "Sales over the last 7 days"
+
+msgid "Ventas frente al periodo anterior"
+msgstr "Sales compared with the previous period"
+
+msgid "Cuando registres tus primeras ventas, aquí verás su evolución diaria."
+msgstr "Once you record your first sales, their daily trend will appear here."
+
+msgid "No detectamos asuntos urgentes en este periodo."
+msgstr "We found no urgent issues during this period."
+
+msgid "Métodos de pago (últimos 7 días)"
+msgstr "Payment methods (last 7 days)"
+
+msgid "Aún no hay pagos registrados"
+msgstr "No payments recorded yet"
+
+msgid "La distribución aparecerá después de tu primera venta."
+msgstr "The breakdown will appear after your first sale."
+
+msgid "Resumen rápido"
+msgstr "Quick summary"
+
+msgid "Periodo anterior"
+msgstr "Previous period"

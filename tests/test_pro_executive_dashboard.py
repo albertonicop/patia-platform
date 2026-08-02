@@ -302,7 +302,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         self.assertEqual(kpis["sales_change"], Decimal("100.0"))
 
     def test_projection_requires_multiple_days_and_sales(self):
-        now = datetime.utcnow()
+        now = datetime(2026, 7, 17, 18, 0, 0)
         for index in range(3):
             self._sale(
                 total="100.00",
@@ -313,6 +313,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         data = build_executive_dashboard(
             self.membership.organization,
             {"period": "this_month"},
+            now_utc=now,
         )
         self.assertIsNotNone(data["monthly_projection"])
 
@@ -321,6 +322,7 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         data = build_executive_dashboard(
             self.membership.organization,
             {"period": "this_month"},
+            now_utc=now,
         )
         self.assertIsNone(data["monthly_projection"])
 

@@ -228,26 +228,6 @@
         </div>
       </article>
 
-      <article class="card reports-v3__panel reports-v3__payments">
-        <header class="reports-v3__panel-head">
-          <div><span>{{ _("Composición") }}</span><h3>{{ _("Métodos de pago") }}</h3></div>
-          <i class="fa-solid fa-wallet" aria-hidden="true"></i>
-        </header>
-        <div class="reports-v3__payment-layout">
-          <div class="reports-v3__chart reports-v3__chart--donut">
-            <canvas id="reportPaymentsChart"></canvas>
-          </div>
-          <ul class="reports-v3__payment-list">
-            {% for payment in payments_report %}
-              <li>
-                <span class="reports-v3__payment-dot reports-v3__payment-dot--{{ payment.key }}" aria-hidden="true"></span>
-                <div><strong>{{ payment.label }}</strong><small>{{ payment.tickets }} {{ _("tickets") }} · {{ "%.1f"|format(payment.percentage) }}%</small></div>
-                <b>{{ payment.amount|money }}</b>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </article>
     </section>
 
     <section class="reports-v3__rankings">
@@ -323,7 +303,6 @@ window.reportAnalytics = {
   advanced: {{ can_use_advanced_reports|tojson }},
   daily: {{ client_daily_report|tojson }},
   previousDaily: {{ (executive_data.executive_chart.previous if executive_data else [])|tojson }},
-  payments: {{ payments_report|tojson }},
   labels: {
     sales: {{ _("Ventas")|tojson }},
     profit: {{ _("Utilidad")|tojson }},

@@ -159,7 +159,11 @@ class ActionableLowStockTests(unittest.TestCase):
             dashboard = self.client.get("/").get_data(as_text=True)
             inventory = self.client.get("/products?low_stock=1").get_data(as_text=True)
 
-        self.assertIn("View products that need attention", dashboard)
+        self.assertIn("Alerts that need attention", dashboard)
+        self.assertIn(
+            "Prioritize the products that have reached their minimum stock.",
+            dashboard,
+        )
         self.assertIn("Products with low stock", dashboard)
         self.assertIn("Restock inventory", dashboard)
         self.assertIn("Quantity received", dashboard)

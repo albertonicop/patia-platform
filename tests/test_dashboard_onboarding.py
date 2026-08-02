@@ -1,5 +1,6 @@
 import os
 import unittest
+from decimal import Decimal
 
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -11,6 +12,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Product, Sale, User
+from app.routes import analytics
 from app.team.services import ensure_owner_organization
 
 
@@ -119,15 +121,17 @@ class DashboardOnboardingTests(unittest.TestCase):
 
         self.assertNotIn("data-onboarding-progress", html)
         self.assertNotIn("Pon PATIA en marcha", html)
-        self.assertIn("Productos más vendidos", html)
+        self.assertIn("Ventas frente al periodo anterior", html)
+        self.assertIn('id="dashboardSalesChart"', html)
+        self.assertIn('id="dashboardPaymentsChart"', html)
 
     def test_inventory_value_uses_current_stock_at_recorded_cost(self):
         user = self.make_user()
         self.add_product(user)
 
-        html = self.dashboard_html()
+        values = analytics(user)
 
-        self.assertIn("$50.00 MXN", html)
+        self.assertEqual(values["inventory_value"], Decimal("50.00"))
 
     def test_single_product_chart_and_profit_explanation_are_rendered(self):
         user = self.make_user()
@@ -150,7 +154,7 @@ class DashboardOnboardingTests(unittest.TestCase):
         self.assertIn("menos el costo registrado", html)
         with open("app/static/js/app.js", encoding="utf-8") as script:
             chart_source = script.read()
-        self.assertIn("isSingleBar", chart_source)
+        self.assertIn("initializeDashboardCharts", chart_source)
         self.assertIn("maxBarThickness", chart_source)
 
 

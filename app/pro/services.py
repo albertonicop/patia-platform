@@ -953,6 +953,7 @@ def build_executive_dashboard(
             "current": current["daily_report"],
             "previous": previous["daily_report"],
         },
+        "payments_report": current["payments_report"],
         "unknown_cost_lines": current["unknown_cost_lines"],
     }
     result.update(

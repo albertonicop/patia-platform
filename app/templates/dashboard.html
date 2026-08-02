@@ -4,36 +4,6 @@
 {% block content %}
 
 <div class="dashboard-v2">
-<section class="dashboard-v2__intro">
-  <div class="dashboard-v2__intro-copy">
-    <span class="dashboard-v2__kicker">{{ _("Resumen de hoy") }}</span>
-    {% if not cash_session %}
-      <h2>{{ _("Abre la caja para comenzar a vender hoy.") }}</h2>
-      <p>{{ _("Tu inventario y saldos están listos; el siguiente paso operativo es preparar la caja del día.") }}</p>
-    {% elif low_stock %}
-      <h2>{% trans count=low_stock %}Hay {{ count }} producto que conviene surtir.{% pluralize %}Hay {{ count }} productos que conviene surtir.{% endtrans %}</h2>
-      <p>{{ _("Revísalos antes del próximo pedido para reducir el riesgo de perder ventas.") }}</p>
-    {% elif total_credit_pending > 0 %}
-      <h2>{{ _("La operación está al día; hay saldos por cobrar.") }}</h2>
-      <p>{{ _("Revisa quién tiene pagos pendientes y registra los abonos recibidos.") }}</p>
-    {% else %}
-      <h2>{{ _("Tu operación está en orden para continuar.") }}</h2>
-      <p>{{ _("La caja está abierta y no detectamos faltantes ni cobros pendientes que requieran atención inmediata.") }}</p>
-    {% endif %}
-
-    <a class="btn dashboard-v2__sell-primary" href="{{ url_for('main.sell') }}">
-      <i class="fa-solid fa-cash-register" aria-hidden="true"></i>
-      {{ _("Hacer una venta") }}
-    </a>
-  </div>
-
-  <div class="dashboard-v2__signal" aria-hidden="true">
-    <span>{{ _("Visión ejecutiva") }}</span>
-    <strong>{{ _("PATIA") }}</strong>
-    <div class="dashboard-v2__signal-line"></div>
-  </div>
-</section>
-
 {% if show_onboarding %}
 <section class="dashboard-v2__onboarding" aria-labelledby="onboarding-title" data-onboarding-progress="{{ onboarding_progress }}">
   <header class="dashboard-v2__onboarding-head">
@@ -80,70 +50,66 @@
 </section>
 {% endif %}
 
-<section class="dashboard-v2__metrics dashboard-v2__metrics--daily" aria-label="{{ _('Lo importante de hoy') }}">
-  <article class="dashboard-v2__metric dashboard-v2__metric--violet">
-    <div class="dashboard-v2__metric-head">
-      <span>{{ _("Ventas hoy") }}</span>
-      <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
-    </div>
-    <strong>{{ today_sales|money }}</strong>
-    <small>{{ _("Actividad del día") }}</small>
+<section class="dashboard-v3__summary" aria-label="{{ _('Resumen ejecutivo') }}">
+  <article class="dashboard-v3__summary-card">
+    <span>{{ _("Ventas del mes") }}</span>
+    <strong>{{ dashboard_executive.monthly_sales|money }}</strong>
+    {% if dashboard_executive.monthly_goal %}
+      <div class="dashboard-v3__progress" role="progressbar"
+           aria-label="{{ _('Avance de la meta mensual') }}"
+           aria-valuemin="0" aria-valuemax="100"
+           aria-valuenow="{{ [dashboard_executive.monthly_goal_progress or 0, 100]|min }}">
+        <span style="width: {{ [dashboard_executive.monthly_goal_progress or 0, 100]|min }}%"></span>
+      </div>
+      <small>{{ _("%(progress)s%% de la meta alcanzada", progress=("%.1f"|format(dashboard_executive.monthly_goal_progress or 0))) }}</small>
+    {% else %}
+      <small>{{ _("Ventas acumuladas desde el inicio del mes") }}</small>
+    {% endif %}
+    <a href="{{ url_for('main.reports', period='this_month') }}">{{ _("Ver reportes") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
   </article>
 
-  <article class="dashboard-v2__metric dashboard-v2__metric--blue">
-    <div class="dashboard-v2__metric-head">
-      <span>{{ _("En caja debería haber") }}</span>
-      <i class="fa-solid fa-vault" aria-hidden="true"></i>
-    </div>
-    {% if cash_session %}
-      <strong>{{ cash_expected|money }}</strong>
-      <small>{{ _("Efectivo calculado durante el turno") }}</small>
+  <article class="dashboard-v3__summary-card">
+    {% if can_use_advanced_reports %}
+      <span>{{ _("Meta mensual") }}</span>
+      {% if dashboard_executive.monthly_goal %}
+        <strong>{{ dashboard_executive.monthly_goal|money }}</strong>
+        <small>{{ _("Objetivo definido para este mes") }}</small>
+      {% else %}
+        <strong>—</strong>
+        <small>{{ _("Define cuánto quieres vender este mes") }}</small>
+      {% endif %}
+      <a href="{{ url_for('main.reports', period='this_month', _anchor='monthly-goal') }}">{{ _("Editar meta") if dashboard_executive.monthly_goal else _("Definir meta") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
     {% else %}
-      <strong>—</strong>
-      <small>{{ _("Tu caja todavía no está abierta.") }}</small>
+      <span>{{ _("En caja debería haber") }}</span>
+      <strong>{{ cash_expected|money if cash_session else '—' }}</strong>
+      <small>{{ _("Efectivo calculado durante el turno") if cash_session else _("Tu caja todavía no está abierta.") }}</small>
+      <a href="{{ url_for('cash.index') }}">{{ _("Ver caja") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
     {% endif %}
   </article>
 
-  {% if total_credit_pending > 0 %}
-  <article class="dashboard-v2__metric dashboard-v2__metric--green">
-    <div class="dashboard-v2__metric-head">
+  <article class="dashboard-v3__summary-card dashboard-v3__summary-card--projection">
+    {% if can_use_advanced_reports %}
+      <span>{{ _("Proyección de cierre") }}</span>
+      {% if dashboard_executive.monthly_projection is not none %}
+        <strong>{{ dashboard_executive.monthly_projection|money }}</strong>
+        {% if dashboard_executive.executive_kpis.sales_change is not none %}
+          <small class="{{ 'is-positive' if dashboard_executive.executive_kpis.sales_change >= 0 else 'is-negative' }}">
+            <i class="fa-solid {{ 'fa-arrow-trend-up' if dashboard_executive.executive_kpis.sales_change >= 0 else 'fa-arrow-trend-down' }}" aria-hidden="true"></i>
+            {{ _("%(change)s%% vs. periodo anterior", change=("%+.1f"|format(dashboard_executive.executive_kpis.sales_change))) }}
+          </small>
+        {% endif %}
+      {% else %}
+        <strong>—</strong>
+        <small>{{ _("Aún no hay suficiente actividad para proyectar") }}</small>
+      {% endif %}
+      <a href="{{ url_for('main.reports', period='this_month') }}">{{ _("Ver proyección") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    {% else %}
       <span>{{ _("Dinero por cobrar") }}</span>
-      <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>
-    </div>
-    <strong>{{ total_credit_pending|money }}</strong>
-    <small>{{ _("Saldo pendiente de tus clientes") }}</small>
+      <strong>{{ total_credit_pending|money }}</strong>
+      <small>{{ _("Saldo pendiente de tus clientes") }}</small>
+      <a href="{{ url_for('credit.index') }}">{{ _("Ver saldos") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    {% endif %}
   </article>
-  {% else %}
-  <div class="dashboard-v2__metric dashboard-v2__metric--clear">
-    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-    <span>{{ _("No tienes pagos pendientes") }}</span>
-  </div>
-  {% endif %}
-
-  <button class="dashboard-v2__metric dashboard-v2__metric--coral dashboard-v2__metric--action"
-          type="button"
-          id="low-stock-open"
-          aria-haspopup="dialog"
-          aria-controls="low-stock-dialog">
-    <div class="dashboard-v2__metric-head">
-      <span>{{ _("Productos por surtir") }}</span>
-      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-    </div>
-    <strong>{{ low_stock }}</strong>
-    <small>{{ _("Ver productos que requieren atención") }} · {{ _("Valor actual: %(value)s", value=inventory_value|money) }}</small>
-  </button>
-</section>
-
-<section class="dashboard-v2__action-alerts" aria-label="{{ _('Acciones pendientes') }}">
-  {% if not cash_session %}
-    <article><div><i class="fa-solid fa-vault" aria-hidden="true"></i><strong>{{ _("Tu caja está cerrada") }}</strong></div><a class="btn ghost" href="{{ url_for('cash.index') }}">{{ _("Abrir caja") }}</a></article>
-  {% endif %}
-  {% if low_stock %}
-    <article><div><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><strong>{% trans count=low_stock %}{{ count }} producto necesita surtirse{% pluralize %}{{ count }} productos necesitan surtirse{% endtrans %}</strong></div><a class="btn ghost" href="{{ url_for('main.products', low_stock=1) }}">{{ _("Ver productos") }}</a></article>
-  {% endif %}
-  {% if total_credit_pending > 0 %}
-    <article><div><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i><strong>{{ _("Hay pagos pendientes de clientes") }}</strong></div><a class="btn ghost" href="{{ url_for('credit.index') }}">{{ _("Ver saldos") }}</a></article>
-  {% endif %}
 </section>
 
 {% if total_products == 0 %}
@@ -265,45 +231,90 @@
   </form>
 </dialog>
 
-<section class="dashboard-v2__workspace">
-  <article class="dashboard-v2__panel dashboard-v2__chart-panel">
-    <header class="dashboard-v2__section-head">
-      <div>
-        <span>{{ _("Rendimiento") }}</span>
-        <h3>{{ _("Productos más vendidos") }}</h3>
-      </div>
-      <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
-    </header>
+<section class="dashboard-v3__analysis">
+  <div class="dashboard-v3__main-column">
+    <article class="dashboard-v2__panel dashboard-v3__trend-panel">
+      <header class="dashboard-v2__section-head">
+        <div>
+          <span>{{ _("Ventas de los últimos 7 días") }}</span>
+          <h3>{{ _("Ventas frente al periodo anterior") }}</h3>
+        </div>
+        <span class="dashboard-v3__period-chip">{{ _("Últimos 7 días") }}</span>
+      </header>
 
-    <div class="chart-box dashboard-v2__chart-box">
-      {% if top_products %}
-        <canvas id="topProducts"></canvas>
+      {% if dashboard_executive.executive_kpis.ticket_count %}
+        <div class="dashboard-v3__trend-chart"><canvas id="dashboardSalesChart"></canvas></div>
       {% else %}
         <div class="dashboard-v2__chart-empty module-empty-v2">
-          <span class="dashboard-v2__chart-empty-icon" aria-hidden="true">
-            <i class="fa-solid fa-chart-column"></i>
-          </span>
-          <div>
-            <h4>{{ _("Aún no hay ventas para mostrar") }}</h4>
-            <p>{{ _("Cuando registres tus primeras ventas, aquí verás el rendimiento de tus productos.") }}</p>
-          </div>
+          <span class="dashboard-v2__chart-empty-icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span>
+          <div><h4>{{ _("Aún no hay ventas para mostrar") }}</h4><p>{{ _("Cuando registres tus primeras ventas, aquí verás su evolución diaria.") }}</p></div>
         </div>
       {% endif %}
-    </div>
-  </article>
+    </article>
 
-  <aside class="dashboard-v2__panel dashboard-v2__copilot">
+    <div class="dashboard-v3__lower-grid">
+      <article id="alertas-operativas" class="dashboard-v2__panel dashboard-v3__alerts-card">
+        <header class="dashboard-v2__section-head">
+          <div><span>{{ _("Operación") }}</span><h3>{{ _("Alertas que requieren atención") }}</h3></div>
+          <i class="fa-regular fa-bell" aria-hidden="true"></i>
+        </header>
+        {% if dashboard_executive.executive_attention %}
+          <div class="dashboard-v3__alerts-list">
+            {% for item in dashboard_executive.executive_attention[:3] %}
+              {% if item.key in ['stock', 'out_of_stock'] %}
+                <button type="button" data-open-low-stock
+                        aria-haspopup="dialog" aria-controls="low-stock-dialog">
+                  <span class="dashboard-v3__alert-dot dashboard-v3__alert-dot--{{ item.tone }}" aria-hidden="true"></span>
+                  <span><strong>{{ item.title }}</strong><small>{{ item.action }}</small></span>
+                  <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                </button>
+              {% else %}
+                <a href="{{ item.url }}">
+                  <span class="dashboard-v3__alert-dot dashboard-v3__alert-dot--{{ item.tone }}" aria-hidden="true"></span>
+                  <span><strong>{{ item.title }}</strong><small>{{ item.action }}</small></span>
+                  <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="dashboard-v3__compact-empty"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>{{ _("Todo bajo control") }}</strong><small>{{ _("No detectamos asuntos urgentes en este periodo.") }}</small></span></div>
+        {% endif %}
+      </article>
+
+      <article class="dashboard-v2__panel dashboard-v3__payments-card">
+        <header class="dashboard-v2__section-head">
+          <div><span>{{ _("Composición") }}</span><h3>{{ _("Métodos de pago (últimos 7 días)") }}</h3></div>
+          <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+        </header>
+        {% if dashboard_executive.executive_kpis.ticket_count %}
+          <div class="dashboard-v3__payments-layout">
+            <div class="dashboard-v3__payments-chart"><canvas id="dashboardPaymentsChart"></canvas></div>
+            <ul>
+              {% for payment in dashboard_executive.payments_report %}
+                <li><span class="dashboard-v3__payment-dot dashboard-v3__payment-dot--{{ payment.key }}" aria-hidden="true"></span><div><strong>{{ payment.label }}</strong><small>{{ "%.1f"|format(payment.percentage) }}%</small></div><b>{{ payment.amount|money }}</b></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% else %}
+          <div class="dashboard-v3__compact-empty"><i class="fa-solid fa-wallet" aria-hidden="true"></i><span><strong>{{ _("Aún no hay pagos registrados") }}</strong><small>{{ _("La distribución aparecerá después de tu primera venta.") }}</small></span></div>
+        {% endif %}
+      </article>
+    </div>
+  </div>
+
+  <aside class="dashboard-v2__panel dashboard-v2__copilot dashboard-v3__quick-summary">
     <header class="dashboard-v2__section-head">
       <div>
-        <span>{{ _("Datos explicados") }}</span>
-        <h3>{{ _("Lectura de tu negocio") }}</h3>
+        <span>{{ _("Lectura de tu negocio") }}</span>
+        <h3>{{ _("Resumen rápido") }}</h3>
       </div>
       <i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i>
     </header>
 
     <div class="dashboard-v2__recommendations">
       {% if recommendations %}
-        {% for r in recommendations %}
+        {% for r in recommendations[:2] %}
           <div class="dashboard-v2__recommendation">
             <span aria-hidden="true"></span>
             <div>
@@ -336,64 +347,24 @@
       </p>
     {% endif %}
 
-    {% if not current_plan_entitlements.advanced_reports %}
-      <div class="pro-feature-card dashboard-v2__upgrade">
-        <h4>
-          <i class="fa-solid fa-chart-line"></i>
-          {{ _("Predicción de inventario") }}
-        </h4>
-
-        <p>
-          {{ _("PATIA analiza tus ventas para ayudarte a decidir qué reabastecer y qué productos requieren atención.") }}
-        </p>
-
-        <a href="/subscribe" class="btn">
-          {{ _("Conocer PATIA Pro") }}
-        </a>
-      </div>
-    {% endif %}
   </aside>
-</section>
-
-<section id="alertas-operativas" class="dashboard-v2__panel dashboard-v2__alerts-panel">
-  <header class="dashboard-v2__section-head">
-    <div>
-      <span>{{ _("Operación") }}</span>
-      <h3>{{ _("Alertas que requieren atención") }}</h3>
-    </div>
-    <i class="fa-regular fa-bell" aria-hidden="true"></i>
-  </header>
-
-  {% if alerts %}
-    <div class="alerts dashboard-v2__alerts">
-      {% for a in alerts %}
-        <div class="alert {{ a.type }} dashboard-v2__alert">
-          <span class="dashboard-v2__alert-indicator" aria-hidden="true"></span>
-          <div>
-            <b>{{ a.title }}</b>
-            <span>{{ a.text }}</span>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state dashboard-v2__empty module-empty-v2">
-      <h4>
-        <i class="fa-solid fa-circle-check"></i>
-        {{ _("Todo bajo control") }}
-      </h4>
-      <p>{{ _("No hay productos con stock crítico en este momento.") }}</p>
-    </div>
-  {% endif %}
 </section>
 </div>
 
 <script>
-  window.topLabels = {{ top_products | map(attribute='name') | list | tojson }};
-  window.topValues = {{ top_products | map(attribute='qty') | list | tojson }};
+  window.dashboardAnalytics = {
+    current: {{ dashboard_executive.executive_chart.current|tojson }},
+    previous: {{ dashboard_executive.executive_chart.previous|tojson }},
+    payments: {{ dashboard_executive.payments_report|tojson }},
+    labels: {
+      sales: {{ _("Ventas")|tojson }},
+      previous: {{ _("Periodo anterior")|tojson }},
+      tickets: {{ _("Tickets")|tojson }}
+    }
+  };
 
   const lowStockDialog = document.getElementById("low-stock-dialog");
-  const lowStockOpen = document.getElementById("low-stock-open");
+  const lowStockOpen = document.querySelectorAll("[data-open-low-stock]");
   const lowStockClose = lowStockDialog.querySelector("[data-close-low-stock]");
   const restockDialog = document.getElementById("restock-dialog");
   const restockForm = document.getElementById("restock-form");
@@ -405,7 +376,7 @@
   const restockSubmittingLabel = {{ _("Actualizando inventario…")|tojson }};
   let restockBaseStock = 0;
 
-  lowStockOpen.addEventListener("click", () => lowStockDialog.showModal());
+  lowStockOpen.forEach((button) => button.addEventListener("click", () => lowStockDialog.showModal()));
   lowStockClose.addEventListener("click", () => lowStockDialog.close());
   lowStockDialog.addEventListener("click", (event) => {
     if (event.target === lowStockDialog) {

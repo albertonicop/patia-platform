@@ -99,9 +99,16 @@ class PhaseEExperienceTests(unittest.TestCase):
         html = self.client.get("/reports").get_data(as_text=True)
 
         self.assertIn('id="reportTrendChart"', html)
-        self.assertIn('id="reportPaymentsChart"', html)
+        self.assertNotIn('id="reportPaymentsChart"', html)
         self.assertIn("window.reportAnalytics", html)
         self.assertIn("Producto reporte", html)
+
+        dashboard = self.client.get("/").get_data(as_text=True)
+        self.assertIn('id="dashboardSalesChart"', dashboard)
+        self.assertIn('id="dashboardPaymentsChart"', dashboard)
+        self.assertIn("Métodos de pago", dashboard)
+        self.assertIn("Efectivo", dashboard)
+        self.assertIn("Tarjeta", dashboard)
 
     def test_empty_recommendations_have_useful_state(self):
         self.login_user(pro=True)
@@ -145,7 +152,7 @@ class PhaseEExperienceTests(unittest.TestCase):
         self.assertIn("Abrir producto", html)
         self.assertIn(f'href="/products/{product.id}/edit"', html)
         self.assertIn("Pulso PATIA", html)
-        self.assertIn("Ver qué surtir", html)
+        self.assertIn("Ver inventario filtrado", html)
         self.assertNotIn("Copiloto PATIA", html)
 
     def test_navigation_marks_active_section_and_has_mobile_toggle(self):

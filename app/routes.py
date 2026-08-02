@@ -1688,6 +1688,14 @@ def dashboard():
         return access_block
     dashboard_data = analytics(user)
     owner = membership.organization.owner
+    from .plans import has_entitlement
+    from .pro.services import build_executive_dashboard
+
+    can_use_advanced_reports = has_entitlement(owner, "advanced_reports")
+    dashboard_executive = build_executive_dashboard(
+        membership.organization,
+        {"period": "7d"},
+    )
     has_basic_data = all(
         (owner.company_name, owner.phone, owner.city, owner.state)
     )
@@ -1744,6 +1752,9 @@ def dashboard():
         onboarding_completed=onboarding_completed,
         onboarding_progress=onboarding_progress,
         show_onboarding=not has_products or not has_sales,
+        dashboard_executive=dashboard_executive,
+        can_use_advanced_reports=can_use_advanced_reports,
+        can_edit_goal=has_permission(membership, "manage_subscription"),
         **dashboard_data,
     )
 

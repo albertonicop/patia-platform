@@ -133,43 +133,6 @@ function initializeReportCharts() {
         });
     }
 
-    const paymentCanvas = document.getElementById("reportPaymentsChart");
-    if (paymentCanvas) {
-        new Chart(paymentCanvas, {
-            type: "doughnut",
-            data: {
-                labels: report.payments.map(payment => payment.label),
-                datasets: [{
-                    data: report.payments.map(payment => payment.amount),
-                    backgroundColor: ["#6956e8", "#2e8bd3", "#20a88a", "#e6aa45"],
-                    borderColor: "#ffffff",
-                    borderWidth: 3,
-                    hoverOffset: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {duration: 220},
-                cutout: "68%",
-                plugins: {
-                    legend: {display: false},
-                    tooltip: {
-                        backgroundColor: "#202435",
-                        padding: 12,
-                        cornerRadius: 10,
-                        titleFont: {weight: "700"},
-                        callbacks: {
-                            label: context => {
-                                const payment = report.payments[context.dataIndex];
-                                return `${payment.label}: ${reportMoney(payment.amount)} · ${payment.percentage}% · ${payment.tickets} ${report.labels.tickets.toLowerCase()}`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
 }
 
 function initializeExecutiveChart() {
@@ -282,8 +245,97 @@ function initializeCustomReportPeriod() {
     });
 }
 
+function initializeDashboardCharts() {
+    const analytics = window.dashboardAnalytics;
+    if (!analytics || typeof Chart === "undefined") return;
+    const locale = document.documentElement.lang === "en" ? "en-US" : "es-MX";
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const labels = analytics.current.map(point => new Date(`${point.date}T12:00:00`).toLocaleDateString(
+        locale,
+        {day: "numeric", month: "short"}
+    ));
+
+    const salesCanvas = document.getElementById("dashboardSalesChart");
+    if (salesCanvas) {
+        new Chart(salesCanvas, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: analytics.labels.sales,
+                        data: analytics.current.map(point => Number(point.sales)),
+                        backgroundColor: "rgba(105, 86, 232, .92)",
+                        borderRadius: 7,
+                        borderSkipped: false,
+                        maxBarThickness: 42,
+                        order: 1
+                    },
+                    {
+                        label: analytics.labels.previous,
+                        data: analytics.previous.map(point => Number(point.sales)),
+                        backgroundColor: "rgba(255, 255, 255, .4)",
+                        borderColor: "#c7ccda",
+                        borderWidth: 1.5,
+                        borderDash: [6, 5],
+                        borderRadius: 7,
+                        borderSkipped: false,
+                        maxBarThickness: 42,
+                        order: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {duration: reducedMotion ? 0 : 200},
+                interaction: {mode: "index", intersect: false},
+                plugins: {
+                    legend: {position: "bottom", labels: {usePointStyle: true, padding: 18, color: "#555d70"}},
+                    tooltip: {callbacks: {label: context => `${context.dataset.label}: ${reportMoney(context.raw)}`}}
+                },
+                scales: {
+                    x: {grid: {display: false}, ticks: {color: "#687085"}},
+                    y: {beginAtZero: true, grid: {color: "rgba(218, 222, 232, .7)"}, ticks: {color: "#687085", callback: value => reportMoney(value)}}
+                }
+            }
+        });
+    }
+
+    const paymentsCanvas = document.getElementById("dashboardPaymentsChart");
+    if (paymentsCanvas) {
+        new Chart(paymentsCanvas, {
+            type: "doughnut",
+            data: {
+                labels: analytics.payments.map(payment => payment.label),
+                datasets: [{
+                    data: analytics.payments.map(payment => Number(payment.amount)),
+                    backgroundColor: ["#6956e8", "#2e9ed3", "#52b77b", "#eca73b", "#e18749"],
+                    borderColor: "#fff",
+                    borderWidth: 3,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {duration: reducedMotion ? 0 : 200},
+                cutout: "66%",
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {callbacks: {label: context => {
+                        const payment = analytics.payments[context.dataIndex];
+                        return `${payment.label}: ${reportMoney(payment.amount)} · ${payment.percentage}%`;
+                    }}}
+                }
+            }
+        });
+    }
+}
+
 initializeReportCharts();
 initializeExecutiveChart();
+initializeDashboardCharts();
 initializeCustomReportPeriod();
 
 function initializePatiaSelects() {

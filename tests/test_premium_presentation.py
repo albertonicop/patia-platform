@@ -109,7 +109,7 @@ class PremiumPresentationTests(unittest.TestCase):
             "landing.html", "legal.html", "reset_password.html",
         )
         for name in consumers:
-            self.assertIn("styles.css') }}?v=130", self.template(name), name)
+            self.assertIn("styles.css') }}?v=131", self.template(name), name)
 
     def test_sidebar_keeps_distinct_pro_routes_without_legacy_dashboard(self):
         base = self.template("base.html")
