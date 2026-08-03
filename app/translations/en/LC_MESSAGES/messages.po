@@ -8421,7 +8421,6 @@ msgstr "The invitation expires in 48 hours."
 #~ msgid "Total de la venta"
 #~ msgstr "Sale total"
 
-
 msgid "Ventas acumuladas desde el inicio del mes"
 msgstr "Sales accumulated since the start of the month"
 
@@ -8467,3 +8466,30 @@ msgstr "Quick summary"
 
 msgid "Periodo anterior"
 msgstr "Previous period"
+
+msgid "Ventas de hoy"
+msgstr "Today's sales"
+
+#, python-format
+msgid "%(count)s ticket registrado hoy"
+msgstr "%(count)s ticket recorded today"
+
+#, python-format
+msgid "%(count)s tickets registrados hoy"
+msgstr "%(count)s tickets recorded today"
+
+msgid "Ver ventas del día"
+msgstr "View today's sales"
+
+#, python-format
+msgid "%(change)s%% vs. mes anterior"
+msgstr "%(change)s%% vs. previous month"
+
+msgid "Aún no hay un mes anterior comparable."
+msgstr "There is no comparable previous month yet."
+
+msgid "Aún no hay ventas este mes."
+msgstr "There are no sales this month yet."
+
+msgid "Ver análisis"
+msgstr "View analysis"

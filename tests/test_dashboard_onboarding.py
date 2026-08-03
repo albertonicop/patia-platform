@@ -1,5 +1,6 @@
 import os
 import unittest
+from datetime import timedelta
 from decimal import Decimal
 
 
@@ -14,6 +15,7 @@ from app import create_app, db
 from app.models import Product, Sale, User
 from app.routes import analytics
 from app.team.services import ensure_owner_organization
+from app.timezones import local_date_bounds_utc, local_today
 
 
 class DashboardOnboardingTests(unittest.TestCase):
@@ -77,6 +79,20 @@ class DashboardOnboardingTests(unittest.TestCase):
         db.session.commit()
         return product
 
+    def add_sale(self, user, product, *, total, created_at, ticket_id):
+        sale = Sale(
+            organization_id=user.organization_memberships[0].organization_id,
+            user_id=user.id,
+            product_id=product.id,
+            quantity=1,
+            unit_price=Decimal(total),
+            total=Decimal(total),
+            ticket_id=ticket_id,
+            created_at=created_at,
+        )
+        db.session.add(sale)
+        return sale
+
     def dashboard_html(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
@@ -124,6 +140,8 @@ class DashboardOnboardingTests(unittest.TestCase):
         self.assertIn("Ventas frente al periodo anterior", html)
         self.assertIn('id="dashboardSalesChart"', html)
         self.assertIn('id="dashboardPaymentsChart"', html)
+        self.assertIn("1 ticket registrado hoy", html)
+        self.assertIn("Aún no hay un mes anterior comparable.", html)
 
     def test_inventory_value_uses_current_stock_at_recorded_cost(self):
         user = self.make_user()
@@ -132,6 +150,103 @@ class DashboardOnboardingTests(unittest.TestCase):
         values = analytics(user)
 
         self.assertEqual(values["inventory_value"], Decimal("50.00"))
+
+    def test_top_cards_use_today_month_and_average_ticket_metrics(self):
+        user = self.make_user()
+        product = self.add_product(user)
+        timezone_name = user.organization_memberships[0].organization.timezone
+        today = local_today(timezone_name)
+        today_start, _ = local_date_bounds_utc(
+            today,
+            today + timedelta(days=1),
+            timezone_name,
+        )
+        current_month = today.replace(day=1)
+        previous_month_last = current_month - timedelta(days=1)
+        previous_month_start, _ = local_date_bounds_utc(
+            previous_month_last.replace(day=1),
+            current_month,
+            timezone_name,
+        )
+
+        self.add_sale(
+            user,
+            product,
+            total="10.00",
+            created_at=today_start + timedelta(hours=8),
+            ticket_id="today-ticket-a",
+        )
+        self.add_sale(
+            user,
+            product,
+            total="20.00",
+            created_at=today_start + timedelta(hours=8, minutes=1),
+            ticket_id="today-ticket-a",
+        )
+        self.add_sale(
+            user,
+            product,
+            total="20.00",
+            created_at=today_start + timedelta(hours=9),
+            ticket_id="today-ticket-b",
+        )
+        self.add_sale(
+            user,
+            product,
+            total="20.00",
+            created_at=previous_month_start + timedelta(days=1, hours=8),
+            ticket_id="previous-ticket-a",
+        )
+        self.add_sale(
+            user,
+            product,
+            total="20.00",
+            created_at=previous_month_start + timedelta(days=2, hours=8),
+            ticket_id="previous-ticket-b",
+        )
+        db.session.commit()
+
+        with self.app.test_request_context("/"):
+            values = analytics(user)["dashboard_summary"]
+        self.assertEqual(Decimal("50.00"), values["today_sales"])
+        self.assertEqual(2, values["today_tickets"])
+        self.assertEqual(Decimal("50.00"), values["month_sales"])
+        self.assertEqual(2, values["month_tickets"])
+        self.assertEqual(Decimal("25.00"), values["month_average_ticket"])
+        self.assertEqual(Decimal("25.0"), values["month_sales_change"])
+        self.assertEqual(Decimal("25.0"), values["month_average_change"])
+
+        html = self.dashboard_html()
+        self.assertIn("Ventas de hoy", html)
+        self.assertIn("2 tickets registrados hoy", html)
+        self.assertIn('href="/reports?period=today"', html)
+        self.assertIn("Ventas del mes", html)
+        self.assertIn("Ticket promedio", html)
+        self.assertGreaterEqual(html.count("+25.0% vs. mes anterior"), 2)
+        self.assertGreaterEqual(
+            html.count('href="/reports?period=this_month"'),
+            2,
+        )
+        self.assertNotIn(">Meta mensual<", html)
+        self.assertNotIn("Proyección de cierre", html)
+
+    def test_top_cards_explain_missing_comparison_and_empty_sales(self):
+        user = self.make_user()
+
+        with self.app.test_request_context("/"):
+            values = analytics(user)["dashboard_summary"]
+        self.assertEqual(Decimal("0.00"), values["today_sales"])
+        self.assertEqual(0, values["today_tickets"])
+        self.assertEqual(Decimal("0.00"), values["month_sales"])
+        self.assertEqual(Decimal("0.00"), values["month_average_ticket"])
+        self.assertIsNone(values["month_sales_change"])
+        self.assertIsNone(values["month_average_change"])
+
+        html = self.dashboard_html()
+        self.assertIn("0 tickets registrados hoy", html)
+        self.assertIn("Aún no hay ventas este mes.", html)
+        self.assertIn("Aún no hay un mes anterior comparable.", html)
+        self.assertNotIn("0.0% vs. mes anterior", html)
 
     def test_single_product_chart_and_profit_explanation_are_rendered(self):
         user = self.make_user()

@@ -1100,6 +1100,47 @@ def compact_money_filter(value):
     return f"${amount:,.{decimals}f} MXN"
 
 
+def _dashboard_sales_summary(organization_id, start_at, end_before):
+    """Return sales and grouped-ticket totals for one dashboard period."""
+    totals = (
+        db.session.query(
+            func.coalesce(func.sum(Sale.total), 0).label("sales"),
+            (
+                func.count(func.distinct(Sale.ticket_id))
+                + func.coalesce(
+                    func.sum(
+                        case((Sale.ticket_id.is_(None), 1), else_=0)
+                    ),
+                    0,
+                )
+            ).label("tickets"),
+        )
+        .filter(
+            Sale.organization_id == organization_id,
+            Sale.created_at >= start_at,
+            Sale.created_at < end_before,
+        )
+        .one()
+    )
+    sales = money_decimal(totals.sales or 0)
+    tickets = int(totals.tickets or 0)
+    return {
+        "sales": sales,
+        "tickets": tickets,
+        "average_ticket": money_decimal(
+            sales / tickets if tickets else MONEY_ZERO
+        ),
+    }
+
+
+def _dashboard_percentage_change(current, previous):
+    previous = money_decimal(previous or 0, nonnegative=False)
+    if previous == MONEY_ZERO:
+        return None
+    current = money_decimal(current or 0, nonnegative=False)
+    return round((current - previous) / previous * 100, 1)
+
+
 def analytics(user=None):
     user = user or current_user()
     organization_id = current_organization_id(user)
@@ -1117,6 +1158,20 @@ def analytics(user=None):
     week_start, week_end = local_date_bounds_utc(
         today - timedelta(days=6),
         today + timedelta(days=1),
+        timezone_name,
+    )
+    month_start_date = today.replace(day=1)
+    previous_month_end_date = month_start_date
+    previous_month_last_date = month_start_date - timedelta(days=1)
+    previous_month_start_date = previous_month_last_date.replace(day=1)
+    month_start, month_end = local_date_bounds_utc(
+        month_start_date,
+        today + timedelta(days=1),
+        timezone_name,
+    )
+    previous_month_start, previous_month_end = local_date_bounds_utc(
+        previous_month_start_date,
+        previous_month_end_date,
         timezone_name,
     )
 
@@ -1155,11 +1210,36 @@ def analytics(user=None):
         or MONEY_ZERO
     )
 
-    today_sales = db.session.query(func.sum(Sale.total)).filter(
-        Sale.organization_id == organization_id,
-        Sale.created_at >= start,
-        Sale.created_at < tomorrow,
-    ).scalar() or 0
+    today_summary = _dashboard_sales_summary(
+        organization_id,
+        start,
+        tomorrow,
+    )
+    month_summary = _dashboard_sales_summary(
+        organization_id,
+        month_start,
+        month_end,
+    )
+    previous_month_summary = _dashboard_sales_summary(
+        organization_id,
+        previous_month_start,
+        previous_month_end,
+    )
+    dashboard_summary = {
+        "today_sales": today_summary["sales"],
+        "today_tickets": today_summary["tickets"],
+        "month_sales": month_summary["sales"],
+        "month_tickets": month_summary["tickets"],
+        "month_sales_change": _dashboard_percentage_change(
+            month_summary["sales"],
+            previous_month_summary["sales"],
+        ),
+        "month_average_ticket": month_summary["average_ticket"],
+        "month_average_change": _dashboard_percentage_change(
+            month_summary["average_ticket"],
+            previous_month_summary["average_ticket"],
+        ),
+    }
 
     week_sales = db.session.query(func.sum(Sale.total)).filter(
         Sale.organization_id == organization_id,
@@ -1330,7 +1410,8 @@ def analytics(user=None):
         inventory_value=inventory_value,
         low_stock=low_stock,
         low_stock_products=low_stock_products,
-        today_sales=today_sales,
+        today_sales=today_summary["sales"],
+        dashboard_summary=dashboard_summary,
         week_sales=week_sales,
         profit=profit,
         cash_session=cash_session,

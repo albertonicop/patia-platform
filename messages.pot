@@ -8107,7 +8107,6 @@ msgstr ""
 msgid "La invitación vence en 48 horas."
 msgstr ""
 
-
 msgid "Ventas acumuladas desde el inicio del mes"
 msgstr ""
 
@@ -8152,4 +8151,31 @@ msgid "Resumen rápido"
 msgstr ""
 
 msgid "Periodo anterior"
+msgstr ""
+
+msgid "Ventas de hoy"
+msgstr ""
+
+#, python-format
+msgid "%(count)s ticket registrado hoy"
+msgstr ""
+
+#, python-format
+msgid "%(count)s tickets registrados hoy"
+msgstr ""
+
+msgid "Ver ventas del día"
+msgstr ""
+
+#, python-format
+msgid "%(change)s%% vs. mes anterior"
+msgstr ""
+
+msgid "Aún no hay un mes anterior comparable."
+msgstr ""
+
+msgid "Aún no hay ventas este mes."
+msgstr ""
+
+msgid "Ver análisis"
 msgstr ""

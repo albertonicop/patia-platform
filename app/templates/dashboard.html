@@ -52,63 +52,42 @@
 
 <section class="dashboard-v3__summary" aria-label="{{ _('Resumen ejecutivo') }}">
   <article class="dashboard-v3__summary-card">
+    <span>{{ _("Ventas de hoy") }}</span>
+    <strong>{{ dashboard_summary.today_sales|money }}</strong>
+    <small>
+      {{ _("%(count)s ticket registrado hoy", count=dashboard_summary.today_tickets) if dashboard_summary.today_tickets == 1 else _("%(count)s tickets registrados hoy", count=dashboard_summary.today_tickets) }}
+    </small>
+    <a href="{{ url_for('main.reports', period='today') }}">{{ _("Ver ventas del día") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+  </article>
+
+  <article class="dashboard-v3__summary-card">
     <span>{{ _("Ventas del mes") }}</span>
-    <strong>{{ dashboard_executive.monthly_sales|money }}</strong>
-    {% if dashboard_executive.monthly_goal %}
-      <div class="dashboard-v3__progress" role="progressbar"
-           aria-label="{{ _('Avance de la meta mensual') }}"
-           aria-valuemin="0" aria-valuemax="100"
-           aria-valuenow="{{ [dashboard_executive.monthly_goal_progress or 0, 100]|min }}">
-        <span style="width: {{ [dashboard_executive.monthly_goal_progress or 0, 100]|min }}%"></span>
-      </div>
-      <small>{{ _("%(progress)s%% de la meta alcanzada", progress=("%.1f"|format(dashboard_executive.monthly_goal_progress or 0))) }}</small>
+    <strong>{{ dashboard_summary.month_sales|money }}</strong>
+    {% if dashboard_summary.month_sales_change is not none %}
+      <small class="{{ 'is-positive' if dashboard_summary.month_sales_change >= 0 else 'is-negative' }}">
+        <i class="fa-solid {{ 'fa-arrow-trend-up' if dashboard_summary.month_sales_change >= 0 else 'fa-arrow-trend-down' }}" aria-hidden="true"></i>
+        {{ _("%(change)s%% vs. mes anterior", change=("%+.1f"|format(dashboard_summary.month_sales_change))) }}
+      </small>
     {% else %}
-      <small>{{ _("Ventas acumuladas desde el inicio del mes") }}</small>
+      <small>{{ _("Aún no hay un mes anterior comparable.") }}</small>
     {% endif %}
     <a href="{{ url_for('main.reports', period='this_month') }}">{{ _("Ver reportes") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
   </article>
 
-  <article class="dashboard-v3__summary-card">
-    {% if can_use_advanced_reports %}
-      <span>{{ _("Meta mensual") }}</span>
-      {% if dashboard_executive.monthly_goal %}
-        <strong>{{ dashboard_executive.monthly_goal|money }}</strong>
-        <small>{{ _("Objetivo definido para este mes") }}</small>
-      {% else %}
-        <strong>—</strong>
-        <small>{{ _("Define cuánto quieres vender este mes") }}</small>
-      {% endif %}
-      <a href="{{ url_for('main.reports', period='this_month', _anchor='monthly-goal') }}">{{ _("Editar meta") if dashboard_executive.monthly_goal else _("Definir meta") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-    {% else %}
-      <span>{{ _("En caja debería haber") }}</span>
-      <strong>{{ cash_expected|money if cash_session else '—' }}</strong>
-      <small>{{ _("Efectivo calculado durante el turno") if cash_session else _("Tu caja todavía no está abierta.") }}</small>
-      <a href="{{ url_for('cash.index') }}">{{ _("Ver caja") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-    {% endif %}
-  </article>
-
   <article class="dashboard-v3__summary-card dashboard-v3__summary-card--projection">
-    {% if can_use_advanced_reports %}
-      <span>{{ _("Proyección de cierre") }}</span>
-      {% if dashboard_executive.monthly_projection is not none %}
-        <strong>{{ dashboard_executive.monthly_projection|money }}</strong>
-        {% if dashboard_executive.executive_kpis.sales_change is not none %}
-          <small class="{{ 'is-positive' if dashboard_executive.executive_kpis.sales_change >= 0 else 'is-negative' }}">
-            <i class="fa-solid {{ 'fa-arrow-trend-up' if dashboard_executive.executive_kpis.sales_change >= 0 else 'fa-arrow-trend-down' }}" aria-hidden="true"></i>
-            {{ _("%(change)s%% vs. periodo anterior", change=("%+.1f"|format(dashboard_executive.executive_kpis.sales_change))) }}
-          </small>
-        {% endif %}
-      {% else %}
-        <strong>—</strong>
-        <small>{{ _("Aún no hay suficiente actividad para proyectar") }}</small>
-      {% endif %}
-      <a href="{{ url_for('main.reports', period='this_month') }}">{{ _("Ver proyección") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    <span>{{ _("Ticket promedio") }}</span>
+    <strong>{{ dashboard_summary.month_average_ticket|money }}</strong>
+    {% if dashboard_summary.month_tickets == 0 %}
+      <small>{{ _("Aún no hay ventas este mes.") }}</small>
+    {% elif dashboard_summary.month_average_change is not none %}
+      <small class="{{ 'is-positive' if dashboard_summary.month_average_change >= 0 else 'is-negative' }}">
+        <i class="fa-solid {{ 'fa-arrow-trend-up' if dashboard_summary.month_average_change >= 0 else 'fa-arrow-trend-down' }}" aria-hidden="true"></i>
+        {{ _("%(change)s%% vs. mes anterior", change=("%+.1f"|format(dashboard_summary.month_average_change))) }}
+      </small>
     {% else %}
-      <span>{{ _("Dinero por cobrar") }}</span>
-      <strong>{{ total_credit_pending|money }}</strong>
-      <small>{{ _("Saldo pendiente de tus clientes") }}</small>
-      <a href="{{ url_for('credit.index') }}">{{ _("Ver saldos") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      <small>{{ _("Aún no hay un mes anterior comparable.") }}</small>
     {% endif %}
+    <a href="{{ url_for('main.reports', period='this_month') }}">{{ _("Ver análisis") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
   </article>
 </section>
 
