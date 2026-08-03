@@ -229,7 +229,10 @@ class CashRegisterTests(unittest.TestCase):
         self.open_register(client, "20.00")
         cash_session = CashRegisterSession.query.one()
         dashboard = client.get("/").get_data(as_text=True)
+        self.assertIn("Caja abierta", dashboard)
         self.assertIn("En caja debería haber", dashboard)
+        self.assertIn("$20.00 MXN", dashboard)
+        self.assertIn('href="/cash-register"', dashboard)
         index = client.get("/cash-register").get_data(as_text=True)
         self.assertIn("En caja debería haber", index)
         self.assertEqual(
@@ -239,11 +242,16 @@ class CashRegisterTests(unittest.TestCase):
             ).status_code,
             302,
         )
+        db.session.refresh(cash_session)
+        self.assertEqual(cash_session.status, "CLOSED")
+        self.assertEqual(cash_session.expected_cash_at_close, Decimal("20.00"))
         detail = client.get(f"/cash-register/{cash_session.id}")
         self.assertEqual(detail.status_code, 200)
         html = detail.get_data(as_text=True)
         self.assertIn("Imprimir corte", html)
         self.assertIn("PATIA · Corte de caja", html)
+        self.assertIn("Efectivo esperado", html)
+        self.assertIn("$20.00 MXN", html)
 
     def test_role_permissions_and_cross_organization_isolation(self):
         cashier, _ = self.add_member("CASHIER", "cashier@cash.test")

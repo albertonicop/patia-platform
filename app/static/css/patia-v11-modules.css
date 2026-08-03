@@ -1,0 +1,1185 @@
+/* ========================================================================
+   PATIA Visual System V1.1 — module identities
+   A shared system with layouts adapted to the job of each screen.
+   ======================================================================== */
+
+/* Authenticated foundation ---------------------------------------------- */
+
+.patia-v11--workspace .app-main-v2 > :where(.reports-v3, .pro-hub-v1,
+  .pro-purchases-v1, .pro-purchase-detail-v1, .pro-monthly-v1,
+  .pro-monthly-report-v2, .pro-alerts-v1, .cash-v2, .cash-cut-v1,
+  .customers-v1, .customer-detail-v1, .customer-form-v1, .receivables-v2,
+  .suppliers-v2, .settings-v2, .inventory-history-v3, .inventory-adjust-v3,
+  .quick-load-v1, .pos-v2) {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+.patia-v11--workspace :where(.card, .module-card-v2) {
+  box-shadow: none;
+}
+
+.patia-v11--workspace :where(.module-heading-v2, .module-intro-v2) {
+  margin-bottom: 18px;
+}
+
+.patia-v11--workspace :where(.module-heading-v2, .module-intro-v2) h2 {
+  color: var(--patia-ink);
+  letter-spacing: -.035em;
+}
+
+.patia-v11--workspace :where(.module-heading-v2, .module-intro-v2) p {
+  color: var(--patia-muted);
+  line-height: 1.55;
+}
+
+.patia-v11--workspace :where(table) {
+  font-variant-numeric: tabular-nums;
+}
+
+.patia-v11--workspace :where(table th) {
+  color: var(--patia-muted);
+  font-size: .68rem;
+  font-weight: 720;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.patia-v11--workspace :where(table td) {
+  color: var(--patia-ink);
+}
+
+.patia-v11--workspace :where(table th, table td) {
+  border-color: var(--patia-line) !important;
+}
+
+.patia-v11--workspace :where(input, select, textarea) {
+  border-color: var(--patia-line-strong) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  color: var(--patia-ink) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--workspace :where(input, select, textarea):focus {
+  border-color: var(--patia-accent) !important;
+}
+
+/* Reports — analytical -------------------------------------------------- */
+
+.patia-v11--reports .reports-v3 {
+  --reports-rule: #cbc7bf;
+}
+
+.patia-v11--reports .reports-v3__view-tabs {
+  gap: 24px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--reports .reports-v3__view-tabs a {
+  padding: 10px 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--patia-muted);
+}
+
+.patia-v11--reports .reports-v3__view-tabs a.is-active {
+  border-bottom-color: var(--patia-accent);
+  color: var(--patia-ink);
+}
+
+.patia-v11--reports .reports-v3__intro {
+  align-items: end;
+  margin-bottom: 18px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--patia-line);
+  background: transparent;
+}
+
+.patia-v11--reports .reports-v3__intro > div:first-child {
+  max-width: 680px;
+}
+
+.patia-v11--reports .reports-v3__intro h2 {
+  margin: 4px 0 6px;
+  font-size: clamp(1.65rem, 2.5vw, 2.35rem);
+  letter-spacing: -.045em;
+}
+
+.patia-v11--reports .reports-v3__range {
+  border: 0;
+  background: transparent;
+  color: var(--patia-muted);
+}
+
+.patia-v11--reports .reports-v3__periods {
+  gap: 0;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+}
+
+.patia-v11--reports .reports-v3__periods a {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--patia-muted);
+  font-size: .76rem;
+}
+
+.patia-v11--reports .reports-v3__periods a:last-child { border-right: 0; }
+
+.patia-v11--reports .reports-v3__periods a.is-active {
+  background: var(--patia-ink);
+  color: #fff;
+}
+
+.patia-v11--reports .reports-v3__custom-period {
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface-muted);
+}
+
+.patia-v11--reports .reports-v3__notice {
+  border: 0;
+  border-left: 3px solid var(--patia-accent);
+  border-radius: 0;
+  background: var(--patia-accent-soft);
+}
+
+.patia-v11--reports .reports-v3__kpis {
+  gap: 0;
+  margin: 18px 0;
+  overflow: hidden;
+  border: 1px solid var(--reports-rule);
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-surface);
+}
+
+.patia-v11--reports .reports-v3__kpi {
+  min-height: 146px;
+  padding: 18px;
+  border: 0;
+  border-right: 1px solid var(--reports-rule);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--reports .reports-v3__kpi:last-child { border-right: 0; }
+.patia-v11--reports .reports-v3__kpi::before { display: none; }
+
+.patia-v11--reports .reports-v3__kpi > span {
+  color: var(--patia-muted);
+  font-size: .68rem;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.patia-v11--reports .reports-v3__kpi > strong {
+  color: var(--patia-ink);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+}
+
+.patia-v11--reports .reports-v3__trend-chip {
+  width: fit-content;
+  border: 0;
+  border-radius: var(--patia-radius-xs);
+  font-size: .68rem;
+}
+
+.patia-v11--reports .reports-v3__executive-grid {
+  gap: 0;
+  margin: 20px 0;
+  overflow: hidden;
+  border: 1px solid #313a40;
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-ink);
+}
+
+.patia-v11--reports .reports-v3__executive-card {
+  padding: 22px !important;
+  border: 0 !important;
+  border-right: 1px solid #465057 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #fff;
+}
+
+.patia-v11--reports .reports-v3__executive-card:last-child { border-right: 0 !important; }
+.patia-v11--reports .reports-v3__executive-card :where(h3, strong) { color: #fff; }
+.patia-v11--reports .reports-v3__executive-card :where(p, span, small) { color: #cbd1d3; }
+.patia-v11--reports .reports-v3__goal-progress { background: #3c464c; }
+.patia-v11--reports .reports-v3__goal-progress span { background: #8b82ff; }
+
+.patia-v11--reports :where(.reports-v3__panel, .reports-v3__trend) {
+  padding: 18px !important;
+  border: 1px solid var(--reports-rule) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--reports .reports-v3__panel-head {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--reports .reports-v3__panel-head > i {
+  color: var(--patia-muted);
+  background: transparent;
+}
+
+.patia-v11--reports .reports-v3__chart {
+  min-height: 300px;
+  max-height: 360px;
+  padding-top: 14px;
+}
+
+.patia-v11--reports .reports-v3__rankings {
+  gap: 16px;
+}
+
+.patia-v11--reports .table-wrap {
+  border: 0;
+  border-radius: 0;
+}
+
+.patia-v11--reports table tbody tr:hover {
+  background: #f6f3ed;
+}
+
+/* Monthly reporting inherits the analytical language. */
+.patia-v11--reports .pro-monthly-v1__latest,
+.patia-v11--reports .pro-monthly-v1__manual,
+.patia-v11--reports .pro-monthly-v1__history {
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--reports .pro-monthly-v1__history a {
+  border-color: var(--patia-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.patia-v11--reports .pro-monthly-report-v2__document {
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  box-shadow: none;
+}
+
+/* Decision Center — actionable ----------------------------------------- */
+
+.patia-v11--decisions .pro-hub-v1__pulse {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(24px, 4vw, 42px);
+  border: 1px solid #2b3439;
+  border-radius: var(--patia-radius-lg);
+  background: var(--patia-ink);
+  color: #fff;
+  box-shadow: none;
+}
+
+.patia-v11--decisions .pro-hub-v1__pulse::after {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 7px;
+  background: var(--patia-accent);
+  content: "";
+}
+
+.patia-v11--decisions .pro-hub-v1__pulse :where(h2, b) { color: #fff; }
+.patia-v11--decisions .pro-hub-v1__pulse p { color: #d5d9db; }
+
+.patia-v11--decisions .pro-hub-v1__pulse-mark {
+  color: #aaa4ff;
+  letter-spacing: .08em;
+}
+
+.patia-v11--decisions .pro-hub-v1__pulse-reading {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 24px;
+  border-block: 1px solid #465057;
+  background: transparent;
+}
+
+.patia-v11--decisions .pro-hub-v1__pulse-reading > span {
+  padding: 16px;
+  border-right: 1px solid #465057;
+  color: #d5d9db;
+}
+
+.patia-v11--decisions .pro-hub-v1__pulse-reading > span:last-child { border-right: 0; }
+.patia-v11--decisions .pro-hub-v1__pulse-reading b {
+  display: block;
+  width: auto;
+  height: auto;
+  margin-bottom: 5px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #aaa4ff;
+  font-size: .7rem;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.patia-v11--decisions .pro-hub-v1__priorities {
+  margin-top: 28px;
+}
+
+.patia-v11--decisions .pro-hub-v1__priorities > header {
+  max-width: 700px;
+  margin-bottom: 14px;
+}
+
+.patia-v11--decisions .pro-hub-v1__priority-list {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-surface);
+}
+
+.patia-v11--decisions .pro-hub-v1__priority {
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 18px;
+  border: 0;
+  border-bottom: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--decisions .pro-hub-v1__priority:last-child { border-bottom: 0; }
+.patia-v11--decisions .pro-hub-v1__priority > span { width: 30px; height: 30px; border-radius: 50%; }
+.patia-v11--decisions .pro-hub-v1__decision dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.patia-v11--decisions .pro-hub-v1__decision dl div { padding: 10px 0 0; border-top: 1px solid var(--patia-line); }
+.patia-v11--decisions .pro-hub-v1__priority .btn { min-width: 150px; }
+
+.patia-v11--decisions .pro-hub-v1__operations {
+  gap: 16px;
+}
+
+.patia-v11--decisions .pro-hub-v1__operations-panel {
+  padding: 20px;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--decisions .pro-hub-v1__control-grid,
+.patia-v11--decisions .pro-hub-v1__team-grid {
+  gap: 0;
+  border-top: 1px solid var(--patia-line);
+}
+
+.patia-v11--decisions .pro-hub-v1__control-grid > a,
+.patia-v11--decisions .pro-hub-v1__team-grid > a {
+  border: 0;
+  border-bottom: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--decisions .pro-hub-v1__grid {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+}
+
+.patia-v11--decisions .pro-hub-v1__card {
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--decisions .pro-hub-v1__card:last-child { border-right: 0; }
+
+.patia-v11--decisions .pro-alerts-v1__periods {
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--decisions .pro-alerts-v1__list {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+}
+
+.patia-v11--decisions .pro-alerts-v1__alert {
+  border: 0;
+  border-bottom: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+/* Purchases — logistics ------------------------------------------------- */
+
+.patia-v11--purchases .module-heading-v2 {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide {
+  display: grid;
+  grid-template-columns: minmax(250px, .7fr) minmax(480px, 1.3fr);
+  gap: 24px;
+  padding: 18px 20px;
+  border: 1px solid var(--patia-line);
+  border-left: 4px solid var(--patia-accent);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide ol {
+  align-items: center;
+  gap: 0;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide li {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-inline: 8px;
+  color: var(--patia-muted);
+  font-size: .7rem;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide li:not(:last-child)::after {
+  position: absolute;
+  top: 13px;
+  right: -18%;
+  width: 36%;
+  border-top: 1px solid var(--patia-line-strong);
+  content: "";
+}
+
+.patia-v11--purchases .pro-purchases-v1__summary {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface-muted);
+}
+
+.patia-v11--purchases .pro-purchases-v1__summary article {
+  padding: 16px;
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--purchases .pro-purchases-v1__summary article:last-child { border-right: 0; }
+
+.patia-v11--purchases .pro-purchases-v1__groups {
+  gap: 18px;
+}
+
+.patia-v11--purchases .pro-purchases-v1__group {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line-strong);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--purchases .pro-purchases-v1__group > header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--patia-line);
+  background: var(--patia-surface-muted);
+}
+
+.patia-v11--purchases .pro-purchases-v1__group > .btn {
+  margin: 14px 18px 18px;
+}
+
+.patia-v11--purchases .pro-purchases-v1__group table td {
+  vertical-align: top;
+}
+
+.patia-v11--purchases .pro-purchases-v1__group input[type="number"] {
+  width: 84px;
+  text-align: right;
+}
+
+.patia-v11--purchases .pro-purchases-v1__method,
+.patia-v11--purchases .pro-purchases-v1__slow,
+.patia-v11--purchases .pro-purchases-v1__orders {
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--purchases .pro-purchases-v1__order-list {
+  gap: 0;
+  border-top: 1px solid var(--patia-line);
+}
+
+.patia-v11--purchases .pro-purchases-v1__order-list > a {
+  border: 0;
+  border-bottom: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.patia-v11--purchases .pro-purchase-detail-v1__table,
+.patia-v11--purchases .pro-purchase-detail-v1__receive,
+.patia-v11--purchases .pro-purchase-detail-v1__history {
+  border-color: var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+/* Cash — register ------------------------------------------------------- */
+
+.patia-v11--cash .cash-v2 {
+  max-width: 1080px !important;
+}
+
+.patia-v11--cash .cash-v2__intro {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--cash .cash-v2__balance {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: clamp(22px, 4vw, 38px);
+  border: 1px solid #303a3f;
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-ink);
+  color: #fff;
+  box-shadow: none;
+}
+
+.patia-v11--cash .cash-v2__status { color: #70d1ae; }
+.patia-v11--cash .cash-v2__balance h3 { margin-top: 14px; color: #cdd3d5; font-size: .82rem; font-weight: 620; }
+.patia-v11--cash .cash-v2__balance > div > strong { color: #fff; font-size: clamp(2.35rem, 5vw, 4.4rem); letter-spacing: -.055em; }
+.patia-v11--cash .cash-v2__balance p { max-width: 620px; color: #b9c1c4; }
+.patia-v11--cash .cash-v2__balance dl { align-self: end; color: #dbe0e1; }
+
+.patia-v11--cash .cash-v2__summary {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+}
+
+.patia-v11--cash .cash-v2__summary > div {
+  padding: 15px;
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.patia-v11--cash .cash-v2__actions {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+}
+
+.patia-v11--cash .cash-v2__action {
+  border: 0 !important;
+  border-right: 1px solid var(--patia-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.patia-v11--cash .cash-v2__action:last-child { border-right: 0 !important; }
+
+.patia-v11--cash .cash-v2__close {
+  display: grid;
+  grid-template-columns: minmax(240px, .7fr) minmax(360px, 1.3fr);
+  gap: 28px;
+  padding: 22px !important;
+  border: 1px solid var(--patia-line-strong) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--cash .cash-v2__reconciliation {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-xs);
+}
+
+.patia-v11--cash .cash-v2__reconciliation > div {
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: var(--patia-surface-muted);
+}
+
+.patia-v11--cash .cash-v2__start {
+  grid-template-columns: auto minmax(0, 1fr) minmax(280px, .7fr);
+  padding: 28px !important;
+  border: 1px solid var(--patia-line-strong) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--cash .cash-v2__history,
+.patia-v11--cash .cash-cut-v1__sheet {
+  border-color: var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  box-shadow: none !important;
+}
+
+/* Customers and receivables — CRM list --------------------------------- */
+
+.patia-v11--crm .customers-simple-v1__intro,
+.patia-v11--crm .receivables-v2__intro {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--crm .customers-simple-v1__toolbar {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--patia-line);
+  background: transparent;
+}
+
+.patia-v11--crm .customers-simple-v1__toolbar form {
+  flex: 1;
+  max-width: 680px;
+}
+
+.patia-v11--crm .customers-v1__list {
+  overflow: hidden;
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--crm .customers-simple-v1__list-head {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--patia-line);
+  background: var(--patia-surface-muted);
+}
+
+.patia-v11--crm .customers-v1__list .table-wrap { border: 0; border-radius: 0; }
+.patia-v11--crm .customers-v1__list tbody tr:hover { background: #f6f3ed; }
+
+.patia-v11--crm .customer-detail-simple-v1__hero {
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--crm .customer-detail-v1__metrics {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+}
+
+.patia-v11--crm .customer-detail-v1__metrics article {
+  border: 0 !important;
+  border-right: 1px solid var(--patia-line) !important;
+  border-radius: 0 !important;
+  background: var(--patia-surface) !important;
+}
+
+.patia-v11--crm .customer-detail-v1__metrics article:last-child { border-right: 0 !important; }
+
+.patia-v11--crm :where(.customer-detail-v1__notes, .customer-detail-v1__history,
+  .customer-form-v1__panel, .receivables-v2__accounts,
+  .receivables-v2__payment, .receivables-v2__reminder,
+  .receivables-v2__history) {
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--crm .receivables-v2__total {
+  padding: 18px 20px;
+  border: 1px solid #303a3f;
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-ink);
+  color: #fff;
+}
+
+.patia-v11--crm .receivables-v2__total :where(span, strong) { color: #fff; }
+.patia-v11--crm .receivables-v2__accounts .table-wrap,
+.patia-v11--crm .receivables-v2__history .table-wrap { border: 0; border-radius: 0; }
+
+.patia-v11--crm .receivables-v2__customer {
+  border-bottom: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Suppliers — directory management ------------------------------------ */
+
+.patia-v11--suppliers .suppliers-v2__intro {
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--patia-line);
+  background: transparent;
+}
+
+.patia-v11--suppliers .suppliers-v2__intro h2 {
+  color: var(--patia-ink);
+  letter-spacing: -.04em;
+}
+
+.patia-v11--suppliers .suppliers-v2__layout {
+  grid-template-columns: minmax(260px, .62fr) minmax(0, 1.38fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.patia-v11--suppliers :where(.suppliers-v2__form-card, .suppliers-v2__list-card) {
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--suppliers .suppliers-v2__form-card {
+  position: sticky;
+  top: 18px;
+  padding: 18px !important;
+}
+
+.patia-v11--suppliers .suppliers-v2__list-card {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.patia-v11--suppliers .suppliers-v2__list-card > h3 {
+  margin: 0;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--patia-line);
+  background: var(--patia-surface-muted);
+}
+
+.patia-v11--suppliers .suppliers-v2__list-card .table-wrap { border: 0; border-radius: 0; }
+.patia-v11--suppliers .suppliers-v2__list-card tbody tr:hover { background: #f6f3ed; }
+
+/* Settings — sectional ------------------------------------------------- */
+
+.patia-v11--settings .settings-v2 {
+  display: grid;
+  grid-template-columns: 178px minmax(0, 1fr);
+  column-gap: 28px;
+  align-items: start;
+  max-width: 1120px !important;
+}
+
+.patia-v11--settings .settings-v2 > :not(.settings-v2__tabs) {
+  grid-column: 2;
+}
+
+.patia-v11--settings .settings-v2__tabs {
+  position: sticky;
+  top: 18px;
+  grid-column: 1;
+  grid-row: 1 / span 20;
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+}
+
+.patia-v11--settings .settings-v2__tabs a {
+  padding: 10px 11px;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: var(--patia-radius-xs);
+  background: transparent;
+  color: var(--patia-muted);
+  text-align: left;
+}
+
+.patia-v11--settings .settings-v2__tabs a.is-active {
+  border-left-color: var(--patia-accent);
+  background: var(--patia-accent-soft);
+  color: var(--patia-ink);
+}
+
+.patia-v11--settings .settings-v2 > .module-intro-v2 {
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--settings .settings-v2__form {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+}
+
+.patia-v11--settings .settings-v2__section {
+  padding: 20px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--patia-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--settings .settings-v2__section-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--patia-radius-xs);
+  background: var(--patia-surface-muted);
+  color: var(--patia-muted);
+}
+
+.patia-v11--settings .settings-v2__actions {
+  margin: 0;
+  padding: 16px 20px;
+  border: 0;
+  background: var(--patia-surface-muted);
+}
+
+.patia-v11--settings .settings-v2__shortcuts {
+  gap: 0;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+}
+
+.patia-v11--settings .settings-v2__shortcuts article {
+  border: 0 !important;
+  border-right: 1px solid var(--patia-line) !important;
+  border-radius: 0 !important;
+  background: var(--patia-surface) !important;
+}
+
+.patia-v11--settings :where(.team-v2__solo, .team-v2__add, .team-v2__people,
+  .team-v2__pending, .subscription-v2__status-card, .subscription-v2__guide,
+  .subscription-v3__monthly-report) {
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--settings .team-v2__person {
+  border-color: var(--patia-line);
+  border-radius: 0;
+}
+
+.patia-v11--settings .subscription-v2__layout {
+  gap: 16px;
+}
+
+.patia-v11--settings .subscription-v2__details {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-xs);
+}
+
+.patia-v11--settings .subscription-v2__details > div {
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: var(--patia-surface-muted);
+}
+
+/* POS and inventory tools — operational -------------------------------- */
+
+.patia-v11--pos .pos-v2 {
+  max-width: 1400px !important;
+}
+
+.patia-v11--pos :where(.pos-v2__sale-panel, .pos-v2__recent) {
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--pos .pos-v2__sale-panel {
+  border-color: var(--patia-line-strong) !important;
+}
+
+.patia-v11--pos .pos-v2__checkout {
+  border-radius: var(--patia-radius-sm);
+}
+
+.patia-v11--inventory :where(.inventory-history-v3__history,
+  .inventory-history-v3__tools, .inventory-history-v3__warning,
+  .inventory-adjust-v3__card, .quick-load-v1__workspace,
+  .quick-load-v1__counter) {
+  border-color: var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+/* Responsive module behavior ------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .patia-v11--reports .reports-v3__kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .patia-v11--reports .reports-v3__kpi:nth-child(3n) { border-right: 0; }
+  .patia-v11--reports .reports-v3__kpi:nth-child(n+4) { border-top: 1px solid var(--patia-line); }
+
+  .patia-v11--decisions .pro-hub-v1__pulse-reading {
+    grid-template-columns: 1fr;
+  }
+
+  .patia-v11--decisions .pro-hub-v1__pulse-reading > span {
+    border-right: 0;
+    border-bottom: 1px solid #465057;
+  }
+
+  .patia-v11--decisions .pro-hub-v1__pulse-reading > span:last-child { border-bottom: 0; }
+
+  .patia-v11--purchases .pro-purchases-v1__guide {
+    grid-template-columns: 1fr;
+  }
+
+  .patia-v11--cash .cash-v2__close {
+    grid-template-columns: 1fr;
+  }
+
+  .patia-v11--suppliers .suppliers-v2__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .patia-v11--suppliers .suppliers-v2__form-card { position: static; }
+}
+
+@media (max-width: 768px) {
+  .patia-v11--reports .reports-v3__intro { align-items: start; }
+  .patia-v11--reports .reports-v3__kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .patia-v11--reports .reports-v3__kpi,
+  .patia-v11--reports .reports-v3__kpi:nth-child(3n) { border-right: 1px solid var(--patia-line); }
+  .patia-v11--reports .reports-v3__kpi:nth-child(2n) { border-right: 0; }
+  .patia-v11--reports .reports-v3__kpi:nth-child(n+3) { border-top: 1px solid var(--patia-line); }
+  .patia-v11--reports .reports-v3__executive-grid { grid-template-columns: 1fr; }
+  .patia-v11--reports .reports-v3__executive-card { border-right: 0 !important; border-bottom: 1px solid #465057 !important; }
+  .patia-v11--reports .reports-v3__executive-card:last-child { border-bottom: 0 !important; }
+
+  .patia-v11--decisions .pro-hub-v1__pulse { grid-template-columns: 1fr; }
+  .patia-v11--decisions .pro-hub-v1__priority { grid-template-columns: 32px minmax(0, 1fr); }
+  .patia-v11--decisions .pro-hub-v1__priority .btn { grid-column: 2; justify-self: start; }
+  .patia-v11--decisions .pro-hub-v1__decision dl { grid-template-columns: 1fr; }
+  .patia-v11--decisions .pro-hub-v1__grid { grid-template-columns: 1fr 1fr; }
+  .patia-v11--decisions .pro-hub-v1__card:nth-child(2n) { border-right: 0; }
+  .patia-v11--decisions .pro-hub-v1__card:nth-child(n+3) { border-top: 1px solid var(--patia-line); }
+
+  .patia-v11--purchases .pro-purchases-v1__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .patia-v11--purchases .pro-purchases-v1__summary article:nth-child(2n) { border-right: 0; }
+  .patia-v11--purchases .pro-purchases-v1__summary article:nth-child(n+3) { border-top: 1px solid var(--patia-line); }
+
+  .patia-v11--cash .cash-v2__start { grid-template-columns: 1fr; }
+  .patia-v11--cash .cash-v2__actions { grid-template-columns: 1fr; }
+  .patia-v11--cash .cash-v2__action { border-right: 0 !important; border-bottom: 1px solid var(--patia-line) !important; }
+  .patia-v11--cash .cash-v2__action:last-child { border-bottom: 0 !important; }
+
+  .patia-v11--settings .settings-v2 { display: block; }
+  .patia-v11--settings .settings-v2__tabs {
+    position: static;
+    display: flex;
+    gap: 0;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    padding: 0;
+  }
+  .patia-v11--settings .settings-v2__tabs a {
+    flex: 1 0 auto;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+    text-align: center;
+  }
+  .patia-v11--settings .settings-v2__tabs a.is-active { border-bottom-color: var(--patia-accent); }
+}
+
+@media (max-width: 560px) {
+  .patia-v11--reports .reports-v3__kpis { grid-template-columns: 1fr; }
+  .patia-v11--reports .reports-v3__kpi,
+  .patia-v11--reports .reports-v3__kpi:nth-child(2n),
+  .patia-v11--reports .reports-v3__kpi:nth-child(3n) {
+    min-height: 120px;
+    border-right: 0;
+    border-top: 1px solid var(--patia-line);
+  }
+  .patia-v11--reports .reports-v3__kpi:first-child { border-top: 0; }
+  .patia-v11--reports .reports-v3__periods { border-radius: 0; }
+  .patia-v11--reports .reports-v3__chart { min-height: 230px; }
+
+  .patia-v11--decisions .pro-hub-v1__pulse { padding: 22px 18px; }
+  .patia-v11--decisions .pro-hub-v1__priority { grid-template-columns: 1fr; }
+  .patia-v11--decisions .pro-hub-v1__priority > span { display: none; }
+  .patia-v11--decisions .pro-hub-v1__priority .btn { grid-column: 1; width: 100%; }
+  .patia-v11--decisions .pro-hub-v1__grid { grid-template-columns: 1fr; }
+  .patia-v11--decisions .pro-hub-v1__card { border-right: 0; border-top: 1px solid var(--patia-line); }
+  .patia-v11--decisions .pro-hub-v1__card:first-child { border-top: 0; }
+
+  .patia-v11--purchases .pro-purchases-v1__guide ol { align-items: stretch; flex-direction: column; }
+  .patia-v11--purchases .pro-purchases-v1__guide li { display: flex; align-items: center; gap: 9px; }
+  .patia-v11--purchases .pro-purchases-v1__guide li::after { display: none; }
+  .patia-v11--purchases .pro-purchases-v1__summary { grid-template-columns: 1fr; }
+  .patia-v11--purchases .pro-purchases-v1__summary article { border-right: 0; border-top: 1px solid var(--patia-line); }
+  .patia-v11--purchases .pro-purchases-v1__summary article:first-child { border-top: 0; }
+
+  .patia-v11--cash .cash-v2__balance { grid-template-columns: 1fr; }
+  .patia-v11--cash .cash-v2__balance > div > strong { font-size: 2.5rem; }
+  .patia-v11--cash .cash-v2__summary { grid-template-columns: 1fr 1fr; }
+  .patia-v11--cash .cash-v2__summary > div:nth-child(2n) { border-right: 0; }
+
+  .patia-v11--crm .customers-simple-v1__toolbar { align-items: stretch; }
+  .patia-v11--crm .customers-simple-v1__toolbar form { max-width: none; }
+  .patia-v11--crm .customer-detail-v1__metrics { display: grid; grid-template-columns: 1fr; }
+  .patia-v11--crm .customer-detail-v1__metrics article { border-right: 0 !important; border-bottom: 1px solid var(--patia-line) !important; }
+  .patia-v11--crm .customer-detail-v1__metrics article:last-child { border-bottom: 0 !important; }
+
+  .patia-v11--crm .receivables-v2__accounts .table-wrap,
+  .patia-v11--suppliers .suppliers-v2__list-card .table-wrap {
+    overflow: visible;
+  }
+
+  .patia-v11--crm .receivables-v2__accounts table,
+  .patia-v11--crm .receivables-v2__accounts tbody,
+  .patia-v11--crm .receivables-v2__accounts tr,
+  .patia-v11--crm .receivables-v2__accounts td,
+  .patia-v11--suppliers .suppliers-v2__list-card table,
+  .patia-v11--suppliers .suppliers-v2__list-card tbody,
+  .patia-v11--suppliers .suppliers-v2__list-card tr,
+  .patia-v11--suppliers .suppliers-v2__list-card td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .patia-v11--crm .receivables-v2__accounts thead,
+  .patia-v11--suppliers .suppliers-v2__list-card thead {
+    display: none;
+  }
+
+  .patia-v11--crm .receivables-v2__accounts tr,
+  .patia-v11--suppliers .suppliers-v2__list-card tr {
+    margin-bottom: 12px;
+    padding: 14px;
+    border: 1px solid var(--patia-line);
+    border-radius: var(--patia-radius-sm);
+    background: #fff;
+  }
+
+  .patia-v11--crm .receivables-v2__accounts tr:last-child,
+  .patia-v11--suppliers .suppliers-v2__list-card tr:last-child { margin-bottom: 0; }
+
+  .patia-v11--crm .receivables-v2__accounts td,
+  .patia-v11--suppliers .suppliers-v2__list-card td {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    min-width: 0;
+    padding: 9px 0;
+    border: 0;
+    border-bottom: 1px solid var(--patia-line-soft);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .patia-v11--crm .receivables-v2__accounts td:last-child,
+  .patia-v11--suppliers .suppliers-v2__list-card td:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .patia-v11--crm .receivables-v2__accounts td::before,
+  .patia-v11--suppliers .suppliers-v2__list-card td::before {
+    content: attr(data-label);
+    color: var(--patia-muted);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+  }
+
+  .patia-v11--crm .receivables-v2__actions,
+  .patia-v11--suppliers .suppliers-v2__list-card td .btn,
+  .patia-v11--suppliers .suppliers-v2__list-card td form {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .patia-v11--crm .receivables-v2__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .patia-v11--crm .receivables-v2__actions .btn,
+  .patia-v11--suppliers .suppliers-v2__list-card td .btn {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .patia-v11--settings .settings-v2__shortcuts { grid-template-columns: 1fr; }
+  .patia-v11--settings .settings-v2__shortcuts article { border-right: 0 !important; border-bottom: 1px solid var(--patia-line) !important; }
+  .patia-v11--settings .subscription-v2__details { grid-template-columns: 1fr; }
+  .patia-v11--settings .subscription-v2__details > div { border-right: 0; border-bottom: 1px solid var(--patia-line); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patia-v11--workspace *,
+  .patia-v11--workspace *::before,
+  .patia-v11--workspace *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

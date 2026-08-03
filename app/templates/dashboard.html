@@ -91,6 +91,17 @@
   </article>
 </section>
 
+{% if cash_session %}
+<section class="dashboard-v11__cash-status" aria-labelledby="dashboard-cash-status-title">
+  <div class="dashboard-v11__cash-status-copy">
+    <span><i class="fa-solid fa-circle" aria-hidden="true"></i> {{ _("Caja abierta") }}</span>
+    <h3 id="dashboard-cash-status-title">{{ _("En caja debería haber") }}</h3>
+  </div>
+  <strong>{{ cash_expected|money }}</strong>
+  <a href="{{ url_for('cash.index') }}">{{ _("Ver caja") }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+</section>
+{% endif %}
+
 {% if total_products == 0 %}
 <section class="card cash-status-v1 dashboard-v2__next-action" aria-labelledby="cash-status-title">
   <div>

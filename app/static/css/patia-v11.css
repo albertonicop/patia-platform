@@ -1,0 +1,1389 @@
+/* ========================================================================
+   PATIA Visual System V1.1 — first checkpoint
+   Shared foundation: tokens, Landing, Inicio, Inventario and application shell.
+   ======================================================================== */
+
+.patia-v11 {
+  --patia-canvas: #f3f0ea;
+  --patia-surface: #fffefb;
+  --patia-surface-muted: #ece9e2;
+  --patia-ink: #1d252b;
+  --patia-muted: #626d72;
+  --patia-line: #d6d2ca;
+  --patia-line-strong: #bdb8af;
+  --patia-accent: #5147d9;
+  --patia-accent-strong: #3930b7;
+  --patia-accent-soft: #eeecff;
+  --patia-success: #167159;
+  --patia-success-soft: #e7f3ed;
+  --patia-warning: #a7601c;
+  --patia-warning-soft: #fff4e5;
+  --patia-danger: #b33f46;
+  --patia-danger-soft: #fff0ef;
+  --patia-radius-xs: 4px;
+  --patia-radius-sm: 7px;
+  --patia-radius-md: 10px;
+  --patia-radius-lg: 12px;
+  color: var(--patia-ink);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+.patia-v11 :where(strong, b, dd, td, .metric) {
+  font-variant-numeric: tabular-nums;
+}
+
+.patia-v11 :where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid rgba(81, 71, 217, .23) !important;
+  outline-offset: 2px;
+}
+
+.patia-v11 > .language-switcher button {
+  min-width: 34px;
+  min-height: 34px;
+}
+
+/* Public landing -------------------------------------------------------- */
+
+body.patia-v11--landing {
+  background: var(--patia-canvas) !important;
+  color: var(--patia-ink) !important;
+}
+
+.patia-v11--landing .landing-v2__header,
+.patia-v11--landing .landing-v2__hero,
+.patia-v11--landing .landing-premium-v1__proof,
+.patia-v11--landing .landing-v2__section,
+.patia-v11--landing .landing-v2__footer {
+  width: min(1180px, calc(100% - 48px));
+}
+
+.patia-v11--landing .landing-v2__header {
+  min-height: 70px;
+  border-color: var(--patia-line);
+}
+
+.patia-v11--landing .landing-v2__brand img {
+  width: 116px;
+}
+
+.patia-v11--landing .landing-v2__nav {
+  gap: 24px;
+}
+
+.patia-v11--landing .landing-v2__nav a {
+  color: #4b565b;
+  font-size: .78rem;
+  font-weight: 680;
+}
+
+.patia-v11--landing .landing-v2__nav .landing-v2__login,
+.patia-v11--landing .landing-v3__nav-cta {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 15px;
+  border-radius: var(--patia-radius-sm);
+  box-shadow: none;
+}
+
+.patia-v11--landing .landing-v2__nav .landing-v2__login {
+  border-color: var(--patia-line);
+  background: transparent;
+}
+
+.patia-v11--landing .landing-v3__nav-cta {
+  background: var(--patia-ink);
+  color: #fff !important;
+}
+
+.patia-v11--landing .landing-v2__hero {
+  grid-template-columns: minmax(0, .86fr) minmax(520px, 1.14fr);
+  min-height: 610px;
+  gap: clamp(42px, 6vw, 82px);
+  padding: 54px 0 46px;
+}
+
+.patia-v11--landing .landing-v2__hero-copy {
+  max-width: 520px;
+}
+
+.patia-v11--landing .landing-v2__eyebrow {
+  color: var(--patia-accent);
+  font-size: .68rem;
+  font-weight: 760;
+  letter-spacing: .09em;
+  text-transform: none;
+}
+
+.patia-v11--landing .landing-v2__hero h1 {
+  max-width: 9.5ch;
+  margin: 16px 0 18px;
+  color: var(--patia-ink);
+  font-size: clamp(3.2rem, 5vw, 4.4rem);
+  font-weight: 730;
+  line-height: .96;
+  letter-spacing: -.052em;
+}
+
+.patia-v11--landing .landing-v2__lead {
+  max-width: 49ch;
+  color: #546066;
+  font-size: 1.02rem;
+  line-height: 1.62;
+}
+
+.patia-v11--landing .landing-v5__terms {
+  display: flex;
+  margin: 22px 0 20px;
+  padding: 10px 0;
+  border-top: 1px solid var(--patia-line);
+  border-bottom: 1px solid var(--patia-line);
+  gap: 0;
+}
+
+.patia-v11--landing .landing-v5__terms > span {
+  min-height: 0;
+  padding: 3px 14px;
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #4b565b;
+}
+
+.patia-v11--landing .landing-v5__terms > span:first-child { padding-left: 0; }
+.patia-v11--landing .landing-v5__terms > span:last-child { border-right: 0; }
+.patia-v11--landing .landing-v5__terms i { color: var(--patia-success); }
+.patia-v11--landing .landing-v5__terms strong {
+  font-size: .74rem;
+  font-weight: 680;
+  line-height: 1.35;
+}
+
+.patia-v11--landing .landing-v2__actions {
+  gap: 10px;
+}
+
+.patia-v11--landing .landing-v2__button {
+  min-height: 45px;
+  padding: 0 18px;
+  border-radius: var(--patia-radius-sm);
+  font-size: .8rem;
+  box-shadow: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.patia-v11--landing .landing-v2__button:hover,
+.patia-v11--landing .landing-v2__button:focus-visible {
+  transform: none;
+}
+
+.patia-v11--landing .landing-v2__button--primary {
+  background: var(--patia-accent);
+}
+
+.patia-v11--landing .landing-v2__button--primary:hover {
+  background: var(--patia-accent-strong);
+}
+
+.patia-v11--landing .landing-v2__button--secondary {
+  border-color: var(--patia-line-strong);
+  background: transparent;
+  color: var(--patia-ink) !important;
+}
+
+.patia-v11--landing .landing-v3__product-stage {
+  min-width: 0;
+}
+
+.patia-v11--landing .landing-v6__real-product {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--patia-line-strong);
+  border-radius: var(--patia-radius-lg);
+  background: var(--patia-surface);
+  box-shadow: 0 18px 46px rgba(35, 37, 34, .12);
+}
+
+.patia-v11--landing .landing-v3__preview-browser {
+  margin: 0;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--patia-line);
+  background: #f8f6f1;
+}
+
+.patia-v11--landing .landing-v6__real-product > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1160 / 770;
+  object-fit: cover;
+  object-position: top left;
+}
+
+.patia-v11--landing .landing-final-v1__preview-caption {
+  color: #53605e;
+  font-size: .72rem;
+}
+
+.patia-v11--landing .landing-premium-v1__proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 auto;
+  padding: 0;
+  border: 1px solid var(--patia-line);
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--landing .landing-premium-v1__proof article {
+  min-height: 112px;
+  padding: 23px 28px;
+  border-right: 1px solid var(--patia-line);
+}
+
+.patia-v11--landing .landing-premium-v1__proof article:last-child {
+  border-right: 0;
+}
+
+.patia-v11--landing .landing-premium-v1__proof strong {
+  color: var(--patia-ink);
+  font-size: .88rem;
+}
+
+.patia-v11--landing .landing-premium-v1__proof span {
+  margin-top: 6px;
+  color: var(--patia-muted);
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
+.patia-v11--landing .landing-v2__section {
+  padding: 72px 0;
+}
+
+.patia-v11--landing .landing-v2__section-head {
+  max-width: 690px;
+  margin-bottom: 30px;
+}
+
+.patia-v11--landing .landing-v2__section-head h2,
+.patia-v11--landing .landing-v2__pricing h2,
+.patia-v11--landing .landing-v2__final h2 {
+  margin: 10px 0 12px;
+  color: var(--patia-ink);
+  font-size: clamp(2.15rem, 3.5vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -.04em;
+}
+
+.patia-v11--landing .landing-v2__section-head p,
+.patia-v11--landing .landing-v2__pricing-copy > p,
+.patia-v11--landing .landing-v2__final > p {
+  color: var(--patia-muted);
+  font-size: .91rem;
+  line-height: 1.6;
+}
+
+.patia-v11--landing .landing-showcase-v1__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.patia-v11--landing .landing-showcase-v1__card {
+  overflow: visible;
+  border: 0;
+  border-top: 2px solid var(--patia-ink);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--landing .landing-showcase-v1__image {
+  margin-top: 18px;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+}
+
+.patia-v11--landing .landing-showcase-v1__card > div:last-child {
+  padding: 18px 0 0;
+}
+
+.patia-v11--landing .landing-showcase-v1__card > div:last-child > span {
+  color: var(--patia-accent);
+  font-size: .68rem;
+  letter-spacing: .07em;
+}
+
+.patia-v11--landing .landing-showcase-v1__card h3 {
+  margin: 7px 0;
+  font-size: 1.2rem;
+}
+
+.patia-v11--landing .landing-showcase-v1__card p {
+  color: var(--patia-muted);
+  font-size: .84rem;
+}
+
+.patia-v11--landing .landing-v2__benefits {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  overflow: visible;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-surface);
+}
+
+.patia-v11--landing .landing-v2__benefits article {
+  min-height: 220px;
+  padding: 26px 24px;
+  border-right: 1px solid var(--patia-line);
+  background: transparent;
+}
+
+.patia-v11--landing .landing-v2__benefits article:last-child { border-right: 0; }
+
+.patia-v11--landing .landing-v2__benefit-icon {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  color: var(--patia-accent);
+  font-size: 1rem;
+}
+
+.patia-v11--landing .landing-v2__benefits h3 {
+  margin: 34px 0 8px;
+  font-size: 1rem;
+}
+
+.patia-v11--landing .landing-v2__benefits p {
+  color: var(--patia-muted);
+  font-size: .79rem;
+  line-height: 1.55;
+}
+
+.patia-v11--landing .landing-v2__steps {
+  padding: 60px;
+  border-radius: var(--patia-radius-lg);
+  background: #20272d;
+}
+
+.patia-v11--landing .landing-v2__step-list {
+  gap: 28px;
+}
+
+.patia-v11--landing .landing-v2__step-list h3 {
+  margin-top: 22px;
+  font-size: 1rem;
+}
+
+.patia-v11--landing .landing-v2__step-list p {
+  color: #c4cbc9;
+  font-size: .79rem;
+}
+
+.patia-v11--landing .landing-v2__comparison-grid {
+  gap: 0;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-surface);
+}
+
+.patia-v11--landing .landing-v2__comparison-card {
+  padding: 30px;
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.patia-v11--landing .landing-v2__comparison-card:last-child { border-right: 0; }
+.patia-v11--landing .landing-v2__comparison-card--after { background: #f7f6f1; }
+.patia-v11--landing .landing-v2__comparison-card h3 { font-size: 1.35rem; }
+
+.patia-v11--landing .landing-premium-v1__pro-value {
+  padding: 54px;
+  border-radius: var(--patia-radius-lg);
+  background: #20272d;
+  box-shadow: none;
+}
+
+.patia-v11--landing .landing-premium-v1__pro-grid > article {
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: var(--patia-radius-sm);
+  background: rgba(255,255,255,.04);
+  box-shadow: none;
+}
+
+.patia-v11--landing .landing-v2__pricing {
+  grid-template-columns: minmax(260px, .65fr) minmax(0, 1.35fr);
+  gap: 56px;
+  align-items: start;
+}
+
+.patia-v11--landing .landing-plans-v1 {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-surface);
+}
+
+.patia-v11--landing .landing-plans-v1 .landing-v2__price-card {
+  padding: 28px;
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.patia-v11--landing .landing-plans-v1 .landing-v2__price-card:last-child { border-right: 0; }
+.patia-v11--landing .landing-plans-v1 .landing-v2__price-card--pro { background: #f5f3ff; }
+
+.patia-v11--landing .landing-v2__faq-list {
+  overflow: hidden;
+  border-top: 1px solid var(--patia-line);
+}
+
+.patia-v11--landing .landing-v2__faq details {
+  border: 0;
+  border-bottom: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.patia-v11--landing .landing-v2__final {
+  padding: 60px;
+  border: 1px solid var(--patia-line-strong);
+  border-radius: var(--patia-radius-lg);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--landing .landing-v2__footer {
+  border-color: var(--patia-line);
+}
+
+.patia-v11--landing > .language-switcher {
+  border-color: var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+/* Authenticated workspace ----------------------------------------------- */
+
+body.patia-v11--workspace {
+  --v2-bg: var(--patia-canvas);
+  --v2-surface: var(--patia-surface);
+  --v2-surface-soft: #f7f5f0;
+  --v2-ink: var(--patia-ink);
+  --v2-muted: var(--patia-muted);
+  --v2-line: var(--patia-line);
+  --v2-violet: var(--patia-accent);
+  background: var(--patia-canvas) !important;
+}
+
+@media (min-width: 901px) {
+  .patia-v11--workspace .sidebar-v2 {
+    width: 220px !important;
+    padding: 18px 14px !important;
+    border-color: var(--patia-line) !important;
+    background: #eae7e0 !important;
+    backdrop-filter: none;
+  }
+
+  .patia-v11--workspace .app-main-v2 {
+    margin-left: 220px !important;
+  }
+}
+
+.patia-v11--workspace .sidebar-v2__brand {
+  gap: 5px !important;
+  margin: 0 10px 20px !important;
+}
+
+.patia-v11--workspace .sidebar-v2__brand .logo-img {
+  width: 108px !important;
+  max-width: 108px !important;
+}
+
+.patia-v11--workspace .sidebar-v2__brand-copy {
+  color: #737b7c !important;
+  font-size: .56rem !important;
+  font-weight: 680;
+  letter-spacing: .1em;
+}
+
+.patia-v11--workspace .sidebar-v2__nav {
+  gap: 1px !important;
+}
+
+.patia-v11--workspace .sidebar-v2__section-label {
+  margin: 15px 10px 5px;
+  color: #747b7c;
+  font-size: .58rem;
+  font-weight: 730;
+  letter-spacing: .11em;
+}
+
+.patia-v11--workspace .sidebar-v2__nav > a {
+  min-height: 39px;
+  gap: 10px;
+  padding: 0 11px !important;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: var(--patia-radius-xs) !important;
+  color: #4d585d !important;
+  font-size: .79rem;
+  font-weight: 620;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.patia-v11--workspace .sidebar-v2__nav > a i {
+  width: 18px;
+  color: #687276;
+  font-size: .82rem;
+}
+
+.patia-v11--workspace .sidebar-v2__nav > a:hover,
+.patia-v11--workspace .sidebar-v2__nav > a:focus-visible {
+  background: rgba(255,255,255,.58) !important;
+  color: var(--patia-ink) !important;
+  transform: none;
+}
+
+.patia-v11--workspace .sidebar-v2__nav > a.is-active,
+.patia-v11--workspace .sidebar-v2__nav > a.is-active.sidebar-v2__pro-link {
+  border-left-color: var(--patia-accent);
+  background: var(--patia-surface) !important;
+  color: var(--patia-accent-strong) !important;
+  box-shadow: none;
+}
+
+.patia-v11--workspace .sidebar-v2__nav > a.is-active i,
+.patia-v11--workspace .sidebar-v2__nav > a.is-active.sidebar-v2__pro-link i {
+  color: var(--patia-accent);
+}
+
+.patia-v11--workspace .sidebar-v2__pro-link {
+  border-color: transparent;
+  background: transparent;
+  color: #4d585d;
+}
+
+.patia-v11--workspace .sidebar-v2__logout {
+  margin-top: 9px !important;
+  padding-top: 9px !important;
+  border-color: var(--patia-line) !important;
+}
+
+.patia-v11--workspace .sidebar-v2__logout-button {
+  min-height: 39px !important;
+  color: #7b4d50 !important;
+  font-size: .78rem !important;
+}
+
+.patia-v11--workspace .whatsapp-float-v2 {
+  bottom: 18px !important;
+  left: 14px !important;
+  height: 38px !important;
+  padding: 0 11px !important;
+  border-color: var(--patia-line);
+  border-radius: var(--patia-radius-sm) !important;
+  background: #f5f3ed !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--workspace .app-main-v2 {
+  padding: 24px clamp(24px, 3vw, 42px) 48px !important;
+  background: var(--patia-canvas);
+}
+
+.patia-v11--workspace .app-topbar-v2 {
+  min-height: 74px;
+  margin: 0 auto 22px !important;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--workspace .app-topbar-v2 .eyebrow {
+  color: var(--patia-muted) !important;
+  font-size: .62rem !important;
+  font-weight: 680;
+  letter-spacing: .08em;
+}
+
+.patia-v11--workspace .app-topbar-v2 h1 {
+  margin-top: 3px;
+  font-size: clamp(1.65rem, 2.5vw, 2.15rem) !important;
+  font-weight: 690;
+  letter-spacing: -.035em;
+}
+
+.patia-v11--workspace .app-topbar-v2__notification,
+.patia-v11--workspace .app-topbar-v2__plan {
+  min-height: 40px;
+  border-color: var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--workspace .app-topbar-v2__notification {
+  padding: 0 12px;
+}
+
+.patia-v11--workspace .app-topbar-v2__plan {
+  min-width: 132px;
+  padding: 6px 11px;
+}
+
+.patia-v11--workspace > .language-switcher {
+  border-color: var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-surface);
+  box-shadow: none;
+}
+
+.patia-v11--workspace .flash {
+  border-color: #b8d6c8;
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-success-soft);
+}
+
+.patia-v11--workspace .btn {
+  min-height: 42px;
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-accent);
+  box-shadow: none;
+}
+
+.patia-v11--workspace .btn.ghost {
+  border-color: var(--patia-line-strong) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: transparent !important;
+  color: var(--patia-ink) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--workspace :where(input, select, textarea) {
+  min-height: 42px;
+  border-color: var(--patia-line-strong) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  color: var(--patia-ink) !important;
+  box-shadow: none !important;
+}
+
+/* Inicio --------------------------------------------------------------- */
+
+.patia-v11--dashboard .dashboard-v2 {
+  max-width: 1320px;
+}
+
+.patia-v11--dashboard .dashboard-v3__summary {
+  gap: 0;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-surface);
+}
+
+.patia-v11--dashboard .dashboard-v3__summary-card {
+  min-height: 145px;
+  padding: 20px 22px;
+  border: 0;
+  border-right: 1px solid var(--patia-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--dashboard .dashboard-v3__summary-card:last-child {
+  border-right: 0;
+}
+
+.patia-v11--dashboard .dashboard-v3__summary-card > span {
+  color: var(--patia-muted);
+  font-size: .68rem;
+  font-weight: 680;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+
+.patia-v11--dashboard .dashboard-v3__summary-card > strong {
+  margin-top: 9px;
+  color: var(--patia-ink);
+  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  font-weight: 690;
+}
+
+.patia-v11--dashboard .dashboard-v3__summary-card > small {
+  margin-top: 6px;
+  color: var(--patia-muted);
+  font-size: .75rem;
+}
+
+.patia-v11--dashboard .dashboard-v3__summary-card > a {
+  padding-top: 12px;
+  color: var(--patia-accent-strong);
+  font-size: .74rem;
+  font-weight: 700;
+}
+
+.patia-v11--dashboard .dashboard-v11__cash-status {
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 16px;
+  margin: -4px 0 16px;
+  padding: 13px 16px;
+  border: 1px solid var(--patia-line);
+  border-left: 3px solid var(--patia-success);
+  background: var(--patia-surface);
+}
+
+.patia-v11--dashboard .dashboard-v11__cash-status-copy span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--patia-success);
+  font-size: .68rem;
+  font-weight: 720;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.patia-v11--dashboard .dashboard-v11__cash-status-copy span i {
+  font-size: .42rem;
+}
+
+.patia-v11--dashboard .dashboard-v11__cash-status h3 {
+  margin: 3px 0 0;
+  font-size: .88rem;
+}
+
+.patia-v11--dashboard .dashboard-v11__cash-status > strong {
+  color: var(--patia-ink);
+  font-size: 1.08rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.patia-v11--dashboard .dashboard-v11__cash-status > a {
+  color: var(--patia-accent-strong);
+  font-size: .76rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.patia-v11--dashboard .dashboard-v3__analysis,
+.patia-v11--dashboard .dashboard-v3__main-column,
+.patia-v11--dashboard .dashboard-v3__lower-grid {
+  gap: 16px;
+}
+
+.patia-v11--dashboard .dashboard-v2__panel,
+.patia-v11--dashboard .dashboard-v3__trend-panel,
+.patia-v11--dashboard .dashboard-v3__alerts-card,
+.patia-v11--dashboard .dashboard-v3__payments-card,
+.patia-v11--dashboard .dashboard-v3__quick-summary {
+  padding: 20px !important;
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-md) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--dashboard .dashboard-v2__section-head {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--dashboard .dashboard-v2__section-head span {
+  color: var(--patia-muted);
+  font-size: .66rem;
+  font-weight: 680;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+
+.patia-v11--dashboard .dashboard-v2__section-head h3 {
+  margin-top: 4px;
+  color: var(--patia-ink);
+  font-size: 1.05rem;
+  font-weight: 680;
+}
+
+.patia-v11--dashboard .dashboard-v2__section-head > i {
+  display: none;
+}
+
+.patia-v11--dashboard .dashboard-v3__period-chip {
+  min-height: 32px;
+  border-color: var(--patia-line);
+  border-radius: var(--patia-radius-xs);
+  background: #f7f5f0;
+}
+
+.patia-v11--dashboard .dashboard-v3__trend-chart {
+  height: 270px;
+}
+
+.patia-v11--dashboard .dashboard-v3__alerts-list > a,
+.patia-v11--dashboard .dashboard-v3__alerts-list > button {
+  padding: 13px 0;
+  border-color: var(--patia-line);
+}
+
+.patia-v11--dashboard .dashboard-v3__alerts-list strong {
+  font-size: .8rem;
+  font-weight: 680;
+}
+
+.patia-v11--dashboard .dashboard-v3__alerts-list small {
+  color: var(--patia-muted);
+}
+
+.patia-v11--dashboard .dashboard-v3__payments-layout {
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.patia-v11--dashboard .dashboard-v3__payments-chart {
+  height: 150px;
+}
+
+.patia-v11--dashboard .dashboard-v3__quick-summary {
+  border-top: 3px solid var(--patia-accent) !important;
+}
+
+.patia-v11--dashboard .dashboard-v2__recommendation {
+  padding: 13px 0;
+  border-color: var(--patia-line);
+}
+
+.patia-v11--dashboard .dashboard-v2__recommendation p {
+  color: var(--patia-ink);
+  font-size: .83rem;
+  line-height: 1.5;
+}
+
+.patia-v11--dashboard .dashboard-v2__pulse-cta {
+  border: 1px solid #c8c3ec;
+  border-radius: var(--patia-radius-sm);
+  background: var(--patia-accent-soft);
+  box-shadow: none;
+}
+
+.patia-v11--dashboard .dashboard-v2__method-note {
+  border-left-color: var(--patia-line-strong);
+  background: #f7f5f0;
+}
+
+/* Inventario ----------------------------------------------------------- */
+
+.patia-v11--inventory .inventory-v2 {
+  max-width: 1320px;
+  color: var(--patia-ink);
+}
+
+.patia-v11--inventory .inventory-v2 .card,
+.patia-v11--inventory .inventory-v2__panel,
+.patia-v11--inventory .inventory-v2__catalog,
+.patia-v11--inventory .inventory-v2__summary {
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-md) !important;
+  background: var(--patia-surface) !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--inventory .inventory-v2__quick-load-callout {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  border-left: 3px solid var(--patia-accent) !important;
+  background: var(--patia-surface) !important;
+}
+
+.patia-v11--inventory .inventory-v2__quick-load-icon {
+  display: inline-flex;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  color: var(--patia-accent);
+  font-size: 1rem;
+}
+
+.patia-v11--inventory .inventory-v2__quick-load-callout h2 {
+  font-size: 1rem;
+  font-weight: 680;
+}
+
+.patia-v11--inventory .inventory-v2__quick-load-callout p {
+  margin-top: 3px;
+  font-size: .78rem;
+}
+
+.patia-v11--inventory .inventory-v2__eyebrow {
+  color: var(--patia-muted);
+  font-size: .64rem;
+  font-weight: 680;
+  letter-spacing: .05em;
+  text-transform: none;
+}
+
+.patia-v11--inventory .inventory-v2__setup-grid {
+  grid-template-columns: minmax(0, 1.08fr) minmax(330px, .92fr);
+  gap: 16px;
+}
+
+.patia-v11--inventory .inventory-v2__panel {
+  padding: 20px;
+}
+
+.patia-v11--inventory .inventory-v2__panel-head {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--inventory .inventory-v2__panel-head h3 {
+  margin-top: 4px;
+  font-size: 1.12rem;
+  font-weight: 680;
+}
+
+.patia-v11--inventory .inventory-v2__panel-head p {
+  color: var(--patia-muted);
+  font-size: .78rem;
+}
+
+.patia-v11--inventory .inventory-v2__product-form,
+.patia-v11--inventory .inventory-v2__advanced-grid {
+  gap: 13px;
+}
+
+.patia-v11--inventory .inventory-v2__field label,
+.patia-v11--inventory .inventory-v2__import-form > label {
+  color: var(--patia-ink);
+  font-size: .76rem;
+  font-weight: 680;
+}
+
+.patia-v11--inventory .inventory-v2__field small,
+.patia-v11--inventory .inventory-v2__import-steps small,
+.patia-v11--inventory .inventory-v2__template-help {
+  color: var(--patia-muted);
+  font-size: .69rem;
+}
+
+.patia-v11--inventory .inventory-v2__advanced {
+  border-color: var(--patia-line);
+  border-radius: var(--patia-radius-sm);
+  background: #f7f5f0;
+}
+
+.patia-v11--inventory .inventory-v2__advanced summary {
+  min-height: 42px;
+  font-size: .75rem;
+}
+
+.patia-v11--inventory .inventory-v2__import-steps {
+  margin: 15px 0;
+}
+
+.patia-v11--inventory .inventory-v2__import-steps b {
+  width: 22px;
+  height: 22px;
+  flex-basis: 22px;
+  border-radius: var(--patia-radius-xs);
+  background: var(--patia-accent-soft);
+  color: var(--patia-accent-strong);
+}
+
+.patia-v11--inventory .inventory-v2__import-steps strong {
+  color: var(--patia-ink);
+  font-size: .78rem;
+}
+
+.patia-v11--inventory .inventory-v2__summary {
+  margin-top: 16px;
+  padding: 13px 16px;
+}
+
+.patia-v11--inventory .inventory-v2__summary span {
+  font-size: .68rem;
+}
+
+.patia-v11--inventory .inventory-v2__summary strong {
+  font-size: 1.15rem;
+  font-weight: 680;
+}
+
+.patia-v11--inventory .inventory-v2__summary > .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.patia-v11--inventory .inventory-v2__catalog {
+  margin-top: 16px;
+  padding: 18px;
+}
+
+.patia-v11--inventory .inventory-v2__catalog-head {
+  align-items: end;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--patia-line);
+}
+
+.patia-v11--inventory .inventory-v2__catalog-head h3 {
+  font-size: 1.08rem;
+  font-weight: 680;
+}
+
+.patia-v11--inventory .inventory-v2__stock-filter,
+.patia-v11--inventory .inventory-v2__bulk-actions {
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.patia-v11--inventory .inventory-v2__filter-chip,
+.patia-v11--inventory .inventory-v2__active-filter,
+.patia-v11--inventory .inventory-v2__clear-filter {
+  border-radius: var(--patia-radius-xs);
+  box-shadow: none;
+}
+
+.patia-v11--inventory .inventory-v2__catalog .table-wrap {
+  border-top: 1px solid var(--patia-line);
+}
+
+.patia-v11--inventory .inventory-v2__catalog table {
+  table-layout: fixed;
+  font-size: .77rem;
+}
+
+.patia-v11--inventory .inventory-v2__catalog th {
+  padding: 10px 9px;
+  border-color: var(--patia-line);
+  background: #f2efe9;
+  color: #596368;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.patia-v11--inventory .inventory-v2__catalog td {
+  padding: 10px 9px;
+  border-color: #e7e3dc;
+  color: #4f595e;
+  line-height: 1.4;
+  vertical-align: top;
+}
+
+.patia-v11--inventory .inventory-v2__catalog td:first-child {
+  color: var(--patia-ink);
+}
+
+.patia-v11--inventory .inventory-v2__catalog td small {
+  color: #7a8385;
+  font-size: .65rem;
+}
+
+.patia-v11--inventory .inventory-v2__catalog tr.danger-row {
+  background: #fffaf8;
+  box-shadow: inset 3px 0 0 var(--patia-danger);
+}
+
+.patia-v11--inventory .inventory-v3__row-actions {
+  gap: 5px;
+}
+
+.patia-v11--inventory .inventory-v3__row-actions .btn,
+.patia-v11--inventory .inventory-v3__more > summary {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: .7rem;
+}
+
+.patia-v11--inventory .inventory-v2__pagination {
+  border-color: var(--patia-line);
+}
+
+/* Responsive ----------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .patia-v11--landing .landing-v2__hero {
+    grid-template-columns: minmax(0, .92fr) minmax(430px, 1.08fr);
+  }
+
+  .patia-v11--landing .landing-v2__benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .patia-v11--landing .landing-v2__benefits article:nth-child(2) { border-right: 0; }
+  .patia-v11--landing .landing-v2__benefits article:nth-child(-n+2) { border-bottom: 1px solid var(--patia-line); }
+
+  .patia-v11--inventory .inventory-v2__setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .patia-v11--landing .landing-v2__hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    padding-top: 42px;
+  }
+
+  .patia-v11--landing .landing-v2__hero-copy {
+    max-width: 680px;
+  }
+
+  .patia-v11--workspace .sidebar-v2 {
+    border-bottom: 1px solid var(--patia-line) !important;
+    background: #eae7e0 !important;
+  }
+
+  .patia-v11--workspace .sidebar-v2__brand {
+    margin-bottom: 0 !important;
+  }
+
+  .patia-v11--workspace .sidebar-v2__toggle {
+    border-color: var(--patia-line-strong);
+    border-radius: var(--patia-radius-sm);
+    background: var(--patia-surface);
+  }
+
+  .patia-v11--workspace .app-main-v2 {
+    padding: 18px 20px 42px !important;
+  }
+
+  .patia-v11--dashboard .dashboard-v3__analysis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .patia-v11--landing .landing-v2__header,
+  .patia-v11--landing .landing-v2__hero,
+  .patia-v11--landing .landing-premium-v1__proof,
+  .patia-v11--landing .landing-v2__section,
+  .patia-v11--landing .landing-v2__footer {
+    width: min(100% - 32px, 1180px);
+  }
+
+  .patia-v11--landing .landing-premium-v1__proof {
+    grid-template-columns: 1fr;
+  }
+
+  .patia-v11--landing .landing-premium-v1__proof article {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--patia-line);
+  }
+
+  .patia-v11--landing .landing-premium-v1__proof article:last-child { border-bottom: 0; }
+
+  .patia-v11--landing .landing-v2__pricing {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .patia-v11--landing .landing-plans-v1 {
+    grid-template-columns: 1fr;
+  }
+
+  .patia-v11--landing .landing-plans-v1 .landing-v2__price-card {
+    border-right: 0;
+    border-bottom: 1px solid var(--patia-line);
+  }
+
+  .patia-v11--landing .landing-plans-v1 .landing-v2__price-card:last-child { border-bottom: 0; }
+
+  .patia-v11--dashboard .dashboard-v3__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .patia-v11--dashboard .dashboard-v3__summary-card {
+    min-height: 132px;
+    border-right: 0;
+    border-bottom: 1px solid var(--patia-line);
+  }
+
+  .patia-v11--dashboard .dashboard-v3__summary-card:last-child { border-bottom: 0; }
+  .patia-v11--dashboard .dashboard-v3__lower-grid { grid-template-columns: 1fr; }
+
+  .patia-v11--dashboard .dashboard-v11__cash-status {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .patia-v11--dashboard .dashboard-v11__cash-status > a {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .patia-v11--landing .landing-v2__header,
+  .patia-v11--landing .landing-v2__hero,
+  .patia-v11--landing .landing-premium-v1__proof,
+  .patia-v11--landing .landing-v2__section,
+  .patia-v11--landing .landing-v2__footer {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .patia-v11--landing .landing-v2__header { min-height: 62px; }
+  .patia-v11--landing .landing-v2__brand img { width: 100px; }
+  .patia-v11--landing .landing-v2__hero { padding: 30px 0 28px; gap: 28px; }
+
+  .patia-v11--landing .landing-v2__hero h1 {
+    font-size: clamp(2.7rem, 13.5vw, 3.35rem);
+  }
+
+  .patia-v11--landing .landing-v5__terms {
+    display: grid;
+  }
+
+  .patia-v11--landing .landing-v5__terms > span,
+  .patia-v11--landing .landing-v5__terms > span:first-child {
+    padding: 8px 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--patia-line);
+  }
+
+  .patia-v11--landing .landing-v5__terms > span:last-child { border-bottom: 0; }
+  .patia-v11--landing .landing-v2__actions { align-items: stretch; flex-direction: column; }
+  .patia-v11--landing .landing-v2__button { width: 100%; }
+  .patia-v11--landing .landing-v2__section { padding: 48px 0; }
+  .patia-v11--landing .landing-v2__section-head h2 { font-size: 2.1rem; }
+  .patia-v11--landing .landing-showcase-v1__grid,
+  .patia-v11--landing .landing-v2__benefits,
+  .patia-v11--landing .landing-v2__comparison-grid,
+  .patia-v11--landing .landing-v2__step-list { grid-template-columns: 1fr; }
+
+  .patia-v11--landing .landing-v2__benefits article,
+  .patia-v11--landing .landing-v2__benefits article:nth-child(2) {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--patia-line);
+  }
+
+  .patia-v11--landing .landing-v2__benefits article:last-child { border-bottom: 0; }
+  .patia-v11--landing .landing-v2__steps,
+  .patia-v11--landing .landing-premium-v1__pro-value,
+  .patia-v11--landing .landing-v2__final { padding: 34px 24px; }
+
+  .patia-v11--landing .landing-v2__comparison-card {
+    border-right: 0;
+    border-bottom: 1px solid var(--patia-line);
+  }
+
+  .patia-v11--landing .landing-v2__comparison-card:last-child { border-bottom: 0; }
+
+  .patia-v11--workspace .app-main-v2 {
+    padding: 14px 12px 36px !important;
+  }
+
+  .patia-v11--workspace .app-topbar-v2 {
+    min-height: 64px;
+    margin-bottom: 14px !important;
+  }
+
+  .patia-v11--dashboard .dashboard-v3__summary-card,
+  .patia-v11--dashboard .dashboard-v3__trend-panel,
+  .patia-v11--dashboard .dashboard-v3__alerts-card,
+  .patia-v11--dashboard .dashboard-v3__payments-card,
+  .patia-v11--dashboard .dashboard-v3__quick-summary {
+    padding: 16px !important;
+  }
+
+  .patia-v11--dashboard .dashboard-v11__cash-status {
+    align-items: start;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .patia-v11--dashboard .dashboard-v11__cash-status > a {
+    grid-column: auto;
+  }
+
+  .patia-v11--dashboard .dashboard-v3__trend-chart { height: 220px; }
+  .patia-v11--dashboard .dashboard-v3__payments-layout { grid-template-columns: 1fr; }
+  .patia-v11--dashboard .dashboard-v3__payments-chart { height: 180px; }
+
+  .patia-v11--inventory .inventory-v2__quick-load-callout {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 15px;
+  }
+
+  .patia-v11--inventory .inventory-v2__quick-load-callout > .btn {
+    grid-column: 1 / -1;
+  }
+
+  .patia-v11--inventory .inventory-v2__panel,
+  .patia-v11--inventory .inventory-v2__catalog { padding: 15px; }
+
+  .patia-v11--inventory .inventory-v2__catalog tbody {
+    gap: 0;
+  }
+
+  .patia-v11--inventory .inventory-v2__catalog tr {
+    padding: 10px 2px;
+    border: 0;
+    border-top: 1px solid var(--patia-line);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .patia-v11--inventory .inventory-v2__catalog tr.danger-row {
+    padding-left: 10px;
+    border-left: 3px solid #df6b72;
+  }
+
+  .patia-v11--inventory .inventory-v2__catalog td {
+    grid-template-columns: minmax(76px, .38fr) minmax(0, 1fr);
+    gap: 9px;
+    padding: 7px 0;
+  }
+
+  .patia-v11--inventory .inventory-v2__catalog td:last-child {
+    display: flex;
+    gap: 8px;
+  }
+
+  .patia-v11--inventory .inventory-v2__catalog td:last-child::before {
+    display: none;
+  }
+
+  .patia-v11--inventory .inventory-v2__catalog td:last-child .btn,
+  .patia-v11--inventory .inventory-v2__catalog td:last-child form {
+    flex: 1 1 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patia-v11 *,
+  .patia-v11 *::before,
+  .patia-v11 *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .001ms !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

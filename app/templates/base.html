@@ -14,11 +14,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=131">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v11.css') }}?v=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v11-modules.css') }}?v=1">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="app-body app-shell-v2 app-polish-v1{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}{% if request.path == '/sell' and session.get('cashier_mode') %} app-shell-v2--cashier-mode{% endif %}">
+<body class="app-body app-shell-v2 app-polish-v1 patia-v11 patia-v11--workspace{% if request.path == '/' %} patia-v11--dashboard{% elif request.path.startswith('/reports') or request.path.startswith('/pro/monthly-reports') %} patia-v11--reports{% elif request.path.startswith('/pro/hub') or request.path.startswith('/pro/alerts') %} patia-v11--decisions{% elif request.path.startswith('/pro/purchases') %} patia-v11--purchases{% elif request.path.startswith('/products') or request.path.startswith('/inventory') %} patia-v11--inventory{% elif request.path.startswith('/cash-register') %} patia-v11--cash{% elif request.path.startswith('/customers') or request.path.startswith('/credit') %} patia-v11--crm{% elif request.path.startswith('/suppliers') %} patia-v11--suppliers{% elif request.path.startswith('/settings') or request.path.startswith('/team') or request.path.startswith('/subscription') %} patia-v11--settings{% elif request.path.startswith('/sell') %} patia-v11--pos{% elif request.path.startswith('/ticket') or request.path.startswith('/receipt') or request.path.startswith('/sales') %} patia-v11--receipt{% else %} patia-v11--general{% endif %}{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}{% if request.path == '/sell' and session.get('cashier_mode') %} app-shell-v2--cashier-mode{% endif %}">
   {% include "_language_selector.html" %}
   <aside class="sidebar sidebar-v2">
     <div class="sidebar-v2__head">

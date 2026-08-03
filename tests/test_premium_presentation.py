@@ -111,6 +111,58 @@ class PremiumPresentationTests(unittest.TestCase):
         for name in consumers:
             self.assertIn("styles.css') }}?v=131", self.template(name), name)
 
+    def test_visual_system_v11_uses_explicit_module_identities(self):
+        base = self.template("base.html")
+        landing = self.template("landing.html")
+        visual_css = (
+            PROJECT_ROOT / "app" / "static" / "css" / "patia-v11.css"
+        ).read_text(encoding="utf-8")
+        module_css = (
+            PROJECT_ROOT / "app" / "static" / "css"
+            / "patia-v11-modules.css"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("patia-v11--landing", landing)
+        self.assertIn("patia-v11.css') }}?v=1", landing)
+        self.assertIn("patia-v11-modules.css') }}?v=1", base)
+        self.assertIn("patia-v11--dashboard", base)
+        self.assertIn("patia-v11--inventory", base)
+        for scope in (
+            "patia-v11--reports",
+            "patia-v11--decisions",
+            "patia-v11--purchases",
+            "patia-v11--cash",
+            "patia-v11--crm",
+            "patia-v11--suppliers",
+            "patia-v11--settings",
+            "patia-v11--pos",
+        ):
+            self.assertIn(scope, base)
+            self.assertIn(f".{scope}", module_css)
+        self.assertNotIn("body:not(", visual_css)
+        self.assertNotIn("body:not(", module_css)
+        for scope in (
+            ".patia-v11--landing",
+            ".patia-v11--dashboard",
+            ".patia-v11--inventory",
+        ):
+            self.assertIn(scope, visual_css)
+
+        self.assertIn(
+            ".patia-v11--decisions .pro-hub-v1__pulse-reading b",
+            module_css,
+        )
+        self.assertIn("width: auto;", module_css)
+        self.assertIn(
+            ".patia-v11--crm .receivables-v2__accounts table",
+            module_css,
+        )
+        self.assertIn(
+            ".patia-v11--suppliers .suppliers-v2__list-card table",
+            module_css,
+        )
+        self.assertIn("min-width: 0;", module_css)
+
     def test_sidebar_keeps_distinct_pro_routes_without_legacy_dashboard(self):
         base = self.template("base.html")
         reports = self.template("reports.html")
