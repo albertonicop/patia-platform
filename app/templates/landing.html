@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/patia-mark.svg') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/brand/patia-mark-original.png') }}">
   <link rel="alternate icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
   <meta name="description" content="{{ _('Inventario, ventas, caja, clientes y decisiones en un solo lugar. Prueba PATIA gratis durante 14 días.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v2-landing.css') }}?v=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v2-landing.css') }}?v=2">
 </head>
 
 <body class="patia-landing-v2">
@@ -17,7 +17,7 @@
   <header class="pl2-header" data-landing-header>
     <div class="pl2-header__inner">
       <a href="/" class="pl2-brand" aria-label="{{ _('PATIA, inicio') }}">
-        <img src="{{ url_for('static', filename='img/brand/patia-logo-light.svg') }}" width="184" height="42" alt="PATIA">
+        <img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" width="184" height="44" alt="PATIA">
       </a>
 
       <nav class="pl2-nav" aria-label="{{ _('Navegación principal') }}">
@@ -108,7 +108,7 @@
           </ul>
         </div>
         <figure class="pl2-frame pl2-frame--offset">
-          <img src="{{ url_for('static', filename='img/landing/patia-pos.jpg') }}" width="1160" height="770" loading="lazy" decoding="async" alt="{{ _('Punto de venta real de PATIA') }}">
+          <img src="{{ url_for('static', filename='img/landing/patia-pos.jpg') }}" width="1160" height="760" loading="lazy" decoding="async" alt="{{ _('Punto de venta real de PATIA') }}">
           <figcaption>{{ _("Una operación conectada de principio a fin.") }}</figcaption>
         </figure>
       </div>
@@ -180,7 +180,7 @@
 
     <section class="pl2-final" aria-labelledby="pl2-final-title">
       <div class="pl2-container">
-        <img src="{{ url_for('static', filename='img/brand/patia-mark.svg') }}" width="56" height="56" alt="" aria-hidden="true">
+        <img src="{{ url_for('static', filename='img/brand/patia-mark-original.png') }}" width="56" height="56" alt="" aria-hidden="true">
         <h2 id="pl2-final-title">{{ _("Tu negocio puede estar más claro desde hoy.") }}</h2>
         <p>{{ _("Prueba PATIA gratis durante 14 días y reúne tu operación en un solo lugar.") }}</p>
         <a class="pl2-button pl2-button--primary" href="/register">{{ _("Probar 14 días gratis") }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
@@ -206,7 +206,7 @@
 
   <footer class="pl2-footer">
     <div class="pl2-container pl2-footer__inner">
-      <div><img src="{{ url_for('static', filename='img/brand/patia-logo-light.svg') }}" width="148" height="34" alt="PATIA"><p>{{ _("Control claro para negocios que quieren crecer.") }}</p></div>
+      <div><img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" width="148" height="35" alt="PATIA"><p>{{ _("Control claro para negocios que quieren crecer.") }}</p></div>
       <nav aria-label="{{ _('Enlaces del pie de página') }}"><a href="#funciones">{{ _("Funciones") }}</a><a href="#precios">{{ _("Precios") }}</a><a href="{{ url_for('main.terms') }}">{{ _("Términos") }}</a><a href="{{ url_for('main.privacy') }}">{{ _("Privacidad") }}</a><a href="/login">{{ _("Iniciar sesión") }}</a></nav>
       <p>{{ _("PATIA © 2026 · NP Ventures") }}</p>
     </div>
