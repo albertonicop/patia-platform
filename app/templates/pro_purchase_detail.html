@@ -13,10 +13,17 @@
     <div>
       <span class="eyebrow">{{ order.supplier_name or _("Sin proveedor") }}</span>
       <h2>{{ order.number }}</h2>
-      <p>{{ _("Estado: %(status)s", status=order_status_labels.get(order.status, order.status)) }}</p>
+      <span class="status-badge status-badge--{{ order.status|lower }}">{{ order_status_labels.get(order.status, order.status) }}</span>
     </div>
     <a class="btn ghost" href="{{ url_for('pro.purchases') }}">{{ _("Volver a Compras") }}</a>
   </header>
+
+  <ol class="pro-purchase-detail-v1__progress" aria-label="{{ _('Estado del pedido') }}">
+    <li class="is-complete"><span>1</span>{{ _("Pedido preparado") }}</li>
+    <li class="{{ 'is-complete' if order.status != 'DRAFT' else '' }}"><span>2</span>{{ _("Pedido confirmado") }}</li>
+    <li class="{{ 'is-complete' if order.status in ('PARTIALLY_RECEIVED', 'RECEIVED') else '' }}"><span>3</span>{{ _("Mercancía recibida") }}</li>
+    <li class="{{ 'is-complete' if order.status == 'RECEIVED' else '' }}"><span>4</span>{{ _("Inventario actualizado") }}</li>
+  </ol>
 
   {% if order.status == "DRAFT" %}
     <form method="POST" action="{{ url_for('pro.purchase_update', order_id=order.id) }}" class="pro-purchase-detail-v1__form">
@@ -57,8 +64,8 @@
     <section class="pro-purchase-detail-v1__receive">
       <div>
         <span class="eyebrow">{{ _("Recepción") }}</span>
-        <h3>{{ _("¿Qué mercancía llegó?") }}</h3>
-        <p>{{ _("Registra solo lo recibido hoy. PATIA actualizará Inventario e Historial en la misma operación.") }}</p>
+        <h3>{{ _("Registra lo que recibiste") }}</h3>
+        <p>{{ _("Escribe solo las unidades que llegaron hoy. Al confirmar, PATIA actualizará Inventario e Historial.") }}</p>
       </div>
       <form method="POST" action="{{ url_for('pro.purchase_receive', order_id=order.id) }}" data-submit-once>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -351,6 +351,17 @@ class ProExecutiveDashboardTests(unittest.TestCase):
         self.assertIn("previousDaily", html)
         self.assertIn("Ventas del periodo anterior", html)
         self.assertIn('action="/pro/monthly-goal"', html)
+        module_css = Path(
+            "app/static/css/patia-v11-modules.css"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            ".reports-v3__executive-card--goal { border-top: 3px",
+            module_css,
+        )
+        self.assertNotIn(
+            ".reports-v3__executive-grid {\n  gap: 0;",
+            module_css,
+        )
 
         hub = self._client(self.owner, self.membership).get(
             "/pro/hub"

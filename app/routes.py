@@ -1190,6 +1190,7 @@ def analytics(user=None):
         key=lambda p: (p.stock - p.min_stock, p.name.casefold()),
     )
     low_stock = len(low_stock_products)
+    out_of_stock = sum(1 for product in products if product.stock <= 0)
 
     latest_credit_ids = (
         db.session.query(
@@ -1226,6 +1227,7 @@ def analytics(user=None):
         previous_month_end,
     )
     dashboard_summary = {
+        "out_of_stock": out_of_stock,
         "today_sales": today_summary["sales"],
         "today_tickets": today_summary["tickets"],
         "month_sales": month_summary["sales"],

@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from babel.support import Translations
+from flask_babel import force_locale
 from sqlalchemy import event as sqlalchemy_event
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -241,7 +242,7 @@ class ProPhaseTwoTests(unittest.TestCase):
             ),
             (
                 "/pro/purchases",
-                "No necesitas reponer mercancía ahora",
+                "Tu inventario tiene buena cobertura",
             ),
             (
                 "/pro/alerts",
@@ -409,6 +410,13 @@ class ProPhaseTwoTests(unittest.TestCase):
             "Agua de prueba",
             response.get_data(as_text=True),
         )
+        html = response.get_data(as_text=True)
+        self.assertIn("Del aviso al inventario actualizado", html)
+        self.assertIn("Productos por reponer", html)
+        self.assertIn("Borradores", html)
+        self.assertIn("Por recibir", html)
+        self.assertIn("Por qué reponer", html)
+        self.assertIn("Preparar pedido", html)
 
         for index in range(25):
             db.session.add(
@@ -441,6 +449,42 @@ class ProPhaseTwoTests(unittest.TestCase):
                 db.engine, "before_cursor_execute", track
             )
         self.assertLessEqual(len(statements), 4)
+
+    def test_purchase_page_summarizes_existing_order_states(self):
+        draft = create_purchase_draft(
+            self.membership,
+            {self.product.id: 2},
+            supplier_name=self.supplier.name,
+        )
+        ordered = create_purchase_draft(
+            self.membership,
+            {self.product.id: 3},
+            supplier_name=self.supplier.name,
+        )
+        confirm_purchase_order(ordered)
+
+        html = self._client(
+            self.owner, self.membership
+        ).get("/pro/purchases").get_data(as_text=True)
+
+        self.assertIn("Borradores</span><strong>1", html)
+        self.assertIn("Por recibir</span><strong>1", html)
+        self.assertIn("pro-purchases-v1__order--draft", html)
+        self.assertIn("pro-purchases-v1__order--ordered", html)
+        self.assertIn(f">{draft.number}<", html)
+        self.assertIn(f">{ordered.number}<", html)
+
+        self.owner.preferred_language = "en"
+        db.session.commit()
+        with force_locale("en"):
+            english = self._client(
+                self.owner, self.membership, language="en"
+            ).get("/pro/purchases").get_data(as_text=True)
+        self.assertIn("From suggestion to updated inventory", english)
+        self.assertIn("Products to restock", english)
+        self.assertIn("Drafts", english)
+        self.assertIn("Awaiting receipt", english)
+        self.assertIn("Why restock", english)
 
     def test_exhausted_product_with_zero_minimum_is_still_suggested(self):
         product = Product(
@@ -613,18 +657,20 @@ class ProPhaseTwoTests(unittest.TestCase):
         response = self._client(owner, membership).get("/pro/purchases")
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            "Todavía no has creado pedidos.",
+            "Todavía no hay pedidos. Prepara uno desde una sugerencia",
             response.get_data(as_text=True),
         )
-        stylesheet = Path("app/static/css/styles.css").read_text(
+        stylesheet = Path(
+            "app/static/css/patia-v11-modules.css"
+        ).read_text(
             encoding="utf-8"
         )
         self.assertIn(
-            ".app-shell-v2 .pro-purchases-v1__orders .reports-text",
+            ".pro-purchases-v1__orders-empty",
             stylesheet,
         )
         self.assertIn(
-            "color: var(--v2-muted, #62697c) !important;",
+            "color: var(--patia-muted);",
             stylesheet,
         )
 

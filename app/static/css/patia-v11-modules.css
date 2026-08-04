@@ -201,28 +201,33 @@
 }
 
 .patia-v11--reports .reports-v3__executive-grid {
-  gap: 0;
+  gap: 14px;
   margin: 20px 0;
-  overflow: hidden;
-  border: 1px solid #313a40;
-  border-radius: var(--patia-radius-md);
-  background: var(--patia-ink);
+  overflow: visible;
+  border: 0;
+  background: transparent;
 }
 
 .patia-v11--reports .reports-v3__executive-card {
   padding: 22px !important;
-  border: 0 !important;
-  border-right: 1px solid #465057 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: #fff;
+  border: 1px solid var(--patia-line) !important;
+  border-radius: var(--patia-radius-sm) !important;
+  background: var(--patia-surface) !important;
+  color: var(--patia-ink);
 }
 
-.patia-v11--reports .reports-v3__executive-card:last-child { border-right: 0 !important; }
-.patia-v11--reports .reports-v3__executive-card :where(h3, strong) { color: #fff; }
-.patia-v11--reports .reports-v3__executive-card :where(p, span, small) { color: #cbd1d3; }
-.patia-v11--reports .reports-v3__goal-progress { background: #3c464c; }
-.patia-v11--reports .reports-v3__goal-progress span { background: #8b82ff; }
+.patia-v11--reports .reports-v3__executive-card--goal { border-top: 3px solid var(--patia-accent) !important; }
+.patia-v11--reports .reports-v3__executive-card--projection { border-top: 3px solid var(--patia-success) !important; }
+.patia-v11--reports .reports-v3__executive-card :where(h3, strong) { color: var(--patia-ink); }
+.patia-v11--reports .reports-v3__executive-card :where(p, span, small) { color: var(--patia-muted); }
+.patia-v11--reports .reports-v3__goal-progress { background: var(--patia-accent-soft); }
+.patia-v11--reports .reports-v3__goal-progress span { background: var(--patia-accent); }
+.patia-v11--reports .reports-v3__comparison-note {
+  margin-top: 18px;
+  padding: 11px 0 0;
+  border-top: 1px solid var(--patia-line);
+  color: var(--patia-muted);
+}
 
 .patia-v11--reports :where(.reports-v3__panel, .reports-v3__trend) {
   padding: 18px !important;
@@ -442,63 +447,79 @@
 /* Purchases — logistics ------------------------------------------------- */
 
 .patia-v11--purchases .module-heading-v2 {
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--patia-line);
+  padding-bottom: 6px;
 }
 
 .patia-v11--purchases .pro-purchases-v1__guide {
+  display: block;
+  padding: 18px 20px 20px;
+  border: 0;
+  border-radius: var(--patia-radius-md);
+  background: var(--patia-surface-muted);
+  box-shadow: none;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide h3 {
+  margin: 0 0 16px;
+  color: var(--patia-ink);
+  font-size: .9rem;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide ol {
   display: grid;
-  grid-template-columns: minmax(250px, .7fr) minmax(480px, 1.3fr);
-  gap: 24px;
-  padding: 18px 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 10px;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-content: center;
+  column-gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: var(--patia-radius-xs);
+  background: var(--patia-surface);
+  color: var(--patia-muted);
+  font-size: .72rem;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide li strong,
+.patia-v11--purchases .pro-purchases-v1__guide li small { display: block; }
+.patia-v11--purchases .pro-purchases-v1__guide li > span { grid-row: 1 / 3; }
+.patia-v11--purchases .pro-purchases-v1__guide li strong { color: var(--patia-ink); }
+.patia-v11--purchases .pro-purchases-v1__guide li small { margin-top: 2px; color: var(--patia-muted); }
+
+.patia-v11--purchases .pro-purchases-v1__guide li:not(:last-child)::after {
+  display: none;
+}
+
+.patia-v11--purchases .pro-purchases-v1__summary {
+  gap: 10px;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.patia-v11--purchases .pro-purchases-v1__summary article {
+  padding: 16px;
   border: 1px solid var(--patia-line);
-  border-left: 4px solid var(--patia-accent);
   border-radius: var(--patia-radius-sm);
   background: var(--patia-surface);
   box-shadow: none;
 }
 
-.patia-v11--purchases .pro-purchases-v1__guide ol {
-  align-items: center;
-  gap: 0;
+.patia-v11--purchases .pro-purchases-v1__section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 28px 0 12px;
 }
 
-.patia-v11--purchases .pro-purchases-v1__guide li {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  padding-inline: 8px;
-  color: var(--patia-muted);
-  font-size: .7rem;
-}
-
-.patia-v11--purchases .pro-purchases-v1__guide li:not(:last-child)::after {
-  position: absolute;
-  top: 13px;
-  right: -18%;
-  width: 36%;
-  border-top: 1px solid var(--patia-line-strong);
-  content: "";
-}
-
-.patia-v11--purchases .pro-purchases-v1__summary {
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--patia-line);
-  border-radius: var(--patia-radius-sm);
-  background: var(--patia-surface-muted);
-}
-
-.patia-v11--purchases .pro-purchases-v1__summary article {
-  padding: 16px;
-  border: 0;
-  border-right: 1px solid var(--patia-line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.patia-v11--purchases .pro-purchases-v1__summary article:last-child { border-right: 0; }
+.patia-v11--purchases .pro-purchases-v1__section-head :where(h2, h3, p) { margin: 0; }
+.patia-v11--purchases .pro-purchases-v1__section-head p { max-width: 560px; color: var(--patia-muted); font-size: .8rem; }
 
 .patia-v11--purchases .pro-purchases-v1__groups {
   gap: 18px;
@@ -507,17 +528,20 @@
 .patia-v11--purchases .pro-purchases-v1__group {
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--patia-line-strong);
-  border-radius: var(--patia-radius-sm);
+  border: 1px solid var(--patia-line);
+  border-radius: var(--patia-radius-md);
   background: var(--patia-surface);
   box-shadow: none;
 }
 
 .patia-v11--purchases .pro-purchases-v1__group > header {
   padding: 16px 18px;
-  border-bottom: 1px solid var(--patia-line);
   background: var(--patia-surface-muted);
 }
+
+.patia-v11--purchases .pro-purchases-v1__group-total { text-align: right; }
+.patia-v11--purchases .pro-purchases-v1__group-total span { display: block; color: var(--patia-muted); font-size: .68rem; }
+.patia-v11--purchases .pro-purchases-v1__reason { color: var(--patia-accent-strong) !important; font-weight: 700; }
 
 .patia-v11--purchases .pro-purchases-v1__group > .btn {
   margin: 14px 18px 18px;
@@ -535,23 +559,56 @@
 .patia-v11--purchases .pro-purchases-v1__method,
 .patia-v11--purchases .pro-purchases-v1__slow,
 .patia-v11--purchases .pro-purchases-v1__orders {
-  border: 1px solid var(--patia-line);
+  border: 0;
   border-radius: var(--patia-radius-sm);
-  background: var(--patia-surface);
+  background: var(--patia-surface-muted);
   box-shadow: none;
 }
 
+.patia-v11--purchases .pro-purchases-v1__method summary { color: var(--patia-ink); cursor: pointer; font-weight: 700; }
+.patia-v11--purchases .pro-purchases-v1__orders { padding: 18px; }
+.patia-v11--purchases .pro-purchases-v1__orders .pro-purchases-v1__section-head { margin: 0 0 12px; }
+
 .patia-v11--purchases .pro-purchases-v1__order-list {
-  gap: 0;
-  border-top: 1px solid var(--patia-line);
+  gap: 8px;
+  border: 0;
 }
 
 .patia-v11--purchases .pro-purchases-v1__order-list > a {
-  border: 0;
-  border-bottom: 1px solid var(--patia-line);
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid var(--patia-line);
+  border-left: 3px solid var(--patia-muted);
+  border-radius: var(--patia-radius-xs);
+  background: var(--patia-surface);
 }
+
+.patia-v11--purchases .pro-purchases-v1__order-list > a > div { display: grid; gap: 2px; }
+
+.patia-v11--purchases .pro-purchases-v1__order--draft { border-left-color: var(--patia-warning) !important; }
+.patia-v11--purchases :where(.pro-purchases-v1__order--ordered, .pro-purchases-v1__order--partially_received) { border-left-color: var(--patia-accent) !important; }
+.patia-v11--purchases .pro-purchases-v1__order--received { border-left-color: var(--patia-success) !important; }
+.patia-v11--purchases .pro-purchases-v1__orders-empty { display: flex; align-items: center; gap: 10px; color: var(--patia-muted); }
+.patia-v11--purchases .pro-purchases-v1__orders-empty p { margin: 0; }
+
+.patia-v11--purchases .pro-purchase-detail-v1__progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.patia-v11--purchases .pro-purchase-detail-v1__progress li {
+  padding: 10px;
+  border-radius: var(--patia-radius-xs);
+  background: var(--patia-surface-muted);
+  color: var(--patia-muted);
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.patia-v11--purchases .pro-purchase-detail-v1__progress li span { margin-right: 6px; }
+.patia-v11--purchases .pro-purchase-detail-v1__progress li.is-complete { background: var(--patia-accent-soft); color: var(--patia-accent-strong); }
 
 .patia-v11--purchases .pro-purchase-detail-v1__table,
 .patia-v11--purchases .pro-purchase-detail-v1__receive,
@@ -1003,8 +1060,7 @@
   .patia-v11--reports .reports-v3__kpi:nth-child(2n) { border-right: 0; }
   .patia-v11--reports .reports-v3__kpi:nth-child(n+3) { border-top: 1px solid var(--patia-line); }
   .patia-v11--reports .reports-v3__executive-grid { grid-template-columns: 1fr; }
-  .patia-v11--reports .reports-v3__executive-card { border-right: 0 !important; border-bottom: 1px solid #465057 !important; }
-  .patia-v11--reports .reports-v3__executive-card:last-child { border-bottom: 0 !important; }
+  .patia-v11--reports .reports-v3__executive-card { border-right: 1px solid var(--patia-line) !important; }
 
   .patia-v11--decisions .pro-hub-v1__pulse { grid-template-columns: 1fr; }
   .patia-v11--decisions .pro-hub-v1__priority { grid-template-columns: 32px minmax(0, 1fr); }
@@ -1015,8 +1071,7 @@
   .patia-v11--decisions .pro-hub-v1__card:nth-child(n+3) { border-top: 1px solid var(--patia-line); }
 
   .patia-v11--purchases .pro-purchases-v1__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .patia-v11--purchases .pro-purchases-v1__summary article:nth-child(2n) { border-right: 0; }
-  .patia-v11--purchases .pro-purchases-v1__summary article:nth-child(n+3) { border-top: 1px solid var(--patia-line); }
+  .patia-v11--purchases .pro-purchases-v1__section-head { align-items: start; flex-direction: column; gap: 5px; }
 
   .patia-v11--cash .cash-v2__start { grid-template-columns: 1fr; }
   .patia-v11--cash .cash-v2__actions { grid-template-columns: 1fr; }
@@ -1063,11 +1118,11 @@
   .patia-v11--decisions .pro-hub-v1__card:first-child { border-top: 0; }
 
   .patia-v11--purchases .pro-purchases-v1__guide ol { align-items: stretch; flex-direction: column; }
-  .patia-v11--purchases .pro-purchases-v1__guide li { display: flex; align-items: center; gap: 9px; }
+  .patia-v11--purchases .pro-purchases-v1__guide ol { grid-template-columns: 1fr; }
+  .patia-v11--purchases .pro-purchases-v1__guide li :where(strong, small) { margin: 0; }
   .patia-v11--purchases .pro-purchases-v1__guide li::after { display: none; }
   .patia-v11--purchases .pro-purchases-v1__summary { grid-template-columns: 1fr; }
-  .patia-v11--purchases .pro-purchases-v1__summary article { border-right: 0; border-top: 1px solid var(--patia-line); }
-  .patia-v11--purchases .pro-purchases-v1__summary article:first-child { border-top: 0; }
+  .patia-v11--purchases .pro-purchase-detail-v1__progress { grid-template-columns: 1fr 1fr; }
 
   .patia-v11--cash .cash-v2__balance { grid-template-columns: 1fr; }
   .patia-v11--cash .cash-v2__balance > div > strong { font-size: 2.5rem; }

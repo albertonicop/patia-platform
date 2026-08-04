@@ -12,6 +12,7 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_patia")
 os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
+from flask_babel import force_locale
 from app.models import Product, Sale, User
 from app.routes import analytics
 from app.team.services import ensure_owner_organization
@@ -140,7 +141,7 @@ class DashboardOnboardingTests(unittest.TestCase):
         self.assertIn("Ventas frente al periodo anterior", html)
         self.assertIn('id="dashboardSalesChart"', html)
         self.assertIn('id="dashboardPaymentsChart"', html)
-        self.assertIn("1 ticket registrado hoy", html)
+        self.assertIn("No tienes productos agotados", html)
         self.assertIn("Aún no hay un mes anterior comparable.", html)
 
     def test_inventory_value_uses_current_stock_at_recorded_cost(self):
@@ -151,7 +152,7 @@ class DashboardOnboardingTests(unittest.TestCase):
 
         self.assertEqual(values["inventory_value"], Decimal("50.00"))
 
-    def test_top_cards_use_today_month_and_average_ticket_metrics(self):
+    def test_top_cards_use_out_of_stock_month_and_average_ticket_metrics(self):
         user = self.make_user()
         product = self.add_product(user)
         timezone_name = user.organization_memberships[0].organization.timezone
@@ -215,18 +216,22 @@ class DashboardOnboardingTests(unittest.TestCase):
         self.assertEqual(Decimal("25.00"), values["month_average_ticket"])
         self.assertEqual(Decimal("25.0"), values["month_sales_change"])
         self.assertEqual(Decimal("25.0"), values["month_average_change"])
+        self.assertEqual(0, values["out_of_stock"])
 
         html = self.dashboard_html()
+        self.assertIn("Productos agotados", html)
+        self.assertIn("No tienes productos agotados", html)
+        self.assertIn(
+            'href="/products?out_of_stock=1&amp;source=dashboard"',
+            html,
+        )
         self.assertIn("Ventas de hoy", html)
         self.assertIn("2 tickets registrados hoy", html)
         self.assertIn('href="/reports?period=today"', html)
         self.assertIn("Ventas del mes", html)
-        self.assertIn("Ticket promedio", html)
-        self.assertGreaterEqual(html.count("+25.0% vs. mes anterior"), 2)
-        self.assertGreaterEqual(
-            html.count('href="/reports?period=this_month"'),
-            2,
-        )
+        self.assertNotIn("Ticket promedio", html)
+        self.assertEqual(html.count("+25.0% vs. mes anterior"), 1)
+        self.assertEqual(html.count('href="/reports?period=this_month"'), 1)
         self.assertNotIn(">Meta mensual<", html)
         self.assertNotIn("Proyección de cierre", html)
 
@@ -243,10 +248,60 @@ class DashboardOnboardingTests(unittest.TestCase):
         self.assertIsNone(values["month_average_change"])
 
         html = self.dashboard_html()
+        self.assertIn("No tienes productos agotados", html)
         self.assertIn("0 tickets registrados hoy", html)
-        self.assertIn("Aún no hay ventas este mes.", html)
         self.assertIn("Aún no hay un mes anterior comparable.", html)
         self.assertNotIn("0.0% vs. mes anterior", html)
+
+    def test_out_of_stock_card_counts_only_the_active_organization(self):
+        user = self.make_user()
+        own_product = self.add_product(user)
+        own_product.stock = 0
+
+        other = User(
+            email="other-owner@patia.test",
+            company_name="Otra tienda",
+            email_verified=True,
+        )
+        other.set_password("Password123")
+        db.session.add(other)
+        db.session.flush()
+        other_membership = ensure_owner_organization(other)
+        db.session.add(Product(
+            organization_id=other_membership.organization_id,
+            user_id=other.id,
+            sku="OTHER-EMPTY",
+            name="Producto agotado ajeno",
+            category="General",
+            cost_price=10,
+            sale_price=20,
+            stock=0,
+            min_stock=1,
+        ))
+        db.session.commit()
+
+        with self.app.test_request_context("/"):
+            values = analytics(user)["dashboard_summary"]
+        self.assertEqual(1, values["out_of_stock"])
+
+        html = self.dashboard_html()
+        self.assertIn("1 producto sin stock", html)
+        filtered = self.client.get("/products?out_of_stock=1&source=dashboard")
+        filtered_html = filtered.get_data(as_text=True)
+        self.assertEqual(200, filtered.status_code)
+        self.assertIn("Productos agotados", filtered_html)
+        self.assertIn("Producto inicial", filtered_html)
+        self.assertNotIn("Producto agotado ajeno", filtered_html)
+
+        user.preferred_language = "en"
+        db.session.commit()
+        with self.client.session_transaction() as session:
+            session["language"] = "en"
+        with force_locale("en"):
+            english = self.dashboard_html()
+        self.assertIn("Out-of-stock products", english)
+        self.assertIn("1 product is out of stock", english)
+        self.assertIn("View out-of-stock products", english)
 
     def test_single_product_chart_and_profit_explanation_are_rendered(self):
         user = self.make_user()

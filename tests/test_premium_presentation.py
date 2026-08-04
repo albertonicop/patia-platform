@@ -135,7 +135,7 @@ class PremiumPresentationTests(unittest.TestCase):
 
         self.assertIn("patia-landing-v2", landing)
         self.assertIn("patia-v2-landing.css') }}?v=2", landing)
-        self.assertIn("patia-v11-modules.css') }}?v=1", base)
+        self.assertIn("patia-v11-modules.css') }}?v=2", base)
         self.assertIn("patia-v11--dashboard", base)
         self.assertIn("patia-v11--inventory", base)
         for scope in (

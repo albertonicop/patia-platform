@@ -11,33 +11,33 @@
 <div class="pro-purchases-v1">
   <header class="module-heading-v2">
     <div>
-      <span class="eyebrow">{{ _("Compra lo necesario, a tiempo") }}</span>
-      <h2>{{ _("Reposición sugerida") }}</h2>
-      <p>{{ _("PATIA analiza las ventas de los últimos 30 días, el stock actual, el stock mínimo y la cobertura estimada. Te propone una cantidad; tú siempre decides qué pedir.") }}</p>
+      <span class="eyebrow">{{ _("Abastecimiento") }}</span>
+      <h2>{{ _("Planifica tus compras") }}</h2>
+      <p>{{ _("Decide qué pedir, prepara el pedido y registra lo que recibes. El inventario solo cambia cuando confirmas una recepción.") }}</p>
     </div>
     <a class="btn ghost" href="{{ url_for('pro.hub') }}">{{ _("Volver a PATIA Pro") }}</a>
   </header>
 
   <section class="pro-purchases-v1__guide" aria-labelledby="purchase-guide-title">
-    <div>
-      <span class="eyebrow">{{ _("Cómo usar esta pantalla") }}</span>
-      <h3 id="purchase-guide-title">{{ _("De una sugerencia a inventario actualizado") }}</h3>
-      <p>{{ _("La recomendación aparece cuando el stock llega al mínimo o la cobertura estimada es de 14 días o menos.") }}</p>
-    </div>
+    <h3 id="purchase-guide-title">{{ _("Del aviso al inventario actualizado") }}</h3>
     <ol aria-label="{{ _('Flujo de una compra') }}">
-      <li><span>1</span>{{ _("Seleccionar") }}</li>
-      <li><span>2</span>{{ _("Crear borrador") }}</li>
-      <li><span>3</span>{{ _("Confirmar") }}</li>
-      <li><span>4</span>{{ _("Recibir") }}</li>
-      <li><span>5</span>{{ _("Inventario actualizado") }}</li>
+      <li><span>1</span><strong>{{ _("Sugerencia") }}</strong><small>{{ _("Revisa qué hace falta") }}</small></li>
+      <li><span>2</span><strong>{{ _("Pedido") }}</strong><small>{{ _("Ajusta y confirma") }}</small></li>
+      <li><span>3</span><strong>{{ _("Recepción") }}</strong><small>{{ _("Registra lo que llegó") }}</small></li>
+      <li><span>4</span><strong>{{ _("Inventario actualizado") }}</strong><small>{{ _("PATIA conserva el movimiento") }}</small></li>
     </ol>
   </section>
 
   <section class="pro-purchases-v1__summary">
     <article><span>{{ _("Productos por reponer") }}</span><strong>{{ summary.products }}</strong></article>
-    <article><span>{{ _("Unidades sugeridas") }}</span><strong>{{ summary.units }}</strong></article>
     <article><span>{{ _("Costo estimado") }}</span><strong>{{ summary.estimated_cost|money }}</strong></article>
-    <article><span>{{ _("Sin movimiento") }}</span><strong>{{ summary.without_movement }}</strong></article>
+    <article><span>{{ _("Borradores") }}</span><strong>{{ summary.draft_orders }}</strong></article>
+    <article><span>{{ _("Por recibir") }}</span><strong>{{ summary.pending_receipt }}</strong></article>
+  </section>
+
+  <section class="pro-purchases-v1__section-head">
+    <div><span class="eyebrow">{{ _("Sugerencias") }}</span><h3>{{ _("Qué conviene reponer") }}</h3></div>
+    <p>{{ _("La cantidad sugerida busca recuperar cobertura sin modificar tus existencias.") }}</p>
   </section>
 
   {% if groups %}
@@ -48,37 +48,37 @@
           <input type="hidden" name="supplier_name" value="{{ group.supplier_name or '' }}">
           <header>
             <div>
-              <span>{{ _("Proveedor") }}</span>
+              <span>{{ _("Pedido para") }}</span>
               <h3>{{ group.supplier_name or _("Sin proveedor") }}</h3>
             </div>
-            <strong>{{ group.estimated_cost|money }}</strong>
+            <div class="pro-purchases-v1__group-total"><span>{{ _("Costo estimado") }}</span><strong>{{ group.estimated_cost|money }}</strong></div>
           </header>
           <div class="table-responsive">
             <table>
-              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Evidencia") }}</th><th>{{ _("Costo estimado") }}</th><th>{{ _("Pedir") }}</th></tr></thead>
+              <thead><tr><th>{{ _("Producto") }}</th><th>{{ _("Por qué reponer") }}</th><th>{{ _("Costo estimado") }}</th><th>{{ _("Cantidad") }}</th></tr></thead>
               <tbody>
                 {% for item in group["items"] %}
                   <tr>
                     <td data-label="{{ _('Producto') }}"><strong>{{ item.name }}</strong><small>{{ item.sku }}</small></td>
-                    <td data-label="{{ _('Evidencia') }}" class="pro-purchases-v1__evidence">
+                    <td data-label="{{ _('Por qué reponer') }}" class="pro-purchases-v1__evidence">
                       <strong>{{ _("Stock %(stock)s · mínimo %(minimum)s", stock=item.stock, minimum=item.min_stock) }}</strong>
                       <small>
                         {% if item.coverage_days is not none %}
-                          {{ _("%(units)s unidades vendidas en 30 días · cobertura aproximada de %(days)s días", units=item.recent_units, days=item.coverage_days) }}
+                          {{ _("Cobertura estimada: %(days)s días", days=item.coverage_days) }} · {{ _("%(units)s vendidas en 30 días", units=item.recent_units) }}
                         {% else %}
                           {{ _("Sin ventas recientes; la sugerencia se basa en el stock mínimo.") }}
                         {% endif %}
                       </small>
-                      <small><strong>{{ _("Motivo:") }}</strong>
+                      <small class="pro-purchases-v1__reason">
                         {% if item.stock <= item.min_stock %}
-                          {{ _("El producto alcanzó o quedó debajo de su stock mínimo.") }}
+                          {{ _("Llegó al nivel mínimo definido.") }}
                         {% else %}
-                          {{ _("La cobertura estimada es de 14 días o menos.") }}
+                          {{ _("Podría agotarse en 14 días o menos.") }}
                         {% endif %}
                       </small>
                     </td>
                     <td data-label="{{ _('Costo estimado') }}">{{ item.estimated_cost|money }}</td>
-                    <td data-label="{{ _('Pedir') }}"><input aria-label="{{ _('Cantidad para %(product)s', product=item.name) }}" type="number" min="1" step="1" name="quantity_{{ item.product_id }}" value="{{ item.suggested_quantity }}" required></td>
+                    <td data-label="{{ _('Cantidad') }}"><input aria-label="{{ _('Cantidad para %(product)s', product=item.name) }}" type="number" min="1" step="1" name="quantity_{{ item.product_id }}" value="{{ item.suggested_quantity }}" required></td>
                   </tr>
                   {% if not item.supplier_name or not item.unit_cost %}
                     <tr class="pro-purchases-v1__data-warning">
@@ -92,49 +92,52 @@
               </tbody>
             </table>
           </div>
-          <button class="btn primary" type="submit">{{ _("Crear borrador de pedido") }}</button>
+          <button class="btn primary" type="submit">{{ _("Preparar pedido") }}</button>
         </form>
       {% endfor %}
     </div>
   {% else %}
     <section class="empty-state-v2">
       <i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>
-      <h3>{{ _("No necesitas reponer mercancía ahora") }}</h3>
-      <p>{{ _("Tus existencias y cobertura están por encima de los niveles de atención.") }}</p>
+      <h3>{{ _("Tu inventario tiene buena cobertura") }}</h3>
+      <p>{{ _("No encontramos productos que necesiten reposición en este momento.") }}</p>
+      <a class="btn ghost" href="{{ url_for('main.products') }}">{{ _("Revisar inventario") }}</a>
     </section>
   {% endif %}
 
-  <section class="pro-purchases-v1__method">
-    <h3>{{ _("Qué ocurre después") }}</h3>
-    <p>{{ _("El borrador no cambia existencias. Al confirmar registras el pedido; al recibir mercancía, PATIA aumenta el stock y conserva el movimiento en el historial de inventario.") }}</p>
+  <details class="pro-purchases-v1__method">
+    <summary>{{ _("Cómo calcula PATIA estas sugerencias") }}</summary>
+    <p>{{ _("PATIA considera ventas recientes, existencias, stock mínimo y cobertura. La sugerencia es orientativa y puedes cambiarla antes de confirmar.") }}</p>
     <small>{{ _("%(sales)s días de ventas analizados · %(coverage)s días de cobertura objetivo · sin movimiento después de %(movement)s días", sales=method.sales_window_days, coverage=method.target_coverage_days, movement=method.no_movement_days) }}</small>
-  </section>
+  </details>
 
   {% if no_movement %}
     <details class="pro-purchases-v1__slow">
-      <summary>{{ _("%(count)s productos sin movimiento", count=no_movement|length) }}</summary>
+      <summary>{{ ngettext("%(count)s producto sin movimiento", "%(count)s productos sin movimiento", no_movement|length, count=no_movement|length) }}</summary>
+      <p>{{ _("Estos productos conservan existencias, pero no registran ventas recientes. Revisa si conviene mantenerlos, ajustar su precio o dejar de reponerlos.") }}</p>
       <ul>
         {% for item in no_movement[:20] %}
           <li><span>{{ item.name }}</span><small>{{ item.sku }} · {{ _("Stock %(stock)s", stock=item.stock) }}</small></li>
         {% endfor %}
       </ul>
+      <a class="btn ghost" href="{{ url_for('main.products', no_sales=1, source='purchases') }}">{{ _("Revisar productos sin ventas") }}</a>
     </details>
   {% endif %}
 
   <section class="pro-purchases-v1__orders">
-    <h2>{{ _("Pedidos") }}</h2>
+    <div class="pro-purchases-v1__section-head"><div><span class="eyebrow">{{ _("Seguimiento") }}</span><h2>{{ _("Pedidos") }}</h2></div><p>{{ _("Abre un pedido para confirmarlo o registrar una recepción.") }}</p></div>
     {% if orders %}
       <div class="pro-purchases-v1__order-list">
         {% for order in orders %}
-          <a href="{{ url_for('pro.purchase_detail', order_id=order.id) }}">
+          <a class="pro-purchases-v1__order pro-purchases-v1__order--{{ order.status|lower }}" href="{{ url_for('pro.purchase_detail', order_id=order.id) }}">
             <div><strong>{{ order.number }}</strong><span>{{ order.supplier_name or _("Sin proveedor") }}</span></div>
             <span class="status-badge status-badge--{{ order.status|lower }}">{{ order_status_labels.get(order.status, order.status) }}</span>
-            <small>{{ _("%(count)s productos", count=order.items|length) }}</small>
+            <small>{{ ngettext("%(count)s producto", "%(count)s productos", order.items|length, count=order.items|length) }}</small>
           </a>
         {% endfor %}
       </div>
     {% else %}
-      <p class="reports-text">{{ _("Todavía no has creado pedidos.") }}</p>
+      <div class="pro-purchases-v1__orders-empty"><i class="fa-regular fa-clipboard" aria-hidden="true"></i><p>{{ _("Todavía no hay pedidos. Prepara uno desde una sugerencia cuando lo necesites.") }}</p></div>
     {% endif %}
   </section>
 </div>

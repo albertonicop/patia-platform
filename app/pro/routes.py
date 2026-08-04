@@ -595,6 +595,14 @@ def purchases():
         .limit(50)
         .all()
     )
+    suggestions["summary"] = {
+        **suggestions["summary"],
+        "draft_orders": sum(order.status == "DRAFT" for order in orders),
+        "pending_receipt": sum(
+            order.status in {"ORDERED", "PARTIALLY_RECEIVED"}
+            for order in orders
+        ),
+    }
     return render_template(
         "pro_purchases.html",
         user=user,
