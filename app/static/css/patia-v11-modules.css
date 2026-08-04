@@ -1238,3 +1238,92 @@
     transition-duration: .01ms !important;
   }
 }
+
+/* Divider refinement --------------------------------------------------- */
+
+.patia-v11--reports :where(.reports-v3__view-tabs, .reports-v3__intro),
+.patia-v11--reports .reports-v3__panel-head,
+.patia-v11--decisions .pro-alerts-v1__periods,
+.patia-v11--cash .cash-v2__intro,
+.patia-v11--crm :where(.customers-simple-v1__intro, .receivables-v2__intro,
+  .customers-simple-v1__toolbar, .customer-detail-simple-v1__hero),
+.patia-v11--suppliers .suppliers-v2__intro,
+.patia-v11--suppliers .suppliers-v2__list-card > h3,
+.patia-v11--settings .settings-v2 > .module-intro-v2 {
+  border-bottom: 0;
+}
+
+.patia-v11--reports .reports-v3__periods a,
+.patia-v11--reports .reports-v3__kpi,
+.patia-v11--reports .reports-v3__kpi:nth-child(2n),
+.patia-v11--reports .reports-v3__kpi:nth-child(3n),
+.patia-v11--decisions .pro-hub-v1__pulse-reading > span,
+.patia-v11--decisions .pro-hub-v1__card,
+.patia-v11--cash .cash-v2__summary > div,
+.patia-v11--cash .cash-v2__action,
+.patia-v11--cash .cash-v2__reconciliation > div,
+.patia-v11--crm .customer-detail-v1__metrics article,
+.patia-v11--settings .settings-v2__shortcuts article,
+.patia-v11--settings .subscription-v2__details > div {
+  border-right: 0 !important;
+}
+
+.patia-v11--reports .reports-v3__kpi,
+.patia-v11--reports .reports-v3__kpi:nth-child(n+3),
+.patia-v11--reports .reports-v3__kpi:nth-child(n+4),
+.patia-v11--decisions .pro-hub-v1__card,
+.patia-v11--decisions .pro-hub-v1__decision dl div,
+.patia-v11--settings .settings-v2__section,
+.patia-v11--settings .settings-v2__shortcuts article,
+.patia-v11--settings .subscription-v2__details > div {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.patia-v11--reports .reports-v3__comparison-note,
+.patia-v11--decisions :where(.pro-hub-v1__control-grid, .pro-hub-v1__team-grid) {
+  border-top: 0;
+}
+
+.patia-v11--decisions .pro-hub-v1__pulse-reading {
+  border-block: 0;
+}
+
+.patia-v11--purchases .pro-purchases-v1__order-list > a {
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.patia-v11--reports .reports-v3__periods {
+  border-color: transparent;
+}
+
+.patia-v11--reports .reports-v3__kpi::after {
+  display: none;
+}
+
+.patia-v11--purchases .pro-purchases-v1__guide li {
+  border-color: transparent;
+  background: transparent;
+}
+
+.patia-v11--crm .customers-v1__empty {
+  border-style: none;
+}
+
+.patia-v11--settings .settings-v2__section-icon,
+.patia-v11--settings .settings-v2__shortcuts article > i {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.patia-v11--settings .subscription-v2__details {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.patia-v11--settings :where(.subscription-v2__status-head, .subscription-v2__actions) {
+  border-color: transparent;
+}

@@ -135,7 +135,8 @@ class PremiumPresentationTests(unittest.TestCase):
 
         self.assertIn("patia-landing-v2", landing)
         self.assertIn("patia-v2-landing.css') }}?v=2", landing)
-        self.assertIn("patia-v11-modules.css') }}?v=2", base)
+        self.assertIn("patia-v11.css') }}?v=2", base)
+        self.assertIn("patia-v11-modules.css') }}?v=3", base)
         self.assertIn("patia-v11--dashboard", base)
         self.assertIn("patia-v11--inventory", base)
         for scope in (
@@ -152,6 +153,16 @@ class PremiumPresentationTests(unittest.TestCase):
             self.assertIn(f".{scope}", module_css)
         self.assertNotIn("body:not(", visual_css)
         self.assertNotIn("body:not(", module_css)
+        self.assertIn("Divider refinement", visual_css)
+        self.assertIn("Divider refinement", module_css)
+        self.assertIn(".patia-v11--workspace .sidebar-v2__logout", visual_css)
+        self.assertIn(".dashboard-v2__recommendation", visual_css)
+        self.assertIn(".dashboard-v3__alerts-list > a", visual_css)
+        self.assertIn(".inventory-v2__catalog", visual_css)
+        self.assertIn(".reports-v3__kpi::after", module_css)
+        self.assertIn(".pro-purchases-v1__guide li", module_css)
+        self.assertIn(".customers-v1__empty", module_css)
+        self.assertIn(".subscription-v2__details", module_css)
         for scope in (
             ".patia-v11--dashboard",
             ".patia-v11--inventory",

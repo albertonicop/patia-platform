@@ -1387,3 +1387,40 @@ body.patia-v11--workspace {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Divider refinement --------------------------------------------------- */
+
+.patia-v11--workspace .app-topbar-v2,
+.patia-v11--dashboard .dashboard-v2__section-head,
+.patia-v11--inventory .inventory-v2__panel-head,
+.patia-v11--inventory .inventory-v2__catalog-head {
+  border-bottom: 0;
+}
+
+.patia-v11--dashboard .dashboard-v3__summary-card {
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.patia-v11--inventory .inventory-v2__catalog .table-wrap {
+  border-top: 0;
+}
+
+.patia-v11--workspace .sidebar-v2__logout {
+  border-top: 0 !important;
+}
+
+.patia-v11--workspace :where(.app-topbar-v2__notification, .app-topbar-v2__plan),
+.patia-v11--workspace > .language-switcher {
+  border-color: transparent !important;
+}
+
+.patia-v11--dashboard .dashboard-v2__recommendation,
+.patia-v11--dashboard .dashboard-v3__alerts-list > a,
+.patia-v11--dashboard .dashboard-v3__alerts-list > button {
+  border-bottom: 0 !important;
+}
+
+.patia-v11--inventory .inventory-v2__catalog {
+  border-color: transparent !important;
+}
