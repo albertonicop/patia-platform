@@ -54,7 +54,7 @@ class InternationalizationTests(unittest.TestCase):
     def test_spanish_is_the_default_language(self):
         response = self.client.get("/")
         self.assertIn('lang="es"', response.get_data(as_text=True))
-        self.assertIn("Tu negocio, bajo control", response.get_data(as_text=True))
+        self.assertIn("El control total de tu negocio", response.get_data(as_text=True))
 
     def test_visitor_can_switch_to_english_and_session_persists_it(self):
         response = self.client.post(
@@ -64,8 +64,8 @@ class InternationalizationTests(unittest.TestCase):
         )
         html = response.get_data(as_text=True)
         self.assertIn('lang="en"', html)
-        self.assertIn("Your business, under control", html)
-        self.assertIn("Your business, under control", self.client.get("/").get_data(as_text=True))
+        self.assertIn("Total control of your business", html)
+        self.assertIn("Total control of your business", self.client.get("/").get_data(as_text=True))
 
     def test_authenticated_language_is_saved_and_restored_on_login(self):
         self.client.post(
@@ -100,7 +100,7 @@ class InternationalizationTests(unittest.TestCase):
         )
         html = response.get_data(as_text=True)
         self.assertIn('lang="es"', html)
-        self.assertIn("Tu negocio, bajo control", html)
+        self.assertIn("El control total de tu negocio", html)
 
     def test_english_catalog_has_no_missing_or_fuzzy_messages(self):
         catalog_path = (

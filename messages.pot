@@ -8179,3 +8179,248 @@ msgstr ""
 
 msgid "Ver análisis"
 msgstr ""
+
+
+#: app/templates/landing.html
+msgid "Inventario, ventas, caja, clientes y decisiones en un solo lugar. Prueba PATIA gratis durante 14 días."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Saltar al contenido"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Funciones"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Demo"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Probar 14 días"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Abrir menú"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Software para negocios en México"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "El control total de tu negocio,"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "en una sola plataforma."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Inventario, ventas, caja, clientes y decisiones en un solo lugar."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Probar 14 días gratis"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Sin tarjeta para comenzar"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Captura real del producto PATIA"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Pantalla real de PATIA con el resumen diario del negocio"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Beneficios principales"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Seguro y confiable"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Tus datos, protegidos"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Disponible en la nube"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Accede desde donde estés"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Soporte en México"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Ayuda cercana cuando la necesites"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Sin instalaciones complicadas ni semanas de capacitación."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Agrégalos uno a uno o importa tu archivo actual."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Vende rápido y mantén tus existencias actualizadas."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Detecta qué atender y toma decisiones con datos reales."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Operación diaria"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Todo lo necesario para operar, sin perder tiempo."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "PATIA conecta cada movimiento para que vendas, controles existencias y atiendas a tus clientes desde una sola cuenta."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Existencias, costos, códigos y alertas de stock."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Ventas rápidas, tickets y distintos métodos de pago."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Caja"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Apertura, movimientos y cierre claro del día."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Clientes y proveedores"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Contactos, compras, saldos y seguimiento en orden."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Punto de venta real de PATIA"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Una operación conectada de principio a fin."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Reportes reales de PATIA con resultados y tendencias"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Información útil, no gráficas por decorar."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Decisiones claras"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Entiende qué pasó y qué conviene hacer después."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "La información de tu operación se convierte en señales concretas para cuidar inventario, margen y efectivo."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Resume qué requiere tu atención y por qué importa."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Compara ventas, utilidad y desempeño por periodo."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Prepara reposición con existencias y movimiento real."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Detecta faltantes, riesgos y pendientes antes de que crezcan."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Importación inteligente"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Tu inventario actual puede entrar a PATIA sin empezar de cero."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Sube el archivo que ya utilizas. PATIA reconoce columnas, muestra una vista previa y separa los errores antes de importar."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Detección automática de columnas"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Vista previa antes de guardar"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Creación y actualización en un solo flujo"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Errores descargables para corregirlos"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Preparado para miles de productos"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Empieza gratis. Elige tu plan cuando estés listo."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "14 días para probar PATIA con tu negocio. Sin tarjeta para comenzar."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Más control para crecer"
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Tu negocio puede estar más claro desde hoy."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Prueba PATIA gratis durante 14 días y reúne tu operación en un solo lugar."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Estamos preparando un recorrido breve para mostrarte PATIA."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Control claro para negocios que quieren crecer."
+msgstr ""
+
+#: app/templates/landing.html
+msgid "Enlaces del pie de página"
+msgstr ""

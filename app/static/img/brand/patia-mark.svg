@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">PATIA</title>
+  <defs>
+    <linearGradient id="g" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6637FF"/>
+      <stop offset=".52" stop-color="#167CFF"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#g)" d="M8 7h27.2C48.5 7 57 15.6 57 27.5 57 39 48.2 47.4 35.7 47.4H21.4V57H8V7Zm13.4 11.8v17.1h12.7c6 0 9.7-3.2 9.7-8.6 0-5.3-3.7-8.5-9.7-8.5H21.4Z"/>
+</svg>

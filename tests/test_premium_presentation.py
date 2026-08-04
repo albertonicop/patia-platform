@@ -13,7 +13,11 @@ class PremiumPresentationTests(unittest.TestCase):
     def test_landing_explains_a_concrete_business_outcome(self):
         landing = self.template("landing.html")
 
-        self.assertIn("Tu negocio, bajo control. Todos los días.", landing)
+        self.assertIn("El control total de tu negocio,", landing)
+        self.assertIn("en una sola plataforma.", landing)
+        self.assertIn("Inventario, ventas, caja, clientes y decisiones en un solo lugar.", landing)
+        self.assertIn("Software para negocios en México", landing)
+        self.assertIn("Probar 14 días gratis", landing)
         self.assertIn("Ver demo", landing)
         self.assertIn("videos/patia-demo.mp4", landing)
         self.assertIn("videos/patia-demo-en.mp4", landing)
@@ -22,9 +26,9 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertNotIn("Probar PATIA gratis", landing)
         self.assertNotIn("PATIA Pro · $199/mes", landing)
         self.assertIn('{{ _("Precios") }}', landing)
-        self.assertIn("Planes simples para cada etapa de tu negocio", landing)
+        self.assertIn("Empieza gratis. Elige tu plan cuando estés listo.", landing)
         self.assertIn("Comenzar prueba con %(plan)s", landing)
-        self.assertEqual(landing.count('class="landing-v5__terms '), 1)
+        self.assertNotIn("landing-v5__terms", landing)
         for filename in ("patia-demo.mp4", "patia-demo-en.mp4"):
             video = PROJECT_ROOT / "app" / "static" / "videos" / filename
             self.assertTrue(video.is_file(), filename)
@@ -43,13 +47,15 @@ class PremiumPresentationTests(unittest.TestCase):
         )
         self.assertIn("PATIA_DEMO_VIDEO_AVAILABLE=_env_flag(", app_factory)
         self.assertIn("default=True", app_factory)
-        self.assertIn("Menos decisiones a ciegas", landing)
-        self.assertIn("PATIA Pro", landing)
+        self.assertIn("Pulso PATIA", landing)
+        self.assertIn("plan.code == 'PRO'", landing)
         self.assertIn("patia-starter.jpg", landing)
         self.assertIn("patia-pro.jpg", landing)
+        self.assertIn("patia-pos.jpg", landing)
         self.assertIn('loading="lazy"', landing)
-        self.assertIn("pantallas reales de PATIA", landing)
-        self.assertIn("$199", landing)
+        self.assertIn("Detección automática de columnas", landing)
+        self.assertIn("Preparado para miles de productos", landing)
+        self.assertIn("{{ plan.price }}", landing)
         self.assertIn("14 días", landing)
 
     def test_pro_comparison_reflects_real_trial_boundaries(self):
@@ -106,10 +112,15 @@ class PremiumPresentationTests(unittest.TestCase):
     def test_all_css_consumers_use_the_same_cache_version(self):
         consumers = (
             "auth.html", "base.html", "base_clean.html", "forgot_password.html",
-            "landing.html", "legal.html", "reset_password.html",
+            "legal.html", "reset_password.html",
         )
         for name in consumers:
             self.assertIn("styles.css') }}?v=131", self.template(name), name)
+        landing = self.template("landing.html")
+        self.assertIn("patia-v2-landing.css') }}?v=1", landing)
+        self.assertNotIn("styles.css", landing)
+        self.assertNotIn("patia-v11.css", landing)
+        self.assertNotIn("landing-motion.css", landing)
 
     def test_visual_system_v11_uses_explicit_module_identities(self):
         base = self.template("base.html")
@@ -122,8 +133,8 @@ class PremiumPresentationTests(unittest.TestCase):
             / "patia-v11-modules.css"
         ).read_text(encoding="utf-8")
 
-        self.assertIn("patia-v11--landing", landing)
-        self.assertIn("patia-v11.css') }}?v=1", landing)
+        self.assertIn("patia-landing-v2", landing)
+        self.assertIn("patia-v2-landing.css') }}?v=1", landing)
         self.assertIn("patia-v11-modules.css') }}?v=1", base)
         self.assertIn("patia-v11--dashboard", base)
         self.assertIn("patia-v11--inventory", base)
@@ -142,12 +153,10 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertNotIn("body:not(", visual_css)
         self.assertNotIn("body:not(", module_css)
         for scope in (
-            ".patia-v11--landing",
             ".patia-v11--dashboard",
             ".patia-v11--inventory",
         ):
             self.assertIn(scope, visual_css)
-
         self.assertIn(
             ".patia-v11--decisions .pro-hub-v1__pulse-reading b",
             module_css,
@@ -162,6 +171,28 @@ class PremiumPresentationTests(unittest.TestCase):
             module_css,
         )
         self.assertIn("min-width: 0;", module_css)
+
+    def test_landing_v2_is_isolated_accessible_and_uses_brand_variants(self):
+        landing = self.template("landing.html")
+        css = (
+            PROJECT_ROOT / "app" / "static" / "css" / "patia-v2-landing.css"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('class="patia-landing-v2"', landing)
+        self.assertIn('href="#contenido"', landing)
+        self.assertIn('aria-modal="true"', landing)
+        self.assertIn("event.key === 'Escape'", landing)
+        self.assertIn("video?.pause()", landing)
+        self.assertIn("button[data-demo-close]", landing)
+        self.assertIn("patia-logo-light.svg", landing)
+        self.assertIn("patia-mark.svg", landing)
+        self.assertTrue((PROJECT_ROOT / "app/static/img/brand/patia-logo-dark.svg").is_file())
+        self.assertIn(".patia-landing-v2", css)
+        self.assertIn("@media (max-width: 900px)", css)
+        self.assertIn("@media (max-width: 700px)", css)
+        self.assertIn("prefers-reduced-motion", css)
+        self.assertNotIn(".sidebar-v2", css)
+        self.assertNotIn(".dashboard-v2", css)
 
     def test_sidebar_keeps_distinct_pro_routes_without_legacy_dashboard(self):
         base = self.template("base.html")

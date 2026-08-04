@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="56" viewBox="0 0 240 56" role="img" aria-labelledby="title">
+  <title id="title">PATIA</title>
+  <defs>
+    <linearGradient id="mark" x1="5" y1="48" x2="48" y2="7" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6637FF"/>
+      <stop offset=".52" stop-color="#167CFF"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="179" y1="12" x2="231" y2="45" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9A6DFF"/>
+      <stop offset="1" stop-color="#26D1F2"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#mark)" d="M5 6h24.4C41.3 6 50 13.6 50 24.6c0 10.6-8.4 18.2-20 18.2H17.2V51H5V6Zm12.2 10.6v15.8h11.4c5.7 0 9.1-2.9 9.1-7.9 0-5-3.5-7.9-9.1-7.9H17.2Z"/>
+  <path fill="#F7F8FF" d="M66 12h29v9.2H76.8v6.3h16.4v8.7H76.8V45H66V12Zm38.7 0h11.1l13.5 33h-11.5l-2-5.5h-11.9l-2 5.5H91l13.7-33Zm2.1 19.2h6.2l-3.1-9-3.1 9ZM126 12h31.1v9.6h-10.2V45h-10.8V21.6H126V12Z"/>
+  <path fill="url(#accent)" d="M164 12h10.9v33H164V12Zm29.2 0h11.1L218 45h-11.5l-2.1-5.5h-11.8l-2 5.5h-11l13.6-33Zm2.2 19.2h6.2l-3.1-9-3.1 9Z"/>
+  <circle cx="227" cy="40" r="5" fill="#25D0F2"/>
+</svg>

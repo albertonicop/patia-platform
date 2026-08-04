@@ -8493,3 +8493,248 @@ msgstr "There are no sales this month yet."
 
 msgid "Ver análisis"
 msgstr "View analysis"
+
+
+#: app/templates/landing.html
+msgid "Inventario, ventas, caja, clientes y decisiones en un solo lugar. Prueba PATIA gratis durante 14 días."
+msgstr "Inventory, sales, cash register, customers, and decisions in one place. Try PATIA free for 14 days."
+
+#: app/templates/landing.html
+msgid "Saltar al contenido"
+msgstr "Skip to content"
+
+#: app/templates/landing.html
+msgid "Funciones"
+msgstr "Features"
+
+#: app/templates/landing.html
+msgid "Demo"
+msgstr "Watch demo"
+
+#: app/templates/landing.html
+msgid "Probar 14 días"
+msgstr "Try 14 days"
+
+#: app/templates/landing.html
+msgid "Abrir menú"
+msgstr "Open menu"
+
+#: app/templates/landing.html
+msgid "Software para negocios en México"
+msgstr "Software for businesses in Mexico"
+
+#: app/templates/landing.html
+msgid "El control total de tu negocio,"
+msgstr "Total control of your business,"
+
+#: app/templates/landing.html
+msgid "en una sola plataforma."
+msgstr "on a single platform."
+
+#: app/templates/landing.html
+msgid "Inventario, ventas, caja, clientes y decisiones en un solo lugar."
+msgstr "Inventory, sales, cash register, customers, and decisions in one place."
+
+#: app/templates/landing.html
+msgid "Probar 14 días gratis"
+msgstr "Try 14 days free"
+
+#: app/templates/landing.html
+msgid "Sin tarjeta para comenzar"
+msgstr "No card required to start"
+
+#: app/templates/landing.html
+msgid "Captura real del producto PATIA"
+msgstr "Real PATIA product screenshot"
+
+#: app/templates/landing.html
+msgid "Pantalla real de PATIA con el resumen diario del negocio"
+msgstr "Real PATIA screen with the business daily summary"
+
+#: app/templates/landing.html
+msgid "Beneficios principales"
+msgstr "Main benefits"
+
+#: app/templates/landing.html
+msgid "Seguro y confiable"
+msgstr "Safe and reliable"
+
+#: app/templates/landing.html
+msgid "Tus datos, protegidos"
+msgstr "Your data, protected"
+
+#: app/templates/landing.html
+msgid "Disponible en la nube"
+msgstr "Available in the cloud"
+
+#: app/templates/landing.html
+msgid "Accede desde donde estés"
+msgstr "Access it from wherever you are"
+
+#: app/templates/landing.html
+msgid "Soporte en México"
+msgstr "Support in Mexico"
+
+#: app/templates/landing.html
+msgid "Ayuda cercana cuando la necesites"
+msgstr "Local help when you need it"
+
+#: app/templates/landing.html
+msgid "Sin instalaciones complicadas ni semanas de capacitación."
+msgstr "No complicated installations or weeks of training."
+
+#: app/templates/landing.html
+msgid "Agrégalos uno a uno o importa tu archivo actual."
+msgstr "Add them one by one or import your current file."
+
+#: app/templates/landing.html
+msgid "Vende rápido y mantén tus existencias actualizadas."
+msgstr "Sell quickly and keep your stock up to date."
+
+#: app/templates/landing.html
+msgid "Detecta qué atender y toma decisiones con datos reales."
+msgstr "See what needs attention and decide with real data."
+
+#: app/templates/landing.html
+msgid "Operación diaria"
+msgstr "Daily operations"
+
+#: app/templates/landing.html
+msgid "Todo lo necesario para operar, sin perder tiempo."
+msgstr "Everything you need to operate without wasting time."
+
+#: app/templates/landing.html
+msgid "PATIA conecta cada movimiento para que vendas, controles existencias y atiendas a tus clientes desde una sola cuenta."
+msgstr "PATIA connects every movement so you can sell, control stock, and serve customers from one account."
+
+#: app/templates/landing.html
+msgid "Existencias, costos, códigos y alertas de stock."
+msgstr "Stock, costs, codes, and inventory alerts."
+
+#: app/templates/landing.html
+msgid "Ventas rápidas, tickets y distintos métodos de pago."
+msgstr "Fast sales, receipts, and multiple payment methods."
+
+#: app/templates/landing.html
+msgid "Caja"
+msgstr "Cash register"
+
+#: app/templates/landing.html
+msgid "Apertura, movimientos y cierre claro del día."
+msgstr "Clear opening, movements, and end-of-day closing."
+
+#: app/templates/landing.html
+msgid "Clientes y proveedores"
+msgstr "Customers and suppliers"
+
+#: app/templates/landing.html
+msgid "Contactos, compras, saldos y seguimiento en orden."
+msgstr "Contacts, purchases, balances, and follow-up in order."
+
+#: app/templates/landing.html
+msgid "Punto de venta real de PATIA"
+msgstr "Real PATIA point of sale"
+
+#: app/templates/landing.html
+msgid "Una operación conectada de principio a fin."
+msgstr "A connected operation from start to finish."
+
+#: app/templates/landing.html
+msgid "Reportes reales de PATIA con resultados y tendencias"
+msgstr "Real PATIA reports with results and trends"
+
+#: app/templates/landing.html
+msgid "Información útil, no gráficas por decorar."
+msgstr "Useful information, not charts for decoration."
+
+#: app/templates/landing.html
+msgid "Decisiones claras"
+msgstr "Clear decisions"
+
+#: app/templates/landing.html
+msgid "Entiende qué pasó y qué conviene hacer después."
+msgstr "Understand what happened and what to do next."
+
+#: app/templates/landing.html
+msgid "La información de tu operación se convierte en señales concretas para cuidar inventario, margen y efectivo."
+msgstr "Your operational data becomes clear signals to protect inventory, margin, and cash."
+
+#: app/templates/landing.html
+msgid "Resume qué requiere tu atención y por qué importa."
+msgstr "Summarizes what needs your attention and why it matters."
+
+#: app/templates/landing.html
+msgid "Compara ventas, utilidad y desempeño por periodo."
+msgstr "Compare sales, profit, and performance by period."
+
+#: app/templates/landing.html
+msgid "Prepara reposición con existencias y movimiento real."
+msgstr "Plan replenishment using actual stock and movement."
+
+#: app/templates/landing.html
+msgid "Detecta faltantes, riesgos y pendientes antes de que crezcan."
+msgstr "Detect shortages, risks, and pending items before they grow."
+
+#: app/templates/landing.html
+msgid "Importación inteligente"
+msgstr "Smart import"
+
+#: app/templates/landing.html
+msgid "Tu inventario actual puede entrar a PATIA sin empezar de cero."
+msgstr "Bring your current inventory into PATIA without starting over."
+
+#: app/templates/landing.html
+msgid "Sube el archivo que ya utilizas. PATIA reconoce columnas, muestra una vista previa y separa los errores antes de importar."
+msgstr "Upload the file you already use. PATIA recognizes columns, shows a preview, and separates errors before importing."
+
+#: app/templates/landing.html
+msgid "Detección automática de columnas"
+msgstr "Automatic column detection"
+
+#: app/templates/landing.html
+msgid "Vista previa antes de guardar"
+msgstr "Preview before saving"
+
+#: app/templates/landing.html
+msgid "Creación y actualización en un solo flujo"
+msgstr "Create and update in one flow"
+
+#: app/templates/landing.html
+msgid "Errores descargables para corregirlos"
+msgstr "Downloadable errors for easy correction"
+
+#: app/templates/landing.html
+msgid "Preparado para miles de productos"
+msgstr "Ready for thousands of products"
+
+#: app/templates/landing.html
+msgid "Empieza gratis. Elige tu plan cuando estés listo."
+msgstr "Start free. Choose your plan when you are ready."
+
+#: app/templates/landing.html
+msgid "14 días para probar PATIA con tu negocio. Sin tarjeta para comenzar."
+msgstr "14 days to try PATIA with your business. No card required to start."
+
+#: app/templates/landing.html
+msgid "Más control para crecer"
+msgstr "More control to grow"
+
+#: app/templates/landing.html
+msgid "Tu negocio puede estar más claro desde hoy."
+msgstr "Your business can be clearer starting today."
+
+#: app/templates/landing.html
+msgid "Prueba PATIA gratis durante 14 días y reúne tu operación en un solo lugar."
+msgstr "Try PATIA for 14 days and bring your operation together in one place."
+
+#: app/templates/landing.html
+msgid "Estamos preparando un recorrido breve para mostrarte PATIA."
+msgstr "We are preparing a short walkthrough to show you PATIA."
+
+#: app/templates/landing.html
+msgid "Control claro para negocios que quieren crecer."
+msgstr "Clear control for businesses that want to grow."
+
+#: app/templates/landing.html
+msgid "Enlaces del pie de página"
+msgstr "Footer links"

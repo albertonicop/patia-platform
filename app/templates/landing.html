@@ -3,419 +3,246 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/patia-mark.svg') }}">
+  <link rel="alternate icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <title>{{ _("PATIA | Control de inventario y ventas para PyMEs") }}</title>
-  <meta name="description" content="{{ _('Controla inventario, ventas, proveedores y alertas de stock con PATIA. Prueba gratuita de 14 días para PyMEs en México.') }}">
+  <meta name="description" content="{{ _('Inventario, ventas, caja, clientes y decisiones en un solo lugar. Prueba PATIA gratis durante 14 días.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=131">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing-motion.css') }}?v=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v11.css') }}?v=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v2-landing.css') }}?v=1">
 </head>
 
-<body class="landing-v2 landing-premium-v1 landing-v3 landing-v4 landing-motion-v1 landing-polish-v1 patia-v11 patia-v11--landing">
-  {% include "_language_selector.html" %}
-  <header class="landing-v2__header">
-    <a href="/" class="landing-v2__brand" aria-label="{{ _('PATIA, inicio') }}">
-      <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
-    </a>
-    <nav class="landing-v2__nav" aria-label="{{ _('Navegación principal') }}">
-      <a href="#beneficios">{{ _("Beneficios") }}</a>
-      <a href="#como-funciona">{{ _("Cómo funciona") }}</a>
-      <a href="#precio">{{ _("Precios") }}</a>
-      <a href="/login" class="landing-v2__login">{{ _("Iniciar sesión") }}</a>
-      <a href="/register" class="landing-v3__nav-cta">{{ _("Comenzar prueba gratis") }}</a>
-    </nav>
+<body class="patia-landing-v2">
+  <a class="pl2-skip" href="#contenido">{{ _("Saltar al contenido") }}</a>
+
+  <header class="pl2-header" data-landing-header>
+    <div class="pl2-header__inner">
+      <a href="/" class="pl2-brand" aria-label="{{ _('PATIA, inicio') }}">
+        <img src="{{ url_for('static', filename='img/brand/patia-logo-light.svg') }}" width="184" height="42" alt="PATIA">
+      </a>
+
+      <nav class="pl2-nav" aria-label="{{ _('Navegación principal') }}">
+        <a href="#funciones">{{ _("Funciones") }}</a>
+        <a href="#como-funciona">{{ _("Cómo funciona") }}</a>
+        <a href="#precios">{{ _("Precios") }}</a>
+        <button type="button" data-demo-open>{{ _("Demo") }}</button>
+      </nav>
+
+      <div class="pl2-header__actions">
+        {% include "_language_selector.html" %}
+        <a class="pl2-login" href="/login">{{ _("Iniciar sesión") }}</a>
+        <a class="pl2-button pl2-button--compact" href="/register">{{ _("Probar 14 días") }}</a>
+      </div>
+
+      <details class="pl2-mobile-menu">
+        <summary aria-label="{{ _('Abrir menú') }}"><i class="fa-solid fa-bars" aria-hidden="true"></i><span>{{ _("Menú") }}</span></summary>
+        <div class="pl2-mobile-menu__panel">
+          <a href="#funciones">{{ _("Funciones") }}</a>
+          <a href="#como-funciona">{{ _("Cómo funciona") }}</a>
+          <a href="#precios">{{ _("Precios") }}</a>
+          <button type="button" data-demo-open>{{ _("Demo") }}</button>
+          <a href="/login">{{ _("Iniciar sesión") }}</a>
+          <a class="pl2-button" href="/register">{{ _("Probar 14 días") }}</a>
+          {% include "_language_selector.html" %}
+        </div>
+      </details>
+    </div>
   </header>
 
-  <main>
-    <section class="landing-v2__hero">
-      <div class="landing-v2__hero-copy">
-        <span class="landing-v2__eyebrow"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ _("Control operativo para PyMEs en México") }}</span>
-        <h1>{{ _("Tu negocio, bajo control. Todos los días.") }}</h1>
-        <p class="landing-v2__lead">
-          {{ _("Administra inventario, ventas y reportes desde un solo lugar. PATIA convierte lo que ocurre en decisiones claras para tu negocio.") }}
-        </p>
-        <div class="landing-v5__terms landing-final-v1__trust-line" aria-label="{{ _('Condiciones de PATIA') }}">
-          <span><i class="fa-solid fa-gift" aria-hidden="true"></i><strong>{{ _("14 días gratis") }}</strong></span>
-          <span><i class="fa-solid fa-tag" aria-hidden="true"></i><strong>{{ _("Después, planes desde $199 MXN al mes") }}</strong></span>
-          <span><i class="fa-solid fa-circle-check" aria-hidden="true"></i><strong>{{ _("Cancela cuando quieras") }}</strong></span>
+  <main id="contenido">
+    <section class="pl2-hero" aria-labelledby="pl2-hero-title">
+      <div class="pl2-orb pl2-orb--one" aria-hidden="true"></div>
+      <div class="pl2-orb pl2-orb--two" aria-hidden="true"></div>
+      <div class="pl2-container pl2-hero__grid">
+        <div class="pl2-hero__copy">
+          <span class="pl2-kicker"><i class="fa-solid fa-location-dot" aria-hidden="true"></i>{{ _("Software para negocios en México") }}</span>
+          <h1 id="pl2-hero-title">{{ _("El control total de tu negocio,") }} <span>{{ _("en una sola plataforma.") }}</span></h1>
+          <p>{{ _("Inventario, ventas, caja, clientes y decisiones en un solo lugar.") }}</p>
+          <div class="pl2-hero__actions">
+            <a class="pl2-button pl2-button--primary" href="/register">{{ _("Probar 14 días gratis") }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            <button class="pl2-button pl2-button--ghost" type="button" data-demo-open><i class="fa-regular fa-circle-play" aria-hidden="true"></i>{{ _("Ver demo") }}</button>
+          </div>
+          <p class="pl2-hero__terms">{{ _("Sin tarjeta para comenzar") }} <span aria-hidden="true">·</span> {{ _("Cancela cuando quieras") }}</p>
         </div>
-        <div class="landing-v2__actions">
-          <a href="/register" class="landing-v2__button landing-v2__button--primary">
-            {{ _("Comenzar prueba gratis") }}
-            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-          </a>
-          <button type="button" class="landing-v2__button landing-v2__button--secondary" data-demo-open>
-            <i class="fa-regular fa-circle-play" aria-hidden="true"></i>
-            {{ _("Ver demo") }}
-          </button>
+
+        <div class="pl2-product" aria-label="{{ _('Captura real del producto PATIA') }}">
+          <div class="pl2-product__chrome" aria-hidden="true"><span></span><span></span><span></span><b>{{ "PATIA" }}</b><small>{{ "patiaapp.com" }}</small></div>
+          <img src="{{ url_for('static', filename='img/landing/patia-starter.jpg') }}"
+               width="1160" height="770" fetchpriority="high" decoding="async"
+               alt="{{ _('Pantalla real de PATIA con el resumen diario del negocio') }}">
         </div>
       </div>
 
-      <div class="landing-v3__product-stage">
-      <div class="landing-v2__preview landing-v6__real-product" aria-label="{{ _('Vista previa real del panel PATIA') }}">
-        <div class="landing-v3__preview-browser" aria-hidden="true">
-          <span><i></i><i></i><i></i></span>
-          <strong>{{ _("PATIA · Tu negocio hoy") }}</strong>
-          <small>{{ "patiaapp.com" }}</small>
-        </div>
-        <img src="{{ url_for('static', filename='img/landing/patia-starter.jpg') }}"
-             width="1160" height="770" fetchpriority="high" decoding="async"
-             alt="{{ _('Dashboard real de PATIA con ventas, caja e inventario') }}">
-      </div>
-      <p class="landing-final-v1__preview-caption"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ _("Producto real. Información clara desde el primer día.") }}</p>
+      <div class="pl2-container pl2-trust" aria-label="{{ _('Beneficios principales') }}">
+        <article><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><div><strong>{{ _("Seguro y confiable") }}</strong><span>{{ _("Tus datos, protegidos") }}</span></div></article>
+        <article><i class="fa-solid fa-cloud" aria-hidden="true"></i><div><strong>{{ _("Disponible en la nube") }}</strong><span>{{ _("Accede desde donde estés") }}</span></div></article>
+        <article><i class="fa-solid fa-headset" aria-hidden="true"></i><div><strong>{{ _("Soporte en México") }}</strong><span>{{ _("Ayuda cercana cuando la necesites") }}</span></div></article>
       </div>
     </section>
 
-    <section class="landing-premium-v1__proof" aria-label="{{ _('Resultados operativos con PATIA') }}">
-      <article><strong>{{ _("Una sola fuente de información") }}</strong><span>{{ _("Ventas, inventario, proveedores y tickets permanecen conectados.") }}</span></article>
-      <article><strong>{{ _("Menos decisiones a ciegas") }}</strong><span>{{ _("Consulta indicadores y alertas antes de comprar o reabastecer.") }}</span></article>
-      <article><strong>{{ _("Listo para operar desde el navegador") }}</strong><span>{{ _("Sin instalaciones, desde computadora o celular.") }}</span></article>
-    </section>
-
-    <section class="landing-v2__section landing-showcase-v1" aria-labelledby="landing-showcase-title">
-      <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">{{ _("El producto, sin promesas abstractas") }}</span>
-        <h2 id="landing-showcase-title">{{ _("Así se ve tener el negocio en orden.") }}</h2>
-        <p>{{ _("Estas son pantallas reales de PATIA: operación diaria con Starter y decisiones respaldadas por datos con Pro.") }}</p>
-      </header>
-      <div class="landing-showcase-v1__grid">
-        <article class="landing-showcase-v1__card">
-          <div class="landing-showcase-v1__image">
-            <img src="{{ url_for('static', filename='img/landing/patia-starter.jpg') }}"
-                 width="1160" height="770" loading="lazy" decoding="async"
-                 alt="{{ _('Dashboard Starter de PATIA con ventas, caja e inventario') }}">
-          </div>
-          <div>
-            <span>{{ _("PATIA Starter") }}</span>
-            <h3>{{ _("Opera tu negocio todos los días") }}</h3>
-            <p>{{ _("Vende, controla inventario, caja, clientes y saldos desde una experiencia rápida.") }}</p>
-          </div>
-        </article>
-        <article class="landing-showcase-v1__card">
-          <div class="landing-showcase-v1__image">
-            <img src="{{ url_for('static', filename='img/landing/patia-pro.jpg') }}"
-                 width="1125" height="720" loading="lazy" decoding="async"
-                 alt="{{ _('Reportes Pro de PATIA con indicadores y proyección') }}">
-          </div>
-          <div>
-            <span>{{ _("PATIA Pro") }}</span>
-            <h3>{{ _("Tu negocio claro. Tu siguiente paso también.") }}</h3>
-            <p>{{ _("Pulso PATIA te muestra qué pasó, por qué importa y qué hacer con evidencia de tu propia operación.") }}</p>
-          </div>
-        </article>
-      </div>
-      <button type="button" class="landing-v2__button landing-v2__button--secondary landing-showcase-v1__demo" data-demo-open>
-        <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
-        {{ _("Ver PATIA en acción") }}
-      </button>
-    </section>
-
-    <section class="landing-v2__section" id="beneficios">
-      <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">{{ _("Lo que resuelve PATIA") }}</span>
-        <h2>{{ _("Menos incertidumbre. Más control diario.") }}</h2>
-        <p>{{ _("Información práctica para operar mejor, reducir faltantes y conocer el desempeño real de tu negocio.") }}</p>
-      </header>
-      <div class="landing-v2__benefits">
-        <article>
-          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></span>
-          <h3>{{ _("Inventario confiable") }}</h3>
-          <p>{{ _("Consulta existencias, costos, precios y valor de inventario sin depender de libretas dispersas.") }}</p>
-        </article>
-        <article>
-          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-cash-register" aria-hidden="true"></i></span>
-          <h3>{{ _("Ventas conectadas") }}</h3>
-          <p>{{ _("Cada venta descuenta stock y alimenta tus indicadores para que la información permanezca actualizada.") }}</p>
-        </article>
-        <article>
-          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-bell" aria-hidden="true"></i></span>
-          <h3>{{ _("Alertas oportunas") }}</h3>
-          <p>{{ _("Identifica productos agotados o con pocas unidades antes de perder ventas por falta de mercancía.") }}</p>
-        </article>
-        <article>
-          <span class="landing-v2__benefit-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
-          <h3>{{ _("Rentabilidad visible") }}</h3>
-          <p>{{ _("Conoce productos con mayor movimiento, ventas semanales y utilidad estimada desde Reportes.") }}</p>
-        </article>
+    <section class="pl2-section pl2-steps" id="como-funciona" aria-labelledby="pl2-steps-title">
+      <div class="pl2-container">
+        <header class="pl2-section__head pl2-section__head--center">
+          <span class="pl2-overline">{{ _("Cómo funciona") }}</span>
+          <h2 id="pl2-steps-title">{{ _("Empieza a tener control en tres pasos.") }}</h2>
+          <p>{{ _("Sin instalaciones complicadas ni semanas de capacitación.") }}</p>
+        </header>
+        <ol class="pl2-steps__list">
+          <li><span class="pl2-step__icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></span><div><b>01</b><h3>{{ _("Carga tus productos") }}</h3><p>{{ _("Agrégalos uno a uno o importa tu archivo actual.") }}</p></div></li>
+          <li><span class="pl2-step__icon"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></span><div><b>02</b><h3>{{ _("Registra tus ventas") }}</h3><p>{{ _("Vende rápido y mantén tus existencias actualizadas.") }}</p></div></li>
+          <li><span class="pl2-step__icon"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i></span><div><b>03</b><h3>{{ _("Actúa con información") }}</h3><p>{{ _("Detecta qué atender y toma decisiones con datos reales.") }}</p></div></li>
+        </ol>
       </div>
     </section>
 
-    <section class="landing-v2__section landing-v2__steps" id="como-funciona">
-      <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">{{ _("Cómo funciona") }}</span>
-        <h2>{{ _("Empieza a tener control en tres pasos.") }}</h2>
-      </header>
-      <ol class="landing-v2__step-list">
-        <li><span>01</span><div><h3>{{ _("Carga tus productos") }}</h3><p>{{ _("Regístralos manualmente o utiliza la plantilla de importación de PATIA.") }}</p></div></li>
-        <li><span>02</span><div><h3>{{ _("Registra tus ventas") }}</h3><p>{{ _("Usa el punto de venta para descontar existencias y mantener datos actualizados.") }}</p></div></li>
-        <li><span>03</span><div><h3>{{ _("Actúa con información") }}</h3><p>{{ _("Consulta alertas, productos destacados, ventas y necesidades de reabastecimiento.") }}</p></div></li>
-      </ol>
-    </section>
-
-    <section class="landing-v2__section landing-v2__comparison">
-      <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">{{ _("Antes y después") }}</span>
-        <h2>{{ _("De administrar por memoria a operar con claridad.") }}</h2>
-      </header>
-      <div class="landing-v2__comparison-grid">
-        <article class="landing-v2__comparison-card landing-v2__comparison-card--before">
-          <span>{{ _("Antes") }}</span>
-          <h3>{{ _("Información dispersa") }}</h3>
-          <ul>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Inventario en libretas o archivos separados") }}</li>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Faltantes descubiertos demasiado tarde") }}</li>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Compras basadas únicamente en intuición") }}</li>
-            <li><i class="fa-solid fa-minus" aria-hidden="true"></i> {{ _("Sin visión clara de ventas y márgenes") }}</li>
+    <section class="pl2-section pl2-capabilities" id="funciones" aria-labelledby="pl2-operation-title">
+      <div class="pl2-container pl2-split">
+        <div class="pl2-split__copy">
+          <span class="pl2-overline">{{ _("Operación diaria") }}</span>
+          <h2 id="pl2-operation-title">{{ _("Todo lo necesario para operar, sin perder tiempo.") }}</h2>
+          <p>{{ _("PATIA conecta cada movimiento para que vendas, controles existencias y atiendas a tus clientes desde una sola cuenta.") }}</p>
+          <ul class="pl2-feature-list">
+            <li><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><div><strong>{{ _("Inventario") }}</strong><span>{{ _("Existencias, costos, códigos y alertas de stock.") }}</span></div></li>
+            <li><i class="fa-solid fa-cash-register" aria-hidden="true"></i><div><strong>{{ _("Punto de venta") }}</strong><span>{{ _("Ventas rápidas, tickets y distintos métodos de pago.") }}</span></div></li>
+            <li><i class="fa-solid fa-vault" aria-hidden="true"></i><div><strong>{{ _("Caja") }}</strong><span>{{ _("Apertura, movimientos y cierre claro del día.") }}</span></div></li>
+            <li><i class="fa-solid fa-address-book" aria-hidden="true"></i><div><strong>{{ _("Clientes y proveedores") }}</strong><span>{{ _("Contactos, compras, saldos y seguimiento en orden.") }}</span></div></li>
           </ul>
-        </article>
-        <article class="landing-v2__comparison-card landing-v2__comparison-card--after">
-          <span>{{ _("Con PATIA") }}</span>
-          <h3>{{ _("Una operación conectada") }}</h3>
-          <ul>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Productos, ventas y proveedores centralizados") }}</li>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Alertas visibles antes de quedarte sin stock") }}</li>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Indicadores para preparar tus compras") }}</li>
-            <li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ _("Reportes y comparaciones disponibles en cualquier momento") }}</li>
-          </ul>
-        </article>
+        </div>
+        <figure class="pl2-frame pl2-frame--offset">
+          <img src="{{ url_for('static', filename='img/landing/patia-pos.jpg') }}" width="1160" height="770" loading="lazy" decoding="async" alt="{{ _('Punto de venta real de PATIA') }}">
+          <figcaption>{{ _("Una operación conectada de principio a fin.") }}</figcaption>
+        </figure>
       </div>
     </section>
 
-    {% set pro_plan = commercial_plans|selectattr("code", "equalto", "PRO")|first %}
-    <section class="landing-v2__section landing-premium-v1__pro-value">
-      <div class="landing-premium-v1__pro-copy">
-        <span class="landing-v2__eyebrow">{{ _("PATIA Pro") }}</span>
-        <h2>{{ _("No solo registra lo que pasó. Te ayuda a decidir qué sigue.") }}</h2>
-        <p>{{ _("Pulso PATIA ordena tus prioridades; Reportes explica los resultados; Compras prepara la reposición y el Reporte mensual conserva el avance.") }}</p>
-        <a href="#precio" class="landing-v2__button landing-v2__button--secondary">{{ _("Ver precio y condiciones") }}</a>
-      </div>
-      <div class="landing-premium-v1__pro-grid">
-        {% if pro_plan %}{% for feature in pro_plan.features %}
-          <article><i class="fa-solid fa-check" aria-hidden="true"></i><div><strong>{{ feature }}</strong></div></article>
-        {% endfor %}{% endif %}
+    <section class="pl2-section pl2-decisions" aria-labelledby="pl2-decisions-title">
+      <div class="pl2-container pl2-split pl2-split--reverse">
+        <figure class="pl2-frame">
+          <img src="{{ url_for('static', filename='img/landing/patia-pro.jpg') }}" width="1125" height="720" loading="lazy" decoding="async" alt="{{ _('Reportes reales de PATIA con resultados y tendencias') }}">
+          <figcaption>{{ _("Información útil, no gráficas por decorar.") }}</figcaption>
+        </figure>
+        <div class="pl2-split__copy">
+          <span class="pl2-overline">{{ _("Decisiones claras") }}</span>
+          <h2 id="pl2-decisions-title">{{ _("Entiende qué pasó y qué conviene hacer después.") }}</h2>
+          <p>{{ _("La información de tu operación se convierte en señales concretas para cuidar inventario, margen y efectivo.") }}</p>
+          <div class="pl2-decision-lines">
+            <article><span>01</span><div><strong>{{ _("Pulso PATIA") }}</strong><p>{{ _("Resume qué requiere tu atención y por qué importa.") }}</p></div></article>
+            <article><span>02</span><div><strong>{{ _("Reportes") }}</strong><p>{{ _("Compara ventas, utilidad y desempeño por periodo.") }}</p></div></article>
+            <article><span>03</span><div><strong>{{ _("Compras inteligentes") }}</strong><p>{{ _("Prepara reposición con existencias y movimiento real.") }}</p></div></article>
+            <article><span>04</span><div><strong>{{ _("Alertas") }}</strong><p>{{ _("Detecta faltantes, riesgos y pendientes antes de que crezcan.") }}</p></div></article>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="landing-v2__section landing-v2__pricing" id="precio">
-      <div class="landing-v2__pricing-copy">
-        <span class="landing-v2__eyebrow">{{ _("Planes simples") }}</span>
-        <h2>{{ _("Planes simples para cada etapa de tu negocio") }}</h2>
-        <p>{{ _("Prueba PATIA durante 14 días y elige el nivel de control que necesita tu negocio.") }}</p>
+    <section class="pl2-section pl2-import" aria-labelledby="pl2-import-title">
+      <div class="pl2-container pl2-import__inner">
+        <div>
+          <span class="pl2-overline">{{ _("Importación inteligente") }}</span>
+          <h2 id="pl2-import-title">{{ _("Tu inventario actual puede entrar a PATIA sin empezar de cero.") }}</h2>
+          <p>{{ _("Sube el archivo que ya utilizas. PATIA reconoce columnas, muestra una vista previa y separa los errores antes de importar.") }}</p>
+        </div>
+        <ul>
+          <li><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>{{ _("Detección automática de columnas") }}</li>
+          <li><i class="fa-solid fa-table-list" aria-hidden="true"></i>{{ _("Vista previa antes de guardar") }}</li>
+          <li><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>{{ _("Creación y actualización en un solo flujo") }}</li>
+          <li><i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>{{ _("Errores descargables para corregirlos") }}</li>
+          <li><i class="fa-solid fa-layer-group" aria-hidden="true"></i>{{ _("Preparado para miles de productos") }}</li>
+        </ul>
       </div>
-      <div class="landing-plans-v1">
-        {% for plan in commercial_plans %}
-          <article class="landing-v2__price-card{% if plan.code == 'PRO' %} landing-v2__price-card--pro{% endif %}">
-            <span class="landing-v2__price-label">PATIA {{ plan.name }}</span>
-            <div class="landing-v2__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN") }}<br>{{ _("al mes") }}</span></div>
+    </section>
+
+    <section class="pl2-section pl2-pricing" id="precios" aria-labelledby="pl2-pricing-title">
+      <div class="pl2-container">
+        <header class="pl2-section__head pl2-section__head--center">
+          <span class="pl2-overline">{{ _("Planes") }}</span>
+          <h2 id="pl2-pricing-title">{{ _("Empieza gratis. Elige tu plan cuando estés listo.") }}</h2>
+          <p>{{ _("14 días para probar PATIA con tu negocio. Sin tarjeta para comenzar.") }}</p>
+        </header>
+        <div class="pl2-plans">
+          {% for plan in commercial_plans %}
+          <article class="pl2-plan{% if plan.code == 'PRO' %} pl2-plan--featured{% endif %}">
+            {% if plan.code == "PRO" %}<span class="pl2-plan__badge">{{ _("Más control para crecer") }}</span>{% endif %}
+            <span class="pl2-plan__name">PATIA {{ plan.name }}</span>
             <p>{{ plan.description }}</p>
+            <div class="pl2-plan__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN al mes") }}</span></div>
             <small>{{ plan.audience }}</small>
-            <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i> {{ feature }}</li>{% endfor %}</ul>
+            <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i>{{ feature }}</li>{% endfor %}</ul>
             {% if plan.code == "PRO" and not plan.configured %}
-              <span class="landing-v2__button landing-v2__button--secondary" aria-disabled="true">{{ _("Pro estará disponible para contratación muy pronto.") }}</span>
+            <span class="pl2-button pl2-button--disabled" aria-disabled="true">{{ _("Pro estará disponible para contratación muy pronto.") }}</span>
             {% else %}
-              <a href="{{ url_for('main.register', plan=plan.code|lower) }}" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba con %(plan)s", plan=plan.name) }}</a>
+            <a class="pl2-button {% if plan.code == 'PRO' %}pl2-button--primary{% else %}pl2-button--ghost{% endif %}" href="{{ url_for('main.register', plan=plan.code|lower) }}">{{ _("Comenzar prueba con %(plan)s", plan=plan.name) }}</a>
             {% endif %}
           </article>
-        {% endfor %}
+          {% endfor %}
+        </div>
       </div>
     </section>
 
-    <section class="landing-v2__section landing-v2__faq">
-      <header class="landing-v2__section-head">
-        <span class="landing-v2__eyebrow">{{ _("Preguntas frecuentes") }}</span>
-        <h2>{{ _("Lo esencial antes de comenzar.") }}</h2>
-      </header>
-      <div class="landing-v2__faq-list">
-        <details><summary>{{ _("¿Necesito instalar algún programa?") }}</summary><p>{{ _("No. PATIA funciona desde el navegador y puedes acceder desde computadora o celular.") }}</p></details>
-        <details><summary>{{ _("¿Puedo importar mis productos?") }}</summary><p>{{ _("Sí. PATIA incluye una plantilla para importar tu catálogo desde un archivo Excel o CSV.") }}</p></details>
-        <details><summary>{{ _("¿Qué pasa al terminar los 14 días?") }}</summary><p>{{ _("Tus datos permanecen en tu cuenta y puedes elegir Starter por $199 MXN al mes o Pro por $349 MXN al mes.") }}</p></details>
-        <details><summary>{{ _("¿PATIA sirve para más de un tipo de negocio?") }}</summary><p>{{ _("Sí. Está diseñado para comercios y PyMEs que manejan productos, inventario y ventas.") }}</p></details>
-      </div>
-    </section>
-
-    <section class="landing-v2__final">
-      <span class="landing-v2__eyebrow">{{ _("Empieza hoy") }}</span>
-      <h2>{{ _("Tu negocio puede operar con más orden desde esta semana.") }}</h2>
-      <p>{{ _("Prueba PATIA durante 14 días y reúne tu operación en un solo lugar.") }}</p>
-      <div class="landing-v2__actions">
-        <a href="/register" class="landing-v2__button landing-v2__button--primary">{{ _("Comenzar prueba gratis") }}</a>
-        <a href="https://wa.me/522381186483" class="landing-v2__button landing-v2__button--secondary" target="_blank" rel="noopener noreferrer">{{ _("Hablar con PATIA") }}</a>
+    <section class="pl2-final" aria-labelledby="pl2-final-title">
+      <div class="pl2-container">
+        <img src="{{ url_for('static', filename='img/brand/patia-mark.svg') }}" width="56" height="56" alt="" aria-hidden="true">
+        <h2 id="pl2-final-title">{{ _("Tu negocio puede estar más claro desde hoy.") }}</h2>
+        <p>{{ _("Prueba PATIA gratis durante 14 días y reúne tu operación en un solo lugar.") }}</p>
+        <a class="pl2-button pl2-button--primary" href="/register">{{ _("Probar 14 días gratis") }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </div>
     </section>
   </main>
 
-  <div class="landing-v4__demo" data-demo-modal hidden>
-    <div class="landing-v4__demo-backdrop" data-demo-close></div>
-    <section class="landing-v4__demo-dialog" role="dialog" aria-modal="true" aria-labelledby="landing-demo-title">
-      <header class="landing-v4__demo-header">
-        <div>
-          <span>{{ _("Demo de PATIA") }}</span>
-          <h2 id="landing-demo-title">{{ _("Conoce PATIA en funcionamiento") }}</h2>
-        </div>
-        <button type="button" class="landing-v4__demo-close" data-demo-close aria-label="{{ _('Cerrar demo') }}">
-          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
-      </header>
-
+  <div class="pl2-demo" data-demo-modal hidden>
+    <div class="pl2-demo__backdrop" data-demo-close></div>
+    <section class="pl2-demo__dialog" role="dialog" aria-modal="true" aria-labelledby="pl2-demo-title">
+      <header><div><span>{{ _("Demo de PATIA") }}</span><h2 id="pl2-demo-title">{{ _("Conoce PATIA en funcionamiento") }}</h2></div><button type="button" data-demo-close aria-label="{{ _('Cerrar demo') }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></header>
       {% set demo_video_available = config.get("PATIA_DEMO_VIDEO_AVAILABLE", false) %}
       {% set demo_video_filename = "videos/patia-demo-en.mp4" if current_language == "en" else "videos/patia-demo.mp4" %}
-      <div class="landing-v5__video-stage" data-video-available="{{ 'true' if demo_video_available else 'false' }}">
-        <video class="landing-v5__video" controls preload="metadata" playsinline data-demo-video {% if not demo_video_available %}hidden{% endif %}>
-          {% if demo_video_available %}
-          <source src="{{ url_for('static', filename=demo_video_filename) }}" type="video/mp4">
-          {% else %}
-          <source data-src="{{ url_for('static', filename=demo_video_filename) }}" type="video/mp4">
-          {% endif %}
+      <div class="pl2-demo__stage">
+        <video controls preload="metadata" playsinline data-demo-video {% if not demo_video_available %}hidden{% endif %}>
+          {% if demo_video_available %}<source src="{{ url_for('static', filename=demo_video_filename) }}" type="video/mp4">{% else %}<source data-src="{{ url_for('static', filename=demo_video_filename) }}" type="video/mp4">{% endif %}
           {{ _("Tu navegador no puede reproducir este video.") }}
         </video>
-        <div class="landing-v5__video-fallback" data-demo-fallback role="status" {% if demo_video_available %}hidden{% endif %}>
-          <span><i class="fa-solid fa-clapperboard" aria-hidden="true"></i></span>
-          <h3>{{ _("Demo en video próximamente") }}</h3>
-          <p>{{ _("Estamos preparando un recorrido breve para mostrarte cómo PATIA conecta inventario, ventas y reportes.") }}</p>
-        </div>
+        <div class="pl2-demo__fallback" role="status" {% if demo_video_available %}hidden{% endif %}><i class="fa-solid fa-clapperboard" aria-hidden="true"></i><h3>{{ _("Demo en video próximamente") }}</h3><p>{{ _("Estamos preparando un recorrido breve para mostrarte PATIA.") }}</p></div>
       </div>
     </section>
   </div>
 
-  <footer class="landing-v2__footer">
-    <div>
-      <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
-      <p>{{ _("Control operativo para PyMEs que quieren crecer con claridad.") }}</p>
+  <footer class="pl2-footer">
+    <div class="pl2-container pl2-footer__inner">
+      <div><img src="{{ url_for('static', filename='img/brand/patia-logo-light.svg') }}" width="148" height="34" alt="PATIA"><p>{{ _("Control claro para negocios que quieren crecer.") }}</p></div>
+      <nav aria-label="{{ _('Enlaces del pie de página') }}"><a href="#funciones">{{ _("Funciones") }}</a><a href="#precios">{{ _("Precios") }}</a><a href="{{ url_for('main.terms') }}">{{ _("Términos") }}</a><a href="{{ url_for('main.privacy') }}">{{ _("Privacidad") }}</a><a href="/login">{{ _("Iniciar sesión") }}</a></nav>
+      <p>{{ _("PATIA © 2026 · NP Ventures") }}</p>
     </div>
-    <div class="landing-v2__footer-links">
-      <a href="#beneficios">{{ _("Beneficios") }}</a>
-      <a href="#precio">{{ _("Precio") }}</a>
-      <a href="{{ url_for('main.terms') }}">{{ _("Términos") }}</a>
-      <a href="{{ url_for('main.privacy') }}">{{ _("Privacidad") }}</a>
-      <a href="/login">{{ _("Iniciar sesión") }}</a>
-    </div>
-    <p class="landing-v2__copyright">{{ _("PATIA © 2026 · NP Ventures") }}</p>
   </footer>
+
   <script>
     (() => {
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      if (reducedMotion.matches) return;
-
-      const heroElements = [
-        document.querySelector('.landing-v2__header'),
-        document.querySelector('.landing-v5__terms'),
-        document.querySelector('.landing-v2__hero-copy .landing-v2__actions'),
-        document.querySelector('.landing-v3__product-stage')
-      ].filter(Boolean);
-
-      const revealGroups = [
-        '.landing-v2__trust',
-        '.landing-premium-v1__proof > article',
-        '.landing-v2__section-head',
-        '.landing-v2__benefits > article',
-        '.landing-v2__step-list > li',
-        '.landing-v2__comparison-card',
-        '.landing-premium-v1__pro-copy',
-        '.landing-premium-v1__pro-grid > article',
-        '.landing-v2__pricing-copy',
-        '.landing-plans-v1 > article',
-        '.landing-v2__faq-list > details',
-        '.landing-v2__final > *',
-        '.landing-v2__footer > *'
-      ];
-
-      try {
-        heroElements.forEach((element, index) => {
-          element.classList.add('landing-motion__hero-item');
-          element.style.setProperty('--motion-index', index);
-          element.addEventListener('animationend', () => {
-            element.classList.remove('landing-motion__hero-item');
-            element.style.removeProperty('--motion-index');
-          }, { once: true });
-        });
-
-        const revealElements = [];
-        revealGroups.forEach((selector) => {
-          document.querySelectorAll(selector).forEach((element, index) => {
-            if (element.classList.contains('landing-motion__reveal')) return;
-            element.classList.add('landing-motion__reveal');
-            element.style.setProperty('--motion-delay', `${Math.min(index * 70, 280)}ms`);
-            if (element.classList.contains('landing-v2__comparison-card--before')) {
-              element.dataset.motionDirection = 'left';
-            } else if (element.classList.contains('landing-v2__comparison-card--after')) {
-              element.dataset.motionDirection = 'right';
-            }
-            revealElements.push(element);
-          });
-        });
-
-        document.body.classList.add('is-motion-enhanced');
-
-        if ('IntersectionObserver' in window) {
-          const observer = new IntersectionObserver((entries, currentObserver) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              entry.target.classList.add('is-visible');
-              currentObserver.unobserve(entry.target);
-            });
-          }, {
-            threshold: 0.08,
-            rootMargin: '0px'
-          });
-          revealElements.forEach((element) => observer.observe(element));
-        } else {
-          revealElements.forEach((element) => element.classList.add('is-visible'));
-        }
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => document.body.classList.add('is-motion-loaded'));
-        });
-      } catch (error) {
-        document.body.classList.remove('is-motion-enhanced');
-        heroElements.forEach((element) => element.classList.remove('landing-motion__hero-item'));
-        document.querySelectorAll('.landing-motion__reveal').forEach((element) => {
-          element.classList.add('is-visible');
-        });
-      }
-    })();
-
-    (() => {
       const modal = document.querySelector('[data-demo-modal]');
-      const openers = document.querySelectorAll('[data-demo-open]');
-      const closers = modal?.querySelectorAll('[data-demo-close]') || [];
       const video = modal?.querySelector('[data-demo-video]');
       let lastFocus = null;
-
       const openDemo = (event) => {
         lastFocus = event.currentTarget;
         modal.hidden = false;
-        document.body.classList.add('landing-v4--demo-open');
-        modal.querySelector('[data-demo-close]').focus();
+        document.body.classList.add('pl2-demo-open');
+        modal.querySelector('button[data-demo-close]').focus();
       };
-
       const closeDemo = () => {
-        video.pause();
-        video.currentTime = 0;
+        video?.pause();
+        if (video) video.currentTime = 0;
         modal.hidden = true;
-        document.body.classList.remove('landing-v4--demo-open');
+        document.body.classList.remove('pl2-demo-open');
         lastFocus?.focus();
       };
-
-      openers.forEach((opener) => opener.addEventListener('click', openDemo));
-      closers.forEach((closer) => closer.addEventListener('click', closeDemo));
-
+      document.querySelectorAll('[data-demo-open]').forEach((button) => button.addEventListener('click', openDemo));
+      modal?.querySelectorAll('[data-demo-close]').forEach((button) => button.addEventListener('click', closeDemo));
       document.addEventListener('keydown', (event) => {
-        if (modal.hidden) return;
+        if (!modal || modal.hidden) return;
         if (event.key === 'Escape') closeDemo();
-        if (event.key === 'Tab') {
-          const focusable = [...modal.querySelectorAll('button, a[href]')].filter((element) => !element.hidden);
-          const first = focusable[0];
-          const last = focusable[focusable.length - 1];
-          if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-          } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-          }
-        }
+        if (event.key !== 'Tab') return;
+        const focusable = [...modal.querySelectorAll('button, video')].filter((element) => !element.hidden);
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       });
+      document.querySelectorAll('.pl2-mobile-menu__panel a, .pl2-mobile-menu__panel button').forEach((item) => item.addEventListener('click', () => item.closest('details')?.removeAttribute('open')));
     })();
   </script>
 </body>
