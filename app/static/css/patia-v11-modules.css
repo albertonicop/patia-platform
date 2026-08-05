@@ -1327,3 +1327,32 @@
 .patia-v11--settings :where(.subscription-v2__status-head, .subscription-v2__actions) {
   border-color: transparent;
 }
+
+/* Exact cascade corrections: selectors intentionally match or exceed the
+   specificity of the rules that introduced these redundant separators. */
+
+.patia-v11--reports .reports-v3__intro,
+.patia-v11--crm .customers-simple-v1__intro,
+.patia-v11--crm .receivables-v2__intro {
+  border-bottom: 0;
+}
+
+.patia-v11--reports .reports-v3__executive-empty {
+  border: 0;
+}
+
+.patia-v11--reports .reports-v3__goal-edit {
+  border-top: 0;
+}
+
+.patia-v11--purchases .pro-purchases-v1__group > header {
+  border-bottom: 0;
+}
+
+.patia-v11--crm .customers-simple-v1__toolbar {
+  border: 0;
+}
+
+.patia-v11--crm .customers-simple-v1__list-head {
+  border-bottom: 0;
+}

@@ -1424,3 +1424,14 @@ body.patia-v11--workspace {
 .patia-v11--inventory .inventory-v2__catalog {
   border-color: transparent !important;
 }
+
+/* Exact cascade corrections: remove only redundant separators. */
+
+.patia-v11--dashboard .dashboard-v3__quick-summary .dashboard-v2__method-note {
+  border-top: 0;
+  border-left: 0;
+}
+
+.patia-v11--inventory .inventory-v2 .inventory-v2__catalog {
+  border-color: transparent !important;
+}
