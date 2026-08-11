@@ -119,7 +119,7 @@
       <footer class="pos-v2__checkout">
         <div class="pos-v2__checkout-total">
           <span>{{ _("Total") }}</span>
-          <strong id="cart-total">{{ _("$0.00 MXN") }}</strong>
+          <strong id="cart-total">{{ 0|money }}</strong>
         </div>
         <div class="pos-v2__payment-method">
           <label for="payment-method">{{ _("Método de pago") }}</label>
@@ -134,12 +134,12 @@
         </div>
         <div id="cash-tender-field" class="pos-v2__cash-tender">
           <label for="amount-received">{{ _("Efectivo recibido") }}</label>
-          <div class="pos-v2__cash-input"><span>$</span><input id="amount-received" type="number" min="0" step="0.01" inputmode="decimal" autocomplete="off" required placeholder="0.00"></div>
+          <div class="pos-v2__cash-input"><span>{{ organization_currency }}</span><input id="amount-received" type="number" min="0" step="0.01" inputmode="decimal" autocomplete="off" required placeholder="0.00"></div>
           <div class="pos-v2__cash-quick" aria-label="{{ _('Cantidades rápidas') }}">
             <button type="button" data-tender="exact">{{ _("Pago exacto") }}</button>
-            <button type="button" data-tender-extra="50">+ $50</button>
-            <button type="button" data-tender-extra="100">+ $100</button>
-            <button type="button" data-tender="next-hundred">{{ _("Siguiente $100") }}</button>
+            <button type="button" data-tender-extra="50">+ 50 {{ organization_currency }}</button>
+            <button type="button" data-tender-extra="100">+ 100 {{ organization_currency }}</button>
+            <button type="button" data-tender="next-hundred">{{ _("Siguiente 100") }} {{ organization_currency }}</button>
           </div>
           <output id="cash-result" class="pos-v2__cash-result" aria-live="polite">
             <span>{{ _("Ingresa cuánto entregó el cliente.") }}</span>
@@ -324,9 +324,10 @@ function cartAmount() {
 }
 
 function formatMoney(value) {
+  const root = document.documentElement;
   return Number(value).toLocaleString(
-    {{ ("en-US" if current_language == "en" else "es-MX")|tojson }},
-    {style: "currency", currency: "MXN"}
+    (root.dataset.localeCode || "es_MX").replace("_", "-"),
+    {style: "currency", currency: root.dataset.currencyCode || "MXN", currencyDisplay: "code"}
   );
 }
 
@@ -422,7 +423,7 @@ function renderResults() {
 
     const availability = document.createElement("span");
     const price = document.createElement("b");
-    price.textContent = `$${Number(product.price).toFixed(2)}`;
+    price.textContent = formatMoney(product.price);
     const stock = document.createElement("small");
     stock.textContent = product.stock > 0 ? POS_I18N.available.replace("__COUNT__", product.stock) : POS_I18N.outOfStock;
     availability.append(price, stock);
@@ -769,7 +770,7 @@ function renderCart() {
   const articleCount = cart.reduce((total, item) => total + item.quantity, 0);
   const total = cartAmount();
   cartCount.textContent = `${articleCount} ${articleCount === 1 ? POS_I18N.item : POS_I18N.items}`;
-  cartTotal.textContent = total.toLocaleString({{ ("en-US" if current_language == "en" else "es-MX")|tojson }}, {style: "currency", currency: "MXN"}) + " MXN";
+  cartTotal.textContent = formatMoney(total);
   cartEmpty.hidden = cart.length > 0;
   cartTableWrap.hidden = cart.length === 0;
   checkoutButton.disabled = (
@@ -786,7 +787,7 @@ function renderCart() {
     nameCell.append(name, stock);
 
     const priceCell = document.createElement("td");
-    priceCell.textContent = `$${Number(item.price).toFixed(2)}`;
+    priceCell.textContent = formatMoney(item.price);
     const quantityCell = document.createElement("td");
     const quantityInput = document.createElement("input");
     quantityInput.type = "number";
@@ -798,7 +799,7 @@ function renderCart() {
     quantityCell.appendChild(quantityInput);
 
     const subtotalCell = document.createElement("td");
-    subtotalCell.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+    subtotalCell.textContent = formatMoney(item.price * item.quantity);
     const actionCell = document.createElement("td");
     const removeButton = document.createElement("button");
     removeButton.type = "button";
@@ -907,7 +908,7 @@ if (storedConfirmation) {
   try {
     const confirmation = JSON.parse(storedConfirmation);
     const confirmationModal = document.getElementById("sale-confirmation");
-    document.getElementById("confirmation-total").textContent = Number(confirmation.total).toLocaleString({{ ("en-US" if current_language == "en" else "es-MX")|tojson }}, {style: "currency", currency: "MXN"}) + " MXN";
+    document.getElementById("confirmation-total").textContent = formatMoney(confirmation.total);
     document.getElementById("confirmation-folio").textContent = confirmation.folio;
     document.getElementById("confirmation-payment").textContent = confirmation.payment_method || POS_I18N.unspecified;
     document.getElementById("confirmation-ticket").href = confirmation.ticket_url;

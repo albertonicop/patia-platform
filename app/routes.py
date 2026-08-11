@@ -10,7 +10,7 @@ import uuid
 import re
 import json
 from decimal import Decimal, InvalidOperation
-from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort, has_request_context
+from flask import Blueprint, render_template, request, redirect, url_for, flash as flask_flash, session, current_app, send_file, jsonify, abort, has_request_context, g
 from flask_babel import force_locale, gettext
 from sqlalchemy import case, exists, func, update
 from sqlalchemy.exc import IntegrityError
@@ -62,6 +62,16 @@ from .credit.services import (
     record_credit_reversal,
 )
 from .money import MONEY_ZERO, money_decimal, money_json, money_sum
+from .currencies import (
+    COUNTRY_OPTIONS,
+    SUPPORTED_CURRENCIES,
+    country_defaults,
+    format_currency as format_organization_currency,
+    normalize_country_code,
+    normalize_currency_code,
+    normalize_locale_code,
+    organization_money_context,
+)
 from .timezones import (
     DEFAULT_TIMEZONE,
     TIMEZONE_CHOICES,
@@ -185,8 +195,24 @@ def _trial_access_response(user, *, json_response=False):
     return render_template("trial_expired.html"), 403
 
 
-def money(value):
-    return f"${money_decimal(value, nonnegative=False):,.2f} MXN"
+def money(value, currency_code=None, locale_code=None):
+    cached_context = getattr(g, "_organization_money_context", None) if has_request_context() else None
+    organization = None
+    if cached_context:
+        active_currency, active_locale = cached_context
+    elif has_request_context():
+        user = current_user()
+        membership = active_membership(user) if user else None
+        organization = membership.organization if membership else None
+        active_currency, active_locale = organization_money_context(organization)
+        g._organization_money_context = (active_currency, active_locale)
+    else:
+        active_currency, active_locale = organization_money_context(None)
+    return format_organization_currency(
+        value,
+        currency_code or active_currency,
+        locale_code or active_locale,
+    )
 
 
 def _sale_ticket_key(sale):
@@ -223,12 +249,16 @@ def _create_sales_ticket(actor, payment_method, *, ticket_id=None):
         .returning(User.next_ticket_number)
         .execution_options(synchronize_session=False)
     ).scalar_one()
+    organization = active_membership(actor).organization
+    currency_code, locale_code = organization_money_context(organization)
     ticket = SalesTicket(
         organization_id=organization_id,
         user_id=owner.id,
         number=next_number - 1,
         public_id=ticket_id or str(uuid.uuid4()),
         payment_method=payment_method,
+        currency_code=currency_code,
+        locale_code=locale_code,
         cashier_member_id=active_membership(actor).id,
     )
     db.session.add(ticket)
@@ -729,6 +759,15 @@ def register():
             company_name=company_name,
             trial_plan_code=requested_plan,
         )
+        country_code = normalize_country_code(request.form.get("country_code"))
+        currency_code = normalize_currency_code(request.form.get("currency_code"))
+        suggested_currency, suggested_locale = country_defaults(country_code)
+        if not request.form.get("currency_code"):
+            currency_code = suggested_currency
+        locale_code = normalize_locale_code(
+            request.form.get("locale_code") or suggested_locale,
+            currency_code,
+        )
         user.preferred_language = selected_language
         user.first_name = first_name
         user.last_name = last_name
@@ -744,6 +783,10 @@ def register():
         try:
             db.session.flush()
             membership = ensure_owner_organization(user)
+            membership.organization.country_code = country_code
+            membership.organization.currency_code = currency_code
+            membership.organization.locale_code = locale_code
+            membership.organization.currency = currency_code
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
@@ -1089,18 +1132,19 @@ def logout():
 
 
 @main.app_template_filter("money")
-def money_filter(value):
-    return money(value or 0)
+def money_filter(value, currency_code=None, locale_code=None):
+    return money(value or 0, currency_code, locale_code)
 
 
 @main.app_template_filter("compact_money")
 def compact_money_filter(value):
     amount = money_decimal(value or 0, nonnegative=False)
-    decimals = 0 if amount == amount.to_integral_value() else 2
-    return f"${amount:,.{decimals}f} MXN"
+    return money(amount)
 
 
-def _dashboard_sales_summary(organization_id, start_at, end_before):
+def _dashboard_sales_summary(
+    organization_id, start_at, end_before, currency_code
+):
     """Return sales and grouped-ticket totals for one dashboard period."""
     totals = (
         db.session.query(
@@ -1117,6 +1161,7 @@ def _dashboard_sales_summary(organization_id, start_at, end_before):
         )
         .filter(
             Sale.organization_id == organization_id,
+            Sale.currency_code == currency_code,
             Sale.created_at >= start_at,
             Sale.created_at < end_before,
         )
@@ -1146,6 +1191,8 @@ def analytics(user=None):
     organization_id = current_organization_id(user)
     cash_session = open_cash_session(organization_id)
     membership = active_membership(user)
+    organization = membership.organization
+    currency_code, _ = organization_money_context(organization)
     timezone_name = safe_timezone_name(
         membership.organization.timezone if membership else DEFAULT_TIMEZONE
     )
@@ -1215,16 +1262,19 @@ def analytics(user=None):
         organization_id,
         start,
         tomorrow,
+        currency_code,
     )
     month_summary = _dashboard_sales_summary(
         organization_id,
         month_start,
         month_end,
+        currency_code,
     )
     previous_month_summary = _dashboard_sales_summary(
         organization_id,
         previous_month_start,
         previous_month_end,
+        currency_code,
     )
     dashboard_summary = {
         "out_of_stock": out_of_stock,
@@ -1245,6 +1295,7 @@ def analytics(user=None):
 
     week_sales = db.session.query(func.sum(Sale.total)).filter(
         Sale.organization_id == organization_id,
+        Sale.currency_code == currency_code,
         Sale.created_at >= week_start,
         Sale.created_at < week_end,
     ).scalar() or 0
@@ -1263,6 +1314,7 @@ def analytics(user=None):
         )
         .filter(
             Sale.organization_id == organization_id,
+            Sale.currency_code == currency_code,
             Sale.created_at >= week_start,
             Sale.created_at < week_end,
         )
@@ -1277,7 +1329,10 @@ def analytics(user=None):
             func.sum(Sale.total).label("revenue"),
         )
         .join(Sale)
-        .filter(Product.organization_id == organization_id)
+        .filter(
+            Product.organization_id == organization_id,
+            Sale.currency_code == currency_code,
+        )
         .group_by(Product.id)
         .order_by(func.sum(Sale.quantity).desc())
         .limit(5)
@@ -1287,7 +1342,10 @@ def analytics(user=None):
     category_sales = (
         db.session.query(Product.category, func.sum(Sale.total).label("revenue"))
         .join(Sale)
-        .filter(Product.organization_id == organization_id)
+        .filter(
+            Product.organization_id == organization_id,
+            Sale.currency_code == currency_code,
+        )
         .group_by(Product.category)
         .order_by(func.sum(Sale.total).desc())
         .all()
@@ -1361,8 +1419,8 @@ def analytics(user=None):
     if week_sales > 0:
         recommendations.append({
             "text": gettext(
-                "En los últimos 7 días registraste $%(amount)s MXN en ventas.",
-                amount=f"{week_sales:,.0f}",
+                "En los últimos 7 días registraste %(amount)s en ventas.",
+                amount=money(week_sales),
             ),
             "source": gettext("Suma de las ventas registradas en el periodo."),
             "action": gettext(
@@ -1374,8 +1432,8 @@ def analytics(user=None):
     if profit > 0:
         recommendations.append({
             "text": gettext(
-                "Tu utilidad estimada de los últimos 7 días es $%(amount)s MXN, considerando el costo registrado de los productos vendidos.",
-                amount=f"{profit:,.0f}",
+                "Tu utilidad estimada de los últimos 7 días es %(amount)s, considerando el costo registrado de los productos vendidos.",
+                amount=money(profit),
             ),
             "source": gettext("Precio vendido menos costo histórico conocido."),
             "action": gettext(
@@ -1509,15 +1567,20 @@ def _report_analytics(
     period,
     *,
     timezone_name=DEFAULT_TIMEZONE,
+    currency_code=None,
+    include_mixed_currency=False,
 ):
     timezone_name = safe_timezone_name(timezone_name)
     start_at = period["start_at"]
     end_before = period["end_before"]
-    sale_filters = (
+    sale_filters = [
         Sale.organization_id == organization_id,
         Sale.created_at >= start_at,
         Sale.created_at < end_before,
-    )
+    ]
+    if currency_code:
+        sale_filters.append(Sale.currency_code == currency_code)
+    sale_filters = tuple(sale_filters)
     known_cost = Sale.unit_cost.is_not(None)
     line_profit = Sale.total - (Sale.unit_cost * Sale.quantity)
 
@@ -1714,6 +1777,16 @@ def _report_analytics(
         })
 
     return {
+        "currency_code": currency_code,
+        "mixed_currency_lines": (
+            Sale.query.filter(
+                Sale.organization_id == organization_id,
+                Sale.created_at >= start_at,
+                Sale.created_at < end_before,
+                Sale.currency_code != currency_code,
+            ).count()
+            if currency_code and include_mixed_currency else 0
+        ),
         "report_period": period,
         "report_kpis": {
             "sales": total_sales,
@@ -2655,6 +2728,9 @@ def _catalog_error_message(code):
 def _catalog_row_error_message(code):
     messages = {
         "invalid_number": gettext("Revisa el costo o precio."),
+        "ambiguous_number": gettext(
+            "El formato del importe es ambiguo para la moneda del negocio. Usa separadores consistentes."
+        ),
         "invalid_integer": gettext(
             "Stock y stock mínimo deben ser números enteros no negativos."
         ),
@@ -2688,7 +2764,15 @@ def import_products_preview():
         existing = Product.query.filter_by(
             organization_id=current_organization_id(user)
         ).all()
-        imported = inspect_catalog(filename, content, mapping, existing)
+        membership = active_membership(user)
+        currency_code, locale_code = organization_money_context(
+            membership.organization
+        )
+        imported = inspect_catalog(
+            filename, content, mapping, existing,
+            currency_code=currency_code,
+            locale_code=locale_code,
+        )
         preview_rows = []
         for row in imported.rows[:20]:
             preview_rows.append({
@@ -2736,11 +2820,17 @@ def import_products_commit():
         mapping = json.loads(request.form.get("mapping") or "{}")
         expected_digest = request.form.get("digest") or ""
         organization_id = current_organization_id(user)
+        membership = active_membership(user)
+        currency_code, locale_code = organization_money_context(
+            membership.organization
+        )
         imported = inspect_catalog(
             filename,
             content,
             mapping,
             Product.query.filter_by(organization_id=organization_id).all(),
+            currency_code=currency_code,
+            locale_code=locale_code,
         )
         if not secrets.compare_digest(imported.digest, expected_digest):
             raise ValueError("file_changed")
@@ -2763,7 +2853,7 @@ def import_products_commit():
             imported,
             organization_id,
             current_organization_owner(user).id,
-            active_membership(user),
+            membership,
         )
         db.session.commit()
         return jsonify({
@@ -3185,6 +3275,8 @@ def sell():
                 ticket_id=ticket.public_id,
                 sales_ticket_id=ticket.id,
                 payment_method=payment_method,
+                currency_code=ticket.currency_code,
+                locale_code=ticket.locale_code,
             )
             db.session.add(sale)
             db.session.flush()
@@ -3477,6 +3569,8 @@ def sell_cart():
                 cost_is_estimated=False,
                 total=quantity * product.sale_price,
                 payment_method=payment_method,
+                currency_code=ticket.currency_code,
+                locale_code=ticket.locale_code,
                 sales_ticket_id=ticket.id,
             )
             sale.ticket_id = ticket_id
@@ -3591,6 +3685,8 @@ def reports():
         membership.organization_id,
         report_period,
         timezone_name=timezone_name,
+        currency_code=membership.organization.currency_code,
+        include_mixed_currency=True,
     )
     executive_data = None
     if advanced_reports:
@@ -4605,6 +4701,8 @@ def admin():
                 func.count(Sale.id),
                 func.sum(Sale.total),
             )
+            .join(Organization, Organization.id == Sale.organization_id)
+            .filter(Sale.currency_code == Organization.currency_code)
             .group_by(Sale.organization_id)
             .all()
         )
@@ -5402,14 +5500,43 @@ def settings():
         user.postal_code = request.form.get("postal_code", "").strip()
         user.phone = request.form.get("phone", "").strip()
         user.timezone = safe_timezone_name(request.form.get("timezone"))
+        country_code = str(
+            request.form.get("country_code")
+            or membership.organization.country_code
+            or "MX"
+        ).upper()
+        currency_code = str(
+            request.form.get("currency_code")
+            or membership.organization.currency_code
+            or membership.organization.currency
+            or "MXN"
+        ).upper()
+        if country_code not in COUNTRY_OPTIONS or currency_code not in SUPPORTED_CURRENCIES:
+            flash(
+                gettext("Selecciona un país y una moneda compatibles."),
+                "danger",
+            )
+            return redirect(url_for("main.settings"))
+        _, suggested_locale = country_defaults(country_code)
+        locale_code = normalize_locale_code(
+            request.form.get("locale_code") or suggested_locale,
+            currency_code,
+        )
         membership.organization.name = company_name
         membership.organization.timezone = user.timezone
+        membership.organization.country_code = country_code
+        membership.organization.currency_code = currency_code
+        membership.organization.locale_code = locale_code
+        membership.organization.currency = currency_code
         db.session.commit()
         flash("Configuración guardada.", "success")
         return redirect(url_for("main.settings"))
     return render_template(
         "settings.html",
         user=user,
+        organization=membership.organization,
+        country_options=COUNTRY_OPTIONS,
+        supported_currencies=sorted(SUPPORTED_CURRENCIES),
         timezone_choices=_translated_timezone_choices(),
     )
 
@@ -5544,4 +5671,12 @@ def ticket(ticket_ref):
         business_address=", ".join(address_parts),
         business_phone=_ticket_business_value(owner.phone),
         auto_print=request.args.get("print") == "1",
+        ticket_currency_code=(
+            sales[0].sales_ticket.currency_code
+            if sales[0].sales_ticket else sales[0].currency_code
+        ),
+        ticket_locale_code=(
+            sales[0].sales_ticket.locale_code
+            if sales[0].sales_ticket else sales[0].locale_code
+        ),
     )

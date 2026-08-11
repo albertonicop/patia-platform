@@ -19,6 +19,7 @@ from sqlalchemy.orm import selectinload
 from app import db
 from app.models import Customer, CustomerCreditMovement, OrganizationMember
 from app.money import money_decimal
+from app.currencies import format_money
 from app.team.services import active_membership, require_permission
 from app.timezones import utc_to_local
 from .services import CreditError, customer_balance, record_credit_payment
@@ -163,7 +164,7 @@ def account(customer_id):
     reminder = gettext(
         "Hola %(name)s, te recordamos que tienes un saldo pendiente de %(balance)s en %(business)s.",
         name=customer.name,
-        balance=f"${balance:,.2f} {membership.organization.currency}",
+        balance=format_money(balance, membership.organization),
         business=membership.organization.name,
     )
     from app.customers.services import whatsapp_number
@@ -265,7 +266,9 @@ def payment(customer_id):
             message = gettext(
                 "Pago registrado. %(name)s ahora debe %(balance)s.",
                 name=customer.name,
-                balance=f"${movement.balance_after:,.2f}",
+                balance=format_money(
+                    movement.balance_after, membership.organization
+                ),
             )
         else:
             message = gettext("Este pago ya había sido registrado.")

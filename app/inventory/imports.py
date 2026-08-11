@@ -18,6 +18,7 @@ from app import db
 from app.inventory.services import record_inventory_movement
 from app.models import Product
 from app.money import money_decimal
+from app.currencies import parse_localized_decimal
 
 
 MAX_IMPORT_ROWS = 5_000
@@ -184,22 +185,17 @@ def _barcode(value):
     return text
 
 
-def _decimal(value, *, default="0.00"):
+def _decimal(value, *, default="0.00", currency_code="MXN", locale_code="es_MX"):
     text = _text(value)
     if not text:
-        text = default
-    text = text.replace("\u00a0", "").replace("$", "").replace("MXN", "").strip()
-    if "," in text and "." in text:
-        if text.rfind(",") > text.rfind("."):
-            text = text.replace(".", "").replace(",", ".")
-        else:
-            text = text.replace(",", "")
-    elif "," in text:
-        tail = text.rsplit(",", 1)[-1]
-        text = text.replace(",", ".") if len(tail) <= 2 else text.replace(",", "")
+        return money_decimal(default)
     try:
-        return money_decimal(Decimal(text))
-    except (InvalidOperation, ValueError):
+        return parse_localized_decimal(text, currency_code, locale_code)
+    except ValueError as exc:
+        if str(exc) == "ambiguous_number":
+            raise
+        raise ValueError("invalid_number")
+    except InvalidOperation:
         raise ValueError("invalid_number")
 
 
@@ -233,7 +229,10 @@ class CatalogImport:
     summary: dict
 
 
-def inspect_catalog(filename, content, mapping=None, existing_products=()):
+def inspect_catalog(
+    filename, content, mapping=None, existing_products=(),
+    currency_code="MXN", locale_code="es_MX",
+):
     if not content:
         raise ValueError("empty_file")
     frame = _read_frame(filename, content)
@@ -277,8 +276,8 @@ def inspect_catalog(filename, content, mapping=None, existing_products=()):
                 "name": _text(_row_value(source, chosen, "name"), 160),
                 "category": _text(_row_value(source, chosen, "category"), 80) or "General",
                 "supplier": _text(_row_value(source, chosen, "supplier"), 120) or None,
-                "cost_price": _decimal(_row_value(source, chosen, "cost_price")),
-                "sale_price": _decimal(_row_value(source, chosen, "sale_price")),
+                "cost_price": _decimal(_row_value(source, chosen, "cost_price"), currency_code=currency_code, locale_code=locale_code),
+                "sale_price": _decimal(_row_value(source, chosen, "sale_price"), currency_code=currency_code, locale_code=locale_code),
                 "stock": _integer(_row_value(source, chosen, "stock")),
                 "min_stock": _integer(_row_value(source, chosen, "min_stock"), default=5),
             }

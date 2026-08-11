@@ -88,6 +88,31 @@
       </div>
     </section>
 
+    <section class="card module-card-v2 settings-v2__section" aria-labelledby="currency-info-title">
+      <header class="settings-v2__section-head">
+        <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-coins"></i></span>
+        <div><h3 id="currency-info-title">{{ _("País y moneda") }}</h3><p>{{ _("Define cómo se muestran los importes de tu negocio.") }}</p></div>
+      </header>
+      <div class="settings-v2__grid">
+        <div class="field-v2">
+          <label for="business-country">{{ _("País") }}</label>
+          <select id="business-country" name="country_code">
+            {% for country_code, country_data in country_options.items() %}
+              <option value="{{ country_code }}" data-currency="{{ country_data[1] }}" data-locale="{{ country_data[2] }}"{% if organization.country_code == country_code %} selected{% endif %}>{{ _(country_data[0]) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field-v2">
+          <label for="business-currency">{{ _("Moneda") }}</label>
+          <select id="business-currency" name="currency_code">
+            {% for currency_code in supported_currencies %}<option value="{{ currency_code }}"{% if organization.currency_code == currency_code %} selected{% endif %}>{{ currency_code }}</option>{% endfor %}
+          </select>
+          <input id="business-locale" type="hidden" name="locale_code" value="{{ organization.locale_code }}">
+        </div>
+        <p class="settings-v2__wide form-notice-v2">{{ _("Cambiar la moneda modifica cómo PATIA muestra los importes. No convierte automáticamente valores históricos.") }}</p>
+      </div>
+    </section>
+
     <section class="card module-card-v2 settings-v2__section" aria-labelledby="tax-info-title">
       <header class="settings-v2__section-head">
         <span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-file-invoice"></i></span>
@@ -125,5 +150,24 @@
     </article>
   </section>
 </div>
+
+<script>
+(() => {
+  const country = document.getElementById("business-country");
+  const currency = document.getElementById("business-currency");
+  const locale = document.getElementById("business-locale");
+  if (!country || !currency || !locale) return;
+  country.addEventListener("change", () => {
+    const option = country.selectedOptions[0];
+    currency.value = option.dataset.currency;
+    locale.value = option.dataset.locale;
+    currency.dispatchEvent(new Event("change", {bubbles: true}));
+  });
+  currency.addEventListener("change", () => {
+    const locales = {MXN:"es_MX", USD:"en_US", EUR:"es_ES", COP:"es_CO", CLP:"es_CL", PEN:"es_PE"};
+    locale.value = locales[currency.value] || "es_MX";
+  });
+})();
+</script>
 
 {% endblock %}

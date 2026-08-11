@@ -109,6 +109,9 @@ def ensure_owner_organization(user: User) -> OrganizationMember:
         owner_user_id=user.id,
         timezone=user.timezone or "America/Mexico_City",
         currency="MXN",
+        country_code="MX",
+        currency_code="MXN",
+        locale_code="es_MX",
     )
     membership = OrganizationMember(
         organization=organization,

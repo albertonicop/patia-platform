@@ -327,6 +327,8 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 "number",
                 "public_id",
                 "payment_method",
+                "currency_code",
+                "locale_code",
                 "amount_received",
                 "change_amount",
                 "cashier_member_id",
@@ -361,7 +363,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260730_24",
+                "20260810_25",
             )
             for table_name, expected_count in before.items():
                 self.assertEqual(
@@ -519,7 +521,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260730_24",
+                "20260810_25",
             )
             self.assertEqual(
                 connection.execute(sa.text("PRAGMA integrity_check")).scalar_one(),
@@ -711,7 +713,7 @@ class SchemaReconciliationMigrationTests(unittest.TestCase):
                 connection.execute(
                     sa.text("SELECT version_num FROM alembic_version")
                 ).scalar_one(),
-                "20260730_24",
+                "20260810_25",
             )
             self.assertEqual(
                 connection.execute(

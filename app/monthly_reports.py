@@ -13,11 +13,11 @@ from types import SimpleNamespace
 from flask import current_app, render_template
 from flask_babel import (
     force_locale,
-    format_currency,
     format_date,
     get_locale,
     gettext,
 )
+from .currencies import format_currency, organization_money_context
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -64,7 +64,7 @@ RETRY_DELAYS = (
     timedelta(days=1),
 )
 
-SNAPSHOT_VERSION = 2
+SNAPSHOT_VERSION = 3
 
 
 def _decimal_text(value):
@@ -79,11 +79,14 @@ def build_report_snapshot(payload, subject):
     """Freeze every user-visible business value used by a monthly report."""
     analytics = payload["analytics"]
     kpis = analytics["report_kpis"]
+    currency_code, locale_code = organization_money_context(payload["organization"])
     snapshot = {
         "version": SNAPSHOT_VERSION,
         "language": str(get_locale() or "es").split("_")[0],
         "subject": subject,
         "business_name": payload["organization"].name,
+        "currency_code": currency_code,
+        "locale_code": locale_code,
         "period": {
             "year": payload["period"]["start_date"].year,
             "month": payload["period"]["start_date"].month,
@@ -212,6 +215,8 @@ def enrich_snapshot_narrative(snapshot, organization_id):
         ),
     }
     metrics = {
+        "currency_code": snapshot.get("currency_code", "MXN"),
+        "locale_code": snapshot.get("locale_code", "es_MX"),
         "sales": snapshot["kpis"]["sales"],
         "profit": snapshot["kpis"]["profit"],
         "margin": snapshot["kpis"]["margin"],
@@ -264,7 +269,9 @@ def payload_from_snapshot(record):
         "subject": snapshot["subject"],
         "snapshot": snapshot,
         "organization": SimpleNamespace(
-            name=snapshot["business_name"]
+            name=snapshot["business_name"],
+            currency_code=snapshot.get("currency_code", "MXN"),
+            locale_code=snapshot.get("locale_code", "es_MX"),
         ),
         "period_label": snapshot["period"]["label"],
         "headline": (snapshot.get("narrative") or {}).get(
@@ -390,7 +397,11 @@ def monthly_report_pdf(record):
     number = ParagraphStyle("PatiaNumber", parent=body, alignment=TA_RIGHT, fontName="Helvetica-Bold", textColor=HexColor("#171A2B"))
 
     def money_value(value):
-        return f"${Decimal(value):,.2f} MXN"
+        return format_currency(
+            Decimal(value),
+            snapshot.get("currency_code", "MXN"),
+            snapshot.get("locale_code", "es_MX"),
+        )
 
     def section(heading, items):
         values = list(items or [])
@@ -726,7 +737,8 @@ def report_payload(organization: Organization, year: int, month: int):
     timezone_name = safe_timezone_name(organization.timezone)
     period = _period(year, month, timezone_name)
     analytics = _report_analytics(
-        organization.id, period, timezone_name=timezone_name
+        organization.id, period, timezone_name=timezone_name,
+        currency_code=organization.currency_code,
     )
     previous_date = period["start_date"] - timedelta(days=1)
     previous_period = _period(
@@ -736,6 +748,7 @@ def report_payload(organization: Organization, year: int, month: int):
         organization.id,
         previous_period,
         timezone_name=timezone_name,
+        currency_code=organization.currency_code,
     )
     sales = analytics["report_kpis"]["sales"]
     previous_sales = previous["report_kpis"]["sales"]
@@ -809,7 +822,10 @@ def report_payload(organization: Organization, year: int, month: int):
             )
         )
     if credit["total"] > MONEY_ZERO:
-        credit_total_label = format_currency(credit["total"], "MXN")
+        currency_code, locale_code = organization_money_context(organization)
+        credit_total_label = format_currency(
+            credit["total"], currency_code, locale_code
+        )
         recommendations.append(
             gettext(
                 "Da seguimiento a %(amount)s pendientes por cobrar.",

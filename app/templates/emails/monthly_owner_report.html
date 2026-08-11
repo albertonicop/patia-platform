@@ -29,7 +29,7 @@
           <tr>
             <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
               <span style="display:block;color:#677086;font-size:12px;">{{ _("Ventas") }}</span>
-              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.sales|money }}</strong>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.sales|money(organization.currency_code, organization.locale_code) }}</strong>
             </td>
             <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
               <span style="display:block;color:#677086;font-size:12px;">{{ _("Ventas registradas") }}</span>
@@ -39,11 +39,11 @@
           <tr>
             <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
               <span style="display:block;color:#677086;font-size:12px;">{{ _("Utilidad estimada") }}</span>
-              <strong style="display:block;margin-top:6px;font-size:22px;">{% if analytics.unknown_cost_lines == 0 %}{{ analytics.report_kpis.profit|money }}{% else %}{{ _("Costo incompleto") }}{% endif %}</strong>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{% if analytics.unknown_cost_lines == 0 %}{{ analytics.report_kpis.profit|money(organization.currency_code, organization.locale_code) }}{% else %}{{ _("Costo incompleto") }}{% endif %}</strong>
             </td>
             <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
               <span style="display:block;color:#677086;font-size:12px;">{{ _("Ticket promedio") }}</span>
-              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.average_ticket|money }}</strong>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.average_ticket|money(organization.currency_code, organization.locale_code) }}</strong>
             </td>
           </tr>
         </table>
@@ -86,11 +86,11 @@
         <table role="presentation" style="width:100%;margin-top:28px;border-collapse:collapse;">
           <tr>
             <td style="padding:12px 0;color:#677086;">{{ _("Valor del inventario") }}</td>
-            <td style="padding:12px 0;text-align:right;font-weight:750;">{{ inventory.value|money }}</td>
+            <td style="padding:12px 0;text-align:right;font-weight:750;">{{ inventory.value|money(organization.currency_code, organization.locale_code) }}</td>
           </tr>
           <tr>
             <td style="padding:12px 0;border-top:1px solid #eceef4;color:#677086;">{{ _("Pendiente por cobrar") }}</td>
-            <td style="padding:12px 0;border-top:1px solid #eceef4;text-align:right;font-weight:750;">{{ credit.total|money }}</td>
+            <td style="padding:12px 0;border-top:1px solid #eceef4;text-align:right;font-weight:750;">{{ credit.total|money(organization.currency_code, organization.locale_code) }}</td>
           </tr>
           <tr>
             <td style="padding:12px 0;border-top:1px solid #eceef4;color:#677086;">{{ _("Cierres con diferencia") }}</td>

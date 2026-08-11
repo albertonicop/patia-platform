@@ -41,9 +41,12 @@ chart('topProducts', window.topLabels||[], window.topValues||[]);
 chart('categoryChart', window.catLabels||[], window.catValues||[], 'doughnut');
 
 function reportMoney(value) {
+    const root = document.documentElement;
+    const currency = root.dataset.currencyCode || "MXN";
+    const locale = (root.dataset.localeCode || "es_MX").replace("_", "-");
     return Number(value || 0).toLocaleString(
-        document.documentElement.lang === "en" ? "en-US" : "es-MX",
-        {style: "currency", currency: "MXN"}
+        locale,
+        {style: "currency", currency, currencyDisplay: "code"}
     );
 }
 

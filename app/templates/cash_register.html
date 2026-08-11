@@ -154,7 +154,10 @@
   const difference = form.querySelector("[data-difference-output]");
   const message = form.querySelector("[data-difference-message]");
   const expected = Number(form.dataset.expected || 0);
-  const money = new Intl.NumberFormat(document.documentElement.lang === "en" ? "en-US" : "es-MX", { style: "currency", currency: "MXN" });
+  const money = new Intl.NumberFormat(
+    (document.documentElement.dataset.localeCode || "es_MX").replace("_", "-"),
+    {style: "currency", currency: document.documentElement.dataset.currencyCode || "MXN", currencyDisplay: "code"}
+  );
   const balancedMessage = {{ _("Todo cuadra.")|tojson }};
   const overMessage = {{ _("Sobran %(amount)s en caja.", amount="__AMOUNT__")|tojson }};
   const shortMessage = {{ _("Faltan %(amount)s en caja.", amount="__AMOUNT__")|tojson }};

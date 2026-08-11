@@ -13,6 +13,18 @@ class Organization(db.Model):
         db.UniqueConstraint(
             "owner_user_id", name="uq_organization_owner_user_id"
         ),
+        db.CheckConstraint(
+            "country_code IN ('MX','US','ES','CO','CL','PE')",
+            name="ck_organization_country_code",
+        ),
+        db.CheckConstraint(
+            "currency_code IN ('MXN','USD','EUR','COP','CLP','PEN')",
+            name="ck_organization_currency_code",
+        ),
+        db.CheckConstraint(
+            "locale_code IN ('es_MX','en_US','es_ES','es_CO','es_CL','es_PE')",
+            name="ck_organization_locale_code",
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -27,6 +39,9 @@ class Organization(db.Model):
         db.String(64), nullable=False, default="America/Mexico_City"
     )
     currency = db.Column(db.String(3), nullable=False, default="MXN")
+    country_code = db.Column(db.String(2), nullable=False, default="MX")
+    currency_code = db.Column(db.String(3), nullable=False, default="MXN")
+    locale_code = db.Column(db.String(16), nullable=False, default="es_MX")
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     monthly_report_enabled = db.Column(
         db.Boolean, nullable=False, default=False
@@ -547,6 +562,10 @@ class SalesTicket(db.Model):
             "user_id",
             "created_at",
         ),
+        db.CheckConstraint(
+            "currency_code IN ('MXN','USD','EUR','COP','CLP','PEN')",
+            name="ck_sales_ticket_currency_code",
+        ),
         db.Index(
             "ix_sales_ticket_organization_created_at",
             "organization_id",
@@ -570,6 +589,8 @@ class SalesTicket(db.Model):
     number = db.Column(db.Integer, nullable=False)
     public_id = db.Column(db.String(36), nullable=False)
     payment_method = db.Column(db.String(20), nullable=True)
+    currency_code = db.Column(db.String(3), nullable=False, default="MXN")
+    locale_code = db.Column(db.String(16), nullable=False, default="es_MX")
     amount_received = db.Column(db.Numeric(14, 2), nullable=True)
     change_amount = db.Column(db.Numeric(14, 2), nullable=True)
     cashier_member_id = db.Column(
@@ -852,6 +873,10 @@ class Sale(db.Model):
             "user_id",
             "created_at",
         ),
+        db.CheckConstraint(
+            "currency_code IN ('MXN','USD','EUR','COP','CLP','PEN')",
+            name="ck_sale_currency_code",
+        ),
         db.Index(
             "ix_sale_user_ticket",
             "user_id",
@@ -915,6 +940,8 @@ class Sale(db.Model):
 
     ticket_id = db.Column(db.String(36), nullable=True)
     payment_method = db.Column(db.String(20), nullable=True)
+    currency_code = db.Column(db.String(3), nullable=False, default="MXN")
+    locale_code = db.Column(db.String(16), nullable=False, default="es_MX")
     sales_ticket_id = db.Column(
         db.Integer,
         db.ForeignKey("sales_ticket.id", ondelete="SET NULL"),

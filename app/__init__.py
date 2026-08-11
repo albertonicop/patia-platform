@@ -222,6 +222,15 @@ def create_app():
         )
 
         current_membership = active_membership(user) if user else None
+        from .currencies import organization_money_context
+        organization_currency, organization_locale = organization_money_context(
+            current_membership.organization if current_membership else None
+        )
+        from flask import g
+        g._organization_money_context = (
+            organization_currency,
+            organization_locale,
+        )
         access_user = (
             current_membership.organization.owner
             if current_membership
@@ -248,6 +257,8 @@ def create_app():
             "supported_languages": SUPPORTED_LANGUAGES,
             "current_language": select_locale(),
             "current_membership": current_membership,
+            "organization_currency": organization_currency,
+            "organization_locale": organization_locale,
             "can_manage_team": has_permission(current_membership, "manage_employees"),
             "can_manage_inventory": has_permission(current_membership, "manage_inventory"),
             "can_view_reports": has_permission(current_membership, "view_reports"),

@@ -391,7 +391,7 @@ function renderImportInspection(data) {
   }));
   importPreview.replaceChildren(...data.rows.map(row => {
     const tr = document.createElement("tr");
-    [row.row, row.name, row.sku, `$${row.sale_price}`, row.stock, row.action === "create" ? INVENTORY_I18N.create : INVENTORY_I18N.update].forEach(value => {
+    [row.row, row.name, row.sku, reportMoney(row.sale_price), row.stock, row.action === "create" ? INVENTORY_I18N.create : INVENTORY_I18N.update].forEach(value => {
       const td = document.createElement("td"); td.textContent = value; tr.appendChild(td);
     });
     return tr;

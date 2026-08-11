@@ -45,6 +45,31 @@
           {% else %}
             <p>{{ _("Registra tu negocio. Todos los campos son necesarios para configurar tu cuenta.") }}</p>
           {% endif %}
+
+          {% if mode == "register" %}
+            {% set selected_country = form_data.get('country_code', 'MX') if form_data is defined else 'MX' %}
+            {% set selected_currency = form_data.get('currency_code', 'MXN') if form_data is defined else 'MXN' %}
+            <div class="auth-v2__grid">
+              <div class="form-group auth-v2__field">
+                <label for="country-code">{{ _("País") }}</label>
+                <select id="country-code" name="country_code" required>
+                  <option value="MX" data-currency="MXN" data-locale="es_MX"{% if selected_country == 'MX' %} selected{% endif %}>{{ _("México") }}</option>
+                  <option value="US" data-currency="USD" data-locale="en_US"{% if selected_country == 'US' %} selected{% endif %}>{{ _("Estados Unidos") }}</option>
+                  <option value="ES" data-currency="EUR" data-locale="es_ES"{% if selected_country == 'ES' %} selected{% endif %}>{{ _("España") }}</option>
+                  <option value="CO" data-currency="COP" data-locale="es_CO"{% if selected_country == 'CO' %} selected{% endif %}>{{ _("Colombia") }}</option>
+                  <option value="CL" data-currency="CLP" data-locale="es_CL"{% if selected_country == 'CL' %} selected{% endif %}>{{ _("Chile") }}</option>
+                  <option value="PE" data-currency="PEN" data-locale="es_PE"{% if selected_country == 'PE' %} selected{% endif %}>{{ _("Perú") }}</option>
+                </select>
+              </div>
+              <div class="form-group auth-v2__field">
+                <label for="currency-code">{{ _("Moneda") }}</label>
+                <select id="currency-code" name="currency_code" required>
+                  {% for code in ('MXN','USD','EUR','COP','CLP','PEN') %}<option value="{{ code }}"{% if selected_currency == code %} selected{% endif %}>{{ code }}</option>{% endfor %}
+                </select>
+                <input id="locale-code" type="hidden" name="locale_code" value="{{ form_data.get('locale_code', 'es_MX') if form_data is defined else 'es_MX' }}">
+              </div>
+            </div>
+          {% endif %}
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -156,5 +181,21 @@
     </section>
   </main>
   <script src="{{ url_for('static', filename='js/app.js') }}?v=113"></script>
+  {% if mode == "register" %}<script>
+  (() => {
+    const country = document.getElementById("country-code");
+    const currency = document.getElementById("currency-code");
+    const locale = document.getElementById("locale-code");
+    country.addEventListener("change", () => {
+      const selected = country.selectedOptions[0];
+      currency.value = selected.dataset.currency;
+      locale.value = selected.dataset.locale;
+      currency.dispatchEvent(new Event("change", {bubbles:true}));
+    });
+    currency.addEventListener("change", () => {
+      locale.value = {MXN:"es_MX",USD:"en_US",EUR:"es_ES",COP:"es_CO",CLP:"es_CL",PEN:"es_PE"}[currency.value] || "es_MX";
+    });
+  })();
+  </script>{% endif %}
 </body>
 </html>

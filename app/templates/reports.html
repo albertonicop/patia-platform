@@ -20,6 +20,7 @@
 {% endmacro %}
 
 {% block content %}
+{% if mixed_currency_lines %}<div class="flash info">{{ _("Este periodo contiene %(count)s movimientos guardados en otra moneda. PATIA no los convierte ni los suma con la moneda actual.", count=mixed_currency_lines) }}</div>{% endif %}
 <div class="reports-v3">
   <nav class="reports-v3__view-tabs" aria-label="{{ _('Secciones de Reportes') }}">
     <a class="is-active" aria-current="page" href="{{ url_for('main.reports') }}">{{ _("Resumen") }}</a>

@@ -20,6 +20,7 @@ from app.models import (
     Sale,
 )
 from app.money import MONEY_ZERO, money_decimal
+from app.currencies import format_money
 from app.timezones import (
     local_date_bounds_utc,
     local_today,
@@ -87,7 +88,9 @@ def _margin_change(current, previous):
     return round(Decimal(str(current)) - Decimal(str(previous)), 1)
 
 
-def _executive_summary(current, previous, sales_change, margin_change):
+def _executive_summary(
+    current, previous, sales_change, margin_change, organization
+):
     if not current["ticket_count"]:
         return {
             "state": "insufficient",
@@ -107,7 +110,7 @@ def _executive_summary(current, previous, sales_change, margin_change):
                 "Registraste %(tickets)s ventas por %(sales)s. Cuando exista un "
                 "periodo anterior comparable, PATIA mostrará la tendencia.",
                 tickets=current["ticket_count"],
-                sales=f"${current['sales']:,.2f}",
+                sales=format_money(current["sales"], organization),
             ),
         }
     if sales_change >= Decimal("5") and (
@@ -728,7 +731,7 @@ def _actionable_snapshot(
                     "%(count)s clientes deben %(amount)s.",
                     credit["customers"],
                     count=credit["customers"],
-                    amount=f"${credit['balance']:,.2f}",
+                    amount=format_money(credit["balance"], organization),
                 ),
                 "action": gettext(
                     "Da seguimiento a los saldos con mayor antigüedad."
@@ -757,7 +760,9 @@ def _actionable_snapshot(
                 ),
                 "evidence": gettext(
                     "La diferencia absoluta acumulada fue %(amount)s.",
-                    amount=f"${cash_differences['amount']:,.2f}",
+                    amount=format_money(
+                        cash_differences["amount"], organization
+                    ),
                 ),
                 "action": gettext(
                     "Compara el efectivo esperado con los cierres registrados."
@@ -810,7 +815,7 @@ def _actionable_snapshot(
                 "priority": 85 + credit["customers"],
                 "title": gettext(
                     "Da seguimiento a %(amount)s por cobrar",
-                    amount=f"${credit['balance']:,.2f}",
+                    amount=format_money(credit["balance"], organization),
                 ),
                 "evidence": ngettext(
                     "%(count)s cliente mantiene saldo pendiente.",
@@ -876,11 +881,13 @@ def build_executive_dashboard(
         organization.id,
         period,
         timezone_name=timezone_name,
+        currency_code=organization.currency_code,
     )
     previous = _report_analytics(
         organization.id,
         previous_period,
         timezone_name=timezone_name,
+        currency_code=organization.currency_code,
     )
     current_kpis = current["report_kpis"]
     previous_kpis = previous["report_kpis"]
@@ -907,6 +914,7 @@ def build_executive_dashboard(
             organization.id,
             month_period,
             timezone_name=timezone_name,
+            currency_code=organization.currency_code,
         )
     )
     month_sales = money_decimal(month["report_kpis"]["sales"])
@@ -944,6 +952,7 @@ def build_executive_dashboard(
             previous_kpis,
             sales_change,
             margin_change,
+            organization,
         ),
         "monthly_goal": goal,
         "monthly_sales": month_sales,

@@ -214,6 +214,7 @@ def export_csv():
             gettext("Estado"),
             gettext("Fecha de creación"),
             gettext("Total comprado"),
+            gettext("Moneda"),
             gettext("Última compra"),
             gettext("Notas"),
         ]
@@ -232,6 +233,7 @@ def export_csv():
                     membership.organization.timezone,
                 ).isoformat(),
                 f"{row.purchase_total:.2f}",
+                membership.organization.currency_code,
                 (
                     utc_to_local(
                         row.last_purchase_at,

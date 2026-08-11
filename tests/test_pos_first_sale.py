@@ -216,7 +216,7 @@ class PosFirstSaleTests(unittest.TestCase):
         html = self.pos_html()
         self.assertIn("Efectivo recibido", html)
         self.assertIn("Pago exacto", html)
-        self.assertIn("Siguiente $100", html)
+        self.assertIn("Siguiente 100 MXN", html)
         self.assertIn("cashPaymentIsReady", html)
         self.assertIn("Cambio:", html)
         self.assertIn("Faltan", html)

@@ -52,9 +52,9 @@
         </div>
 
         <section class="pro-monthly-report-v1__kpis" aria-label="{{ _('Indicadores del mes') }}">
-          <article><span>{{ _("Ventas") }}</span><strong>{{ snapshot.kpis.sales|money }}</strong></article>
-          <article><span>{{ _("Utilidad estimada") }}</span><strong>{{ snapshot.kpis.profit|money }}</strong></article>
-          <article><span>{{ _("Ticket promedio") }}</span><strong>{{ snapshot.kpis.average_ticket|money }}</strong></article>
+          <article><span>{{ _("Ventas") }}</span><strong>{{ snapshot.kpis.sales|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
+          <article><span>{{ _("Utilidad estimada") }}</span><strong>{{ snapshot.kpis.profit|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
+          <article><span>{{ _("Ticket promedio") }}</span><strong>{{ snapshot.kpis.average_ticket|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
           <article><span>{{ _("Ventas registradas") }}</span><strong>{{ snapshot.kpis.ticket_count }}</strong></article>
         </section>
 
@@ -101,7 +101,7 @@
                       <tr>
                         <td>{{ product.name }}</td>
                         <td>{{ product.units }}</td>
-                        <td>{{ (product.profit if product.profit is defined and product.profit is not none else product.revenue)|money }}</td>
+                        <td>{{ (product.profit if product.profit is defined and product.profit is not none else product.revenue)|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</td>
                       </tr>
                     {% endfor %}
                   </tbody>
@@ -120,7 +120,7 @@
                   <thead><tr><th>{{ _("Cliente") }}</th><th>{{ _("Compras") }}</th><th>{{ _("Total") }}</th></tr></thead>
                   <tbody>
                     {% for customer in snapshot.customers %}
-                      <tr><td>{{ customer.name }}</td><td>{{ customer.tickets }}</td><td>{{ customer.sales|money }}</td></tr>
+                      <tr><td>{{ customer.name }}</td><td>{{ customer.tickets }}</td><td>{{ customer.sales|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</td></tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -134,8 +134,8 @@
         <section class="pro-monthly-report-v2__opportunities">
           <header><span>{{ _("Oportunidades y alertas") }}</span><h3>{{ _("Dónde conviene poner atención") }}</h3></header>
           <div class="pro-monthly-report-v1__details">
-            <article><span>{{ _("Valor del inventario") }}</span><strong>{{ snapshot.inventory.value|money }}</strong></article>
-            <article><span>{{ _("Pendiente por cobrar") }}</span><strong>{{ snapshot.credit.total|money }}</strong></article>
+            <article><span>{{ _("Valor del inventario") }}</span><strong>{{ snapshot.inventory.value|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
+            <article><span>{{ _("Pendiente por cobrar") }}</span><strong>{{ snapshot.credit.total|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
             <article><span>{{ _("Cierres con diferencia") }}</span><strong>{{ snapshot.cash.count }}</strong></article>
           </div>
         </section>
