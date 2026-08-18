@@ -34,6 +34,7 @@ from app.team.services import (
     require_permission,
 )
 from app.timezones import local_today, safe_timezone_name, utc_to_local
+from app.units import quantity_decimal
 
 from .purchases import (
     cancel_purchase_order,
@@ -624,7 +625,7 @@ def purchase_draft_create():
             continue
         try:
             product_id = int(key.removeprefix("quantity_"))
-            quantity = int(value)
+            quantity = quantity_decimal(value, positive=True)
         except (TypeError, ValueError):
             continue
         if quantity > 0:
@@ -685,8 +686,8 @@ def purchase_update(order_id):
     quantities = {}
     for item in order.items:
         try:
-            quantities[item.id] = int(
-                request.form.get(f"quantity_{item.id}", "")
+            quantities[item.id] = quantity_decimal(
+                request.form.get(f"quantity_{item.id}", ""), positive=True
             )
         except (TypeError, ValueError):
             quantities[item.id] = 0
@@ -733,11 +734,11 @@ def purchase_receive(order_id):
     quantities = {}
     for item in order.items:
         try:
-            quantities[item.id] = int(
+            quantities[item.id] = quantity_decimal(
                 request.form.get(f"received_{item.id}", "0")
             )
         except (TypeError, ValueError):
-            quantities[item.id] = -1
+            quantities[item.id] = quantity_decimal(0) - 1
     try:
         receipt, created = receive_purchase_order(
             order,

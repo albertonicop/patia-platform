@@ -86,7 +86,7 @@
         {% endif %}
       </div>
 
-      {% if user.stripe_subscription_id and current_plan_code in ["STARTER", "PRO"] and not user.pending_plan_code %}
+      {% if user.stripe_subscription_id and current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and not user.pending_plan_code %}
         <div class="subscription-v3__change-plan">
           {% if current_plan_code == "STARTER" %}
             {% set target = commercial_plans|selectattr("code", "equalto", "PRO")|first %}
@@ -121,6 +121,8 @@
           {{ _("Funciones incluidas en tu plan Starter") }}
         {% elif current_plan_code == "PRO" %}
           {{ _("Funciones incluidas en tu plan Pro") }}
+        {% elif current_plan_code == "RESTAURANT" %}
+          {{ _("Funciones incluidas en tu plan Restaurant") }}
         {% else %}
           {{ _("Funciones incluidas en tu acceso actual") }}
         {% endif %}
@@ -160,6 +162,6 @@
       </div>
     {% endif %}
   </section>
-  <a class="btn ghost subscription-v2__plans-link" href="{{ url_for('main.subscribe') }}">{{ _("Comparar Starter y Pro") }}</a>
+  <a class="btn ghost subscription-v2__plans-link" href="{{ url_for('main.subscribe') }}">{{ _("Comparar planes") }}</a>
 </div>
 {% endblock %}

@@ -134,19 +134,28 @@
                 <input id="postal_code" name="postal_code" value="{{ form_data.get('postal_code', '') if form_data is defined else '' }}" placeholder="{{ _('CP') }}" autocomplete="postal-code" required>
               </div>
               <div class="form-group auth-v2__field">
-                <label for="business_type">{{ _("Giro del negocio") }}</label>
+                <label for="business_type">{{ _("¿Qué tipo de negocio tienes?") }}</label>
                 <select id="business_type" name="business_type" required>
                   <option value="">{{ _("Selecciona...") }}</option>
                   {% set selected_business = form_data.get('business_type', '') if form_data is defined else '' %}
-                  <option value="Minisúper"{% if selected_business == 'Minisúper' %} selected{% endif %}>{{ _("Minisúper") }}</option>
-                  <option value="Abarrotes"{% if selected_business == 'Abarrotes' %} selected{% endif %}>{{ _("Abarrotes") }}</option>
-                  <option value="Ferretería"{% if selected_business == 'Ferretería' %} selected{% endif %}>{{ _("Ferretería") }}</option>
-                  <option value="Farmacia"{% if selected_business == 'Farmacia' %} selected{% endif %}>{{ _("Farmacia") }}</option>
-                  <option value="Distribuidora"{% if selected_business == 'Distribuidora' %} selected{% endif %}>{{ _("Distribuidora") }}</option>
-                  <option value="Otro"{% if selected_business == 'Otro' %} selected{% endif %}>{{ _("Otro") }}</option>
+                  <option value="general"{% if selected_business and selected_business not in ['restaurant', 'Restaurante'] %} selected{% endif %}>{{ _("Negocio / tienda") }}</option>
+                  <option value="restaurant"{% if selected_business in ['restaurant', 'Restaurante'] %} selected{% endif %}>{{ _("Restaurante") }}</option>
                 </select>
+                <small id="restaurant-plan-note" hidden>{{ _("Para controlar recetas e ingredientes, te recomendamos el plan Restaurant.") }}</small>
               </div>
             </div>
+          {% endif %}
+
+          {% if mode == 'register' %}
+          <script>
+            const businessType = document.getElementById("business_type");
+            const restaurantNote = document.getElementById("restaurant-plan-note");
+            if (businessType && restaurantNote) {
+              const syncRestaurantNote = () => restaurantNote.hidden = businessType.value !== "restaurant";
+              businessType.addEventListener("change", syncRestaurantNote);
+              syncRestaurantNote();
+            }
+          </script>
           {% endif %}
 
           <div class="form-group auth-v2__field">

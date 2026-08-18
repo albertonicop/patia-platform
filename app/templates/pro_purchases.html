@@ -78,7 +78,7 @@
                       </small>
                     </td>
                     <td data-label="{{ _('Costo estimado') }}">{{ item.estimated_cost|money }}</td>
-                    <td data-label="{{ _('Cantidad') }}"><input aria-label="{{ _('Cantidad para %(product)s', product=item.name) }}" type="number" min="1" step="1" name="quantity_{{ item.product_id }}" value="{{ item.suggested_quantity }}" required></td>
+                    <td data-label="{{ _('Cantidad') }}"><input aria-label="{{ _('Cantidad para %(product)s', product=item.name) }}" type="number" min="0.001" step="0.001" name="quantity_{{ item.product_id }}" value="{{ item.suggested_quantity|quantity }}" required></td>
                   </tr>
                   {% if not item.supplier_name or not item.unit_cost %}
                     <tr class="pro-purchases-v1__data-warning">

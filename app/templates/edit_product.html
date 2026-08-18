@@ -44,12 +44,16 @@
       </div>
       <div class="inventory-v2__field">
         <label for="edit-product-stock">{{ _("Stock actual") }}</label>
-        <input id="edit-product-stock" name="stock" type="number" value="{{ product.stock }}" min="0" step="1" inputmode="numeric" required aria-describedby="stock-change-warning">
+        <input id="edit-product-stock" name="stock" type="number" value="{{ product.stock|quantity }}" min="0" step="0.001" inputmode="decimal" required aria-describedby="stock-change-warning">
         <small id="stock-change-warning" class="product-edit-v1__warning">{{ _("Este valor reemplaza las existencias actuales. PATIA V1.0 no conserva un historial de ajustes manuales.") }}</small>
       </div>
       <div class="inventory-v2__field">
         <label for="edit-product-min-stock">{{ _("Stock mínimo") }}</label>
-        <input id="edit-product-min-stock" name="min_stock" type="number" value="{{ product.min_stock }}" min="0" step="1" inputmode="numeric" required>
+        <input id="edit-product-min-stock" name="min_stock" type="number" value="{{ product.min_stock|quantity }}" min="0" step="0.001" inputmode="decimal" required>
+      </div>
+      <div class="field-v2">
+        <label for="edit-product-unit">{{ _("Unidad base") }}</label>
+        <select id="edit-product-unit" name="unit_code">{% for code in ['piece','kg','g','L','ml','dozen','portion'] %}<option value="{{ code }}"{% if product.unit_code == code %} selected{% endif %}>{{ _(code) }}</option>{% endfor %}</select>
       </div>
       <div class="product-edit-v1__actions inventory-v2__field--wide">
         <button class="btn" type="submit">{{ _("Guardar cambios") }}</button>

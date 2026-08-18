@@ -19,12 +19,13 @@ from app.inventory.services import record_inventory_movement
 from app.models import Product
 from app.money import money_decimal
 from app.currencies import parse_localized_decimal
+from app.units import normalize_unit, quantity_decimal
 
 
 MAX_IMPORT_ROWS = 5_000
 FIELDS = (
     "sku", "barcode", "name", "category", "supplier",
-    "cost_price", "sale_price", "stock", "min_stock",
+    "cost_price", "sale_price", "stock", "min_stock", "unit_code",
 )
 REQUIRED_FIELDS = frozenset({"name", "sale_price", "stock"})
 ALIASES = {
@@ -53,6 +54,10 @@ ALIASES = {
     "min_stock": {
         "stock minimo", "minimo", "existencia minima", "minimum stock",
         "reorder point", "reorder level", "punto de reorden",
+    },
+    "unit_code": {
+        "unidad", "unidad base", "unidad de inventario", "unit", "base unit",
+        "uom", "unidad medida",
     },
 }
 
@@ -199,17 +204,17 @@ def _decimal(value, *, default="0.00", currency_code="MXN", locale_code="es_MX")
         raise ValueError("invalid_number")
 
 
-def _integer(value, *, default=0):
+def _quantity(value, *, default=0):
     text = _text(value)
     if not text:
         return default
     try:
         number = Decimal(text.replace(",", ""))
     except InvalidOperation:
-        raise ValueError("invalid_integer")
-    if number < 0 or number != number.to_integral_value():
-        raise ValueError("invalid_integer")
-    return int(number)
+        raise ValueError("invalid_quantity")
+    if number < 0:
+        raise ValueError("invalid_quantity")
+    return quantity_decimal(number)
 
 
 def _row_value(row, mapping, field):
@@ -278,8 +283,9 @@ def inspect_catalog(
                 "supplier": _text(_row_value(source, chosen, "supplier"), 120) or None,
                 "cost_price": _decimal(_row_value(source, chosen, "cost_price"), currency_code=currency_code, locale_code=locale_code),
                 "sale_price": _decimal(_row_value(source, chosen, "sale_price"), currency_code=currency_code, locale_code=locale_code),
-                "stock": _integer(_row_value(source, chosen, "stock")),
-                "min_stock": _integer(_row_value(source, chosen, "min_stock"), default=5),
+                "stock": _quantity(_row_value(source, chosen, "stock")),
+                "min_stock": _quantity(_row_value(source, chosen, "min_stock"), default=5),
+                "unit_code": normalize_unit(_row_value(source, chosen, "unit_code")),
             }
             if not item["name"]:
                 raise ValueError("missing_identity")
@@ -317,7 +323,9 @@ def inspect_catalog(
 
 
 def apply_catalog(imported, organization_id, owner_id, membership):
-    existing = Product.query.filter_by(organization_id=organization_id).with_for_update().all()
+    existing = Product.query.filter_by(
+        organization_id=organization_id, item_type="inventory"
+    ).with_for_update().all()
     by_id = {item.id: item for item in existing}
     created = updated = 0
     pending_opening_movements = []
@@ -334,6 +342,7 @@ def apply_catalog(imported, organization_id, owner_id, membership):
             product.sale_price = row["sale_price"]
             product.stock = row["stock"]
             product.min_stock = row["min_stock"]
+            product.unit_code = row["unit_code"]
             product.is_active = True
             if before != product.stock:
                 record_inventory_movement(
@@ -352,6 +361,7 @@ def apply_catalog(imported, organization_id, owner_id, membership):
                 category=row["category"], supplier=row["supplier"],
                 cost_price=row["cost_price"], sale_price=row["sale_price"],
                 stock=row["stock"], min_stock=row["min_stock"],
+                unit_code=row["unit_code"],
             )
             db.session.add(product)
             pending_opening_movements.append(product)
@@ -366,7 +376,7 @@ def apply_catalog(imported, organization_id, owner_id, membership):
                 membership,
                 "OPENING_BALANCE",
                 0,
-                int(product.stock),
+                product.stock,
                 reason="Alta mediante importación verificada",
             )
     return {"created": created, "updated": updated, "errors": len(imported.errors), "omitted": imported.summary["blank"]}

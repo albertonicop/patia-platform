@@ -38,11 +38,11 @@
             <td data-label="{{ _('Producto') }}"><strong>{{ item.product_name }}</strong><small>{{ item.product_sku }}</small></td>
             <td data-label="{{ _('Pedido') }}">
               {% if order.status == "DRAFT" %}
-                <input type="number" min="1" step="1" name="quantity_{{ item.id }}" value="{{ item.ordered_quantity }}" aria-label="{{ _('Cantidad de %(product)s', product=item.product_name) }}" required>
-              {% else %}{{ item.ordered_quantity }}{% endif %}
+                <input type="number" min="0.001" step="0.001" name="quantity_{{ item.id }}" value="{{ item.ordered_quantity|quantity }}" aria-label="{{ _('Cantidad de %(product)s', product=item.product_name) }}" required>
+              {% else %}{{ item.ordered_quantity|quantity }}{% endif %}
             </td>
-            <td data-label="{{ _('Recibido') }}">{{ item.received_quantity }}</td>
-            <td data-label="{{ _('Pendiente') }}">{{ item.pending_quantity }}</td>
+            <td data-label="{{ _('Recibido') }}">{{ item.received_quantity|quantity }}</td>
+            <td data-label="{{ _('Pendiente') }}">{{ item.pending_quantity|quantity }}</td>
             <td data-label="{{ _('Costo unitario') }}">{{ item.unit_cost|money if item.unit_cost is not none else "—" }}</td>
           </tr>
         {% endfor %}
@@ -72,8 +72,8 @@
         <input type="hidden" name="request_id" value="{{ receipt_request_id }}">
         {% for item in order.items if item.pending_quantity %}
           <label>
-            <span>{{ item.product_name }} <small>{{ _("Pendientes: %(count)s", count=item.pending_quantity) }}</small></span>
-            <input type="number" min="0" max="{{ item.pending_quantity }}" step="1" name="received_{{ item.id }}" value="{{ item.pending_quantity }}">
+            <span>{{ item.product_name }} <small>{{ _("Pendientes: %(count)s", count=item.pending_quantity|quantity) }}</small></span>
+            <input type="number" min="0" max="{{ item.pending_quantity|quantity }}" step="0.001" name="received_{{ item.id }}" value="{{ item.pending_quantity|quantity }}">
           </label>
         {% endfor %}
         <button class="btn primary" type="submit">{{ _("Recibir mercancía") }}</button>

@@ -24,6 +24,7 @@ from app.models import (
     Supplier,
 )
 from app.money import money_decimal
+from app.units import quantity_decimal
 
 
 SUGGESTION_WINDOW_DAYS = 30
@@ -69,6 +70,7 @@ def purchase_suggestions(organization_id: int, *, now=None):
         .filter(
             Product.organization_id == organization_id,
             Product.is_active.is_(True),
+            Product.item_type == "inventory",
         )
         .order_by(Product.supplier, Product.name)
         .all()
@@ -90,8 +92,8 @@ def purchase_suggestions(organization_id: int, *, now=None):
     no_movement = []
     for row in rows:
         product = row.Product
-        recent_units = int(row.recent_units or 0)
-        daily_velocity = Decimal(recent_units) / Decimal(
+        recent_units = quantity_decimal(row.recent_units or 0)
+        daily_velocity = recent_units / Decimal(
             SUGGESTION_WINDOW_DAYS
         )
         coverage_days = (
@@ -100,13 +102,15 @@ def purchase_suggestions(organization_id: int, *, now=None):
             else None
         )
         target_stock = max(
-            int(product.min_stock) * 2,
-            ceil(daily_velocity * TARGET_COVERAGE_DAYS),
-            1 if int(product.stock) <= 0 else 0,
+            quantity_decimal(product.min_stock) * 2,
+            quantity_decimal(ceil(daily_velocity * TARGET_COVERAGE_DAYS)),
+            Decimal("1") if product.stock <= 0 else Decimal("0"),
         )
-        suggested_quantity = max(target_stock - int(product.stock), 0)
+        suggested_quantity = quantity_decimal(
+            max(target_stock - product.stock, Decimal("0"))
+        )
         needs_restock = (
-            int(product.stock) <= int(product.min_stock)
+            product.stock <= product.min_stock
             or (
                 coverage_days is not None
                 and coverage_days <= Decimal("14")
@@ -123,8 +127,8 @@ def purchase_suggestions(organization_id: int, *, now=None):
             "sku": product.sku,
             "supplier_name": supplier_name,
             "supplier_id": supplier_ids.get(supplier_name),
-            "stock": int(product.stock),
-            "min_stock": int(product.min_stock),
+            "stock": quantity_decimal(product.stock),
+            "min_stock": quantity_decimal(product.min_stock),
             "recent_units": recent_units,
             "daily_velocity": round(daily_velocity, 2),
             "coverage_days": coverage_days,
@@ -156,7 +160,7 @@ def purchase_suggestions(organization_id: int, *, now=None):
                 "supplier_name": item["supplier_name"],
                 "supplier_id": item["supplier_id"],
                 "items": [],
-                "units": 0,
+                "units": Decimal("0"),
                 "estimated_cost": Decimal("0.00"),
             },
         )
@@ -215,22 +219,23 @@ def _next_order_number(organization_id: int):
 
 def create_purchase_draft(
     membership,
-    product_quantities: dict[int, int],
+    product_quantities: dict[int, Decimal],
     *,
     supplier_name: str | None = None,
     notes: str | None = None,
 ):
     """Create one draft atomically from explicitly selected products."""
-    clean = {
-        int(product_id): int(quantity)
-        for product_id, quantity in product_quantities.items()
-        if int(quantity) > 0
-    }
+    clean = {}
+    for product_id, quantity in product_quantities.items():
+        parsed = quantity_decimal(quantity)
+        if parsed > 0:
+            clean[int(product_id)] = parsed
     if not clean:
         raise ValueError("At least one product is required.")
     products = Product.query.filter(
         Product.organization_id == membership.organization_id,
         Product.is_active.is_(True),
+        Product.item_type == "inventory",
         Product.id.in_(clean),
     ).order_by(Product.name).all()
     if len(products) != len(clean):
@@ -292,14 +297,16 @@ def purchase_order_query(organization_id: int):
 
 def update_purchase_draft(
     order: PurchaseOrder,
-    quantities: dict[int, int],
+    quantities: dict[int, Decimal],
     *,
     notes=None,
 ):
     if order.status != "DRAFT":
         raise ValueError("Only draft orders can be edited.")
     for item in order.items:
-        quantity = int(quantities.get(item.id, item.ordered_quantity))
+        quantity = quantity_decimal(
+            quantities.get(item.id, item.ordered_quantity), positive=True
+        )
         if quantity <= 0:
             raise ValueError("Ordered quantities must be positive.")
         item.ordered_quantity = quantity
@@ -330,7 +337,7 @@ def cancel_purchase_order(order: PurchaseOrder):
 def receive_purchase_order(
     order: PurchaseOrder,
     membership,
-    quantities: dict[int, int],
+    quantities: dict[int, Decimal],
     *,
     request_id: str,
 ):
@@ -377,7 +384,7 @@ def receive_purchase_order(
     )
     selected = []
     for item in locked_items:
-        quantity = int(quantities.get(item.id, 0) or 0)
+        quantity = quantity_decimal(quantities.get(item.id, 0) or 0)
         if quantity < 0 or quantity > item.pending_quantity:
             raise ValueError("Received quantity exceeds the pending units.")
         if quantity:
@@ -407,7 +414,7 @@ def receive_purchase_order(
     db.session.flush()
     for item, quantity in selected:
         product = products[item.product_id]
-        stock_before = int(product.stock)
+        stock_before = quantity_decimal(product.stock)
         restock = InventoryRestockEvent(
             organization_id=membership.organization_id,
             user_id=membership.user_id,

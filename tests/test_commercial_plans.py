@@ -13,6 +13,7 @@ os.environ.setdefault("STRIPE_SECRET_KEY", "sk_test_commercial")
 os.environ.setdefault("STRIPE_PRICE_ID", "price_starter_legacy")
 os.environ.setdefault("STRIPE_STARTER_PRICE_ID", "price_starter")
 os.environ.setdefault("STRIPE_PRO_PRICE_ID", "price_pro")
+os.environ.setdefault("STRIPE_RESTAURANT_PRICE_ID", "price_restaurant")
 os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_commercial")
 os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
@@ -28,6 +29,7 @@ from app.plans import (
     GRANDFATHERED,
     MANUAL,
     PRO,
+    RESTAURANT,
     STARTER,
     current_plan_code,
     entitlements_for,
@@ -51,6 +53,7 @@ class CommercialPlanTests(unittest.TestCase):
             RATELIMIT_ENABLED=False,
             STRIPE_STARTER_PRICE_ID="price_starter",
             STRIPE_PRO_PRICE_ID="price_pro",
+            STRIPE_RESTAURANT_PRICE_ID="price_restaurant",
         )
         self.context = self.app.app_context()
         self.context.push()
@@ -223,11 +226,12 @@ class CommercialPlanTests(unittest.TestCase):
         self.assertEqual(current_plan_code(self.owner), MANUAL)
         self.assertTrue(has_entitlement(self.owner, "monthly_owner_report"))
 
-    def test_checkout_uses_requested_starter_and_pro_prices(self):
+    def test_checkout_uses_requested_paid_plan_prices(self):
         client = self.client_for(self.owner)
         for plan_code, expected_price in (
             (STARTER, "price_starter"),
             (PRO, "price_pro"),
+            (RESTAURANT, "price_restaurant"),
         ):
             with patch(
                 "app.routes.stripe.checkout.Session.create",
@@ -246,6 +250,13 @@ class CommercialPlanTests(unittest.TestCase):
             )
             self.assertEqual(params["metadata"]["plan_code"], plan_code)
             self.assertIn(plan_code.lower(), params["idempotency_key"])
+
+    def test_landing_presents_restaurant_without_fake_checkout(self):
+        self.app.config["STRIPE_RESTAURANT_PRICE_ID"] = None
+        html = self.app.test_client().get("/").get_data(as_text=True)
+        self.assertIn("PATIA Restaurant", html)
+        self.assertIn("$360", html)
+        self.assertIn("Restaurantes", html)
 
     def test_checkout_does_not_fake_pro_when_price_is_missing(self):
         self.app.config["STRIPE_PRO_PRICE_ID"] = None

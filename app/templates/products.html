@@ -64,7 +64,7 @@
         </div>
         <div class="inventory-v2__field">
           <label for="product-stock">{{ _("Cantidad inicial") }}</label>
-          <input id="product-stock" name="stock" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+          <input id="product-stock" name="stock" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0">
           <small>{{ _("Unidades disponibles actualmente.") }}</small>
         </div>
 
@@ -85,9 +85,13 @@
             </div>
             <div class="inventory-v2__field">
               <label for="product-min-stock">{{ _("Stock mínimo") }} <em>{{ _("Opcional") }}</em></label>
-              <input id="product-min-stock" name="min_stock" type="number" min="0" step="1" inputmode="numeric" placeholder="5">
+              <input id="product-min-stock" name="min_stock" type="number" min="0" step="0.001" inputmode="decimal" placeholder="5">
               <small>{{ _("PATIA te alertará cuando llegues a esta cantidad.") }}</small>
-            </div>
+              </div>
+              <div class="field-v2">
+                <label for="product-unit">{{ _("Unidad base") }}</label>
+                <select id="product-unit" name="unit_code"><option value="piece">{{ _("pieza") }}</option><option value="kg">{{ _("kg") }}</option><option value="g">{{ _("g") }}</option><option value="L">{{ _("L") }}</option><option value="ml">{{ _("ml") }}</option><option value="dozen">{{ _("docena") }}</option><option value="portion">{{ _("porción") }}</option></select>
+              </div>
           </div>
         </details>
 
@@ -236,7 +240,7 @@
                 <td data-label="{{ _('Producto') }}"><b>{{ p.name }}</b><small>{{ p.sku }} · {{ p.barcode or 'sin código' }}</small></td>
                 <td data-label="{{ _('Categoría') }}">{{ p.category }}</td>
                 <td data-label="{{ _('Proveedor') }}">{{ p.supplier or '-' }}</td>
-                <td data-label="{{ _('Stock') }}">{{ p.stock }} / min {{ p.min_stock }}</td>
+                <td data-label="{{ _('Stock') }}">{{ p.stock|quantity }} {{ _(p.unit_code) }} / min {{ p.min_stock|quantity }}</td>
                 <td data-label="{{ _('Precio') }}">{{ p.sale_price|money }}</td>
                 <td data-label="{{ _('Margen') }}">{{ p.margin }}%</td>
                 <td data-label="{{ _('Valor') }}">{{ p.inventory_value|money }}</td>
@@ -320,7 +324,7 @@ const INVENTORY_I18N = {
     name: {{ _("Nombre")|tojson }}, category: {{ _("Categoría")|tojson }},
     supplier: {{ _("Proveedor")|tojson }}, cost_price: {{ _("Costo")|tojson }},
     sale_price: {{ _("Precio de venta")|tojson }}, stock: {{ _("Stock")|tojson }},
-    min_stock: {{ _("Stock mínimo")|tojson }}
+    min_stock: {{ _("Stock mínimo")|tojson }}, unit_code: {{ _("Unidad base")|tojson }}
   }{% if catalog_count > 0 %},
   cancelSelection: {{ _("Cancelar selección")|tojson }},
   selectProducts: {{ _("Seleccionar productos")|tojson }},

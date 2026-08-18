@@ -34,6 +34,8 @@ services:
         sync: false
       - key: STRIPE_PRO_PRICE_ID
         sync: false
+      - key: STRIPE_RESTAURANT_PRICE_ID
+        sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: RESEND_API_KEY

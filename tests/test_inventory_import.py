@@ -4,6 +4,7 @@ import os
 import re
 import time
 import unittest
+from decimal import Decimal
 from openpyxl import load_workbook
 
 
@@ -413,7 +414,7 @@ class InventoryImportTests(unittest.TestCase):
 
         self.assertRegex(html, r'<input[^>]*name="name"[^>]*required')
         for name, step in (("cost_price", "0.01"), ("sale_price", "0.01"),
-                           ("stock", "1"), ("min_stock", "1")):
+                           ("stock", "0.001"), ("min_stock", "0.001")):
             tag = re.search(rf'<input[^>]*name="{name}"[^>]*>', html).group(0)
             self.assertIn('min="0"', tag)
             self.assertIn(f'step="{step}"', tag)
@@ -456,14 +457,15 @@ class InventoryImportTests(unittest.TestCase):
         self.assertNotIn("could not convert", html)
         self.assertEqual(Product.query.filter_by(user_id=self.user.id).count(), 0)
 
-    def test_fractional_or_non_finite_inventory_values_are_rejected(self):
+    def test_fractional_inventory_is_accepted_and_non_finite_is_rejected(self):
         response = self.import_csv(
             "FRACCION,7505,Producto,General,,10,20,1.5,1\n"
             "INFINITO,7506,Producto,General,,inf,20,2,1\n"
         )
 
-        self.assertIn("0 creados, 0 actualizados, 0 omitidos y 2 errores", response.get_data(as_text=True))
-        self.assertEqual(Product.query.filter_by(user_id=self.user.id).count(), 0)
+        self.assertIn("1 creados, 0 actualizados, 0 omitidos y 1 errores", response.get_data(as_text=True))
+        product = Product.query.filter_by(user_id=self.user.id).one()
+        self.assertEqual(product.stock, Decimal("1.500"))
 
     def test_csv_error_log_reports_the_actual_file_row(self):
         with self.assertLogs("app", level="WARNING") as captured:

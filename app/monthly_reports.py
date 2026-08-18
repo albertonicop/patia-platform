@@ -51,6 +51,7 @@ from app.models import (
 from app.money import MONEY_ZERO, money_decimal
 from app.plans import has_entitlement, subscription_access_is_active
 from app.timezones import local_date_bounds_utc, safe_timezone_name
+from app.units import format_quantity
 
 
 class MonthlyReportUnavailable(ValueError):
@@ -160,7 +161,14 @@ def build_report_snapshot(payload, subject):
         ],
         "inventory": {
             "value": _decimal_text(payload["inventory"]["value"]),
-            "low_stock": list(payload["inventory"]["low_stock"]),
+            "low_stock": [
+                {
+                    **item,
+                    "stock": format_quantity(item["stock"]),
+                    "min_stock": format_quantity(item["min_stock"]),
+                }
+                for item in payload["inventory"]["low_stock"]
+            ],
         },
         "credit": {
             "total": _decimal_text(payload["credit"]["total"]),
@@ -647,6 +655,7 @@ def _inventory_snapshot(organization_id: int):
         .filter(
             Product.organization_id == organization_id,
             Product.is_active.is_(True),
+            Product.item_type == "inventory",
         )
         .scalar()
     )
@@ -654,6 +663,7 @@ def _inventory_snapshot(organization_id: int):
         Product.query.filter(
             Product.organization_id == organization_id,
             Product.is_active.is_(True),
+            Product.item_type == "inventory",
             Product.stock <= Product.min_stock,
         )
         .order_by(Product.stock.asc(), Product.name.asc())

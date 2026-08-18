@@ -6,6 +6,7 @@ from sqlalchemy import func
 
 from app import db
 from app.models import InventoryMovement, Product
+from app.units import quantity_decimal
 
 
 MANUAL_MOVEMENT_TYPES = frozenset(
@@ -24,8 +25,8 @@ def record_inventory_movement(
     product: Product,
     membership,
     movement_type: str,
-    stock_before: int,
-    stock_after: int,
+    stock_before,
+    stock_after,
     *,
     reason: str | None = None,
     sale=None,
@@ -35,8 +36,8 @@ def record_inventory_movement(
     """Append one immutable movement without committing the transaction."""
     if product.organization_id != membership.organization_id:
         raise ValueError("Product does not belong to the active organization.")
-    stock_before = int(stock_before)
-    stock_after = int(stock_after)
+    stock_before = quantity_decimal(stock_before)
+    stock_after = quantity_decimal(stock_after)
     if stock_before < 0 or stock_after < 0:
         raise ValueError("Stock cannot be negative.")
     movement = InventoryMovement(
@@ -67,8 +68,8 @@ def change_product_stock(
     membership,
     movement_type: str,
     *,
-    delta: int | None = None,
-    target_stock: int | None = None,
+    delta=None,
+    target_stock=None,
     reason: str | None = None,
     sale=None,
     sales_ticket=None,
@@ -77,8 +78,12 @@ def change_product_stock(
     """Change stock and append its ledger entry in the current transaction."""
     if (delta is None) == (target_stock is None):
         raise ValueError("Provide either delta or target_stock.")
-    before = int(product.stock)
-    after = int(target_stock) if target_stock is not None else before + int(delta)
+    before = quantity_decimal(product.stock)
+    after = (
+        quantity_decimal(target_stock)
+        if target_stock is not None
+        else before + quantity_decimal(delta, allow_negative=True)
+    )
     if after < 0:
         raise ValueError("Stock cannot be negative.")
     product.stock = after
@@ -107,7 +112,7 @@ def record_opening_balance(
         membership,
         "OPENING_BALANCE",
         0,
-        int(product.stock),
+        quantity_decimal(product.stock),
         reason=reason,
     )
 
@@ -116,12 +121,12 @@ def record_opening_balance(
 class StockConsistency:
     product_id: int
     product_name: str
-    current_stock: int
-    ledger_stock: int
+    current_stock: object
+    ledger_stock: object
     continuity_errors: int = 0
 
     @property
-    def difference(self) -> int:
+    def difference(self):
         return self.current_stock - self.ledger_stock
 
     @property
@@ -194,8 +199,8 @@ def stock_consistency(organization_id: int) -> list[StockConsistency]:
         StockConsistency(
             product_id=row[0],
             product_name=row[1],
-            current_stock=int(row[2]),
-            ledger_stock=int(row[3]),
+            current_stock=quantity_decimal(row[2]),
+            ledger_stock=quantity_decimal(row[3]),
             continuity_errors=int(row[4]),
         )
         for row in rows

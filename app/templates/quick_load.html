@@ -67,7 +67,7 @@
       <form id="restock-form" class="quick-load-v1__restock-form">
         <div class="quick-load-v1__field">
           <label for="restock-quantity">{{ _("Cantidad recibida") }} <span>*</span></label>
-          <input id="restock-quantity" name="quantity" type="number" min="1" step="1" inputmode="numeric" required>
+          <input id="restock-quantity" name="quantity" type="number" min="0.001" step="0.001" inputmode="decimal" required>
           <small id="restock-help">{{ _("Se sumará al stock actual y quedará registrada en el historial.") }}</small>
         </div>
         <div class="quick-load-v1__actions">
@@ -114,6 +114,16 @@
           </datalist>
         </div>
         <div class="quick-load-v1__field">
+          <label for="quick-unit">{{ _("Unidad base") }}</label>
+          <select id="quick-unit" name="unit_code">
+            <option value="piece">{{ _("pieza") }}</option>
+            <option value="kg">{{ _("kg") }}</option><option value="g">{{ _("g") }}</option>
+            <option value="L">{{ _("L") }}</option><option value="ml">{{ _("ml") }}</option>
+            <option value="dozen">{{ _("docena") }}</option>
+            <option value="portion">{{ _("porción") }}</option>
+          </select>
+        </div>
+        <div class="quick-load-v1__field">
           <label for="quick-cost">{{ _("Precio de costo") }}</label>
           <input id="quick-cost" name="cost_price" type="number" min="0" step="0.01" inputmode="decimal" value="0">
         </div>
@@ -123,11 +133,11 @@
         </div>
         <div class="quick-load-v1__field">
           <label for="quick-stock">{{ _("Existencias iniciales") }}</label>
-          <input id="quick-stock" name="stock" type="number" min="0" step="1" inputmode="numeric" value="0">
+          <input id="quick-stock" name="stock" type="number" min="0" step="0.001" inputmode="decimal" value="0">
         </div>
         <div class="quick-load-v1__field">
           <label for="quick-min-stock">{{ _("Stock mínimo") }}</label>
-          <input id="quick-min-stock" name="min_stock" type="number" min="0" step="1" inputmode="numeric" value="5">
+          <input id="quick-min-stock" name="min_stock" type="number" min="0" step="0.001" inputmode="decimal" value="5">
         </div>
         <div class="quick-load-v1__actions quick-load-v1__field--wide">
           <button id="quick-product-submit" class="btn" type="submit">{{ _("Guardar y continuar") }}</button>
@@ -255,6 +265,7 @@
         document.getElementById("quick-price").value = "0";
         document.getElementById("quick-stock").value = "0";
         document.getElementById("quick-min-stock").value = "5";
+        document.getElementById("quick-unit").value = "piece";
         setStatus("");
         window.setTimeout(() => document.getElementById("quick-name").focus(), 0);
       }

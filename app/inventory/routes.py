@@ -18,6 +18,7 @@ from app.models import (
 from app.plans import has_entitlement
 from app.team.services import active_membership, require_permission
 from app.timezones import safe_timezone_name, utc_to_local
+from app.units import format_quantity, quantity_decimal
 
 from .services import change_product_stock, stock_consistency
 
@@ -177,6 +178,7 @@ def index():
         )
     products = Product.query.filter_by(
         organization_id=membership.organization_id,
+        item_type="inventory",
     ).order_by(Product.name).all()
     consistency = stock_consistency(membership.organization_id)
     selected_product = next(
@@ -291,12 +293,12 @@ def _csv_safe(value):
 
 
 def _human_movement_summary(movement, labels):
-    quantity = abs(int(movement.quantity_delta))
+    quantity = format_quantity(abs(movement.quantity_delta))
     if movement.movement_type == "SALE":
         action = ngettext(
             "Se vendió %(count)s unidad.",
             "Se vendieron %(count)s unidades.",
-            quantity,
+            float(abs(movement.quantity_delta)),
             count=quantity,
         )
         result = gettext(
@@ -317,7 +319,7 @@ def _human_movement_summary(movement, labels):
         action = ngettext(
             "Se recibió %(count)s unidad.",
             "Se recibieron %(count)s unidades.",
-            quantity,
+            float(abs(movement.quantity_delta)),
             count=quantity,
         )
         result = gettext(
@@ -327,7 +329,7 @@ def _human_movement_summary(movement, labels):
         action = ngettext(
             "Salió %(count)s unidad.",
             "Salieron %(count)s unidades.",
-            quantity,
+            float(abs(movement.quantity_delta)),
             count=quantity,
         )
         result = gettext(
@@ -405,9 +407,9 @@ def adjust(product_id):
     if note:
         reason = f"{reason}: {note[:180]}"
     try:
-        quantity = int(request.form.get("quantity", ""))
+        quantity = quantity_decimal(request.form.get("quantity", ""))
     except (TypeError, ValueError):
-        quantity = -1
+        quantity = quantity_decimal(0) - 1
     if quantity < 0 or (mode != "count" and quantity == 0):
         flash(gettext("Ingresa una cantidad válida."), "danger")
         return redirect(

@@ -25,6 +25,10 @@ class Organization(db.Model):
             "locale_code IN ('es_MX','en_US','es_ES','es_CO','es_CL','es_PE')",
             name="ck_organization_locale_code",
         ),
+        db.CheckConstraint(
+            "business_type IN ('general','restaurant')",
+            name="ck_organization_business_type",
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -42,6 +46,7 @@ class Organization(db.Model):
     country_code = db.Column(db.String(2), nullable=False, default="MX")
     currency_code = db.Column(db.String(3), nullable=False, default="MXN")
     locale_code = db.Column(db.String(16), nullable=False, default="es_MX")
+    business_type = db.Column(db.String(30), nullable=False, default="general")
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     monthly_report_enabled = db.Column(
         db.Boolean, nullable=False, default=False
@@ -75,6 +80,10 @@ class Organization(db.Model):
         "PurchaseOrder",
         back_populates="organization",
         cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    recipes = db.relationship(
+        "Recipe", back_populates="organization", cascade="all, delete-orphan",
         passive_deletes=True,
     )
 
@@ -168,6 +177,14 @@ class OrganizationInvitation(db.Model):
 
 class Product(db.Model):
     __table_args__ = (
+        db.CheckConstraint(
+            "unit_code IN ('kg','g','L','ml','piece','dozen','portion')",
+            name="ck_product_unit_code",
+        ),
+        db.CheckConstraint(
+            "item_type IN ('inventory','recipe')",
+            name="ck_product_item_type",
+        ),
         db.UniqueConstraint(
             "organization_id", "sku", name="uq_product_organization_sku"
         ),
@@ -224,15 +241,17 @@ class Product(db.Model):
         default=MONEY_ZERO,
     )
     stock = db.Column(
-        db.Integer,
+        db.Numeric(14, 3),
         nullable=False,
         default=0,
     )
     min_stock = db.Column(
-        db.Integer,
+        db.Numeric(14, 3),
         nullable=False,
         default=5,
     )
+    unit_code = db.Column(db.String(20), nullable=False, default="piece")
+    item_type = db.Column(db.String(20), nullable=False, default="inventory")
 
     is_active = db.Column(
         db.Boolean,
@@ -263,6 +282,10 @@ class Product(db.Model):
         back_populates="product",
         passive_deletes=True,
     )
+    recipe = db.relationship(
+        "Recipe", back_populates="sale_product", uselist=False,
+        foreign_keys="Recipe.sale_product_id",
+    )
 
     @property
     def margin(self):
@@ -281,6 +304,148 @@ class Product(db.Model):
     @property
     def inventory_value(self):
         return money_decimal(self.stock * self.cost_price)
+
+
+class Recipe(db.Model):
+    """Restaurant recipe or reusable preparation scoped to one organization."""
+
+    __tablename__ = "recipe"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "organization_id", "name", name="uq_recipe_organization_name"
+        ),
+        db.UniqueConstraint("sale_product_id", name="uq_recipe_sale_product"),
+        db.CheckConstraint(
+            "recipe_type IN ('dish','preparation')", name="ck_recipe_type"
+        ),
+        db.CheckConstraint("yield_quantity > 0", name="ck_recipe_yield_positive"),
+        db.Index("ix_recipe_org_active_name", "organization_id", "is_active", "name"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer, db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    sale_product_id = db.Column(
+        db.Integer, db.ForeignKey("product.id", ondelete="RESTRICT"),
+        nullable=True, index=True,
+    )
+    name = db.Column(db.String(160), nullable=False)
+    category = db.Column(db.String(80), nullable=False, default="Platillos")
+    description = db.Column(db.Text, nullable=True)
+    recipe_type = db.Column(db.String(20), nullable=False, default="dish")
+    yield_quantity = db.Column(db.Numeric(14, 3), nullable=False, default=1)
+    yield_unit_code = db.Column(db.String(20), nullable=False, default="portion")
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    organization = db.relationship("Organization", back_populates="recipes")
+    sale_product = db.relationship(
+        "Product", back_populates="recipe", foreign_keys=[sale_product_id]
+    )
+    components = db.relationship(
+        "RecipeComponent", back_populates="recipe",
+        cascade="all, delete-orphan", passive_deletes=True,
+        foreign_keys="RecipeComponent.recipe_id",
+    )
+
+
+class RecipeComponent(db.Model):
+    __tablename__ = "recipe_component"
+    __table_args__ = (
+        db.CheckConstraint("quantity > 0", name="ck_recipe_component_quantity_positive"),
+        db.CheckConstraint(
+            "(product_id IS NOT NULL AND source_recipe_id IS NULL) OR "
+            "(product_id IS NULL AND source_recipe_id IS NOT NULL)",
+            name="ck_recipe_component_one_source",
+        ),
+        db.UniqueConstraint(
+            "recipe_id", "product_id", name="uq_recipe_component_product"
+        ),
+        db.UniqueConstraint(
+            "recipe_id", "source_recipe_id", name="uq_recipe_component_recipe"
+        ),
+        db.Index("ix_recipe_component_recipe", "recipe_id", "position"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipe.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    product_id = db.Column(
+        db.Integer, db.ForeignKey("product.id", ondelete="RESTRICT"),
+        nullable=True, index=True,
+    )
+    source_recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipe.id", ondelete="RESTRICT"),
+        nullable=True, index=True,
+    )
+    quantity = db.Column(db.Numeric(14, 3), nullable=False)
+    unit_code = db.Column(db.String(20), nullable=False)
+    position = db.Column(db.Integer, nullable=False, default=0)
+
+    recipe = db.relationship(
+        "Recipe", back_populates="components", foreign_keys=[recipe_id]
+    )
+    product = db.relationship("Product", foreign_keys=[product_id])
+    source_recipe = db.relationship("Recipe", foreign_keys=[source_recipe_id])
+
+
+class RecipeSaleConsumption(db.Model):
+    """Immutable ingredient/cost snapshot for one sold recipe line."""
+
+    __tablename__ = "recipe_sale_consumption"
+    __table_args__ = (
+        db.CheckConstraint("quantity > 0", name="ck_recipe_sale_consumption_quantity"),
+        db.Index("ix_recipe_consumption_sale", "sale_id", "id"),
+        db.Index("ix_recipe_consumption_ticket", "sales_ticket_id", "id"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(
+        db.Integer, db.ForeignKey("organization.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    sale_id = db.Column(
+        db.Integer, db.ForeignKey("sale.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    sales_ticket_id = db.Column(
+        db.Integer, db.ForeignKey("sales_ticket.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipe.id", ondelete="RESTRICT"),
+        nullable=False, index=True,
+    )
+    ingredient_product_id = db.Column(
+        db.Integer, db.ForeignKey("product.id", ondelete="RESTRICT"),
+        nullable=False, index=True,
+    )
+    ingredient_name = db.Column(db.String(160), nullable=False)
+    quantity = db.Column(db.Numeric(14, 3), nullable=False)
+    unit_code = db.Column(db.String(20), nullable=False)
+    unit_cost = db.Column(db.Numeric(14, 2), nullable=False, default=MONEY_ZERO)
+    total_cost = db.Column(db.Numeric(14, 2), nullable=False, default=MONEY_ZERO)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    sale = db.relationship("Sale", back_populates="recipe_consumptions")
+    sales_ticket = db.relationship("SalesTicket")
+    recipe = db.relationship("Recipe")
+    ingredient_product = db.relationship("Product")
+
+
+def _prevent_recipe_consumption_mutation(mapper, connection, target):
+    raise ValueError("Recipe sale consumptions are immutable.")
+
+
+event.listen(RecipeSaleConsumption, "before_update", _prevent_recipe_consumption_mutation)
 
 
 class InventoryRestockEvent(db.Model):
@@ -331,9 +496,9 @@ class InventoryRestockEvent(db.Model):
         nullable=False,
         index=True,
     )
-    quantity = db.Column(db.Integer, nullable=False)
-    stock_before = db.Column(db.Integer, nullable=False)
-    stock_after = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Numeric(14, 3), nullable=False)
+    stock_before = db.Column(db.Numeric(14, 3), nullable=False)
+    stock_after = db.Column(db.Numeric(14, 3), nullable=False)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -363,7 +528,7 @@ class InventoryMovement(db.Model):
             name="ck_inventory_movement_stock_nonnegative",
         ),
         db.CheckConstraint(
-            "quantity_delta = stock_after - stock_before",
+            "ABS(quantity_delta - (stock_after - stock_before)) < 0.0005",
             name="ck_inventory_movement_delta_matches_stock",
         ),
         db.Index(
@@ -423,9 +588,9 @@ class InventoryMovement(db.Model):
         index=True,
     )
     movement_type = db.Column(db.String(30), nullable=False)
-    quantity_delta = db.Column(db.Integer, nullable=False)
-    stock_before = db.Column(db.Integer, nullable=False)
-    stock_after = db.Column(db.Integer, nullable=False)
+    quantity_delta = db.Column(db.Numeric(14, 3), nullable=False)
+    stock_before = db.Column(db.Numeric(14, 3), nullable=False)
+    stock_after = db.Column(db.Numeric(14, 3), nullable=False)
     reason = db.Column(db.String(255), nullable=True)
     product_name = db.Column(db.String(160), nullable=False)
     product_sku = db.Column(db.String(64), nullable=False)
@@ -456,7 +621,9 @@ class InventoryMovement(db.Model):
 
     @property
     def signed_quantity(self):
-        return f"{self.quantity_delta:+d}"
+        from .units import format_quantity
+        prefix = "+" if self.quantity_delta > 0 else ""
+        return f"{prefix}{format_quantity(self.quantity_delta)}"
 
 
 def _prevent_inventory_movement_mutation(mapper, connection, target):
@@ -963,6 +1130,15 @@ class Sale(db.Model):
         "SalesTicket",
         back_populates="sales",
     )
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipe.id", ondelete="SET NULL"),
+        nullable=True, index=True,
+    )
+    recipe = db.relationship("Recipe")
+    recipe_consumptions = db.relationship(
+        "RecipeSaleConsumption", back_populates="sale",
+        cascade="all, delete-orphan", passive_deletes=True,
+    )
 
 
 class Supplier(db.Model):
@@ -1416,9 +1592,9 @@ class PurchaseOrderItem(db.Model):
     )
     product_name = db.Column(db.String(160), nullable=False)
     product_sku = db.Column(db.String(64), nullable=False)
-    ordered_quantity = db.Column(db.Integer, nullable=False)
+    ordered_quantity = db.Column(db.Numeric(14, 3), nullable=False)
     received_quantity = db.Column(
-        db.Integer, nullable=False, default=0
+        db.Numeric(14, 3), nullable=False, default=0
     )
     unit_cost = db.Column(db.Numeric(14, 2), nullable=True)
     created_at = db.Column(
@@ -1437,9 +1613,11 @@ class PurchaseOrderItem(db.Model):
 
     @property
     def pending_quantity(self):
+        from .units import quantity_decimal
         return max(
-            int(self.ordered_quantity) - int(self.received_quantity),
-            0,
+            quantity_decimal(self.ordered_quantity)
+            - quantity_decimal(self.received_quantity),
+            quantity_decimal(0),
         )
 
 
@@ -1521,7 +1699,7 @@ class PurchaseReceiptItem(db.Model):
         nullable=False,
         index=True,
     )
-    quantity = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Numeric(14, 3), nullable=False)
     unit_cost = db.Column(db.Numeric(14, 2), nullable=True)
     restock_event_id = db.Column(
         db.Integer,

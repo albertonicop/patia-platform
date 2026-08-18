@@ -85,8 +85,23 @@
           </select>
           <small>{{ _("Cambiarla ajusta únicamente cómo se muestran y agrupan las fechas; no modifica tus ventas guardadas.") }}</small>
         </div>
+        <div class="field-v2 settings-v2__wide">
+          <label for="organization-business-type">{{ _("Tipo de negocio") }}</label>
+          <select id="organization-business-type" name="business_type">
+            <option value="general"{% if organization.business_type == 'general' %} selected{% endif %}>{{ _("Negocio / tienda") }}</option>
+            <option value="restaurant"{% if organization.business_type == 'restaurant' %} selected{% endif %}>{{ _("Restaurante") }}</option>
+          </select>
+          <small>{{ _("Adapta las herramientas disponibles sin cambiar tus datos actuales.") }}</small>
+        </div>
+        {% if request.args.get('confirm_business_type_change') == '1' %}<label class="check-row settings-v2__wide"><input type="checkbox" name="confirm_business_type_change" value="1" required> {{ _("Entiendo que las recetas se conservarán, pero dejarán de estar disponibles.") }}</label>{% endif %}
       </div>
     </section>
+
+    {% if organization.business_type == 'restaurant' %}
+    <section class="card module-card-v2 settings-v2__section" aria-labelledby="restaurant-features-title">
+      <header class="settings-v2__section-head"><span class="settings-v2__section-icon" aria-hidden="true"><i class="fa-solid fa-utensils"></i></span><div><h3 id="restaurant-features-title">{{ _("Funciones para restaurantes") }}</h3><p>{{ _("Recetas, ingredientes, rendimientos y costo real por platillo.") }}</p></div></header>
+    </section>
+    {% endif %}
 
     <section class="card module-card-v2 settings-v2__section" aria-labelledby="currency-info-title">
       <header class="settings-v2__section-head">

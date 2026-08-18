@@ -269,7 +269,9 @@ class PosFirstSaleTests(unittest.TestCase):
         final_idempotency_position = sell_cart.index(
             "# Repetir la verificación tras bloquear inventario"
         )
-        stock_check_position = sell_cart.index("if product.stock < quantity")
+        stock_check_position = sell_cart.index(
+            'if product.item_type != "recipe" and product.stock < quantity'
+        )
         self.assertLess(lock_position, final_idempotency_position)
         self.assertLess(final_idempotency_position, stock_check_position)
 

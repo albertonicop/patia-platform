@@ -45,6 +45,7 @@ ROLE_PERMISSIONS = {
             "manage_cash_movements",
             "view_cash_history",
             "view_inventory_history",
+            "manage_recipes",
         }
     ),
     "MANAGER": frozenset(
@@ -71,6 +72,7 @@ ROLE_PERMISSIONS = {
             "manage_cash_movements",
             "view_cash_history",
             "view_inventory_history",
+            "manage_recipes",
         }
     ),
     "CASHIER": frozenset(
@@ -112,6 +114,10 @@ def ensure_owner_organization(user: User) -> OrganizationMember:
         country_code="MX",
         currency_code="MXN",
         locale_code="es_MX",
+        business_type=(
+            user.business_type if user.business_type in {"general", "restaurant"}
+            else "general"
+        ),
     )
     membership = OrganizationMember(
         organization=organization,

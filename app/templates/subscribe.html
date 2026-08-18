@@ -22,9 +22,9 @@
         <div class="plans-v2__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN al mes") }}</span></div>
         <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i>{{ feature }}</li>{% endfor %}</ul>
         {% if user.stripe_subscription_id %}
-          {% if current_plan_code in ["STARTER", "PRO"] and plan.code == current_plan_code %}
+          {% if current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and plan.code == current_plan_code %}
             <button class="btn ghost" type="button" disabled>{{ _("Tu plan actual") }}</button>
-          {% elif current_plan_code in ["STARTER", "PRO"] and plan.configured and not user.pending_plan_code %}
+          {% elif current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and plan.configured and not user.pending_plan_code %}
             <form action="{{ url_for('main.change_subscription_plan') }}" method="POST">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input type="hidden" name="plan_code" value="{{ plan.code }}">

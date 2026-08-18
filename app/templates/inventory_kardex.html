@@ -109,8 +109,8 @@
                 <summary>{{ _("Ver detalles") }}</summary>
                 <dl>
                   <div><dt>{{ _("Tipo de cambio") }}</dt><dd>{{ movement.human_summary.label }}</dd></div>
-                  <div><dt>{{ _("Existencias antes") }}</dt><dd>{{ movement.stock_before }}</dd></div>
-                  <div><dt>{{ _("Existencias después") }}</dt><dd>{{ movement.stock_after }}</dd></div>
+                  <div><dt>{{ _("Existencias antes") }}</dt><dd>{{ movement.stock_before|quantity }}</dd></div>
+                  <div><dt>{{ _("Existencias después") }}</dt><dd>{{ movement.stock_after|quantity }}</dd></div>
                   {% if movement.reason %}<div><dt>{{ _("Motivo") }}</dt><dd>{{ movement.reason }}</dd></div>{% endif %}
                   {% if movement.performed_by_member and movement.performed_by_member.user %}<div><dt>{{ _("Responsable") }}</dt><dd>{{ movement.performed_by_member.user.first_name or movement.performed_by_member.user.email }}</dd></div>{% endif %}
                   {% if movement.sales_ticket %}<div><dt>{{ _("Ticket relacionado") }}</dt><dd>{{ movement.sales_ticket.folio }}</dd></div>{% endif %}

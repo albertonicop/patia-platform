@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Recetas") }} | PATIA{% endblock %}
+{% block content %}
+<main class="container restaurant-v1">
+  <header class="page-header">
+    <div><span class="eyebrow">{{ _("Restaurante") }}</span><h1>{{ _("Recetas") }}</h1><p>{{ _("Conoce el costo real, margen y disponibilidad de cada platillo.") }}</p></div>
+    <a class="btn" href="{{ url_for('recipes.create') }}"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{ _("Crear receta") }}</a>
+  </header>
+  {% if recipes %}
+  <div class="table-wrap recipe-v1__table">
+    <table>
+      <thead><tr><th>{{ _("Nombre") }}</th><th>{{ _("Precio de venta") }}</th><th>{{ _("Costo estimado") }}</th><th>{{ _("Utilidad estimada") }}</th><th>{{ _("Margen") }}</th><th>{{ _("Disponibilidad") }}</th><th>{{ _("Estado") }}</th><th>{{ _("Acciones") }}</th></tr></thead>
+      <tbody>
+      {% for card in recipes %}
+        <tr>
+          <td data-label="{{ _('Nombre') }}"><strong>{{ card.recipe.name }}</strong><small>{{ card.recipe.category }}</small></td>
+          <td data-label="{{ _('Precio de venta') }}">{{ card.price|money }}</td>
+          <td data-label="{{ _('Costo estimado') }}">{{ card.cost|money }}</td>
+          <td data-label="{{ _('Utilidad estimada') }}">{{ card.profit|money }}</td>
+          <td data-label="{{ _('Margen') }}">{% if card.margin is not none %}{{ '%.1f'|format(card.margin) }}%{% else %}—{% endif %}</td>
+          <td data-label="{{ _('Disponibilidad') }}">{{ _("%(count)s porciones", count=card.availability) if card.recipe.recipe_type == 'dish' else _("Preparación") }}</td>
+          <td data-label="{{ _('Estado') }}"><span class="badge {{ 'success' if card.recipe.is_active else 'muted' }}">{{ _("Activa") if card.recipe.is_active else _("Inactiva") }}</span></td>
+          <td data-label="{{ _('Acciones') }}" class="recipe-v1__actions">
+            <a href="{{ url_for('recipes.detail', recipe_id=card.recipe.id) }}">{{ _("Ver") }}</a>
+            <a href="{{ url_for('recipes.edit', recipe_id=card.recipe.id) }}">{{ _("Editar") }}</a>
+            <form method="post" action="{{ url_for('recipes.duplicate', recipe_id=card.recipe.id) }}" data-submit-once><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-button" type="submit">{{ _("Duplicar") }}</button></form>
+            <form method="post" action="{{ url_for('recipes.toggle', recipe_id=card.recipe.id) }}" data-submit-once><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-button" type="submit">{{ _("Desactivar") if card.recipe.is_active else _("Activar") }}</button></form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <section class="empty-state recipe-v1__empty"><i class="fa-solid fa-utensils" aria-hidden="true"></i><h2>{{ _("Crea tu primera receta") }}</h2><p>{{ _("Agrega ingredientes para conocer el costo y descontarlos automáticamente al vender.") }}</p><a class="btn" href="{{ url_for('recipes.create') }}">{{ _("Crear receta") }}</a></section>
+  {% endif %}
+</main>
+{% endblock %}

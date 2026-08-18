@@ -294,7 +294,8 @@ const PRODUCTS = [
     barcode: {{ (product.barcode or "") | tojson }},
     sku: {{ (product.sku or "") | tojson }},
     price: {{ product.sale_price }},
-    stock: {{ product.stock }}
+    stock: {{ product.pos_stock }},
+    isRecipe: {{ (product.item_type == 'recipe')|tojson }}
   },
   {% endfor %}
 ];
@@ -637,6 +638,10 @@ quickCustomerForm.addEventListener("submit", async event => {
       })
     });
     const data = await response.json();
+    if (!response.ok && data.error_code === "insufficient_recipe_stock") {
+      const detail = (data.shortages || []).map(item => `${item.product}: ${item.missing} ${item.unit}`).join(" · ");
+      throw new Error(detail ? `${data.error} ${detail}` : data.error);
+    }
     if (!response.ok || !data.ok) throw new Error(data.error || POS_I18N.saleError);
     chooseCustomer(data.customer);
     closeQuickCustomer();

@@ -88,6 +88,7 @@ def create_app():
         "STRIPE_PRICE_ID": os.environ.get("STRIPE_PRICE_ID"),
         "STRIPE_STARTER_PRICE_ID": os.environ.get("STRIPE_STARTER_PRICE_ID"),
         "STRIPE_PRO_PRICE_ID": os.environ.get("STRIPE_PRO_PRICE_ID"),
+        "STRIPE_RESTAURANT_PRICE_ID": os.environ.get("STRIPE_RESTAURANT_PRICE_ID"),
         "STRIPE_WEBHOOK_SECRET": os.environ.get("STRIPE_WEBHOOK_SECRET"),
     }
     if not stripe_disabled:
@@ -209,6 +210,9 @@ def create_app():
     from .pro.routes import pro
 
     app.register_blueprint(pro)
+    from .recipes.routes import recipes
+
+    app.register_blueprint(recipes)
     @app.context_processor
     def inject_pro_access():
         user = current_user()
@@ -219,6 +223,7 @@ def create_app():
             entitlement_plan_code,
             entitlements_for,
             plan_price,
+            has_entitlement,
         )
 
         current_membership = active_membership(user) if user else None
@@ -253,6 +258,11 @@ def create_app():
             "current_entitlement_plan_code": entitlement_code,
             "current_plan_price": plan_price(entitlement_code),
             "current_plan_entitlements": entitlements_for(entitlement_code),
+            "can_use_recipes": bool(
+                current_membership
+                and current_membership.organization.business_type == "restaurant"
+                and has_entitlement(access_user, "recipes", has_paid_access=paid_access)
+            ),
             "trial_days_left": trial_days_left,
             "supported_languages": SUPPORTED_LANGUAGES,
             "current_language": select_locale(),

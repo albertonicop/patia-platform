@@ -15,7 +15,7 @@
         <p>{{ _("Registra las unidades que ya no puedes vender.") }}</p>
       {% else %}
         <h2>{{ _("Corregir existencias de %(product)s", product=product.name) }}</h2>
-        <p>{{ _("PATIA tiene registradas %(count)s unidades.", count=product.stock) }}</p>
+        <p>{{ _("PATIA tiene registradas %(count)s %(unit)s.", count=product.stock|quantity, unit=_(product.unit_code)) }}</p>
       {% endif %}
     </header>
 
@@ -28,7 +28,7 @@
         <input type="hidden" name="reason_code" value="received">
       {% elif mode == "loss" %}
         <label for="adjust-quantity">{{ _("¿Cuántas unidades salieron?") }}</label>
-        <input id="adjust-quantity" name="quantity" type="number" min="1" max="{{ product.stock }}" step="1" required autofocus>
+        <input id="adjust-quantity" name="quantity" type="number" min="0.001" max="{{ product.stock|quantity }}" step="0.001" required autofocus>
         <label for="adjust-reason">{{ _("¿Por qué salieron?") }}</label>
         <select id="adjust-reason" name="reason_code" required>
           <option value="damage">{{ _("Producto dañado") }}</option>
@@ -41,7 +41,7 @@
         <label for="adjust-quantity">{{ _("¿Cuántas unidades tienes realmente?") }}</label>
         <input id="adjust-quantity" name="quantity" type="number" min="0" step="1" required autofocus aria-describedby="adjust-difference">
         <div id="adjust-difference" class="inventory-adjust-v3__calculation" aria-live="polite">
-          <span>{{ _("Registradas") }}: <strong>{{ product.stock }}</strong></span>
+          <span>{{ _("Registradas") }}: <strong>{{ product.stock|quantity }} {{ _(product.unit_code) }}</strong></span>
           <span>{{ _("Contadas") }}: <strong data-counted>—</strong></span>
           <span>{{ _("Cambio") }}: <strong data-difference>—</strong></span>
         </div>

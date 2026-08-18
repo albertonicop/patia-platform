@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ recipe.name }} | PATIA{% endblock %}
+{% block content %}
+<main class="container restaurant-v1">
+  <header class="page-header"><div><span class="eyebrow">{{ _("Receta") }}</span><h1>{{ recipe.name }}</h1><p>{{ recipe.description or recipe.category }}</p></div><div class="page-actions"><a class="btn secondary" href="{{ url_for('recipes.index') }}">{{ _("Volver") }}</a><a class="btn" href="{{ url_for('recipes.edit', recipe_id=recipe.id) }}">{{ _("Editar receta") }}</a></div></header>
+  <section class="recipe-v1__summary">
+    <article><span>{{ _("Costo por porción") if recipe.recipe_type == 'dish' else _("Costo de preparación") }}</span><strong>{{ cost|money }}</strong></article>
+    {% if recipe.recipe_type == 'dish' %}<article><span>{{ _("Precio de venta") }}</span><strong>{{ price|money }}</strong></article><article><span>{{ _("Utilidad estimada") }}</span><strong>{{ (price-cost)|money }}</strong></article><article><span>{{ _("Margen") }}</span><strong>{{ '%.1f'|format(margin) if margin is not none else '—' }}{% if margin is not none %}%{% endif %}</strong></article>{% endif %}
+  </section>
+  {% if recipe.recipe_type == 'dish' %}<div class="recipe-v1__availability"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><div><strong>{{ _("Disponibles: %(count)s porciones", count=availability) }}</strong><p>{{ _("Calculado con el ingrediente que se agotará primero.") }}</p></div></div>{% endif %}
+  <section class="card module-card-v2"><header><h2>{{ _("Ingredientes") }}</h2><p>{{ _("Costo calculado con el inventario actual.") }}</p></header><div class="table-wrap"><table><thead><tr><th>{{ _("Ingrediente") }}</th><th>{{ _("Cantidad utilizada") }}</th><th>{{ _("Costo") }}</th></tr></thead><tbody>{% for row in ingredient_costs %}<tr><td>{{ row.product.name }}</td><td>{{ row.quantity|quantity }} {{ _(row.product.unit_code) }}</td><td>{{ row.cost|money }}</td></tr>{% endfor %}</tbody></table></div></section>
+</main>
+{% endblock %}

@@ -12,12 +12,13 @@ from flask_babel import gettext
 TRIAL = "TRIAL"
 STARTER = "STARTER"
 PRO = "PRO"
+RESTAURANT = "RESTAURANT"
 GRANDFATHERED = "GRANDFATHERED"
 MANUAL = "MANUAL"
 
-PAID_PLAN_CODES = frozenset({STARTER, PRO})
+PAID_PLAN_CODES = frozenset({STARTER, PRO, RESTAURANT})
 KNOWN_PLAN_CODES = frozenset(
-    {TRIAL, STARTER, PRO, GRANDFATHERED, MANUAL}
+    {TRIAL, STARTER, PRO, RESTAURANT, GRANDFATHERED, MANUAL}
 )
 
 
@@ -31,6 +32,7 @@ class PlanEntitlements:
     monthly_owner_report: bool
     priority_support: bool
     executive_dashboard: bool
+    recipes: bool
 
 
 STARTER_ENTITLEMENTS = PlanEntitlements(
@@ -42,6 +44,7 @@ STARTER_ENTITLEMENTS = PlanEntitlements(
     monthly_owner_report=False,
     priority_support=False,
     executive_dashboard=False,
+    recipes=False,
 )
 PRO_ENTITLEMENTS = PlanEntitlements(
     max_members=5,
@@ -52,6 +55,18 @@ PRO_ENTITLEMENTS = PlanEntitlements(
     monthly_owner_report=True,
     priority_support=True,
     executive_dashboard=True,
+    recipes=False,
+)
+RESTAURANT_ENTITLEMENTS = PlanEntitlements(
+    max_members=5,
+    advanced_roles=True,
+    advanced_inventory_history=True,
+    advanced_reports=False,
+    advanced_exports=False,
+    monthly_owner_report=False,
+    priority_support=False,
+    executive_dashboard=False,
+    recipes=True,
 )
 # Existing customers keep every capability they already had, but monthly email
 # is not silently enabled because it is a new outbound communication.
@@ -64,6 +79,7 @@ GRANDFATHERED_ENTITLEMENTS = PlanEntitlements(
     monthly_owner_report=False,
     priority_support=True,
     executive_dashboard=False,
+    recipes=False,
 )
 
 DAILY_CAPABILITIES = frozenset(
@@ -95,6 +111,8 @@ def entitlements_for(plan_code: str) -> PlanEntitlements:
         return PRO_ENTITLEMENTS
     if code == GRANDFATHERED:
         return GRANDFATHERED_ENTITLEMENTS
+    if code == RESTAURANT:
+        return RESTAURANT_ENTITLEMENTS
     return STARTER_ENTITLEMENTS
 
 
@@ -115,6 +133,8 @@ def capabilities_for(plan_code: str) -> frozenset[str]:
         capabilities.add("priority_support")
     if entitlements.executive_dashboard:
         capabilities.add("executive_dashboard")
+    if entitlements.recipes:
+        capabilities.update({"recipes", "recipe_costing", "ingredient_depletion"})
     return frozenset(capabilities)
 
 
@@ -157,7 +177,7 @@ def current_plan_code(
             getattr(user, "subscription_plan_code", None),
             default=GRANDFATHERED,
         )
-        if stored in {STARTER, PRO, GRANDFATHERED}:
+        if stored in {STARTER, PRO, RESTAURANT, GRANDFATHERED}:
             return stored
         return GRANDFATHERED
     stored = normalize_plan_code(
@@ -221,14 +241,18 @@ def current_plan_label(plan_code: str) -> str:
         TRIAL: gettext("Prueba gratuita"),
         STARTER: gettext("Starter"),
         PRO: gettext("Pro"),
+        RESTAURANT: gettext("Restaurant"),
         GRANDFATHERED: gettext("Plan actual protegido"),
         MANUAL: gettext("Acceso manual"),
     }
     return labels.get(plan_code, gettext("Plan actual"))
 
 
+PLAN_PRICES_MXN = {STARTER: 199, PRO: 349, RESTAURANT: 360}
+
+
 def plan_price(plan_code: str) -> int | None:
-    return {STARTER: 199, PRO: 349}.get(normalize_plan_code(plan_code))
+    return PLAN_PRICES_MXN.get(normalize_plan_code(plan_code))
 
 
 def price_id_for(config, plan_code: str) -> str | None:
@@ -239,6 +263,8 @@ def price_id_for(config, plan_code: str) -> str | None:
         )
     if code == PRO:
         return config.get("STRIPE_PRO_PRICE_ID")
+    if code == RESTAURANT:
+        return config.get("STRIPE_RESTAURANT_PRICE_ID")
     return None
 
 
@@ -247,6 +273,8 @@ def configured_price_plan(config, price_id: str | None) -> str | None:
         return None
     if price_id_for(config, PRO) == price_id:
         return PRO
+    if price_id_for(config, RESTAURANT) == price_id:
+        return RESTAURANT
     if price_id_for(config, STARTER) == price_id:
         return STARTER
     return None
@@ -290,6 +318,24 @@ def commercial_plans(config) -> list[dict]:
                 gettext("Historial y reportes avanzados"),
                 gettext("Reporte mensual enviado al propietario"),
                 gettext("Soporte prioritario"),
+            ),
+        },
+        {
+            "code": RESTAURANT,
+            "name": gettext("Restaurant"),
+            "price": PLAN_PRICES_MXN[RESTAURANT],
+            "audience": gettext(
+                "Restaurantes que necesitan controlar ingredientes y costos reales."
+            ),
+            "description": gettext(
+                "Para restaurantes que quieren controlar recetas, ingredientes y el costo real de cada platillo."
+            ),
+            "features": (
+                gettext("Todo lo necesario para operar"),
+                gettext("Recetas e ingredientes"),
+                gettext("Costeo y margen por platillo"),
+                gettext("Rendimientos y preparaciones"),
+                gettext("Descuento automático de inventario al vender"),
             ),
         },
     )

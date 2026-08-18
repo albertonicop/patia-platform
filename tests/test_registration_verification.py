@@ -166,7 +166,7 @@ class RegistrationVerificationTests(unittest.TestCase):
         self.assertEqual(duplicate.status_code, 409)
         self.assertIn('value="Tienda Ana"', html)
         self.assertIn('value="repeat@patia.test"', html)
-        self.assertIn('value="Abarrotes" selected', html)
+        self.assertIn('value="general" selected', html)
         self.assertNotIn('value="Password123"', html)
 
     def test_incomplete_registration_returns_validation_instead_of_500(self):

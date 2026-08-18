@@ -34,6 +34,8 @@ from .models import (
     OrganizationInvitation,
     OrganizationMember,
     Product,
+    Recipe,
+    RecipeSaleConsumption,
     Sale,
     SalesTicket,
     StripeWebhookEvent,
@@ -79,6 +81,13 @@ from .timezones import (
     local_today,
     safe_timezone_name,
     utc_to_local,
+)
+from .units import normalize_unit, quantity_decimal
+from .recipes.services import (
+    RecipeError,
+    RecipeStockError,
+    consume_recipe_sale,
+    prepare_recipe_sales,
 )
 from .team.services import (
     active_membership,
@@ -730,7 +739,12 @@ def register():
         address = request.form.get("address", "").strip()
         city = request.form.get("city", "").strip()
         state = request.form.get("state", "").strip()
-        business_type = request.form.get("business_type", "").strip()
+        raw_business_type = request.form.get("business_type", "general").strip().lower()
+        business_type = (
+            "restaurant"
+            if raw_business_type in {"restaurant", "restaurante"}
+            else "general"
+        )
         postal_code = request.form.get("postal_code", "").strip()
 
         existing_user = User.query.filter_by(email=email).first()
@@ -745,15 +759,15 @@ def register():
                 form_data=request.form,
             ), 409
 
-        from .plans import PRO, STARTER
+        from .plans import PRO, RESTAURANT, STARTER
 
         requested_plan = str(
             request.form.get("plan")
             or request.args.get("plan")
             or STARTER
         ).upper()
-        if requested_plan not in {STARTER, PRO}:
-            requested_plan = STARTER
+        if requested_plan not in {STARTER, PRO, RESTAURANT}:
+            requested_plan = RESTAURANT if business_type == "restaurant" else STARTER
         user = User(
             email=email,
             company_name=company_name,
@@ -775,7 +789,9 @@ def register():
         user.address = address
         user.city = city
         user.state = state
-        user.business_type = business_type
+        user.business_type = (
+            "Restaurante" if business_type == "restaurant" else "Negocio / tienda"
+        )
         user.postal_code = postal_code
         user.set_password(password)
 
@@ -783,6 +799,7 @@ def register():
         try:
             db.session.flush()
             membership = ensure_owner_organization(user)
+            membership.organization.business_type = business_type
             membership.organization.country_code = country_code
             membership.organization.currency_code = currency_code
             membership.organization.locale_code = locale_code
@@ -806,7 +823,7 @@ def register():
         session["organization_id"] = membership.organization_id
         session["post_verify_destination"] = (
             "subscribe"
-            if requested_plan == PRO
+            if requested_plan in {PRO, RESTAURANT}
             else "dashboard"
         )
 
@@ -1142,6 +1159,12 @@ def compact_money_filter(value):
     return money(amount)
 
 
+@main.app_template_filter("quantity")
+def quantity_filter(value):
+    from .units import format_quantity
+    return format_quantity(value)
+
+
 def _dashboard_sales_summary(
     organization_id, start_at, end_before, currency_code
 ):
@@ -1222,13 +1245,18 @@ def analytics(user=None):
         timezone_name,
     )
 
-    products = Product.query.filter_by(organization_id=organization_id, is_active=True).all()
+    products = Product.query.filter_by(
+        organization_id=organization_id,
+        is_active=True,
+        item_type="inventory",
+    ).all()
 
     total_products = len(products)
     total_sales = Sale.query.filter_by(organization_id=organization_id).count()
     inventory_value = (
         db.session.query(func.sum(Product.stock * Product.cost_price))
         .filter(Product.organization_id == organization_id, Product.is_active.is_(True))
+        .filter(Product.item_type == "inventory")
         .scalar()
         or 0
     )
@@ -1365,7 +1393,7 @@ def analytics(user=None):
     alerts = []
     for p in products:
         sold_7_days = sold_by_product.get(p.id, 0) or 0
-        avg_daily_sales = sold_7_days / 7
+        avg_daily_sales = Decimal(str(sold_7_days)) / Decimal("7")
         days_left = round(p.stock / avg_daily_sales, 1) if avg_daily_sales > 0 else None
 
         if p.stock <= 0:
@@ -1934,6 +1962,7 @@ def products():
     catalog_query = Product.query.filter(
         Product.organization_id == organization_id,
         Product.is_active.is_(True),
+        Product.item_type == "inventory",
     )
     catalog_count = catalog_query.count()
     low_stock_count = catalog_query.filter(
@@ -2046,6 +2075,7 @@ def _quick_load_product_payload(product):
         "sku": product.sku,
         "stock": product.stock,
         "min_stock": product.min_stock,
+        "unit_code": product.unit_code,
         "sale_price": money_json(product.sale_price),
         "sale_price_display": money(product.sale_price),
         "supplier": product.supplier,
@@ -2081,6 +2111,7 @@ def quick_load_products():
         for (name,) in db.session.query(Product.supplier)
         .filter(
             Product.organization_id == organization_id,
+            Product.item_type == "inventory",
             Product.supplier.isnot(None),
         )
         .distinct()
@@ -2092,6 +2123,7 @@ def quick_load_products():
         for (name,) in db.session.query(Product.category)
         .filter(
             Product.organization_id == organization_id,
+            Product.item_type == "inventory",
             Product.category.isnot(None),
         )
         .distinct()
@@ -2170,8 +2202,8 @@ def quick_load_create_product():
         supplier = str(payload.get("supplier") or "").strip() or None
         cost_price = money_decimal(payload.get("cost_price") or 0)
         sale_price = money_decimal(payload.get("sale_price") or 0)
-        stock = int(payload.get("stock") or 0)
-        min_stock = int(payload.get("min_stock") or 0)
+        stock = quantity_decimal(payload.get("stock") or 0)
+        min_stock = quantity_decimal(payload.get("min_stock") or 0)
     except (TypeError, ValueError, OverflowError):
         return jsonify({
             "ok": False,
@@ -2219,6 +2251,7 @@ def quick_load_create_product():
         sale_price=sale_price,
         stock=stock,
         min_stock=min_stock,
+        unit_code=normalize_unit(payload.get("unit_code")),
     )
     db.session.add(product)
     try:
@@ -2268,9 +2301,9 @@ def quick_load_restock_product(product_id):
     owner = current_organization_owner(user)
     payload = request.get_json(silent=True) or {}
     try:
-        quantity = int(payload.get("quantity"))
+        quantity = quantity_decimal(payload.get("quantity"), positive=True)
     except (TypeError, ValueError, OverflowError):
-        quantity = 0
+        quantity = quantity_decimal(0)
     if quantity <= 0:
         return jsonify({
             "ok": False,
@@ -2550,7 +2583,7 @@ def import_products():
             "matched": 0,
         }
         existing_products = Product.query.filter_by(
-            organization_id=organization_id
+            organization_id=organization_id, item_type="inventory"
         ).all()
         products_by_sku = {
             product.sku: product for product in existing_products if product.sku
@@ -2579,9 +2612,7 @@ def import_products():
             if integer:
                 if not number.is_finite() or number < 0:
                     raise ValueError("negative value")
-                if number != number.to_integral_value():
-                    raise ValueError("fractional integer value")
-                return int(number)
+                return quantity_decimal(number)
             return money_decimal(number)
 
         for row_index, row in df.iterrows():
@@ -2921,8 +2952,8 @@ def add_product():
         sale_price = money_decimal(
             request.form.get("sale_price") or 0, nonnegative=False
         )
-        stock = int(request.form.get("stock") or 0)
-        min_stock = int(request.form.get("min_stock") or 5)
+        stock = quantity_decimal(request.form.get("stock") or 0)
+        min_stock = quantity_decimal(request.form.get("min_stock") or 5)
     except (TypeError, ValueError):
         flash("Revisa precios y existencias e inténtalo nuevamente.", "danger")
         return redirect(url_for("main.products"))
@@ -2972,6 +3003,7 @@ def add_product():
         p.sale_price = sale_price
         p.stock = stock
         p.min_stock = min_stock
+        p.unit_code = normalize_unit(request.form.get("unit_code") or p.unit_code)
         p.is_active = True
     else:
         p = Product(
@@ -2986,6 +3018,7 @@ def add_product():
             sale_price=sale_price,
             stock=stock,
             min_stock=min_stock,
+            unit_code=normalize_unit(request.form.get("unit_code")),
         )
         db.session.add(p)
     try:
@@ -3047,8 +3080,8 @@ def edit_product(product_id):
         sale_price = money_decimal(
             request.form.get("sale_price") or 0, nonnegative=False
         )
-        stock = int(request.form.get("stock") or 0)
-        min_stock = int(request.form.get("min_stock") or 0)
+        stock = quantity_decimal(request.form.get("stock") or 0)
+        min_stock = quantity_decimal(request.form.get("min_stock") or 0)
     except (TypeError, ValueError):
         flash("Revisa precios y existencias e inténtalo nuevamente.", "danger")
         return render_template("edit_product.html", product=product, user=user), 400
@@ -3094,6 +3127,7 @@ def edit_product(product_id):
     product.sale_price = sale_price
     product.stock = stock
     product.min_stock = min_stock
+    product.unit_code = normalize_unit(request.form.get("unit_code") or product.unit_code)
     try:
         if stock_before != product.stock:
             record_inventory_movement(
@@ -3133,7 +3167,7 @@ def restock_product(product_id):
     owner = current_organization_owner(user)
 
     try:
-        quantity = int(request.form.get("quantity", ""))
+        quantity = quantity_decimal(request.form.get("quantity", ""))
     except (TypeError, ValueError):
         flash(gettext("Ingresa una cantidad recibida válida."), "danger")
         return redirect(url_for("main.dashboard"))
@@ -3224,6 +3258,9 @@ def sell():
         except (TypeError, ValueError):
             flash("Selecciona un producto y una cantidad válida.", "danger")
             return redirect(url_for("main.sell"))
+        if qty <= 0:
+            flash("La cantidad debe ser mayor a cero.", "danger")
+            return redirect(url_for("main.sell"))
         product = (
             Product.query.filter_by(
                 id=product_id,
@@ -3233,9 +3270,29 @@ def sell():
             .with_for_update()
             .first_or_404()
         )
-        if qty <= 0:
-            flash("La cantidad debe ser mayor a cero.", "danger")
-        elif product.stock < qty:
+        recipe_plan = None
+        if product.item_type == "recipe":
+            from .plans import has_entitlement
+            if (
+                membership.organization.business_type != "restaurant"
+                or not has_entitlement(owner, "recipes")
+            ):
+                abort(403)
+            try:
+                recipe_plan = prepare_recipe_sales([(product, qty)], organization_id)[product.id]
+            except RecipeStockError as exc:
+                shortage = exc.shortages[0]
+                flash(
+                    gettext(
+                        "No hay suficientes ingredientes. %(product)s: faltan %(amount)s %(unit)s.",
+                        product=shortage["product"].name,
+                        amount=shortage["missing"],
+                        unit=shortage["product"].unit_code,
+                    ),
+                    "danger",
+                )
+                return redirect(url_for("main.sell"))
+        if product.item_type != "recipe" and product.stock < qty:
             flash("No hay suficiente inventario.", "danger")
         else:
             payment_method = request.form.get("payment_method", "cash")
@@ -3262,14 +3319,19 @@ def sell():
                 cash_session.id if cash_session else None
             )
             stock_before = product.stock
-            product.stock -= qty
+            if product.item_type != "recipe":
+                product.stock -= qty
             sale = Sale(
                 organization_id=organization_id,
                 user_id=owner.id,
                 product_id=product.id,
                 quantity=qty,
                 unit_price=product.sale_price,
-                unit_cost=product.cost_price if product.cost_price > 0 else None,
+                unit_cost=(
+                    product.cost_price
+                    if product.item_type != "recipe" and product.cost_price > 0
+                    else None
+                ),
                 cost_is_estimated=False,
                 total=qty * product.sale_price,
                 ticket_id=ticket.public_id,
@@ -3301,16 +3363,21 @@ def sell():
                     db.session.rollback()
                     flash(str(exc), "danger")
                     return redirect(url_for("main.sell"))
-            record_inventory_movement(
-                product,
-                membership,
-                "SALE",
-                stock_before,
-                product.stock,
-                reason=gettext("Venta registrada"),
-                sale=sale,
-                sales_ticket=ticket,
-            )
+            if recipe_plan:
+                consume_recipe_sale(
+                    sale, recipe_plan[0], recipe_plan[1], membership, ticket
+                )
+            else:
+                record_inventory_movement(
+                    product,
+                    membership,
+                    "SALE",
+                    stock_before,
+                    product.stock,
+                    reason=gettext("Venta registrada"),
+                    sale=sale,
+                    sales_ticket=ticket,
+                )
             if payment_method == "cash":
                 record_cash_movement(
                     cash_session,
@@ -3349,6 +3416,21 @@ def sell():
         organization_id=organization_id,
         is_active=True,
     ).order_by(Product.name).all()
+    recipe_products = [product for product in products if product.item_type == "recipe"]
+    if recipe_products:
+        from .recipes.services import recipe_availability, recipe_query
+        recipes_by_product = {
+            recipe.sale_product_id: recipe
+            for recipe in recipe_query(organization_id).filter(
+                Recipe.is_active.is_(True)
+            ).all()
+        }
+        for product in recipe_products:
+            recipe = recipes_by_product.get(product.id)
+            product.pos_stock = recipe_availability(recipe) if recipe else 0
+    for product in products:
+        if not hasattr(product, "pos_stock"):
+            product.pos_stock = product.stock
     return render_template(
         "sell.html",
         products=products,
@@ -3498,6 +3580,20 @@ def sell_cart():
         if len(products) != len(requested_items):
             return jsonify({"ok": False, "error": gettext("Producto no encontrado")}), 404
 
+        from .plans import has_entitlement
+        has_recipe_items = any(
+            product.item_type == "recipe" for product in products.values()
+        )
+        if has_recipe_items and (
+            membership.organization.business_type != "restaurant"
+            or not has_entitlement(owner, "recipes")
+        ):
+            return jsonify({"ok": False, "error": gettext("Acceso no permitido.")}), 403
+        recipe_sales = prepare_recipe_sales(
+            [(products[product_id], quantity) for product_id, quantity in requested_items.items()],
+            organization_id,
+        )
+
         expected_total = money_sum(
             products[product_id].sale_price * quantity
             for product_id, quantity in requested_items.items()
@@ -3535,7 +3631,7 @@ def sell_cart():
 
         for product_id, quantity in requested_items.items():
             product = products[product_id]
-            if product.stock < quantity:
+            if product.item_type != "recipe" and product.stock < quantity:
                 return jsonify({
                     "ok": False,
                     "error": gettext("Stock insuficiente: %(product)s", product=product.name),
@@ -3558,14 +3654,19 @@ def sell_cart():
         for product_id, quantity in requested_items.items():
             product = products[product_id]
             stock_before = product.stock
-            product.stock -= quantity
+            if product.item_type != "recipe":
+                product.stock -= quantity
             sale = Sale(
                 organization_id=organization_id,
                 user_id=owner.id,
                 product_id=product.id,
                 quantity=quantity,
                 unit_price=product.sale_price,
-                unit_cost=product.cost_price if product.cost_price > 0 else None,
+                unit_cost=(
+                    product.cost_price
+                    if product.item_type != "recipe" and product.cost_price > 0
+                    else None
+                ),
                 cost_is_estimated=False,
                 total=quantity * product.sale_price,
                 payment_method=payment_method,
@@ -3576,16 +3677,22 @@ def sell_cart():
             sale.ticket_id = ticket_id
             db.session.add(sale)
             db.session.flush()
-            record_inventory_movement(
-                product,
-                membership,
-                "SALE",
-                stock_before,
-                product.stock,
-                reason=gettext("Venta registrada"),
-                sale=sale,
-                sales_ticket=ticket,
-            )
+            if product.item_type == "recipe":
+                recipe, requirements = recipe_sales[product.id]
+                consume_recipe_sale(
+                    sale, recipe, requirements, membership, ticket
+                )
+            else:
+                record_inventory_movement(
+                    product,
+                    membership,
+                    "SALE",
+                    stock_before,
+                    product.stock,
+                    reason=gettext("Venta registrada"),
+                    sale=sale,
+                    sales_ticket=ticket,
+                )
             sales.append(sale)
         db.session.flush()
         if payment_method == "credit":
@@ -3626,6 +3733,24 @@ def sell_cart():
             "single_sale_id": sales[0].id if len(sales) == 1 else None,
             "payment_method": _payment_method_label(payment_method),
         })
+    except RecipeStockError as exc:
+        db.session.rollback()
+        return jsonify({
+            "ok": False,
+            "error": gettext("No hay suficientes ingredientes para preparar este producto."),
+            "error_code": "insufficient_recipe_stock",
+            "shortages": [
+                {
+                    "product": item["product"].name,
+                    "missing": str(item["missing"]),
+                    "unit": item["product"].unit_code,
+                }
+                for item in exc.shortages
+            ],
+        }), 409
+    except RecipeError as exc:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": gettext("No pudimos preparar la receta seleccionada."), "error_code": str(exc)}), 409
     except CreditNotEnabled as exc:
         db.session.rollback()
         return jsonify({
@@ -4263,7 +4388,34 @@ def _reverse_sale(sale_id, *, movement_type, success_message):
         .with_for_update()
         .first()
     )
-    if product:
+    if sale.recipe_id:
+        consumptions = RecipeSaleConsumption.query.filter_by(
+            organization_id=organization_id, sale_id=sale.id
+        ).order_by(RecipeSaleConsumption.id).all()
+        ingredient_ids = [row.ingredient_product_id for row in consumptions]
+        ingredients = {
+            item.id: item for item in Product.query.filter(
+                Product.organization_id == organization_id,
+                Product.id.in_(ingredient_ids),
+            ).with_for_update().all()
+        }
+        for consumption in consumptions:
+            ingredient = ingredients.get(consumption.ingredient_product_id)
+            if not ingredient:
+                continue
+            stock_before = ingredient.stock
+            ingredient.stock += consumption.quantity
+            record_inventory_movement(
+                ingredient, membership, movement_type, stock_before,
+                ingredient.stock,
+                reason=(
+                    gettext("Devolución de receta: %(name)s", name=sale.product.name)
+                    if movement_type == "RETURN"
+                    else gettext("Cancelación de receta: %(name)s", name=sale.product.name)
+                ),
+                sales_ticket=sale.sales_ticket,
+            )
+    elif product:
         stock_before = product.stock
         product.stock += sale.quantity
         record_inventory_movement(
@@ -4433,6 +4585,7 @@ def change_subscription_plan():
     from .plans import (
         PAID_PLAN_CODES,
         STARTER,
+        current_plan_label,
         current_plan_code,
         entitlements_for,
         price_id_for,
@@ -4565,6 +4718,7 @@ def change_subscription_plan():
                 "success",
             )
         else:
+            target_label = current_plan_label(target_plan)
             stripe.Subscription.modify(
                 owner.stripe_subscription_id,
                 items=[{"id": items[0]["id"], "price": target_price}],
@@ -4572,14 +4726,17 @@ def change_subscription_plan():
                 proration_behavior="create_prorations",
                 payment_behavior="pending_if_incomplete",
                 idempotency_key=(
-                    f"patia-plan-upgrade-{owner.id}-pro-"
+                    f"patia-plan-change-{owner.id}-{target_plan.lower()}-"
                     f"{subscription.get('current_period_end')}"
                 ),
             )
             owner.pending_plan_code = target_plan
             owner.pending_plan_effective_at = datetime.utcnow()
             flash(
-                "Solicitamos el cambio a Pro. Se activará cuando Stripe confirme el pago.",
+                gettext(
+                    "Solicitamos el cambio a %(plan)s. Se activará cuando Stripe confirme el pago.",
+                    plan=target_label,
+                ),
                 "success",
             )
         db.session.commit()
@@ -4753,6 +4910,7 @@ def admin():
     )
     from .plans import (
         PRO,
+        RESTAURANT,
         STARTER,
         current_plan_code,
         current_plan_label,
@@ -4820,6 +4978,7 @@ def admin():
             "TRIAL": gettext("Trial"),
             "STARTER": gettext("Starter"),
             "PRO": gettext("Pro"),
+            "RESTAURANT": gettext("Restaurant"),
             "GRANDFATHERED": gettext("Cliente anterior"),
             "MANUAL": gettext("Acceso manual"),
         }
@@ -4889,12 +5048,12 @@ def admin():
     mrr = sum(
         client["price"] or 0
         for client in clients
-        if client["plan_code"] in {STARTER, PRO}
+        if client["plan_code"] in {STARTER, PRO, RESTAURANT}
         and client["subscription_status"] in {"active", "trialing"}
         and not client["read_only"]
     )
     paying_clients = sum(
-        client["plan_code"] in {STARTER, PRO}
+        client["plan_code"] in {STARTER, PRO, RESTAURANT}
         and client["subscription_status"] in {"active", "trialing"}
         and not client["read_only"]
         for client in clients
@@ -4904,7 +5063,7 @@ def admin():
             client["plan_code"] == code and not client["read_only"]
             for client in clients
         )
-        for code in ("TRIAL", "STARTER", "PRO", "GRANDFATHERED", "MANUAL")
+        for code in ("TRIAL", "STARTER", "PRO", "RESTAURANT", "GRANDFATHERED", "MANUAL")
     }
     renewal_limit = today + timedelta(days=30)
     upcoming_renewals = sum(
@@ -4939,7 +5098,7 @@ def admin():
     selected_plan = request.args.get("plan", "all").strip().upper()
     selected_status = request.args.get("status", "all").strip().lower()
     selected_attention = request.args.get("attention", "all").strip().lower()
-    valid_plans = {"ALL", "TRIAL", "STARTER", "PRO", "GRANDFATHERED", "MANUAL"}
+    valid_plans = {"ALL", "TRIAL", "STARTER", "PRO", "RESTAURANT", "GRANDFATHERED", "MANUAL"}
     valid_statuses = {
         "all",
         "active",
@@ -5256,7 +5415,11 @@ def delete_all_products():
     access_block = _trial_access_response(user)
     if access_block:
         return access_block
-    products = Product.query.filter_by(organization_id=organization_id, is_active=True).all()
+    products = Product.query.filter_by(
+        organization_id=organization_id,
+        is_active=True,
+        item_type="inventory",
+    ).all()
     product_ids_with_sales = {
         product_id
         for (product_id,) in (
@@ -5324,6 +5487,7 @@ def delete_selected_products():
             Product.id.in_(ids),
             Product.organization_id == organization_id,
             Product.is_active.is_(True),
+            Product.item_type == "inventory",
         ).all()
         if ids
         else []
@@ -5522,12 +5686,42 @@ def settings():
             request.form.get("locale_code") or suggested_locale,
             currency_code,
         )
+        business_type = str(
+            request.form.get("business_type")
+            or membership.organization.business_type
+            or "general"
+        ).lower()
+        if business_type not in {"general", "restaurant"}:
+            flash(gettext("Selecciona un tipo de negocio válido."), "danger")
+            return redirect(url_for("main.settings"))
+        if (
+            membership.organization.business_type == "restaurant"
+            and business_type == "general"
+        ):
+            has_active_recipes = Recipe.query.filter_by(
+                organization_id=membership.organization_id,
+                is_active=True,
+            ).first() is not None
+            if (
+                has_active_recipes
+                and request.form.get("confirm_business_type_change") != "1"
+            ):
+                flash(
+                    gettext(
+                        "Confirma el cambio. Las recetas se conservarán, pero dejarán de estar disponibles."
+                    ),
+                    "warning",
+                )
+                return redirect(
+                    url_for("main.settings", confirm_business_type_change=1)
+                )
         membership.organization.name = company_name
         membership.organization.timezone = user.timezone
         membership.organization.country_code = country_code
         membership.organization.currency_code = currency_code
         membership.organization.locale_code = locale_code
         membership.organization.currency = currency_code
+        membership.organization.business_type = business_type
         db.session.commit()
         flash("Configuración guardada.", "success")
         return redirect(url_for("main.settings"))
