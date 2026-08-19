@@ -138,11 +138,11 @@ def capabilities_for(plan_code: str) -> frozenset[str]:
     return frozenset(capabilities)
 
 
-def subscription_access_is_active(user, *, now=None, grace_days=3) -> bool:
+def stripe_subscription_access_is_active(user, *, now=None, grace_days=3) -> bool:
     if not user:
         return False
-    if bool(getattr(user, "manual_pro_access", False)):
-        return True
+    if not getattr(user, "stripe_subscription_id", None):
+        return False
     now = now or datetime.utcnow()
     status = str(getattr(user, "subscription_status", "") or "").lower()
     period_end = getattr(user, "current_period_end", None)
@@ -151,6 +151,16 @@ def subscription_access_is_active(user, *, now=None, grace_days=3) -> bool:
     if status == "past_due" and period_end:
         return period_end + timedelta(days=grace_days) >= now
     return False
+
+
+def subscription_access_is_active(user, *, now=None, grace_days=3) -> bool:
+    if not user:
+        return False
+    if stripe_subscription_access_is_active(
+        user, now=now, grace_days=grace_days
+    ):
+        return True
+    return bool(getattr(user, "manual_pro_access", False))
 
 
 def current_plan_code(
@@ -163,6 +173,25 @@ def current_plan_code(
     """Resolve the effective commercial plan without silently downgrading."""
     if not user:
         return TRIAL
+    stripe_access = (
+        str(getattr(user, "subscription_status", "") or "").lower()
+        in {"active", "trialing"}
+        and stripe_subscription_access_is_active(
+            user, now=now, grace_days=grace_days
+        )
+    )
+    if stripe_access:
+        stored = normalize_plan_code(
+            getattr(user, "subscription_plan_code", None),
+            default=GRANDFATHERED,
+        )
+        if stored in {STARTER, PRO, RESTAURANT}:
+            return stored
+        if bool(getattr(user, "manual_pro_access", False)):
+            return MANUAL
+        if stored == GRANDFATHERED:
+            return GRANDFATHERED
+        return GRANDFATHERED
     if bool(getattr(user, "manual_pro_access", False)):
         return MANUAL
     paid_access = (
@@ -187,6 +216,7 @@ def current_plan_code(
     if (
         stored in PAID_PLAN_CODES
         and getattr(user, "stripe_subscription_id", None)
+        and not str(getattr(user, "subscription_status", "") or "").strip()
     ):
         return stored
     return TRIAL

@@ -534,6 +534,15 @@ def _subscription_period_end(subscription):
     return _as_utc_datetime(max(periods)) if periods else None
 
 
+def _subscription_confirms_active_access(subscription, status):
+    period_end = _subscription_period_end(subscription)
+    return bool(
+        status in {"active", "trialing"}
+        and period_end
+        and period_end >= datetime.utcnow()
+    )
+
+
 def _invoice_subscription_id(invoice):
     subscription_id = invoice.get("subscription")
     if subscription_id:
@@ -609,6 +618,8 @@ def _sync_subscription_state(user, subscription, stripe_created_at, deleted=Fals
             ),
         )
         user.subscription_plan_code = resolved_plan
+        if _subscription_confirms_active_access(subscription, status):
+            user.manual_pro_access = False
         if user.pending_plan_code == resolved_plan:
             user.pending_plan_code = None
             user.pending_plan_effective_at = None
@@ -4158,6 +4169,8 @@ def _process_stripe_event(event):
                 ),
             )
             user.subscription_plan_code = resolved_plan
+            if _subscription_confirms_active_access(subscription, status):
+                user.manual_pro_access = False
             if user.pending_plan_code == resolved_plan:
                 user.pending_plan_code = None
                 user.pending_plan_effective_at = None
@@ -4310,6 +4323,65 @@ def stripe_success():
     )
     if checkout_user_id != str(user.id):
         flash("La sesión de pago no pertenece a este usuario.", "danger")
+        return redirect(url_for("main.subscription"))
+
+    try:
+        if checkout_session.get("mode") != "subscription":
+            raise StripeEventIgnored("Checkout no es de suscripción.")
+        if checkout_session.get("status") != "complete":
+            raise StripeEventIgnored("Checkout todavía no está completado.")
+        customer_id = checkout_session.get("customer")
+        subscription_id = checkout_session.get("subscription")
+        if not customer_id or not subscription_id:
+            raise StripeEventIgnored("Checkout sin cliente o suscripción.")
+        if user.stripe_customer_id and user.stripe_customer_id != customer_id:
+            raise StripeEventIgnored("Checkout pertenece a otro cliente.")
+        _ensure_stripe_ids_available(user, customer_id, subscription_id)
+        subscription = _stripe_dict(
+            stripe.Subscription.retrieve(subscription_id)
+        )
+        _validate_subscription(
+            subscription,
+            user=user,
+            customer_id=customer_id,
+        )
+        metadata = subscription.get("metadata") or {}
+        metadata_user_id = str(metadata.get("user_id") or "")
+        if metadata_user_id and metadata_user_id != str(user.id):
+            raise StripeEventIgnored("Metadatos de suscripción no coinciden.")
+        organization = Organization.query.filter_by(owner_user_id=user.id).first()
+        metadata_org_id = str(metadata.get("organization_id") or "")
+        if (
+            metadata_org_id
+            and organization
+            and metadata_org_id != str(organization.id)
+        ):
+            raise StripeEventIgnored("Metadatos de organización no coinciden.")
+        requested_plan = str(
+            (checkout_session.get("metadata") or {}).get("plan_code") or ""
+        ).upper()
+        subscription_plan = _subscription_plan_code(subscription)
+        if requested_plan and requested_plan != subscription_plan:
+            raise StripeEventIgnored(
+                "El plan de Checkout no coincide con la suscripción."
+            )
+        user.stripe_customer_id = customer_id
+        user.stripe_subscription_id = subscription_id
+        _sync_subscription_state(user, subscription, datetime.utcnow())
+        db.session.commit()
+    except StripeEventIgnored as error:
+        db.session.rollback()
+        current_app.logger.warning(
+            "No se pudo reconciliar Stripe Checkout: %s", error
+        )
+        flash("No se pudo confirmar tu suscripción con Stripe.", "danger")
+        return redirect(url_for("main.subscription"))
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "No se pudo reconciliar la suscripción de Checkout"
+        )
+        flash("No se pudo confirmar tu suscripción con Stripe.", "danger")
         return redirect(url_for("main.subscription"))
 
     if has_pro_access(user):

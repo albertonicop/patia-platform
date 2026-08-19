@@ -9409,6 +9409,9 @@ msgstr "The invitation expires in 48 hours."
 #~ msgid "Aún no hay ventas este mes."
 #~ msgstr "There are no sales this month yet."
 
+msgid "No se pudo confirmar tu suscripción con Stripe."
+msgstr "We could not confirm your subscription with Stripe."
+
 #~ msgid "Ver análisis"
 #~ msgstr "View analysis"
 

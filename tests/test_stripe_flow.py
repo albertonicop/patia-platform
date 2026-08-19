@@ -4,6 +4,7 @@ import calendar
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
+from flask import g
 
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -15,7 +16,9 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Organization, OrganizationMember, StripeWebhookEvent, User
+from app.plans import MANUAL, RESTAURANT, current_plan_code
 from app.routes import has_pro_access
+from app.team.services import ensure_owner_organization
 
 
 def utc_timestamp(value):
@@ -43,6 +46,7 @@ class StripeFlowTests(unittest.TestCase):
             STRIPE_PRICE_ID="price_patia_pro",
             STRIPE_STARTER_PRICE_ID="price_patia_starter",
             STRIPE_PRO_PRICE_ID="price_patia_pro",
+            STRIPE_RESTAURANT_PRICE_ID="price_patia_restaurant",
         )
         cls.context = cls.app.app_context()
         cls.context.push()
@@ -55,12 +59,11 @@ class StripeFlowTests(unittest.TestCase):
         cls.context.pop()
 
     def setUp(self):
-        db.session.rollback()
-        StripeWebhookEvent.query.delete()
-        OrganizationMember.query.delete()
-        Organization.query.delete()
-        User.query.delete()
-        db.session.commit()
+        db.session.remove()
+        db.drop_all()
+        db.create_all()
+        db.session.remove()
+        g.pop("_active_membership_cache", None)
         self.client = self.app.test_client()
 
     def make_user(self, email="owner@patia.test", **values):
@@ -74,19 +77,31 @@ class StripeFlowTests(unittest.TestCase):
         with self.client.session_transaction() as session:
             session["user_id"] = user.id
 
-    def subscription(self, user, status="active", period_end=None):
+    def subscription(
+        self,
+        user,
+        status="active",
+        period_end=None,
+        *,
+        plan_code="PRO",
+        price_id="price_patia_pro",
+        organization_id=None,
+    ):
         period_end = period_end or datetime.utcnow() + timedelta(days=30)
+        metadata = {"user_id": str(user.id), "plan_code": plan_code}
+        if organization_id is not None:
+            metadata["organization_id"] = str(organization_id)
         return {
             "id": user.stripe_subscription_id or "sub_patia",
             "customer": user.stripe_customer_id or "cus_patia",
             "status": status,
             "current_period_end": utc_timestamp(period_end),
             "cancel_at_period_end": False,
-            "metadata": {"user_id": str(user.id)},
+            "metadata": metadata,
             "items": {
                 "data": [
                     {
-                        "price": {"id": "price_patia_pro"},
+                        "price": {"id": price_id},
                         "current_period_end": utc_timestamp(period_end),
                     }
                 ]
@@ -419,6 +434,176 @@ class StripeFlowTests(unittest.TestCase):
             plan="pro",
         )
         self.assertTrue(has_pro_access(user))
+        self.assertEqual(current_plan_code(user), MANUAL)
+
+    def test_active_restaurant_subscription_replaces_manual_access(self):
+        user = self.make_user(
+            manual_pro_access=True,
+            stripe_customer_id="cus_restaurant",
+            stripe_subscription_id="sub_restaurant",
+            subscription_status="active",
+            subscription_plan_code="RESTAURANT",
+            current_period_end=datetime.utcnow() + timedelta(days=30),
+        )
+        membership = ensure_owner_organization(user)
+        membership.organization.business_type = "restaurant"
+        db.session.commit()
+        self.assertEqual(current_plan_code(user), RESTAURANT)
+        subscription = self.subscription(
+            user,
+            plan_code="RESTAURANT",
+            price_id="price_patia_restaurant",
+            organization_id=membership.organization_id,
+        )
+        event = self.invoice_event(
+            "evt_restaurant_paid",
+            "invoice.paid",
+            user,
+            utc_timestamp(datetime.utcnow()),
+        )
+
+        response = self.send_event(event, subscription)
+
+        self.assertEqual(response.status_code, 200)
+        db.session.refresh(user)
+        self.assertFalse(user.manual_pro_access)
+        self.assertEqual(user.subscription_plan_code, RESTAURANT)
+        self.assertEqual(current_plan_code(user), RESTAURANT)
+        self.login(user)
+        self.assertEqual(self.client.get("/recipes").status_code, 200)
+
+    def test_stripe_success_reconciles_verified_restaurant_subscription(self):
+        user = self.make_user(manual_pro_access=True)
+        membership = ensure_owner_organization(user)
+        membership.organization.business_type = "restaurant"
+        db.session.commit()
+        self.login(user)
+        checkout = {
+            "id": "cs_restaurant",
+            "mode": "subscription",
+            "status": "complete",
+            "client_reference_id": str(user.id),
+            "metadata": {
+                "user_id": str(user.id),
+                "plan_code": "RESTAURANT",
+            },
+            "customer": "cus_restaurant_success",
+            "subscription": "sub_restaurant_success",
+        }
+        subscription = self.subscription(
+            user,
+            plan_code="RESTAURANT",
+            price_id="price_patia_restaurant",
+            organization_id=membership.organization_id,
+        )
+        subscription["id"] = checkout["subscription"]
+        subscription["customer"] = checkout["customer"]
+
+        with (
+            patch(
+                "app.routes.stripe.checkout.Session.retrieve",
+                return_value=checkout,
+            ),
+            patch(
+                "app.routes.stripe.Subscription.retrieve",
+                return_value=subscription,
+            ),
+        ):
+            response = self.client.get(
+                "/stripe-success?session_id=cs_restaurant"
+            )
+
+        self.assertEqual(response.status_code, 302)
+        db.session.refresh(user)
+        self.assertFalse(user.manual_pro_access)
+        self.assertEqual(current_plan_code(user), RESTAURANT)
+        self.assertEqual(self.client.get("/recipes").status_code, 200)
+
+    def test_incomplete_checkout_does_not_remove_manual_access(self):
+        user = self.make_user(manual_pro_access=True)
+        membership = ensure_owner_organization(user)
+        db.session.commit()
+        self.login(user)
+        checkout = {
+            "id": "cs_incomplete",
+            "mode": "subscription",
+            "status": "open",
+            "client_reference_id": str(user.id),
+            "metadata": {"user_id": str(user.id), "plan_code": "PRO"},
+            "customer": "cus_incomplete",
+            "subscription": "sub_incomplete",
+        }
+        subscription = self.subscription(user, status="incomplete")
+        subscription["id"] = checkout["subscription"]
+        subscription["customer"] = checkout["customer"]
+
+        with (
+            patch(
+                "app.routes.stripe.checkout.Session.retrieve",
+                return_value=checkout,
+            ),
+            patch(
+                "app.routes.stripe.Subscription.retrieve",
+                return_value=subscription,
+            ),
+        ):
+            response = self.client.get(
+                "/stripe-success?session_id=cs_incomplete"
+            )
+
+        self.assertEqual(response.status_code, 302)
+        db.session.refresh(user)
+        self.assertTrue(user.manual_pro_access)
+        self.assertEqual(current_plan_code(user), MANUAL)
+
+    def test_payment_failure_never_removes_manual_access(self):
+        user = self.make_user(
+            manual_pro_access=True,
+            stripe_customer_id="cus_manual_failed",
+            stripe_subscription_id="sub_manual_failed",
+        )
+        event = self.invoice_event(
+            "evt_manual_failed",
+            "invoice.payment_failed",
+            user,
+            utc_timestamp(datetime.utcnow()),
+        )
+
+        response = self.send_event(event, self.subscription(user))
+
+        self.assertEqual(response.status_code, 200)
+        db.session.refresh(user)
+        self.assertTrue(user.manual_pro_access)
+        self.assertEqual(current_plan_code(user), MANUAL)
+
+    def test_deleted_restaurant_subscription_revokes_restaurant_access(self):
+        user = self.make_user(
+            stripe_customer_id="cus_restaurant_deleted",
+            stripe_subscription_id="sub_restaurant_deleted",
+            subscription_status="active",
+            subscription_plan_code="RESTAURANT",
+            current_period_end=datetime.utcnow() + timedelta(days=30),
+        )
+        subscription = self.subscription(
+            user,
+            status="canceled",
+            plan_code="RESTAURANT",
+            price_id="price_patia_restaurant",
+        )
+        event = {
+            "id": "evt_restaurant_deleted",
+            "type": "customer.subscription.deleted",
+            "created": utc_timestamp(datetime.utcnow()),
+            "data": {"object": subscription},
+        }
+
+        response = self.send_event(event)
+
+        self.assertEqual(response.status_code, 200)
+        db.session.refresh(user)
+        self.assertEqual(user.subscription_status, "canceled")
+        self.assertNotEqual(current_plan_code(user), RESTAURANT)
+        self.assertFalse(has_pro_access(user))
 
     def test_legacy_plan_pro_does_not_become_manual_pro(self):
         user = self.make_user(plan="pro")
