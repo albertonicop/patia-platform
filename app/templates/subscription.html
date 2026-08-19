@@ -62,31 +62,31 @@
       {% endif %}
 
       <div class="subscription-v2__actions">
-        {% if user.stripe_customer_id %}
+        {% if manageable_subscription and user.stripe_customer_id %}
           <form method="POST" action="{{ url_for('main.billing_portal') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn">{{ _("Administrar pagos") }}</button>
           </form>
         {% endif %}
 
-        {% if user.stripe_subscription_id and not user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
+        {% if manageable_subscription and not user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
           <form method="POST" action="{{ url_for('main.cancel_subscription') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn ghost">{{ _("Cancelar al final del periodo") }}</button>
           </form>
-        {% elif user.stripe_subscription_id and user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
+        {% elif manageable_subscription and user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
           <form method="POST" action="{{ url_for('main.reactivate_subscription') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn">{{ _("Reactivar suscripción") }}</button>
           </form>
         {% endif %}
 
-        {% if not user.stripe_subscription_id and not user.manual_pro_access %}
+        {% if not manageable_subscription and not stripe_reference_check_failed %}
           <a class="btn" href="{{ url_for('main.subscribe') }}">{{ _("Ver planes") }}</a>
         {% endif %}
       </div>
 
-      {% if user.stripe_subscription_id and current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and not user.pending_plan_code %}
+      {% if manageable_subscription and current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and not user.pending_plan_code %}
         <div class="subscription-v3__change-plan">
           {% if current_plan_code == "STARTER" %}
             {% set target = commercial_plans|selectattr("code", "equalto", "PRO")|first %}

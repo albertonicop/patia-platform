@@ -8411,3 +8411,7 @@ msgstr ""
 #: app/routes.py:4377 app/routes.py:4384
 msgid "No se pudo confirmar tu suscripción con Stripe."
 msgstr ""
+
+#: app/templates/subscribe.html:37
+msgid "No pudimos validar tu suscripción"
+msgstr ""

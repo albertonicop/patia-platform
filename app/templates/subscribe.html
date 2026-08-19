@@ -21,9 +21,9 @@
         <header><h3>PATIA {{ plan.name }}</h3><p>{{ plan.description }}</p></header>
         <div class="plans-v2__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN al mes") }}</span></div>
         <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i>{{ feature }}</li>{% endfor %}</ul>
-        {% if user.stripe_subscription_id %}
+        {% if manageable_subscription %}
           {% if current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and plan.code == current_plan_code %}
-            <button class="btn ghost" type="button" disabled>{{ _("Tu plan actual") }}</button>
+            <a class="btn ghost" href="{{ url_for('main.subscription') }}">{{ _("Administrar mi plan") }}</a>
           {% elif current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and plan.configured and not user.pending_plan_code %}
             <form action="{{ url_for('main.change_subscription_plan') }}" method="POST">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -33,6 +33,8 @@
           {% else %}
             <a class="btn ghost" href="{{ url_for('main.subscription') }}">{{ _("Administrar mi plan") }}</a>
           {% endif %}
+        {% elif stripe_reference_check_failed %}
+          <button class="btn ghost" type="button" disabled>{{ _("No pudimos validar tu suscripción") }}</button>
         {% elif plan.checkout_enabled %}
           <form action="/create-checkout-session" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

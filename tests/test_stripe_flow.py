@@ -35,6 +35,11 @@ class StripeObjectWithoutGet:
         return self.payload
 
 
+class StripeMissingResourceError(Exception):
+    code = "resource_missing"
+    http_status = 404
+
+
 class StripeFlowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -424,6 +429,7 @@ class StripeFlowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         db.session.refresh(user)
         self.assertEqual(user.subscription_status, "canceled")
+        self.assertIsNone(user.stripe_subscription_id)
         self.assertEqual(user.plan, "trial")
         self.assertFalse(has_pro_access(user))
 
@@ -602,8 +608,211 @@ class StripeFlowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         db.session.refresh(user)
         self.assertEqual(user.subscription_status, "canceled")
+        self.assertIsNone(user.stripe_subscription_id)
         self.assertNotEqual(current_plan_code(user), RESTAURANT)
         self.assertFalse(has_pro_access(user))
+
+    def test_canceled_stale_restaurant_reference_allows_fresh_checkout(self):
+        user = self.make_user(
+            manual_pro_access=True,
+            stripe_customer_id="cus_deleted_restaurant",
+            stripe_subscription_id="sub_canceled_restaurant",
+            subscription_status="canceled",
+            subscription_plan_code="RESTAURANT",
+            email_verified=True,
+        )
+        membership = ensure_owner_organization(user)
+        membership.organization.business_type = "restaurant"
+        db.session.commit()
+        canceled = self.subscription(
+            user,
+            status="canceled",
+            plan_code="RESTAURANT",
+            price_id="price_patia_restaurant",
+            organization_id=membership.organization_id,
+        )
+        checkout = SimpleNamespace(url="https://checkout.stripe.test/new-restaurant")
+        self.login(user)
+
+        with (
+            patch("app.routes.stripe.Subscription.retrieve", return_value=canceled),
+            patch(
+                "app.routes.stripe.Customer.retrieve",
+                return_value={"id": user.stripe_customer_id, "deleted": True},
+            ),
+        ):
+            plans = self.client.get("/subscribe")
+
+        plans_html = plans.get_data(as_text=True)
+        db.session.refresh(user)
+        self.assertEqual(plans.status_code, 200)
+        self.assertIn("Elegir Restaurant por $360 al mes", plans_html)
+        self.assertNotIn("Administrar mi plan", plans_html)
+        self.assertTrue(user.manual_pro_access)
+        self.assertEqual(current_plan_code(user), MANUAL)
+        self.assertIsNone(user.stripe_subscription_id)
+        self.assertIsNone(user.stripe_customer_id)
+        self.assertEqual(self.client.get("/recipes").status_code, 403)
+
+        with patch(
+            "app.routes.stripe.checkout.Session.create", return_value=checkout
+        ) as create_checkout:
+            response = self.client.post(
+                "/create-checkout-session",
+                data={"plan_code": "RESTAURANT"},
+            )
+
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(response.location, checkout.url)
+        checkout_params = create_checkout.call_args.kwargs
+        self.assertNotIn("customer", checkout_params)
+        self.assertEqual(checkout_params["customer_email"], user.email)
+        self.assertEqual(
+            checkout_params["line_items"][0]["price"],
+            "price_patia_restaurant",
+        )
+
+    def test_nonexistent_subscription_and_customer_allow_checkout(self):
+        user = self.make_user(
+            manual_pro_access=True,
+            stripe_customer_id="cus_missing",
+            stripe_subscription_id="sub_missing",
+            subscription_status="active",
+            email_verified=True,
+        )
+        ensure_owner_organization(user)
+        self.login(user)
+        checkout = SimpleNamespace(url="https://checkout.stripe.test/new")
+        with (
+            patch(
+                "app.routes.stripe.Subscription.retrieve",
+                side_effect=StripeMissingResourceError(),
+            ),
+            patch(
+                "app.routes.stripe.Customer.retrieve",
+                side_effect=StripeMissingResourceError(),
+            ),
+            patch(
+                "app.routes.stripe.checkout.Session.create",
+                return_value=checkout,
+            ) as create_checkout,
+        ):
+            response = self.client.post(
+                "/create-checkout-session",
+                data={"plan_code": "RESTAURANT"},
+            )
+
+        db.session.refresh(user)
+        self.assertEqual(response.status_code, 303)
+        self.assertIsNone(user.stripe_subscription_id)
+        self.assertIsNone(user.stripe_customer_id)
+        self.assertTrue(user.manual_pro_access)
+        self.assertNotIn("customer", create_checkout.call_args.kwargs)
+
+    def test_transient_subscription_error_preserves_reference_and_blocks_checkout(self):
+        user = self.make_user(
+            manual_pro_access=True,
+            stripe_customer_id="cus_transient",
+            stripe_subscription_id="sub_transient",
+            subscription_status="active",
+            email_verified=True,
+        )
+        ensure_owner_organization(user)
+        self.login(user)
+        with (
+            patch(
+                "app.routes.stripe.Subscription.retrieve",
+                side_effect=RuntimeError("temporary Stripe outage"),
+            ),
+            patch("app.routes.stripe.checkout.Session.create") as create_checkout,
+        ):
+            response = self.client.post(
+                "/create-checkout-session",
+                data={"plan_code": "RESTAURANT"},
+            )
+
+        db.session.refresh(user)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(user.stripe_subscription_id, "sub_transient")
+        self.assertEqual(user.stripe_customer_id, "cus_transient")
+        self.assertTrue(user.manual_pro_access)
+        create_checkout.assert_not_called()
+
+    def test_deleted_customer_without_subscription_is_not_reused(self):
+        user = self.make_user(
+            manual_pro_access=True,
+            stripe_customer_id="cus_deleted_without_subscription",
+            email_verified=True,
+        )
+        ensure_owner_organization(user)
+        self.login(user)
+        checkout = SimpleNamespace(url="https://checkout.stripe.test/fresh-customer")
+        with (
+            patch(
+                "app.routes.stripe.Customer.retrieve",
+                return_value={
+                    "id": "cus_deleted_without_subscription",
+                    "deleted": True,
+                },
+            ),
+            patch(
+                "app.routes.stripe.checkout.Session.create",
+                return_value=checkout,
+            ) as create_checkout,
+        ):
+            response = self.client.post(
+                "/create-checkout-session",
+                data={"plan_code": "RESTAURANT"},
+            )
+
+        db.session.refresh(user)
+        self.assertEqual(response.status_code, 303)
+        self.assertIsNone(user.stripe_customer_id)
+        params = create_checkout.call_args.kwargs
+        self.assertNotIn("customer", params)
+        self.assertEqual(params["customer_email"], user.email)
+
+    def test_active_and_trialing_subscriptions_remain_manageable(self):
+        cases = (
+            ("active", "STARTER", "price_patia_starter"),
+            ("trialing", "PRO", "price_patia_pro"),
+        )
+        for status, plan_code, price_id in cases:
+            user = self.make_user(
+                email=f"{status}@patia.test",
+                stripe_customer_id=f"cus_{status}",
+                stripe_subscription_id=f"sub_{status}",
+                subscription_status=status,
+                subscription_plan_code=plan_code,
+                current_period_end=datetime.utcnow() + timedelta(days=30),
+                email_verified=True,
+            )
+            organization = ensure_owner_organization(user).organization
+            subscription = self.subscription(
+                user,
+                status=status,
+                plan_code=plan_code,
+                price_id=price_id,
+                organization_id=organization.id,
+            )
+            self.login(user)
+            with (
+                patch(
+                    "app.routes.stripe.Subscription.retrieve",
+                    return_value=subscription,
+                ),
+                patch(
+                    "app.routes.stripe.Customer.retrieve",
+                    return_value={"id": user.stripe_customer_id},
+                ),
+            ):
+                response = self.client.get("/subscribe")
+
+            html = response.get_data(as_text=True)
+            db.session.refresh(user)
+            self.assertEqual(response.status_code, 200, status)
+            self.assertIn("Administrar mi plan", html, status)
+            self.assertEqual(user.stripe_subscription_id, f"sub_{status}")
 
     def test_legacy_plan_pro_does_not_become_manual_pro(self):
         user = self.make_user(plan="pro")
@@ -653,8 +862,17 @@ class StripeFlowTests(unittest.TestCase):
             email_verified=True,
         )
         self.login(user)
+        subscription = self.subscription(user, status="active")
         portal = SimpleNamespace(url="https://billing.stripe.test/portal")
         with (
+            patch(
+                "app.routes.stripe.Subscription.retrieve",
+                return_value=subscription,
+            ),
+            patch(
+                "app.routes.stripe.Customer.retrieve",
+                return_value={"id": user.stripe_customer_id},
+            ),
             patch("app.routes.stripe.billing_portal.Session.create", return_value=portal),
             patch("app.routes.stripe.checkout.Session.create") as checkout,
         ):

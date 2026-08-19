@@ -9441,3 +9441,7 @@ msgstr "We could not confirm your subscription with Stripe."
 
 #~ msgid "Rendimientos y preparaciones"
 #~ msgstr "Yields and preparations"
+
+#: app/templates/subscribe.html:37
+msgid "No pudimos validar tu suscripción"
+msgstr "We could not verify your subscription"

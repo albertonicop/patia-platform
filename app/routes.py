@@ -573,6 +573,162 @@ def _validate_subscription(subscription, user=None, customer_id=None):
         raise StripeEventIgnored("La suscripción no pertenece al cliente guardado.")
 
 
+def _stripe_resource_is_missing(error):
+    """Distinguish a confirmed stale Stripe reference from a transient failure."""
+    return bool(
+        getattr(error, "code", None) == "resource_missing"
+        or getattr(error, "http_status", None) == 404
+    )
+
+
+def _validate_subscription_identity(subscription, user):
+    """Verify that a configured Stripe subscription belongs to this owner/org."""
+    _validate_subscription(subscription, user=user)
+    metadata = subscription.get("metadata") or {}
+    metadata_user_id = str(metadata.get("user_id") or "")
+    if metadata_user_id and metadata_user_id != str(user.id):
+        raise StripeEventIgnored("La suscripción pertenece a otro usuario.")
+    organization = Organization.query.filter_by(owner_user_id=user.id).first()
+    metadata_org_id = str(metadata.get("organization_id") or "")
+    if metadata_org_id and (
+        not organization or metadata_org_id != str(organization.id)
+    ):
+        raise StripeEventIgnored("La suscripción pertenece a otra organización.")
+    _subscription_plan_code(subscription)
+
+
+def _retrieve_valid_stripe_customer(customer_id):
+    """Return an existing Stripe customer, or None only when absence is proven."""
+    if not customer_id:
+        return None
+    try:
+        customer = _stripe_dict(stripe.Customer.retrieve(customer_id))
+    except Exception as error:
+        if _stripe_resource_is_missing(error):
+            return None
+        raise
+    return None if customer.get("deleted") else customer
+
+
+def _validated_checkout_customer_id(user):
+    """Return a reusable customer ID, detaching a proven deleted reference."""
+    customer_id = user.stripe_customer_id
+    if not customer_id:
+        return None
+    if _retrieve_valid_stripe_customer(customer_id) is not None:
+        return customer_id
+    user.stripe_customer_id = None
+    db.session.commit()
+    current_app.logger.info(
+        "Customer Stripe obsoleto desvinculado: user_id=%s customer_id=%s",
+        user.id,
+        customer_id,
+    )
+    return None
+
+
+def _clear_stale_stripe_reference(
+    user,
+    *,
+    status="canceled",
+    clear_customer=False,
+    reason,
+):
+    """Detach only a Stripe reference that the API has proven unusable."""
+    previous_subscription_id = user.stripe_subscription_id
+    user.stripe_subscription_id = None
+    if clear_customer:
+        user.stripe_customer_id = None
+    user.subscription_status = (
+        status if status in KNOWN_SUBSCRIPTION_STATUSES else "canceled"
+    )
+    user.current_period_end = None
+    user.cancel_at_period_end = False
+    user.next_payment_attempt = None
+    user.pending_plan_code = None
+    user.pending_plan_effective_at = None
+    sync_user_plan(user)
+    db.session.commit()
+    current_app.logger.info(
+        "Referencia Stripe obsoleta desvinculada: user_id=%s subscription_id=%s reason=%s",
+        user.id,
+        previous_subscription_id,
+        reason,
+    )
+
+
+def _manageable_stripe_subscription(user, *, cleanup_stale=True):
+    """Resolve a real, owned, manageable subscription from Stripe itself.
+
+    A local ID never grants portal access by itself. Confirmed stale references may
+    be detached; network/authentication failures are deliberately propagated.
+    """
+    subscription_id = user.stripe_subscription_id
+    if not subscription_id:
+        return None
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+    try:
+        subscription = _stripe_dict(
+            stripe.Subscription.retrieve(subscription_id)
+        )
+    except Exception as error:
+        if not _stripe_resource_is_missing(error):
+            raise
+        clear_customer = False
+        if user.stripe_customer_id:
+            clear_customer = (
+                _retrieve_valid_stripe_customer(user.stripe_customer_id) is None
+            )
+        if cleanup_stale:
+            _clear_stale_stripe_reference(
+                user,
+                clear_customer=clear_customer,
+                reason="subscription_missing",
+            )
+        return None
+
+    subscription_customer_id = subscription.get("customer")
+    try:
+        _validate_subscription_identity(subscription, user)
+    except StripeEventIgnored:
+        if cleanup_stale:
+            _clear_stale_stripe_reference(
+                user,
+                status=(subscription.get("status") or "canceled").lower(),
+                # Never reuse a customer reached through a subscription whose
+                # ownership, organization, or configured price failed validation.
+                clear_customer=True,
+                reason="subscription_invalid",
+            )
+        return None
+
+    customer = _retrieve_valid_stripe_customer(subscription_customer_id)
+    if customer is None:
+        if cleanup_stale:
+            _clear_stale_stripe_reference(
+                user,
+                status=(subscription.get("status") or "canceled").lower(),
+                clear_customer=True,
+                reason="customer_missing",
+            )
+        return None
+
+    status = (subscription.get("status") or "").lower()
+    if status not in MANAGED_SUBSCRIPTION_STATUSES:
+        if cleanup_stale:
+            _clear_stale_stripe_reference(
+                user,
+                status=status,
+                reason=f"subscription_{status or 'unknown'}",
+            )
+        return None
+
+    _ensure_stripe_ids_available(user, subscription_customer_id, subscription_id)
+    _sync_subscription_state(user, subscription, datetime.utcnow())
+    db.session.commit()
+    return subscription
+
+
 def _find_subscription_user(subscription):
     subscription_id = subscription.get("id")
     user = User.query.filter_by(stripe_subscription_id=subscription_id).first()
@@ -625,6 +781,10 @@ def _sync_subscription_state(user, subscription, stripe_created_at, deleted=Fals
             user.pending_plan_effective_at = None
     if status != "past_due":
         user.next_payment_attempt = None
+    if deleted or status == "canceled":
+        # Keep the webhook/audit record and customer when it still exists, but a
+        # canceled subscription must never block a future Checkout.
+        user.stripe_subscription_id = None
     sync_user_plan(user)
     return True
 
@@ -632,22 +792,10 @@ def _sync_subscription_state(user, subscription, stripe_created_at, deleted=Fals
 def _has_managed_stripe_subscription(user):
     if not user.stripe_subscription_id:
         return False
-    if user.subscription_status in MANAGED_SUBSCRIPTION_STATUSES:
-        return True
     if current_app.config["STRIPE_DISABLED"]:
         return True
-    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     try:
-        subscription = _stripe_dict(
-            stripe.Subscription.retrieve(user.stripe_subscription_id)
-        )
-        _validate_subscription(subscription, user=user)
-        _sync_subscription_state(user, subscription, datetime.utcnow())
-        db.session.commit()
-        return subscription.get("status") in MANAGED_SUBSCRIPTION_STATUSES
-    except StripeEventIgnored:
-        db.session.rollback()
-        return False
+        return bool(_manageable_stripe_subscription(user))
     except Exception:
         db.session.rollback()
         current_app.logger.exception(
@@ -3928,10 +4076,30 @@ def subscribe():
         flash("El pago fue cancelado. No se realizó ningún cargo.", "info")
     from .plans import commercial_plans
 
+    manageable_subscription = False
+    stripe_reference_check_failed = False
+    if user.stripe_subscription_id and not current_app.config["STRIPE_DISABLED"]:
+        try:
+            manageable_subscription = bool(
+                _manageable_stripe_subscription(user)
+            )
+        except Exception:
+            db.session.rollback()
+            stripe_reference_check_failed = True
+            current_app.logger.exception(
+                "No se pudo verificar la referencia Stripe en planes"
+            )
+            flash(
+                "No pudimos validar tu suscripción. Intenta nuevamente.",
+                "danger",
+            )
+
     return render_template(
         "subscribe.html",
         user=user,
         commercial_plans=commercial_plans(current_app.config),
+        manageable_subscription=manageable_subscription,
+        stripe_reference_check_failed=stripe_reference_check_failed,
     )
 
 
@@ -3994,16 +4162,40 @@ def create_checkout_session():
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     existing_subscription = None
 
-    if (
-        user.stripe_subscription_id
-        and user.subscription_status in MANAGED_SUBSCRIPTION_STATUSES
-    ):
-        return _redirect_to_billing_portal(user)
+    if user.stripe_subscription_id:
+        try:
+            if _manageable_stripe_subscription(user):
+                return _redirect_to_billing_portal(user)
+        except Exception as error:
+            db.session.rollback()
+            error_type, error_code, error_message = _safe_stripe_error(error)
+            current_app.logger.exception(
+                "No se pudo validar la referencia Stripe antes de Checkout: type=%s code=%s message=%s",
+                error_type,
+                error_code,
+                error_message,
+            )
+            flash("No pudimos validar tu suscripción. Intenta nuevamente.", "danger")
+            return redirect(url_for("main.subscribe"))
 
-    if user.stripe_customer_id:
+    try:
+        checkout_customer_id = _validated_checkout_customer_id(user)
+    except Exception as error:
+        db.session.rollback()
+        error_type, error_code, error_message = _safe_stripe_error(error)
+        current_app.logger.exception(
+            "No se pudo validar el customer antes de Checkout: type=%s code=%s message=%s",
+            error_type,
+            error_code,
+            error_message,
+        )
+        flash("No pudimos validar tu suscripción. Intenta nuevamente.", "danger")
+        return redirect(url_for("main.subscribe"))
+
+    if checkout_customer_id:
         try:
             subscriptions = _stripe_dict(stripe.Subscription.list(
-                customer=user.stripe_customer_id,
+                customer=checkout_customer_id,
                 status="all",
                 limit=10,
             ))
@@ -4051,8 +4243,8 @@ def create_checkout_session():
             }
         },
     }
-    if user.stripe_customer_id:
-        checkout_params["customer"] = user.stripe_customer_id
+    if checkout_customer_id:
+        checkout_params["customer"] = checkout_customer_id
     else:
         checkout_params["customer_email"] = user.email
 
@@ -4552,18 +4744,15 @@ def subscription():
         return redirect(url_for("main.login"))
     user = current_organization_owner(user)
     subscription_info = None
+    manageable_subscription = False
+    stripe_reference_check_failed = False
     if user.stripe_subscription_id and not current_app.config["STRIPE_DISABLED"]:
-        stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
         try:
-            sub = _stripe_dict(
-                stripe.Subscription.retrieve(user.stripe_subscription_id)
-            )
-            _validate_subscription(sub, user=user)
-            _sync_subscription_state(user, sub, datetime.utcnow())
-            db.session.commit()
-            subscription_info = sub
+            subscription_info = _manageable_stripe_subscription(user)
+            manageable_subscription = bool(subscription_info)
         except Exception:
             db.session.rollback()
+            stripe_reference_check_failed = True
             current_app.logger.exception("No se pudo sincronizar la suscripción")
             flash("No pudimos actualizar el estado de tu suscripción.", "danger")
     from .plans import (
@@ -4595,6 +4784,8 @@ def subscription():
         "subscription.html",
         user=user,
         subscription_info=subscription_info,
+        manageable_subscription=manageable_subscription,
+        stripe_reference_check_failed=stripe_reference_check_failed,
         has_paid_access=paid_access,
         current_plan_code=plan_code,
         current_plan_label=current_plan_label(plan_code),
