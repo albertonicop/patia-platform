@@ -324,18 +324,17 @@ def commercial_plans(config) -> list[dict]:
             "code": RESTAURANT,
             "name": gettext("Restaurant"),
             "price": PLAN_PRICES_MXN[RESTAURANT],
-            "audience": gettext(
-                "Restaurantes que necesitan controlar ingredientes y costos reales."
-            ),
+            "audience": gettext("Control especializado para restaurantes."),
             "description": gettext(
                 "Para restaurantes que quieren controlar recetas, ingredientes y el costo real de cada platillo."
             ),
             "features": (
                 gettext("Todo lo necesario para operar"),
                 gettext("Recetas e ingredientes"),
-                gettext("Costeo y margen por platillo"),
-                gettext("Rendimientos y preparaciones"),
-                gettext("Descuento automático de inventario al vender"),
+                gettext("Costeo real por platillo"),
+                gettext("Kg, g, L, ml y piezas"),
+                gettext("Descuento automático de inventario"),
+                gettext("Disponibilidad de platillos"),
             ),
         },
     )

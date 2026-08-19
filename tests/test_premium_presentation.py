@@ -229,6 +229,23 @@ class PremiumPresentationTests(unittest.TestCase):
         self.assertNotIn(".sidebar-v2", css)
         self.assertNotIn(".dashboard-v2", css)
 
+    def test_landing_pricing_supports_three_plans_without_mobile_overflow(self):
+        css = (
+            PROJECT_ROOT / "app" / "static" / "css" / "patia-v2-landing.css"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            ".pl2-plans { max-width: 1180px; margin: auto; display: grid; "
+            "grid-template-columns: repeat(3, minmax(0,1fr));",
+            css,
+        )
+        self.assertIn(
+            ".pl2-plans { max-width: 760px; grid-template-columns: 1fr; }",
+            css,
+        )
+        self.assertIn(".pl2-plan { position: relative; display: flex;", css)
+        self.assertIn("min-width: 0;", css)
+
     def test_sidebar_keeps_distinct_pro_routes_without_legacy_dashboard(self):
         base = self.template("base.html")
         reports = self.template("reports.html")

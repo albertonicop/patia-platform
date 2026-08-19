@@ -169,6 +169,8 @@
             <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i>{{ feature }}</li>{% endfor %}</ul>
             {% if plan.code == "PRO" and not plan.configured %}
             <span class="pl2-button pl2-button--disabled" aria-disabled="true">{{ _("Pro estará disponible para contratación muy pronto.") }}</span>
+            {% elif plan.code == "RESTAURANT" and not plan.configured %}
+            <span class="pl2-button pl2-button--disabled" aria-disabled="true">{{ _("Disponible próximamente") }}</span>
             {% else %}
             <a class="pl2-button {% if plan.code == 'PRO' %}pl2-button--primary{% else %}pl2-button--ghost{% endif %}" href="{{ url_for('main.register', plan=plan.code|lower) }}">{{ _("Comenzar prueba con %(plan)s", plan=plan.name) }}</a>
             {% endif %}

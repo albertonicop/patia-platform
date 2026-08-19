@@ -254,9 +254,43 @@ class CommercialPlanTests(unittest.TestCase):
     def test_landing_presents_restaurant_without_fake_checkout(self):
         self.app.config["STRIPE_RESTAURANT_PRICE_ID"] = None
         html = self.app.test_client().get("/").get_data(as_text=True)
+        self.assertEqual(html.count('<article class="pl2-plan'), 3)
         self.assertIn("PATIA Restaurant", html)
         self.assertIn("$360", html)
-        self.assertIn("Restaurantes", html)
+        self.assertIn("Control especializado para restaurantes.", html)
+        self.assertIn("Costeo real por platillo", html)
+        self.assertIn("Kg, g, L, ml y piezas", html)
+        self.assertIn("Disponibilidad de platillos", html)
+        self.assertIn("Disponible próximamente", html)
+        self.assertNotIn("/register?plan=restaurant", html)
+
+    def test_landing_enables_restaurant_only_with_its_own_price(self):
+        self.app.config.update(
+            STRIPE_RESTAURANT_PRICE_ID="price_restaurant",
+            STRIPE_STARTER_PRICE_ID="price_starter",
+            STRIPE_PRO_PRICE_ID="price_pro",
+        )
+        html = self.app.test_client().get("/").get_data(as_text=True)
+        self.assertIn("/register?plan=restaurant", html)
+        self.assertIn("Comenzar prueba con Restaurant", html)
+
+        self.app.config["STRIPE_RESTAURANT_PRICE_ID"] = None
+        html = self.app.test_client().get("/").get_data(as_text=True)
+        self.assertNotIn("/register?plan=restaurant", html)
+        self.assertIn("/register?plan=starter", html)
+        self.assertIn("/register?plan=pro", html)
+
+    def test_landing_presents_restaurant_in_english(self):
+        self.app.config["STRIPE_RESTAURANT_PRICE_ID"] = None
+        client = self.app.test_client()
+        client.post("/language", data={"language": "en", "next": "/"})
+        html = client.get("/").get_data(as_text=True)
+        self.assertIn("PATIA Restaurant", html)
+        self.assertIn("For restaurants that want to control recipes", html)
+        self.assertIn("Specialized control for restaurants.", html)
+        self.assertIn("Real cost per dish", html)
+        self.assertIn("Dish availability", html)
+        self.assertIn("Coming soon", html)
 
     def test_checkout_does_not_fake_pro_when_price_is_missing(self):
         self.app.config["STRIPE_PRO_PRICE_ID"] = None
