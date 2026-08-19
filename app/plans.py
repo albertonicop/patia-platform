@@ -61,11 +61,11 @@ RESTAURANT_ENTITLEMENTS = PlanEntitlements(
     max_members=5,
     advanced_roles=True,
     advanced_inventory_history=True,
-    advanced_reports=False,
-    advanced_exports=False,
-    monthly_owner_report=False,
+    advanced_reports=True,
+    advanced_exports=True,
+    monthly_owner_report=True,
     priority_support=False,
-    executive_dashboard=False,
+    executive_dashboard=True,
     recipes=True,
 )
 # Existing customers keep every capability they already had, but monthly email

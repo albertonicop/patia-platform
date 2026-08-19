@@ -882,12 +882,14 @@ def build_executive_dashboard(
         period,
         timezone_name=timezone_name,
         currency_code=organization.currency_code,
+        include_restaurant=(organization.business_type == "restaurant"),
     )
     previous = _report_analytics(
         organization.id,
         previous_period,
         timezone_name=timezone_name,
         currency_code=organization.currency_code,
+        include_restaurant=(organization.business_type == "restaurant"),
     )
     current_kpis = current["report_kpis"]
     previous_kpis = previous["report_kpis"]
@@ -915,6 +917,7 @@ def build_executive_dashboard(
             month_period,
             timezone_name=timezone_name,
             currency_code=organization.currency_code,
+            include_restaurant=(organization.business_type == "restaurant"),
         )
     )
     month_sales = money_decimal(month["report_kpis"]["sales"])
@@ -964,6 +967,7 @@ def build_executive_dashboard(
         },
         "payments_report": current["payments_report"],
         "unknown_cost_lines": current["unknown_cost_lines"],
+        "restaurant_report": current.get("restaurant_report"),
     }
     result.update(
         _actionable_snapshot(
@@ -1006,6 +1010,7 @@ def build_smart_alerts(organization, args, *, now_utc=None):
         "smart_alerts": alerts,
         "executive_control": data["executive_control"],
         "team_activity": data["team_activity"],
+        "restaurant_report": data.get("restaurant_report"),
         "alert_summary": {
             "total": len(alerts),
             "high": sum(

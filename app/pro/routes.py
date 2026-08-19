@@ -243,6 +243,74 @@ def hub():
         }
         for item in alerts["smart_alerts"][:3]
     ]
+    restaurant_report = alerts.get("restaurant_report")
+    if membership.organization.business_type == "restaurant" and restaurant_report:
+        limited = restaurant_report["limited_dishes"]
+        if limited:
+            dish = limited[0]
+            priorities.insert(0, {
+                "title": gettext(
+                    "%(dish)s tiene disponibilidad limitada",
+                    dish=dish["name"],
+                ),
+                "evidence": gettext(
+                    "Quedan aproximadamente %(count)s porciones; %(ingredient)s es el ingrediente limitante.",
+                    count=dish["availability"],
+                    ingredient=dish["limiting_ingredient"],
+                ),
+                "impact": gettext(
+                    "Revisa ese ingrediente antes de que el platillo deje de estar disponible."
+                ),
+                "label": gettext("Abrir receta"),
+                "url": url_for("recipes.detail", recipe_id=dish["recipe_id"]),
+                "icon": "fa-utensils",
+                "tone": "warning",
+            })
+        critical = restaurant_report["critical_ingredients"]
+        if not limited and critical:
+            ingredient = critical[0]
+            priorities.insert(0, {
+                "title": gettext(
+                    "Repón %(ingredient)s para tus recetas",
+                    ingredient=ingredient["name"],
+                ),
+                "evidence": gettext(
+                    "Quedan %(stock)s; el mínimo configurado es %(minimum)s.",
+                    stock=ingredient["stock"],
+                    minimum=ingredient["min_stock"],
+                ),
+                "impact": gettext(
+                    "Su disponibilidad afecta los platillos que utilizan este ingrediente."
+                ),
+                "label": gettext("Revisar ingrediente"),
+                "url": url_for(
+                    "main.edit_product", product_id=ingredient["product_id"]
+                ),
+                "icon": "fa-box-open",
+                "tone": "warning",
+            })
+        low_margin = restaurant_report["lowest_margin"]
+        if (
+            not limited and not critical
+            and low_margin and low_margin[0]["margin"] < 25
+        ):
+            dish = low_margin[0]
+            priorities.insert(0, {
+                "title": gettext(
+                    "Revisa el margen de %(dish)s", dish=dish["name"]
+                ),
+                "evidence": gettext(
+                    "Su margen histórico del periodo es %(margin)s%%.",
+                    margin=dish["margin"],
+                ),
+                "impact": gettext(
+                    "Compara el precio con el costo histórico de sus ingredientes."
+                ),
+                "label": gettext("Ver rentabilidad"),
+                "url": url_for("main.reports", period="this_month") + "#restaurant-profitability",
+                "icon": "fa-chart-line",
+                "tone": "warning",
+            })
     if (
         len(priorities) < 3
         and purchases["summary"]["products"]

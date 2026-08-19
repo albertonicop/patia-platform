@@ -288,6 +288,26 @@
         </article>
       {% endif %}
     </section>
+
+    {% if restaurant_report %}
+    <section id="restaurant-dishes" class="reports-v3__restaurant" aria-labelledby="restaurant-dishes-title">
+      <header class="reports-v3__panel-head"><div><span>{{ _("Restaurant") }}</span><h3 id="restaurant-dishes-title">{{ _("Resultados por platillo") }}</h3><p>{{ _("Ingresos y rentabilidad calculados con el costo histórico de cada venta.") }}</p></div></header>
+      <div class="reports-v3__rankings">
+        <article class="card reports-v3__panel">
+          <header><h3>{{ _("Platillos más vendidos") }}</h3></header>
+          {% if restaurant_report.top_selling %}<div class="table-wrap"><table><thead><tr><th>{{ _("Platillo") }}</th><th>{{ _("Unidades") }}</th><th>{{ _("Ingresos") }}</th><th>{{ _("Utilidad") }}</th></tr></thead><tbody>{% for dish in restaurant_report.top_selling %}<tr><td><a href="{{ url_for('recipes.detail', recipe_id=dish.recipe_id) }}">{{ dish.name }}</a></td><td>{{ dish.units }}</td><td>{{ dish.revenue|money }}</td><td>{{ dish.profit|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>{{ _("Sin platillos vendidos en este periodo.") }}</p>{% endif %}
+        </article>
+        <article id="restaurant-profitability" class="card reports-v3__panel">
+          <header><h3>{{ _("Rentabilidad de platillos") }}</h3></header>
+          {% if restaurant_report.most_profitable %}<div class="table-wrap"><table><thead><tr><th>{{ _("Platillo") }}</th><th>{{ _("Costo histórico") }}</th><th>{{ _("Utilidad") }}</th><th>{{ _("Margen") }}</th></tr></thead><tbody>{% for dish in restaurant_report.most_profitable %}<tr><td>{{ dish.name }}</td><td>{{ dish.cost|money }}</td><td>{{ dish.profit|money }}</td><td>{{ "%.1f"|format(dish.margin) if dish.margin is not none else "—" }}{% if dish.margin is not none %}%{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>{{ _("Sin datos suficientes") }}</p>{% endif %}
+        </article>
+      </div>
+      <article class="card reports-v3__panel">
+        <header class="reports-v3__panel-head"><div><span>{{ _("Inventario físico") }}</span><h3>{{ _("Ingredientes consumidos") }}</h3><p>{{ _("Consumo real descontado por las recetas vendidas durante el periodo.") }}</p></div><strong>{{ restaurant_report.ingredient_cost|money }}</strong></header>
+        {% if restaurant_report.ingredients %}<div class="table-wrap"><table><thead><tr><th>{{ _("Ingrediente") }}</th><th>{{ _("Cantidad consumida") }}</th><th>{{ _("Costo consumido") }}</th><th>{{ _("Estado actual") }}</th></tr></thead><tbody>{% for ingredient in restaurant_report.ingredients %}<tr><td><a href="{{ url_for('main.edit_product', product_id=ingredient.product_id) }}">{{ ingredient.name }}</a></td><td>{{ ingredient.quantity|quantity }} {{ _(ingredient.unit_code) }}</td><td>{{ ingredient.cost|money }}</td><td>{{ _("Stock crítico") if ingredient.is_critical else _("Disponible") }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>{{ _("Sin consumo de ingredientes en este periodo.") }}</p>{% endif %}
+      </article>
+    </section>
+    {% endif %}
   {% else %}
     <section class="card reports-v3__empty module-empty-v2">
       <i class="fa-solid fa-chart-column" aria-hidden="true"></i>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Reporte mensual Pro") }}{% endblock %}
+{% block title %}{{ _("Reporte mensual Restaurant") if organization.business_type == "restaurant" else _("Reporte mensual Pro") }}{% endblock %}
 {% block content %}
 <div class="pro-monthly-report-v2">
   <a class="pro-monthly-report-v2__back" href="{{ url_for('pro.monthly_reports') }}">
@@ -19,7 +19,7 @@
       <section class="pro-monthly-report-v2__page" aria-labelledby="monthly-report-title">
         <header class="pro-monthly-report-v2__masthead">
           <div>
-            <span class="eyebrow">{{ _("PATIA Pro · Reporte mensual ejecutivo") }}</span>
+            <span class="eyebrow">{{ _("PATIA Restaurant · Reporte mensual") if snapshot.get('report_type') == 'restaurant' else _("PATIA Pro · Reporte mensual ejecutivo") }}</span>
             <h2 id="monthly-report-title">{{ snapshot.business_name }}</h2>
             <p>{{ snapshot.period.label }}</p>
             <small>
@@ -55,7 +55,7 @@
           <article><span>{{ _("Ventas") }}</span><strong>{{ snapshot.kpis.sales|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
           <article><span>{{ _("Utilidad estimada") }}</span><strong>{{ snapshot.kpis.profit|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
           <article><span>{{ _("Ticket promedio") }}</span><strong>{{ snapshot.kpis.average_ticket|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</strong></article>
-          <article><span>{{ _("Ventas registradas") }}</span><strong>{{ snapshot.kpis.ticket_count }}</strong></article>
+          <article><span>{{ _("Platillos vendidos") if snapshot.get('restaurant') else _("Ventas registradas") }}</span><strong>{{ snapshot.restaurant.dish_units if snapshot.get('restaurant') else snapshot.kpis.ticket_count }}</strong></article>
         </section>
 
         {% if snapshot.kpis.unknown_cost_lines %}
@@ -139,6 +139,17 @@
             <article><span>{{ _("Cierres con diferencia") }}</span><strong>{{ snapshot.cash.count }}</strong></article>
           </div>
         </section>
+
+        {% if snapshot.get("restaurant") %}
+        <section class="pro-monthly-report-v2__restaurant" aria-labelledby="monthly-restaurant-title">
+          <header><span>{{ _("Lectura Restaurant") }}</span><h3 id="monthly-restaurant-title">{{ _("Platillos e ingredientes del mes") }}</h3></header>
+          <div class="pro-monthly-report-v2__rankings">
+            <section><h3>{{ _("Platillos destacados") }}</h3>{% if snapshot.restaurant.top_selling %}<div class="table-scroll"><table><thead><tr><th>{{ _("Platillo") }}</th><th>{{ _("Unidades") }}</th><th>{{ _("Ingresos") }}</th><th>{{ _("Margen") }}</th></tr></thead><tbody>{% for dish in snapshot.restaurant.top_selling %}<tr><td>{{ dish.name }}</td><td>{{ dish.units }}</td><td>{{ dish.revenue|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</td><td>{{ "%.1f"|format(dish.margin) if dish.margin is not none else "—" }}{% if dish.margin is not none %}%{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>{{ _("Sin platillos vendidos en este periodo.") }}</p>{% endif %}</section>
+            <section><h3>{{ _("Ingredientes con mayor consumo") }}</h3>{% if snapshot.restaurant.ingredients %}<div class="table-scroll"><table><thead><tr><th>{{ _("Ingrediente") }}</th><th>{{ _("Consumo") }}</th><th>{{ _("Costo") }}</th></tr></thead><tbody>{% for ingredient in snapshot.restaurant.ingredients[:5] %}<tr><td>{{ ingredient.name }}</td><td>{{ ingredient.quantity }} {{ _(ingredient.unit_code) }}</td><td>{{ ingredient.cost|money(snapshot.get('currency_code', 'MXN'), snapshot.get('locale_code', 'es_MX')) }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>{{ _("Sin consumo de ingredientes en este periodo.") }}</p>{% endif %}</section>
+          </div>
+          {% if snapshot.restaurant.limited_dishes %}<div class="reports-v3__notice reports-v3__notice--warning"><strong>{{ ngettext("%(count)s platillo tiene disponibilidad limitada.", "%(count)s platillos tienen disponibilidad limitada.", snapshot.restaurant.limited_dishes|length, count=snapshot.restaurant.limited_dishes|length) }}</strong><p>{{ snapshot.restaurant.limited_dishes[0].name }} · {{ _("Ingrediente limitante: %(ingredient)s", ingredient=snapshot.restaurant.limited_dishes[0].limiting_ingredient) }}</p></div>{% endif %}
+        </section>
+        {% endif %}
 
         <section class="pro-monthly-report-v2__actions">
           <span>{{ _("Conclusión y siguiente paso") }}</span>

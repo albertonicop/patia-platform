@@ -13,6 +13,7 @@ from sqlalchemy.orm import selectinload
 from app import db
 from app.inventory.services import change_product_stock
 from app.models import (
+    InventoryMovement,
     InventoryRestockEvent,
     Organization,
     Product,
@@ -38,27 +39,61 @@ def purchase_suggestions(organization_id: int, *, now=None):
     recent_start = now - timedelta(days=SUGGESTION_WINDOW_DAYS)
     movement_start = now - timedelta(days=NO_MOVEMENT_DAYS)
 
-    recent = (
-        db.session.query(
-            Sale.product_id.label("product_id"),
-            func.coalesce(func.sum(Sale.quantity), 0).label("units"),
+    organization = db.session.get(Organization, organization_id)
+    if organization and organization.business_type == "restaurant":
+        # A dish sale consumes physical ingredients through Kardex. Use that
+        # immutable movement instead of treating the virtual dish as stock.
+        recent = (
+            db.session.query(
+                InventoryMovement.product_id.label("product_id"),
+                func.coalesce(
+                    func.sum(-InventoryMovement.quantity_delta), 0
+                ).label("units"),
+            )
+            .filter(
+                InventoryMovement.organization_id == organization_id,
+                InventoryMovement.movement_type.in_((
+                    "SALE", "SALE_CANCELLATION", "RETURN",
+                )),
+                InventoryMovement.created_at >= recent_start,
+            )
+            .group_by(InventoryMovement.product_id)
+            .subquery()
         )
-        .filter(
-            Sale.organization_id == organization_id,
-            Sale.created_at >= recent_start,
+        movement = (
+            db.session.query(
+                InventoryMovement.product_id.label("product_id"),
+                func.max(InventoryMovement.created_at).label("last_sale_at"),
+            )
+            .filter(
+                InventoryMovement.organization_id == organization_id,
+                InventoryMovement.movement_type == "SALE",
+            )
+            .group_by(InventoryMovement.product_id)
+            .subquery()
         )
-        .group_by(Sale.product_id)
-        .subquery()
-    )
-    movement = (
-        db.session.query(
-            Sale.product_id.label("product_id"),
-            func.max(Sale.created_at).label("last_sale_at"),
+    else:
+        recent = (
+            db.session.query(
+                Sale.product_id.label("product_id"),
+                func.coalesce(func.sum(Sale.quantity), 0).label("units"),
+            )
+            .filter(
+                Sale.organization_id == organization_id,
+                Sale.created_at >= recent_start,
+            )
+            .group_by(Sale.product_id)
+            .subquery()
         )
-        .filter(Sale.organization_id == organization_id)
-        .group_by(Sale.product_id)
-        .subquery()
-    )
+        movement = (
+            db.session.query(
+                Sale.product_id.label("product_id"),
+                func.max(Sale.created_at).label("last_sale_at"),
+            )
+            .filter(Sale.organization_id == organization_id)
+            .group_by(Sale.product_id)
+            .subquery()
+        )
     rows = (
         db.session.query(
             Product,
@@ -92,7 +127,10 @@ def purchase_suggestions(organization_id: int, *, now=None):
     no_movement = []
     for row in rows:
         product = row.Product
-        recent_units = quantity_decimal(row.recent_units or 0)
+        recent_units = max(
+            quantity_decimal(row.recent_units or 0, allow_negative=True),
+            Decimal("0"),
+        )
         daily_velocity = recent_units / Decimal(
             SUGGESTION_WINDOW_DAYS
         )

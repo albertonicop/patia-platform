@@ -88,6 +88,7 @@ from .recipes.services import (
     RecipeStockError,
     consume_recipe_sale,
     prepare_recipe_sales,
+    recipes_using_product,
 )
 from .team.services import (
     active_membership,
@@ -1660,6 +1661,39 @@ def analytics(user=None):
             "url": url_for("main.products", low_stock=1),
         })
 
+    restaurant_insights = None
+    if organization.business_type == "restaurant":
+        from .recipes.services import restaurant_period_analytics
+
+        restaurant_data = restaurant_period_analytics(
+            organization_id,
+            {
+                "start_at": week_start,
+                "end_before": week_end,
+                "start_date": today - timedelta(days=6),
+                "end_date": today,
+            },
+            currency_code=currency_code,
+        )
+        restaurant_insights = {
+            "top_dish": (
+                restaurant_data["top_selling"][0]
+                if restaurant_data["top_selling"] else None
+            ),
+            "best_margin": (
+                max(
+                    (
+                        item for item in restaurant_data["dishes"]
+                        if item["margin"] is not None
+                    ),
+                    key=lambda item: item["margin"],
+                    default=None,
+                )
+            ),
+            "critical_ingredients": restaurant_data["critical_ingredients"],
+            "limited_dishes": restaurant_data["limited_dishes"][:3],
+        }
+
     alerts = alerts[:5]
     return dict(
         total_products=total_products,
@@ -1680,6 +1714,7 @@ def analytics(user=None):
         category_sales=category_sales,
         alerts=alerts,
         recommendations=recommendations,
+        restaurant_insights=restaurant_insights,
     )
 
 
@@ -1766,6 +1801,7 @@ def _report_analytics(
     timezone_name=DEFAULT_TIMEZONE,
     currency_code=None,
     include_mixed_currency=False,
+    include_restaurant=False,
 ):
     timezone_name = safe_timezone_name(timezone_name)
     start_at = period["start_at"]
@@ -1973,6 +2009,15 @@ def _report_analytics(
             ),
         })
 
+    restaurant_report = None
+    if include_restaurant:
+        from .recipes.services import restaurant_period_analytics
+
+        restaurant_report = restaurant_period_analytics(
+            organization_id,
+            period,
+            currency_code=currency_code,
+        )
     return {
         "currency_code": currency_code,
         "mixed_currency_lines": (
@@ -2008,6 +2053,7 @@ def _report_analytics(
         "payments_report": payments,
         "top_selling_report": top_selling,
         "profitable_products_report": profitable_products,
+        "restaurant_report": restaurant_report,
     }
 
 
@@ -3236,8 +3282,17 @@ def edit_product(product_id):
         organization_id=organization_id,
         is_active=True,
     ).with_for_update().first_or_404()
+    recipe_usages = (
+        recipes_using_product(organization_id, product.id)
+        if membership.organization.business_type == "restaurant"
+        and product.item_type == "inventory"
+        else []
+    )
     if request.method == "GET":
-        return render_template("edit_product.html", product=product, user=user)
+        return render_template(
+            "edit_product.html", product=product, user=user,
+            recipe_usages=recipe_usages,
+        )
 
     name = request.form.get("name", "").strip()
     sku = request.form.get("sku", "").strip()
@@ -3253,11 +3308,11 @@ def edit_product(product_id):
         min_stock = quantity_decimal(request.form.get("min_stock") or 0)
     except (TypeError, ValueError):
         flash("Revisa precios y existencias e inténtalo nuevamente.", "danger")
-        return render_template("edit_product.html", product=product, user=user), 400
+        return render_template("edit_product.html", product=product, user=user, recipe_usages=recipe_usages), 400
 
     if not name or not sku:
         flash("Nombre y SKU son obligatorios.", "danger")
-        return render_template("edit_product.html", product=product, user=user), 400
+        return render_template("edit_product.html", product=product, user=user, recipe_usages=recipe_usages), 400
     if (
         cost_price < MONEY_ZERO
         or sale_price < MONEY_ZERO
@@ -3265,7 +3320,7 @@ def edit_product(product_id):
         or min_stock < 0
     ):
         flash("Precios y existencias no pueden ser negativos.", "danger")
-        return render_template("edit_product.html", product=product, user=user), 400
+        return render_template("edit_product.html", product=product, user=user, recipe_usages=recipe_usages), 400
 
     duplicate_sku = Product.query.filter(
         Product.organization_id == organization_id,
@@ -3274,7 +3329,7 @@ def edit_product(product_id):
     ).first()
     if duplicate_sku:
         flash("Ya existe otro producto con ese SKU.", "danger")
-        return render_template("edit_product.html", product=product, user=user), 409
+        return render_template("edit_product.html", product=product, user=user, recipe_usages=recipe_usages), 409
 
     if barcode:
         duplicate_barcode = Product.query.filter(
@@ -3284,7 +3339,7 @@ def edit_product(product_id):
         ).first()
         if duplicate_barcode:
             flash("Ya existe otro producto con ese código de barras.", "danger")
-            return render_template("edit_product.html", product=product, user=user), 409
+            return render_template("edit_product.html", product=product, user=user, recipe_usages=recipe_usages), 409
 
     stock_before = product.stock
     product.name = name
@@ -3315,7 +3370,7 @@ def edit_product(product_id):
             organization_id,
         )
         flash("No pudimos guardar el producto porque el SKU ya está en uso.", "danger")
-        return render_template("edit_product.html", product=product, user=user), 409
+        return render_template("edit_product.html", product=product, user=user, recipe_usages=recipe_usages), 409
 
     flash("Producto actualizado correctamente. Las ventas anteriores conservaron sus importes originales.", "success")
     return redirect(url_for("main.products") + "#catalogo")
@@ -3981,6 +4036,9 @@ def reports():
         timezone_name=timezone_name,
         currency_code=membership.organization.currency_code,
         include_mixed_currency=True,
+        include_restaurant=(
+            membership.organization.business_type == "restaurant"
+        ),
     )
     executive_data = None
     if advanced_reports:

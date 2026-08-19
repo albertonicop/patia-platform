@@ -90,6 +90,18 @@
   </article>
 </section>
 
+{% if restaurant_insights %}
+<section class="restaurant-dashboard-v1" aria-labelledby="restaurant-dashboard-title">
+  <header><span>{{ _("Lectura Restaurant") }}</span><h3 id="restaurant-dashboard-title">{{ _("Platillos e ingredientes esta semana") }}</h3></header>
+  <div>
+    <a href="{{ url_for('main.reports', period='7d') }}#restaurant-dishes"><span>{{ _("Platillo más vendido") }}</span><strong>{{ restaurant_insights.top_dish.name if restaurant_insights.top_dish else _("Sin ventas todavía") }}</strong>{% if restaurant_insights.top_dish %}<small>{{ _("%(count)s unidades", count=restaurant_insights.top_dish.units) }}</small>{% endif %}</a>
+    <a href="{{ url_for('main.reports', period='7d') }}#restaurant-profitability"><span>{{ _("Mejor margen") }}</span><strong>{{ restaurant_insights.best_margin.name if restaurant_insights.best_margin else _("Sin datos suficientes") }}</strong>{% if restaurant_insights.best_margin %}<small>{{ "%.1f"|format(restaurant_insights.best_margin.margin) }}%</small>{% endif %}</a>
+    <a href="{{ url_for('main.products', low_stock=1) }}"><span>{{ _("Ingredientes críticos") }}</span><strong>{{ restaurant_insights.critical_ingredients|length }}</strong><small>{{ _("Revisa qué necesitas reponer") }}</small></a>
+    <a href="{{ url_for('recipes.index') }}"><span>{{ _("Platillos con disponibilidad limitada") }}</span><strong>{{ restaurant_insights.limited_dishes|length }}</strong>{% if restaurant_insights.limited_dishes %}<small>{{ restaurant_insights.limited_dishes[0].name }} · {{ _("%(count)s porciones", count=restaurant_insights.limited_dishes[0].availability) }}</small>{% else %}<small>{{ _("Sin límites críticos") }}</small>{% endif %}</a>
+  </div>
+</section>
+{% endif %}
+
 {% if cash_session %}
 <section class="dashboard-v11__cash-status" aria-labelledby="dashboard-cash-status-title">
   <div class="dashboard-v11__cash-status-copy">

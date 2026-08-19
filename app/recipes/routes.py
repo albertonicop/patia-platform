@@ -16,7 +16,7 @@ from app.team.services import active_membership, require_permission
 from app.units import UNITS, compatible_units, normalize_unit, quantity_decimal
 from .services import (
     RecipeError, recipe_availability, recipe_cost, recipe_query,
-    validate_recipe_components,
+    recipe_operational_summary, validate_recipe_components,
 )
 
 
@@ -124,6 +124,7 @@ def _save_recipe(recipe, membership):
     recipe.organization_id = membership.organization_id
     validate_recipe_components(recipe, components)
     recipe.components[:] = components
+    db.session.add(recipe)
 
     if recipe_type == "dish":
         sale_price = money_decimal(
@@ -151,7 +152,6 @@ def _save_recipe(recipe, membership):
             recipe.sale_product.category = category
             recipe.sale_product.sale_price = sale_price
             recipe.sale_product.is_active = recipe.is_active
-        db.session.add(recipe)
         db.session.flush()
         recipe.sale_product.cost_price = recipe_cost(recipe, 1)[0]
     elif recipe.sale_product is not None:
@@ -255,14 +255,16 @@ def edit(recipe_id):
 def detail(recipe_id):
     membership, _ = _context()
     recipe = recipe_query(membership.organization_id).filter_by(id=recipe_id).first_or_404()
-    output = 1 if recipe.recipe_type == "dish" else recipe.yield_quantity
-    cost, details = recipe_cost(recipe, output)
+    operational = recipe_operational_summary(recipe)
+    cost = operational["cost"]
     price = recipe.sale_product.sale_price if recipe.sale_product else MONEY_ZERO
     margin = ((price - cost) / price * Decimal("100")) if price > 0 else None
     return render_template(
-        "recipe_detail.html", recipe=recipe, ingredient_costs=details,
+        "recipe_detail.html", recipe=recipe,
+        ingredient_costs=operational["ingredients"],
         cost=cost, price=price, margin=margin,
-        availability=recipe_availability(recipe),
+        availability=operational["availability"],
+        limiting_ingredient=operational["limiting_ingredient"],
     )
 
 

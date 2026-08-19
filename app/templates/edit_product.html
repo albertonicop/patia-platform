@@ -61,5 +61,11 @@
       </div>
     </form>
   </section>
+  {% if recipe_usages %}
+  <section class="card inventory-v2__panel recipe-v1__usage" aria-labelledby="recipe-usage-title">
+    <header><span>{{ _("Ingrediente") }}</span><h3 id="recipe-usage-title">{{ _("Usado en recetas") }}</h3><p>{{ _("Cambiar su costo o existencias actualiza la disponibilidad y el costo actual de estas recetas; las ventas anteriores no cambian.") }}</p></header>
+    <ul>{% for recipe in recipe_usages %}<li><a href="{{ url_for('recipes.detail', recipe_id=recipe.id) }}">{{ recipe.name }}</a><span>{{ _("Platillo") if recipe.recipe_type == 'dish' else _("Preparación") }}</span></li>{% endfor %}</ul>
+  </section>
+  {% endif %}
 </div>
 {% endblock %}

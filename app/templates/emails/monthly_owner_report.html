@@ -32,8 +32,8 @@
               <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.sales|money(organization.currency_code, organization.locale_code) }}</strong>
             </td>
             <td style="width:50%;padding:17px;background:#f6f7fb;border:1px solid #e8eaf1;border-radius:13px;">
-              <span style="display:block;color:#677086;font-size:12px;">{{ _("Ventas registradas") }}</span>
-              <strong style="display:block;margin-top:6px;font-size:22px;">{{ analytics.report_kpis.ticket_count }}</strong>
+              <span style="display:block;color:#677086;font-size:12px;">{{ _("Platillos vendidos") if restaurant else _("Ventas registradas") }}</span>
+              <strong style="display:block;margin-top:6px;font-size:22px;">{{ restaurant.dish_units if restaurant else analytics.report_kpis.ticket_count }}</strong>
             </td>
           </tr>
           <tr>
@@ -73,6 +73,35 @@
             </tr>
             {% endfor %}
           </table>
+        </section>
+        {% endif %}
+
+        {% if restaurant %}
+        <section style="margin-top:28px;">
+          <h2 style="margin:0 0 12px;font-size:18px;">{{ _("Platillos destacados") }}</h2>
+          {% if restaurant.top_selling %}
+          <table role="presentation" style="width:100%;border-collapse:collapse;">
+            {% for dish in restaurant.top_selling[:5] %}
+            <tr>
+              <td style="padding:11px 0;border-bottom:1px solid #eceef4;">{{ dish.name }}</td>
+              <td style="padding:11px 0;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ _("%(count)s unidades", count=dish.units) }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+          {% else %}<p style="color:#677086;">{{ _("Sin platillos vendidos en este periodo.") }}</p>{% endif %}
+        </section>
+        <section style="margin-top:28px;">
+          <h2 style="margin:0 0 12px;font-size:18px;">{{ _("Ingredientes con mayor consumo") }}</h2>
+          {% if restaurant.ingredients %}
+          <table role="presentation" style="width:100%;border-collapse:collapse;">
+            {% for ingredient in restaurant.ingredients[:5] %}
+            <tr>
+              <td style="padding:11px 0;border-bottom:1px solid #eceef4;">{{ ingredient.name }}</td>
+              <td style="padding:11px 0;border-bottom:1px solid #eceef4;text-align:right;font-weight:700;">{{ ingredient.quantity }} {{ _(ingredient.unit_code) }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+          {% else %}<p style="color:#677086;">{{ _("Sin consumo de ingredientes en este periodo.") }}</p>{% endif %}
         </section>
         {% endif %}
 

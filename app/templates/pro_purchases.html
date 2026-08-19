@@ -64,7 +64,7 @@
                       <strong>{{ _("Stock %(stock)s · mínimo %(minimum)s", stock=item.stock, minimum=item.min_stock) }}</strong>
                       <small>
                         {% if item.coverage_days is not none %}
-                          {{ _("Cobertura estimada: %(days)s días", days=item.coverage_days) }} · {{ _("%(units)s vendidas en 30 días", units=item.recent_units) }}
+                          {{ _("Cobertura estimada: %(days)s días", days=item.coverage_days) }} · {% if organization.business_type == 'restaurant' %}{{ _("%(units)s consumidas por ventas en 30 días", units=item.recent_units) }}{% else %}{{ _("%(units)s vendidas en 30 días", units=item.recent_units) }}{% endif %}
                         {% else %}
                           {{ _("Sin ventas recientes; la sugerencia se basa en el stock mínimo.") }}
                         {% endif %}
@@ -107,7 +107,7 @@
 
   <details class="pro-purchases-v1__method">
     <summary>{{ _("Cómo calcula PATIA estas sugerencias") }}</summary>
-    <p>{{ _("PATIA considera ventas recientes, existencias, stock mínimo y cobertura. La sugerencia es orientativa y puedes cambiarla antes de confirmar.") }}</p>
+    <p>{% if organization.business_type == 'restaurant' %}{{ _("PATIA considera el consumo real de ingredientes por las recetas vendidas, existencias, stock mínimo y cobertura. La sugerencia es orientativa y puedes cambiarla antes de confirmar.") }}{% else %}{{ _("PATIA considera ventas recientes, existencias, stock mínimo y cobertura. La sugerencia es orientativa y puedes cambiarla antes de confirmar.") }}{% endif %}</p>
     <small>{{ _("%(sales)s días de ventas analizados · %(coverage)s días de cobertura objetivo · sin movimiento después de %(movement)s días", sales=method.sales_window_days, coverage=method.target_coverage_days, movement=method.no_movement_days) }}</small>
   </details>
 

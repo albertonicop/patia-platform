@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-18 22:42-0600\n"
+"POT-Creation-Date: 2026-08-19 12:17-0600\n"
 "PO-Revision-Date: 2026-07-17 11:53-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -35,121 +35,123 @@ msgstr ""
 "We could not sign you out because the page expired. Refresh the page and "
 "try again."
 
-#: app/__init__.py:462 app/routes.py:1146
+#: app/__init__.py:462 app/routes.py:1306
 msgid "Tu sesión ya terminó. Inicia sesión nuevamente."
 msgstr "Your session has already ended. Sign in again."
 
-#: app/monthly_reports.py:207
+#: app/monthly_reports.py:254
 msgid "El registro constante permite comparar el negocio con periodos futuros."
 msgstr ""
 "Consistent records make it possible to compare the business with future "
 "periods."
 
-#: app/monthly_reports.py:215
+#: app/monthly_reports.py:262
 msgid "La utilidad es parcial porque existen ventas sin costo conocido."
 msgstr "Profit is partial because some sales have no known cost."
 
-#: app/monthly_reports.py:344
+#: app/monthly_reports.py:392
 msgid "Reporte mensual ejecutivo"
 msgstr "Executive monthly report"
 
-#: app/monthly_reports.py:345 app/templates/dashboard.html:53
+#: app/monthly_reports.py:393 app/templates/dashboard.html:53
 #: app/templates/pro_monthly_report.html:49
 msgid "Resumen ejecutivo"
 msgstr "Executive summary"
 
-#: app/monthly_reports.py:346 app/templates/admin_organization.html:48
-#: app/templates/dashboard.html:349
+#: app/monthly_reports.py:394 app/templates/admin_organization.html:48
+#: app/templates/dashboard.html:361
 #: app/templates/emails/monthly_owner_report.html:31
 #: app/templates/pro_dashboard.html:55 app/templates/pro_dashboard.html:107
-#: app/templates/pro_monthly_report.html:55 app/templates/reports.html:308
+#: app/templates/pro_monthly_report.html:55 app/templates/reports.html:328
 msgid "Ventas"
 msgstr "Sales"
 
-#: app/monthly_reports.py:347 app/templates/emails/monthly_owner_report.html:41
+#: app/monthly_reports.py:395 app/templates/emails/monthly_owner_report.html:41
 #: app/templates/pro_monthly_report.html:56 app/templates/recipe_detail.html:8
 #: app/templates/recipe_form.html:19 app/templates/recipes.html:12
 #: app/templates/recipes.html:19
 msgid "Utilidad estimada"
 msgstr "Estimated profit"
 
-#: app/monthly_reports.py:348 app/templates/emails/monthly_owner_report.html:35
+#: app/monthly_reports.py:396 app/templates/emails/monthly_owner_report.html:35
 #: app/templates/pro_monthly_report.html:58
 msgid "Ventas registradas"
 msgstr "Recorded sales"
 
-#: app/monthly_reports.py:349 app/templates/emails/monthly_owner_report.html:45
+#: app/monthly_reports.py:397 app/templates/emails/monthly_owner_report.html:45
 #: app/templates/pro_dashboard.html:58 app/templates/pro_monthly_report.html:57
 #: app/templates/reports.html:123
 msgid "Ticket promedio"
 msgstr "Average ticket"
 
-#: app/monthly_reports.py:350 app/templates/emails/monthly_owner_report.html:52
+#: app/monthly_reports.py:398 app/templates/emails/monthly_owner_report.html:52
 #: app/templates/pro_monthly_report.html:70
 msgid "Lo que salió bien"
 msgstr "What went well"
 
-#: app/monthly_reports.py:351 app/templates/emails/monthly_owner_report.html:59
+#: app/monthly_reports.py:399 app/templates/emails/monthly_owner_report.html:59
 #: app/templates/pro_monthly_report.html:75
 msgid "Lo que conviene revisar"
 msgstr "What to review"
 
-#: app/monthly_reports.py:352 app/templates/pro_monthly_report.html:93
+#: app/monthly_reports.py:400 app/templates/pro_monthly_report.html:93
 msgid "Productos destacados"
 msgstr "Highlighted products"
 
-#: app/monthly_reports.py:353 app/templates/pro_monthly_report.html:116
+#: app/monthly_reports.py:401 app/templates/pro_monthly_report.html:116
 msgid "Clientes importantes"
 msgstr "Top customers"
 
-#: app/monthly_reports.py:354 app/templates/pro_monthly_report.html:135
+#: app/monthly_reports.py:402 app/templates/pro_monthly_report.html:135
 msgid "Oportunidades y alertas"
 msgstr "Opportunities and alerts"
 
-#: app/monthly_reports.py:355
+#: app/monthly_reports.py:403
 msgid "Acciones para el siguiente mes"
 msgstr "Actions for next month"
 
-#: app/monthly_reports.py:356 app/templates/emails/monthly_owner_report.html:88
+#: app/monthly_reports.py:404
+#: app/templates/emails/monthly_owner_report.html:117
 #: app/templates/pro_monthly_report.html:137
 msgid "Valor del inventario"
 msgstr "Inventory value"
 
-#: app/monthly_reports.py:357 app/templates/emails/monthly_owner_report.html:92
+#: app/monthly_reports.py:405
+#: app/templates/emails/monthly_owner_report.html:121
 #: app/templates/pro_monthly_report.html:138
 msgid "Pendiente por cobrar"
 msgstr "Outstanding receivables"
 
-#: app/monthly_reports.py:358 app/pro/services.py:468
+#: app/monthly_reports.py:406 app/pro/services.py:468
 #: app/templates/cash_register.html:8
-#: app/templates/emails/monthly_owner_report.html:96
+#: app/templates/emails/monthly_owner_report.html:125
 #: app/templates/pro_monthly_report.html:139
 msgid "Cierres con diferencia"
 msgstr "Closings with discrepancies"
 
-#: app/monthly_reports.py:359
+#: app/monthly_reports.py:407
 msgid "Sin datos para este periodo."
 msgstr "No data for this period."
 
-#: app/monthly_reports.py:361
+#: app/monthly_reports.py:409
 msgid "Documento generado por PATIA a partir de la operación registrada."
 msgstr "Document generated by PATIA from the recorded activity."
 
-#: app/monthly_reports.py:364
+#: app/monthly_reports.py:412
 #, python-format
 msgid "Snapshot %(hash)s"
 msgstr "Snapshot %(hash)s"
 
-#: app/monthly_reports.py:367
+#: app/monthly_reports.py:415
 msgid "Resultados del mes"
 msgstr "Monthly results"
 
-#: app/monthly_reports.py:369
+#: app/monthly_reports.py:417
 msgid "Ventas, rentabilidad y productos que explican el periodo."
 msgstr "Sales, profitability, and products that explain the period."
 
-#: app/inventory/routes.py:240 app/monthly_reports.py:371
-#: app/templates/dashboard.html:189 app/templates/pro_monthly_report.html:98
+#: app/inventory/routes.py:240 app/monthly_reports.py:419
+#: app/templates/dashboard.html:201 app/templates/pro_monthly_report.html:98
 #: app/templates/pro_purchase_detail.html:34
 #: app/templates/pro_purchase_detail.html:38
 #: app/templates/pro_purchases.html:58 app/templates/pro_purchases.html:62
@@ -160,27 +162,28 @@ msgstr "Sales, profitability, and products that explain the period."
 msgid "Producto"
 msgstr "Product"
 
-#: app/monthly_reports.py:372 app/templates/pro_monthly_report.html:98
-#: app/templates/reports.html:242 app/templates/reports.html:261
+#: app/monthly_reports.py:420 app/templates/pro_monthly_report.html:98
+#: app/templates/pro_monthly_report.html:147 app/templates/reports.html:242
+#: app/templates/reports.html:261 app/templates/reports.html:298
 msgid "Unidades"
 msgstr "Units"
 
-#: app/monthly_reports.py:373 app/templates/pro_monthly_report.html:98
+#: app/monthly_reports.py:421 app/templates/pro_monthly_report.html:98
 msgid "Resultado"
 msgstr "Result"
 
-#: app/monthly_reports.py:374 app/templates/credit_accounts.html:19
+#: app/monthly_reports.py:422 app/templates/credit_accounts.html:19
 #: app/templates/credit_accounts.html:21 app/templates/customers.html:41
 #: app/templates/customers.html:46 app/templates/pro_monthly_report.html:120
 #: app/templates/ticket.html:81
 msgid "Cliente"
 msgstr "Customer"
 
-#: app/monthly_reports.py:375 app/templates/pro_monthly_report.html:120
+#: app/monthly_reports.py:423 app/templates/pro_monthly_report.html:120
 msgid "Compras"
 msgstr "Purchases"
 
-#: app/monthly_reports.py:376 app/templates/customer_detail.html:80
+#: app/monthly_reports.py:424 app/templates/customer_detail.html:80
 #: app/templates/customer_detail.html:86
 #: app/templates/pro_monthly_report.html:120 app/templates/sell.html:53
 #: app/templates/sell.html:121 app/templates/sell.html:208
@@ -188,217 +191,277 @@ msgstr "Purchases"
 msgid "Total"
 msgstr "Total"
 
-#: app/monthly_reports.py:378 app/templates/pro_monthly_report.html:129
+#: app/monthly_reports.py:426 app/templates/pro_monthly_report.html:129
 msgid "No hubo ventas vinculadas a clientes durante este mes."
 msgstr "No sales were linked to customers this month."
 
-#: app/monthly_reports.py:380
+#: app/monthly_reports.py:428
 msgid "Control y siguiente paso"
 msgstr "Control and next step"
 
-#: app/monthly_reports.py:382
+#: app/monthly_reports.py:430
 msgid "Inventario, saldos y caja para preparar el próximo mes."
 msgstr "Inventory, balances, and cash register insights to prepare for next month."
 
-#: app/monthly_reports.py:385
+#: app/monthly_reports.py:433
 msgid "Registra actividad durante el mes para recibir acciones específicas."
 msgstr "Record activity during the month to receive specific actions."
 
-#: app/monthly_reports.py:795
+#: app/monthly_reports.py:435
+msgid "Platillos e ingredientes"
+msgstr "Dishes and ingredients"
+
+#: app/monthly_reports.py:436 app/templates/edit_product.html:67
+#: app/templates/pro_monthly_report.html:147 app/templates/recipe_form.html:11
+#: app/templates/reports.html:298 app/templates/reports.html:302
+msgid "Platillo"
+msgstr "Dish"
+
+#: app/monthly_reports.py:437 app/templates/edit_product.html:66
+#: app/templates/pro_monthly_report.html:148
+#: app/templates/recipe_detail.html:11 app/templates/recipe_form.html:36
+#: app/templates/reports.html:307
+msgid "Ingrediente"
+msgstr "Ingredient"
+
+#: app/monthly_reports.py:438 app/templates/pro_monthly_report.html:148
+msgid "Consumo"
+msgstr "Consumption"
+
+#: app/monthly_reports.py:439 app/templates/pro_dashboard.html:57
+#: app/templates/pro_monthly_report.html:147 app/templates/products.html:236
+#: app/templates/products.html:245 app/templates/recipe_detail.html:8
+#: app/templates/recipe_form.html:19 app/templates/recipes.html:12
+#: app/templates/recipes.html:20 app/templates/reports.html:117
+#: app/templates/reports.html:261 app/templates/reports.html:302
+msgid "Margen"
+msgstr "Margin"
+
+#: app/monthly_reports.py:496 app/templates/emails/monthly_owner_report.html:35
+#: app/templates/pro_monthly_report.html:58
+msgid "Platillos vendidos"
+msgstr "Dishes sold"
+
+#: app/monthly_reports.py:890
 #, python-format
 msgid "Tus ventas crecieron %(percentage)s%% frente al mes anterior."
 msgstr "Your sales grew %(percentage)s%% compared with the previous month."
 
-#: app/monthly_reports.py:802
+#: app/monthly_reports.py:897
 #, python-format
 msgid "Tus ventas bajaron %(percentage)s%% frente al mes anterior."
 msgstr "Your sales fell %(percentage)s%% compared with the previous month."
 
-#: app/monthly_reports.py:809
+#: app/monthly_reports.py:904
 #, python-format
 msgid "Tu utilidad creció %(percentage)s%% frente al mes anterior."
 msgstr "Your profit grew %(percentage)s%% compared with the previous month."
 
-#: app/monthly_reports.py:816
+#: app/monthly_reports.py:911
 #, python-format
 msgid "Tu utilidad bajó %(percentage)s%% frente al mes anterior."
 msgstr "Your profit fell %(percentage)s%% compared with the previous month."
 
-#: app/monthly_reports.py:824
+#: app/monthly_reports.py:919
 #, python-format
 msgid "Repón %(product)s y revisa los demás productos con pocas existencias."
 msgstr "Restock %(product)s and review the other low-stock products."
 
-#: app/monthly_reports.py:830
+#: app/monthly_reports.py:925
 #, python-format
 msgid "%(count)s productos necesitan reabastecimiento."
 msgstr "%(count)s products need restocking."
 
-#: app/monthly_reports.py:841
+#: app/monthly_reports.py:936
 #, python-format
 msgid "Da seguimiento a %(amount)s pendientes por cobrar."
 msgstr "Follow up on %(amount)s in outstanding receivables."
 
-#: app/monthly_reports.py:847
+#: app/monthly_reports.py:942
 #, python-format
 msgid "Tienes %(amount)s pendientes por cobrar."
 msgstr "You have %(amount)s in outstanding receivables."
 
-#: app/monthly_reports.py:854
+#: app/monthly_reports.py:949
 #, python-format
 msgid "Revisa los %(count)s cierres con diferencias de caja."
 msgstr "Review the %(count)s cash closings with discrepancies."
 
-#: app/monthly_reports.py:860
+#: app/monthly_reports.py:955
 #, python-format
 msgid "%(count)s cierres de caja tuvieron diferencias."
 msgstr "%(count)s cash closings had discrepancies."
 
-#: app/monthly_reports.py:867
+#: app/monthly_reports.py:962
 msgid "Completa los costos faltantes para obtener una utilidad exacta."
 msgstr "Add the missing costs to obtain an accurate profit."
 
-#: app/monthly_reports.py:872
+#: app/monthly_reports.py:967
 #, python-format
 msgid "%(count)s ventas no tienen un costo histórico completo."
 msgstr "%(count)s sales do not have a complete historical cost."
 
-#: app/monthly_reports.py:879
+#: app/monthly_reports.py:976
+#, python-format
+msgid "%(dish)s fue el platillo más vendido con %(count)s unidades."
+msgstr "%(dish)s was the best-selling dish with %(count)s units."
+
+#: app/monthly_reports.py:982
+#, python-format
+msgid ""
+"%(dish)s tiene disponibilidad limitada a %(count)s porciones por falta de"
+" %(ingredient)s."
+msgstr ""
+"%(dish)s is limited to %(count)s portions due to insufficient "
+"%(ingredient)s."
+
+#: app/monthly_reports.py:987
+#, python-format
+msgid "Repón %(ingredient)s para mantener disponible %(dish)s."
+msgstr "Restock %(ingredient)s to keep %(dish)s available."
+
+#: app/monthly_reports.py:997
+#, python-format
+msgid "%(dish)s cerró con un margen de %(margin)s%%."
+msgstr "%(dish)s closed with a %(margin)s%% margin."
+
+#: app/monthly_reports.py:1003
 msgid "Mantén el seguimiento actual; no detectamos alertas importantes."
 msgstr "Keep up your current tracking; we found no major alerts."
 
-#: app/monthly_reports.py:885
+#: app/monthly_reports.py:1009
 #, python-format
 msgid "Registraste %(count)s ventas durante el mes."
 msgstr "You recorded %(count)s sales during the month."
 
-#: app/monthly_reports.py:891
+#: app/monthly_reports.py:1015
 msgid "No detectamos situaciones urgentes en este periodo."
 msgstr "We found no urgent issues during this period."
 
-#: app/monthly_reports.py:895
+#: app/monthly_reports.py:1019
 msgid "Este mes todavía no tiene ventas registradas en PATIA."
 msgstr "There are no sales recorded in PATIA for this month yet."
 
-#: app/monthly_reports.py:899
+#: app/monthly_reports.py:1023
 msgid "Ya tienes un mes de información listo para revisar."
 msgstr "You now have a full month of information ready to review."
 
-#: app/monthly_reports.py:903
+#: app/monthly_reports.py:1027
 #, python-format
 msgid "Vendiste %(percentage)s%% más que el mes anterior."
 msgstr "You sold %(percentage)s%% more than the previous month."
 
-#: app/monthly_reports.py:908
+#: app/monthly_reports.py:1032
 #, python-format
 msgid "Vendiste %(percentage)s%% menos que el mes anterior."
 msgstr "You sold %(percentage)s%% less than the previous month."
 
-#: app/monthly_reports.py:912
+#: app/monthly_reports.py:1036
 msgid "Tus ventas se mantuvieron estables este mes."
 msgstr "Your sales remained stable this month."
 
-#: app/monthly_reports.py:1026 app/pro/routes.py:436
+#: app/monthly_reports.py:1151 app/pro/routes.py:504
 #, python-format
 msgid "Tu resumen mensual de %(business)s — %(period)s"
 msgstr "Your monthly summary for %(business)s — %(period)s"
 
-#: app/plans.py:241
+#: app/plans.py:271
 msgid "Prueba gratuita"
 msgstr "Free trial"
 
-#: app/plans.py:242 app/plans.py:288 app/routes.py:4996 app/routes.py:5317
+#: app/plans.py:272 app/plans.py:318 app/routes.py:5317 app/routes.py:5638
 #: app/templates/admin.html:88
 msgid "Starter"
 msgstr "Starter"
 
-#: app/plans.py:243 app/plans.py:306 app/routes.py:4997 app/routes.py:5318
+#: app/plans.py:273 app/plans.py:336 app/routes.py:5318 app/routes.py:5639
 #: app/templates/admin.html:89
 msgid "Pro"
 msgstr "Pro"
 
-#: app/plans.py:244 app/plans.py:325 app/routes.py:4998
+#: app/plans.py:274 app/plans.py:355 app/routes.py:5319
+#: app/templates/reports.html:294
 msgid "Restaurant"
 msgstr "Restaurant"
 
-#: app/plans.py:245
+#: app/plans.py:275
 msgid "Plan actual protegido"
 msgstr "Protected current plan"
 
-#: app/plans.py:246 app/routes.py:5000 app/routes.py:5320
+#: app/plans.py:276 app/routes.py:5321 app/routes.py:5641
 #: app/templates/admin.html:91 app/templates/admin_organization.html:39
 msgid "Acceso manual"
 msgstr "Manual access"
 
-#: app/plans.py:248 app/routes.py:5321 app/templates/subscription.html:21
+#: app/plans.py:278 app/routes.py:5642 app/templates/subscription.html:21
 msgid "Plan actual"
 msgstr "Current plan"
 
-#: app/plans.py:291
+#: app/plans.py:321
 msgid "Negocios pequeños manejados por el propietario y un cajero."
 msgstr "Small businesses run by the owner and one cashier."
 
-#: app/plans.py:294
+#: app/plans.py:324
 msgid "Todo lo necesario para vender y controlar un negocio pequeño."
 msgstr "Everything you need to sell and run a small business."
 
-#: app/plans.py:297
+#: app/plans.py:327
 msgid "Propietario y un cajero"
 msgstr "Owner and one cashier"
 
-#: app/plans.py:298
+#: app/plans.py:328
 msgid "Ventas, inventario y tickets"
 msgstr "Sales, inventory, and tickets"
 
-#: app/plans.py:299
+#: app/plans.py:329
 msgid "Clientes, caja y saldos pendientes"
 msgstr "Customers, daily cash, and outstanding balances"
 
-#: app/plans.py:300
+#: app/plans.py:330
 msgid "Alertas y reportes esenciales"
 msgstr "Essential alerts and reports"
 
-#: app/plans.py:301
+#: app/plans.py:331
 msgid "Productos y ventas sin límites artificiales"
 msgstr "Products and sales without artificial limits"
 
-#: app/plans.py:309
+#: app/plans.py:339
 msgid "Negocios con varias personas que necesitan más control."
 msgstr "Businesses with several people that need more control."
 
-#: app/plans.py:312
+#: app/plans.py:342
 msgid "Más control para negocios que trabajan con varias personas."
 msgstr "More control for businesses with several team members."
 
-#: app/plans.py:315
+#: app/plans.py:345
 msgid "Todo lo incluido en Starter"
 msgstr "Everything included in Starter"
 
-#: app/plans.py:316
+#: app/plans.py:346
 msgid "Hasta cinco personas"
 msgstr "Up to five people"
 
-#: app/plans.py:317
+#: app/plans.py:347
 msgid "Encargados y permisos avanzados"
 msgstr "Managers and advanced permissions"
 
-#: app/plans.py:318
+#: app/plans.py:348
 msgid "Historial y reportes avanzados"
 msgstr "Advanced history and reports"
 
-#: app/plans.py:319
+#: app/plans.py:349
 msgid "Reporte mensual enviado al propietario"
 msgstr "Monthly report sent to the owner"
 
-#: app/plans.py:320
+#: app/plans.py:350
 msgid "Soporte prioritario"
 msgstr "Priority support"
 
-#: app/plans.py:327
+#: app/plans.py:357
 msgid "Control especializado para restaurantes."
 msgstr "Specialized control for restaurants."
 
-#: app/plans.py:329
+#: app/plans.py:359
 msgid ""
 "Para restaurantes que quieren controlar recetas, ingredientes y el costo "
 "real de cada platillo."
@@ -406,254 +469,254 @@ msgstr ""
 "For restaurants that want to control recipes, ingredients, and the real "
 "cost of every dish."
 
-#: app/plans.py:332
+#: app/plans.py:362
 msgid "Todo lo necesario para operar"
 msgstr "Everything needed to operate"
 
-#: app/plans.py:333
+#: app/plans.py:363
 msgid "Recetas e ingredientes"
 msgstr "Recipes and ingredients"
 
-#: app/plans.py:334
+#: app/plans.py:364
 msgid "Costeo real por platillo"
 msgstr "Real cost per dish"
 
-#: app/plans.py:335
+#: app/plans.py:365
 msgid "Kg, g, L, ml y piezas"
 msgstr "Kg, g, L, ml, and units"
 
-#: app/plans.py:336
+#: app/plans.py:366
 msgid "Descuento automático de inventario"
 msgstr "Automatic inventory deduction"
 
-#: app/plans.py:337
+#: app/plans.py:367
 msgid "Disponibilidad de platillos"
 msgstr "Dish availability"
 
-#: app/routes.py:198
+#: app/routes.py:199
 msgid "Tu periodo de prueba terminó. Activa PATIA Pro para continuar."
 msgstr "Your trial period is over. Activate PATIA Pro to continue."
 
-#: app/routes.py:297
+#: app/routes.py:298
 msgid "Selecciona un cliente válido."
 msgstr "Select a valid customer."
 
-#: app/routes.py:305
+#: app/routes.py:306
 msgid "El cliente seleccionado no está disponible."
 msgstr "The selected customer is not available."
 
-#: app/routes.py:335
+#: app/routes.py:336
 msgid "Demasiados intentos de autorización. Espera un minuto."
 msgstr "Too many authorization attempts. Wait one minute."
 
-#: app/routes.py:367 app/templates/recipes.html:22
+#: app/routes.py:368 app/templates/recipes.html:22
 msgid "Activa"
 msgstr "Active"
 
-#: app/routes.py:368 app/routes.py:5056 app/routes.py:5208
+#: app/routes.py:369 app/routes.py:5377 app/routes.py:5529
 #: app/templates/admin.html:98 app/templates/admin_organization.html:14
 msgid "En prueba"
 msgstr "On test"
 
-#: app/routes.py:369 app/routes.py:4972 app/routes.py:5053 app/routes.py:5205
-#: app/routes.py:5222 app/templates/admin.html:99 app/templates/admin.html:107
+#: app/routes.py:370 app/routes.py:5293 app/routes.py:5374 app/routes.py:5526
+#: app/routes.py:5543 app/templates/admin.html:99 app/templates/admin.html:107
 #: app/templates/admin_organization.html:36
 msgid "Pago pendiente"
 msgstr "Payment pending"
 
-#: app/routes.py:370
+#: app/routes.py:371
 msgid "Sin pagar"
 msgstr "Unpaid"
 
-#: app/routes.py:371
+#: app/routes.py:372
 msgid "Cancelada"
 msgstr "Canceled"
 
-#: app/routes.py:372
+#: app/routes.py:373
 msgid "Incompleta"
 msgstr "Incomplete"
 
-#: app/routes.py:373
+#: app/routes.py:374
 msgid "Incompleta y vencida"
 msgstr "Incomplete and expired"
 
-#: app/routes.py:374
+#: app/routes.py:375
 msgid "Pausada"
 msgstr "Paused"
 
-#: app/routes.py:376
+#: app/routes.py:377
 msgid "Sin suscripción"
 msgstr "No subscription"
 
-#: app/routes.py:385
+#: app/routes.py:386
 msgid "Ciudad de México"
 msgstr "Mexico City"
 
-#: app/routes.py:386
+#: app/routes.py:387
 msgid "Cancún"
 msgstr "Cancun"
 
-#: app/routes.py:387
+#: app/routes.py:388
 msgid "Tijuana"
 msgstr "Tijuana"
 
-#: app/routes.py:388
+#: app/routes.py:389
 msgid "Hermosillo"
 msgstr "Hermosillo"
 
-#: app/routes.py:389
+#: app/routes.py:390
 msgid "Chihuahua"
 msgstr "Chihuahua"
 
-#: app/routes.py:713
+#: app/routes.py:873
 msgid "Completa todos los campos obligatorios."
 msgstr "Complete all required fields."
 
-#: app/routes.py:716 app/routes.py:717 app/routes.py:728 app/routes.py:729
-#: app/routes.py:739 app/routes.py:740 app/routes.py:765 app/routes.py:766
-#: app/routes.py:823 app/routes.py:824 app/routes.py:868
+#: app/routes.py:876 app/routes.py:877 app/routes.py:888 app/routes.py:889
+#: app/routes.py:899 app/routes.py:900 app/routes.py:925 app/routes.py:926
+#: app/routes.py:983 app/routes.py:984 app/routes.py:1028
 msgid "Crear cuenta"
 msgstr "Create account"
 
-#: app/routes.py:725 app/routes.py:970
+#: app/routes.py:885 app/routes.py:1130
 msgid "El correo no es válido o no existe."
 msgstr "The email address is invalid or does not exist."
 
-#: app/routes.py:736 app/routes.py:1068
+#: app/routes.py:896 app/routes.py:1228
 msgid "La contraseña debe tener al menos 8 caracteres."
 msgstr "The password must be at least 8 characters."
 
-#: app/routes.py:762 app/routes.py:820
+#: app/routes.py:922 app/routes.py:980
 msgid "Ese correo ya está registrado."
 msgstr "That email address is already registered."
 
-#: app/routes.py:848 app/routes.py:1001
+#: app/routes.py:1008 app/routes.py:1161
 msgid "Verifica tu correo en PATIA"
 msgstr "Verify your email in PATIA"
 
-#: app/routes.py:852 app/templates/verify_email.html:9
+#: app/routes.py:1012 app/templates/verify_email.html:9
 msgid "Verifica tu correo"
 msgstr "Verify your email"
 
-#: app/routes.py:853
+#: app/routes.py:1013
 msgid "Tu código de verificación es:"
 msgstr "Your verification code is:"
 
-#: app/routes.py:855 app/routes.py:944
+#: app/routes.py:1015 app/routes.py:1104
 msgid "Este código expira en 30 minutos."
 msgstr "This code expires in 30 minutes."
 
-#: app/routes.py:885
+#: app/routes.py:1045
 msgid "Código inválido."
 msgstr "Invalid code."
 
-#: app/routes.py:889
+#: app/routes.py:1049
 msgid "El código expiró. Solicita uno nuevo."
 msgstr "The code expired. Request a new one."
 
-#: app/routes.py:893
+#: app/routes.py:1053
 msgid "Código incorrecto."
 msgstr "Incorrect code."
 
-#: app/routes.py:903
+#: app/routes.py:1063
 msgid "¡Bienvenido a PATIA!"
 msgstr "Welcome to PATIA!"
 
-#: app/routes.py:907
+#: app/routes.py:1067
 #, python-format
 msgid "Bienvenido a PATIA, %(name)s!"
 msgstr "Welcome to PATIA, %(name)s!"
 
-#: app/routes.py:908
+#: app/routes.py:1068
 msgid "Tu cuenta está lista. Tienes 14 días gratis para explorar todo."
 msgstr "Your account is ready. You have 14 days free to explore everything."
 
-#: app/routes.py:909
+#: app/routes.py:1069
 msgid "Ir a mi inventario"
 msgstr "Go to my inventory"
 
-#: app/routes.py:916
+#: app/routes.py:1076
 msgid "¡Correo verificado! Bienvenido a PATIA."
 msgstr "Email verified! Welcome to PATIA."
 
-#: app/routes.py:939
+#: app/routes.py:1099
 msgid "Nuevo código de verificación PATIA"
 msgstr "New PATIA verification code"
 
-#: app/routes.py:942
+#: app/routes.py:1102
 msgid "Tu nuevo código"
 msgstr "Your new code"
 
-#: app/routes.py:950
+#: app/routes.py:1110
 msgid "Te enviamos un nuevo código de verificación."
 msgstr "We sent you a new verification code."
 
-#: app/routes.py:952
+#: app/routes.py:1112
 msgid "No pudimos enviar el código. Inténtalo nuevamente en unos minutos."
 msgstr "We could not send the code. Try again in a few minutes."
 
-#: app/routes.py:979 app/routes.py:993
+#: app/routes.py:1139 app/routes.py:1153
 msgid "Ese correo ya pertenece a otra cuenta de PATIA."
 msgstr "That email already belongs to another PATIA account."
 
-#: app/routes.py:1003
+#: app/routes.py:1163
 #, python-format
 msgid "Tu nuevo código de verificación es: %(code)s"
 msgstr "Your new verification code is: %(code)s"
 
-#: app/routes.py:1010
+#: app/routes.py:1170
 msgid "Actualizamos tu correo y enviamos un código nuevo."
 msgstr "We updated your email and sent a new code."
 
-#: app/routes.py:1016
+#: app/routes.py:1176
 msgid ""
 "Actualizamos tu correo, pero no pudimos enviar el código. Intenta "
 "reenviarlo."
 msgstr "We updated your email, but could not send the code. Try sending it again."
 
-#: app/routes.py:1037
+#: app/routes.py:1197
 msgid "Recupera tu contraseña PATIA"
 msgstr "Recover your PATIA password"
 
-#: app/routes.py:1040
+#: app/routes.py:1200
 msgid "Recuperar contraseña"
 msgstr "Recover password"
 
-#: app/routes.py:1041
+#: app/routes.py:1201
 msgid ""
 "Haz clic en el botón para crear una nueva contraseña. Expira en 30 "
 "minutos."
 msgstr "Click the button to create a new password. Expires in 30 minutes."
 
-#: app/routes.py:1042
+#: app/routes.py:1202
 msgid "Crear nueva contraseña"
 msgstr "Create new password"
 
-#: app/routes.py:1050
+#: app/routes.py:1210
 msgid "Si ese correo existe, te enviamos un enlace."
 msgstr "If that email exists, we sent a link."
 
-#: app/routes.py:1074
+#: app/routes.py:1234
 msgid "Contraseña actualizada. Inicia sesión."
 msgstr "Password updated. Sign in."
 
-#: app/routes.py:1088
+#: app/routes.py:1248
 msgid "Correo o contraseña incorrectos."
 msgstr "Incorrect email or password."
 
-#: app/routes.py:1096
+#: app/routes.py:1256
 msgid "Tu acceso a esta empresa estÃ¡ desactivado. Contacta al propietario."
 msgstr "Your access to this business is deactivated. Contact the owner."
 
-#: app/routes.py:1114
+#: app/routes.py:1274
 msgid "Tu prueba gratuita de PATIA termina en 2 días"
 msgstr "Your free PATIA trial ends in 2 days"
 
-#: app/routes.py:1118
+#: app/routes.py:1278
 msgid "Tu prueba termina en 2 días"
 msgstr "Your trial ends in 2 days"
 
-#: app/routes.py:1119
+#: app/routes.py:1279
 #, python-format
 msgid ""
 "Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No "
@@ -662,73 +725,73 @@ msgstr ""
 "Hello %(name)s, your PATIA free trial period ends soon. Don't lose access"
 " to your inventory and sales."
 
-#: app/routes.py:1120 app/templates/admin_organization.html:95
+#: app/routes.py:1280 app/templates/admin_organization.html:95
 msgid "Activar PATIA Pro"
 msgstr "Activate PATIA Pro"
 
-#: app/routes.py:1128
+#: app/routes.py:1288
 msgid "Sesión iniciada correctamente."
 msgstr "Signed in successfully."
 
-#: app/routes.py:1131 app/templates/landing.html:32
+#: app/routes.py:1291 app/templates/landing.html:32
 #: app/templates/landing.html:43 app/templates/landing.html:212
 msgid "Iniciar sesión"
 msgstr "Sign in"
 
-#: app/routes.py:1131
+#: app/routes.py:1291
 msgid "Entrar"
 msgstr "Sign in"
 
-#: app/routes.py:1139
+#: app/routes.py:1299
 msgid "Para cerrar sesión de forma segura, utiliza el botón Cerrar sesión."
 msgstr "To sign out securely, use the Sign out button."
 
-#: app/routes.py:1157
+#: app/routes.py:1317
 msgid "Has cerrado sesión correctamente."
 msgstr "You have signed out successfully."
 
-#: app/routes.py:1412
+#: app/routes.py:1572
 #, python-format
 msgid "%(product)s agotado"
 msgstr "%(product)s sold out"
 
-#: app/routes.py:1413
+#: app/routes.py:1573
 msgid "Stock actual: 0. Necesitas reabastecerlo inmediatamente."
 msgstr "Current stock: 0. You need to restock immediately."
 
-#: app/routes.py:1418
+#: app/routes.py:1578
 #, python-format
 msgid "Reordenar %(product)s"
 msgstr "Reorder %(product)s"
 
-#: app/routes.py:1420
+#: app/routes.py:1580
 #, python-format
 msgid "Stock actual: %(stock)s. Mínimo recomendado: %(minimum)s."
 msgstr "Current stock: %(stock)s. Recommended minimum: %(minimum)s."
 
-#: app/routes.py:1428
+#: app/routes.py:1588
 #, python-format
 msgid "%(product)s se agotará pronto"
 msgstr "%(product)s will be out of stock soon"
 
-#: app/routes.py:1430
+#: app/routes.py:1590
 #, python-format
 msgid ""
 "Con el ritmo actual de ventas, se acabará en aproximadamente %(days)s "
 "días."
 msgstr "At the current sales rate, it will be gone in approximately %(days)s days."
 
-#: app/routes.py:1437
+#: app/routes.py:1597
 #, python-format
 msgid "Vigilar %(product)s"
 msgstr "Monitor %(product)s"
 
-#: app/routes.py:1438
+#: app/routes.py:1598
 #, python-format
 msgid "Inventario estimado para %(days)s días."
 msgstr "Estimated inventory for %(days)s days."
 
-#: app/routes.py:1445
+#: app/routes.py:1605
 #, python-format
 msgid ""
 "%(product)s es el producto con más movimiento. Conviene revisar sus "
@@ -737,11 +800,11 @@ msgstr ""
 "%(product)s is the product with the most movement. It is a good idea to "
 "check their stock before your next purchase."
 
-#: app/routes.py:1448
+#: app/routes.py:1608
 msgid "Ventas registradas en los últimos 7 días."
 msgstr "Sales recorded in the last 7 days."
 
-#: app/routes.py:1450
+#: app/routes.py:1610
 msgid ""
 "Confirma sus existencias, costo y stock mínimo antes de preparar tu "
 "siguiente compra."
@@ -749,28 +812,28 @@ msgstr ""
 "Check its inventory, cost, and minimum stock before preparing your next "
 "purchase."
 
-#: app/routes.py:1452
+#: app/routes.py:1612
 msgid "Abrir producto"
 msgstr "Open product"
 
-#: app/routes.py:1460
+#: app/routes.py:1620
 #, python-format
 msgid "En los últimos 7 días registraste %(amount)s en ventas."
 msgstr "In the last 7 days you recorded %(amount)s in sales."
 
-#: app/routes.py:1463
+#: app/routes.py:1623
 msgid "Suma de las ventas registradas en el periodo."
 msgstr "Sum of sales recorded in this period."
 
-#: app/routes.py:1465
+#: app/routes.py:1625
 msgid "Compara los días del periodo para identificar cuándo vendes más."
 msgstr "Compare the days in this period to identify when you sell the most."
 
-#: app/routes.py:1467 app/templates/dashboard.html:89
+#: app/routes.py:1627 app/templates/dashboard.html:89
 msgid "Ver reportes"
 msgstr "View reports"
 
-#: app/routes.py:1473
+#: app/routes.py:1633
 #, python-format
 msgid ""
 "Tu utilidad estimada de los últimos 7 días es %(amount)s, considerando el"
@@ -779,11 +842,11 @@ msgstr ""
 "Your estimated profit for the last 7 days is %(amount)s, considering the "
 "recorded cost of products sold."
 
-#: app/routes.py:1476
+#: app/routes.py:1636
 msgid "Precio vendido menos costo histórico conocido."
 msgstr "Sale price minus known historical cost."
 
-#: app/routes.py:1478
+#: app/routes.py:1638
 msgid ""
 "Revisa qué productos aportaron esa utilidad y cuáles necesitan un mejor "
 "margen."
@@ -791,11 +854,11 @@ msgstr ""
 "Review which products contributed to that profit and which need a better "
 "margin."
 
-#: app/routes.py:1480
+#: app/routes.py:1640
 msgid "Revisar utilidad"
 msgstr "Review profit"
 
-#: app/routes.py:1487
+#: app/routes.py:1647
 #, python-format
 msgid ""
 "Tienes %(count)s producto con inventario bajo. Revísalo antes de que "
@@ -804,7 +867,7 @@ msgstr ""
 "You have %(count)s product with low inventory. Review it before it "
 "affects a sale."
 
-#: app/routes.py:1492
+#: app/routes.py:1652
 #, python-format
 msgid ""
 "Tienes %(count)s productos con inventario bajo. Revísalos antes de que "
@@ -813,187 +876,187 @@ msgstr ""
 "You have %(count)s products with low inventory. Review them before they "
 "affect a sale."
 
-#: app/routes.py:1496
+#: app/routes.py:1656
 msgid "Stock actual comparado con el mínimo de cada producto."
 msgstr "Current stock compared with each product's minimum."
 
-#: app/routes.py:1498
+#: app/routes.py:1658
 msgid ""
 "Reabastece primero los productos agotados o más cercanos a quedarse sin "
 "existencias."
 msgstr "Restock sold-out products and those closest to running out first."
 
-#: app/routes.py:1500
+#: app/routes.py:1660
 msgid "Ver qué surtir"
 msgstr "View what to restock"
 
-#: app/routes.py:1554
+#: app/routes.py:1748
 msgid "El periodo solicitado no es válido. Mostramos los últimos 7 días."
 msgstr "The requested period is invalid. We are showing the last 7 days."
 
-#: app/routes.py:1578
+#: app/routes.py:1772
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr "The start date cannot be later than the end date."
 
-#: app/routes.py:1580
+#: app/routes.py:1774
 msgid "El rango personalizado no puede superar 366 días."
 msgstr "The custom range cannot exceed 366 days."
 
-#: app/routes.py:1582
+#: app/routes.py:1776
 msgid "Escribe fechas válidas. Mostramos los últimos 7 días."
 msgstr "Enter valid dates. We are showing the last 7 days."
 
-#: app/routes.py:1900
+#: app/routes.py:2105
 msgid "Completa los datos básicos"
 msgstr "Complete the basic information"
 
-#: app/routes.py:1901
+#: app/routes.py:2106
 msgid "Confirma la información principal de tu negocio."
 msgstr "Confirm the main information of your business."
 
-#: app/routes.py:1904
+#: app/routes.py:2109
 msgid "Completar datos"
 msgstr "Complete data"
 
-#: app/routes.py:1915 app/templates/products.html:24
+#: app/routes.py:2120 app/templates/products.html:24
 #: app/templates/products.html:39
 msgid "Agrega tu primer producto"
 msgstr "Add your first product"
 
-#: app/routes.py:1916
+#: app/routes.py:2121
 msgid "Captura un producto o importa tu catálogo desde Excel."
 msgstr "Capture a product or import your catalog from Excel."
 
-#: app/routes.py:1918 app/templates/products.html:27
+#: app/routes.py:2123 app/templates/products.html:27
 msgid "Agregar primer producto"
 msgstr "Add first product"
 
-#: app/routes.py:1922
+#: app/routes.py:2127
 msgid "Registra tu primera venta"
 msgstr "Register your first sale"
 
-#: app/routes.py:1923
+#: app/routes.py:2128
 msgid "Prueba el punto de venta con un producto de tu catálogo."
 msgstr "Test the point of sale with a product from your catalog."
 
-#: app/routes.py:1925
+#: app/routes.py:2130
 msgid "Registrar primera venta"
 msgstr "Register first sale"
 
-#: app/routes.py:1929
+#: app/routes.py:2134
 msgid "Revisa tus resultados"
 msgstr "Check your results"
 
-#: app/routes.py:1930
+#: app/routes.py:2135
 msgid "Consulta ventas, inventario y alertas en este panel."
 msgstr "View sales, inventory, and alerts in this dashboard."
 
-#: app/routes.py:2048 app/templates/dashboard.html:55
+#: app/routes.py:2253 app/templates/dashboard.html:55
 msgid "Productos agotados"
 msgstr "Out-of-stock products"
 
-#: app/routes.py:2050
+#: app/routes.py:2255
 msgid "Productos por agotarse"
 msgstr "Products at risk of running out"
 
-#: app/routes.py:2052
+#: app/routes.py:2257
 msgid "Productos sin ventas en el periodo"
 msgstr "Products without sales in this period"
 
-#: app/routes.py:2054
+#: app/routes.py:2259
 msgid "Productos sin costo conocido"
 msgstr "Products with an unknown cost"
 
-#: app/routes.py:2056
+#: app/routes.py:2261
 #, python-format
 msgid "Productos con margen de 15%% o menos"
 msgstr "Products with a margin of 15%% or less"
 
-#: app/routes.py:2157 app/routes.py:2198 app/routes.py:2304 app/routes.py:2797
-#: app/routes.py:2855 app/team/services.py:210
+#: app/routes.py:2362 app/routes.py:2403 app/routes.py:2509 app/routes.py:3002
+#: app/routes.py:3060 app/team/services.py:210
 msgid "Inicia sesión para continuar."
 msgstr "Sign in to continue."
 
-#: app/routes.py:2167
+#: app/routes.py:2372
 msgid "Escanea o escribe un código de barras válido."
 msgstr "Scan or enter a valid barcode."
 
-#: app/routes.py:2220 app/routes.py:2235
+#: app/routes.py:2425 app/routes.py:2440
 msgid "Revisa los datos del producto e inténtalo nuevamente."
 msgstr "Review the product details and try again."
 
-#: app/routes.py:2243
+#: app/routes.py:2448
 msgid "Ese código ya pertenece a un producto de tu inventario."
 msgstr "That barcode already belongs to a product in your inventory."
 
-#: app/routes.py:2249
+#: app/routes.py:2454
 msgid "Ese SKU ya está en uso. Escribe uno diferente."
 msgstr "That SKU is already in use. Enter a different one."
 
-#: app/routes.py:2271
+#: app/routes.py:2476
 msgid "Alta mediante carga rápida"
 msgstr "Created through quick entry"
 
-#: app/routes.py:2285
+#: app/routes.py:2490
 msgid "El código o el SKU ya fue registrado. Escanéalo de nuevo para continuar."
 msgstr "The barcode or SKU was already registered. Scan it again to continue."
 
-#: app/routes.py:2294
+#: app/routes.py:2499
 #, python-format
 msgid "%(product)s se agregó al inventario."
 msgstr "%(product)s was added to inventory."
 
-#: app/routes.py:2320 app/routes.py:3185
+#: app/routes.py:2525 app/routes.py:3399
 msgid "La cantidad recibida debe ser mayor que cero."
 msgstr "The received quantity must be greater than zero."
 
-#: app/routes.py:2331
+#: app/routes.py:2536
 msgid "No encontramos ese producto en tu inventario."
 msgstr "We could not find that product in your inventory."
 
-#: app/routes.py:2338 app/routes.py:3199
+#: app/routes.py:2543 app/routes.py:3413
 msgid "La cantidad recibida supera el límite permitido."
 msgstr "The received quantity exceeds the allowed limit."
 
-#: app/routes.py:2359
+#: app/routes.py:2564
 msgid "Reabastecimiento desde carga rápida"
 msgstr "Restocked through quick entry"
 
-#: app/routes.py:2372 app/routes.py:3233
+#: app/routes.py:2577 app/routes.py:3447
 msgid "No pudimos actualizar el inventario. Inténtalo nuevamente."
 msgstr "We could not update the inventory. Please try again."
 
-#: app/routes.py:2378 app/routes.py:3240
+#: app/routes.py:2583 app/routes.py:3454
 #, python-format
 msgid "Se agregaron %(quantity)s unidades a %(product)s."
 msgstr "%(quantity)s units were added to %(product)s."
 
-#: app/inventory/routes.py:241 app/routes.py:2395
+#: app/inventory/routes.py:241 app/routes.py:2600
 #: app/templates/edit_product.html:20 app/templates/products.html:51
 #: app/templates/products.html:138 app/templates/products.html:323
 #: app/templates/quick_load.html:62 app/templates/quick_load.html:98
 msgid "SKU"
 msgstr "SKU"
 
-#: app/routes.py:2396 app/templates/edit_product.html:25
+#: app/routes.py:2601 app/templates/edit_product.html:25
 #: app/templates/products.html:75 app/templates/products.html:323
 #: app/templates/quick_load.html:33 app/templates/quick_load.html:89
 msgid "Código de barras"
 msgstr "Bar-code"
 
-#: app/routes.py:2397 app/templates/edit_product.html:16
+#: app/routes.py:2602 app/templates/edit_product.html:16
 #: app/templates/products.html:47
 msgid "Nombre del producto"
 msgstr "Product name"
 
-#: app/routes.py:2398 app/templates/edit_product.html:30
+#: app/routes.py:2603 app/templates/edit_product.html:30
 #: app/templates/products.html:79 app/templates/products.html:236
 #: app/templates/products.html:241 app/templates/products.html:324
 #: app/templates/quick_load.html:103 app/templates/recipe_form.html:10
 msgid "Categoría"
 msgstr "Category"
 
-#: app/routes.py:2399 app/templates/edit_product.html:34
+#: app/routes.py:2604 app/templates/edit_product.html:34
 #: app/templates/products.html:83 app/templates/products.html:236
 #: app/templates/products.html:242 app/templates/products.html:325
 #: app/templates/quick_load.html:65 app/templates/quick_load.html:110
@@ -1002,12 +1065,12 @@ msgstr "Category"
 msgid "Proveedor"
 msgstr "Supplier"
 
-#: app/routes.py:2400 app/templates/products.html:325
-#: app/templates/recipe_detail.html:11 app/templates/reports.html:261
+#: app/routes.py:2605 app/templates/pro_monthly_report.html:148
+#: app/templates/products.html:325 app/templates/reports.html:261
 msgid "Costo"
 msgstr "Cost"
 
-#: app/routes.py:2401 app/templates/edit_product.html:42
+#: app/routes.py:2606 app/templates/edit_product.html:42
 #: app/templates/products.html:61 app/templates/products.html:326
 #: app/templates/quick_load.html:131 app/templates/recipe_detail.html:8
 #: app/templates/recipe_form.html:12 app/templates/recipes.html:12
@@ -1015,63 +1078,63 @@ msgstr "Cost"
 msgid "Precio de venta"
 msgstr "Sale price"
 
-#: app/routes.py:2402
+#: app/routes.py:2607
 msgid "Stock inicial"
 msgstr "Initial stock"
 
-#: app/routes.py:2403 app/templates/dashboard.html:142
+#: app/routes.py:2608 app/templates/dashboard.html:154
 #: app/templates/edit_product.html:51 app/templates/products.html:87
 #: app/templates/products.html:327 app/templates/quick_load.html:139
 msgid "Stock mínimo"
 msgstr "Minimum stock"
 
-#: app/routes.py:2410
+#: app/routes.py:2615
 msgid "Taladro percutor 1/2 pulgada"
 msgstr "1/2-inch hammer drill"
 
-#: app/routes.py:2411
+#: app/routes.py:2616
 msgid "Herramientas eléctricas"
 msgstr "Power tools"
 
-#: app/routes.py:2412 app/routes.py:2423 app/routes.py:2434
+#: app/routes.py:2617 app/routes.py:2628 app/routes.py:2639
 msgid "Proveedor de ejemplo"
 msgstr "Example supplier"
 
-#: app/routes.py:2421
+#: app/routes.py:2626
 msgid "Pintura vinílica blanca 19 L"
 msgstr "White vinyl paint 19 L"
 
-#: app/routes.py:2422
+#: app/routes.py:2627
 msgid "Pinturas"
 msgstr "Paint"
 
-#: app/routes.py:2432
+#: app/routes.py:2637
 msgid "Tornillo galvanizado 1/4 x 2"
 msgstr "1/4 x 2 galvanized screw"
 
-#: app/routes.py:2433
+#: app/routes.py:2638
 msgid "Tornillería"
 msgstr "Fasteners"
 
-#: app/routes.py:2445
+#: app/routes.py:2650
 msgid "PRODUCTOS"
 msgstr "PRODUCTS"
 
-#: app/routes.py:2447
+#: app/routes.py:2652
 msgid "EJEMPLO FERRETERÍA"
 msgstr "HARDWARE STORE EXAMPLE"
 
-#: app/routes.py:2456
+#: app/routes.py:2661
 msgid "PATIA - Plantilla oficial de productos"
 msgstr "PATIA - Official product template"
 
-#: app/routes.py:2458
+#: app/routes.py:2663
 msgid ""
 "Llena esta tabla con tus productos. No cambies los nombres de las "
 "columnas."
 msgstr "Fill this table with your products. Do not change the column names."
 
-#: app/routes.py:2582
+#: app/routes.py:2787
 msgid ""
 "El archivo no contiene las columnas obligatorias. Descarga la plantilla "
 "PATIA e inténtalo de nuevo."
@@ -1079,19 +1142,19 @@ msgstr ""
 "The file does not contain the required columns. Download the PATIA "
 "template and try again."
 
-#: app/routes.py:2685
+#: app/routes.py:2890
 msgid "Importación por coincidencia de SKU"
 msgstr "Imported by matching SKU"
 
-#: app/routes.py:2687
+#: app/routes.py:2892
 msgid "Importación por código de barras"
 msgstr "Imported by matching barcode"
 
-#: app/routes.py:2717
+#: app/routes.py:2922
 msgid "Alta mediante importación"
 msgstr "Created through import"
 
-#: app/routes.py:2730
+#: app/routes.py:2935
 #, python-format
 msgid ""
 "Importación terminada: %(created)s creados, %(updated)s actualizados, "
@@ -1102,36 +1165,36 @@ msgstr ""
 "skipped, and %(errors)s errors. %(matched)s rows matched existing "
 "products."
 
-#: app/routes.py:2757
+#: app/routes.py:2962
 msgid "Selecciona un archivo CSV o Excel."
 msgstr "Select a CSV or Excel file."
 
-#: app/routes.py:2758
+#: app/routes.py:2963
 msgid "El archivo está vacío."
 msgstr "The file is empty."
 
-#: app/routes.py:2759
+#: app/routes.py:2964
 msgid "El archivo supera el límite de 12 MB."
 msgstr "The file exceeds the 12 MB limit."
 
-#: app/routes.py:2760
+#: app/routes.py:2965
 msgid "Usa un archivo CSV o Excel .xlsx."
 msgstr "Use a CSV or Excel .xlsx file."
 
-#: app/routes.py:2762
+#: app/routes.py:2967
 #, python-format
 msgid "El archivo supera el límite de %(limit)s productos."
 msgstr "The file exceeds the %(limit)s product limit."
 
-#: app/routes.py:2766
+#: app/routes.py:2971
 msgid "No pudimos leer el catálogo. Revisa el archivo e inténtalo nuevamente."
 msgstr "We could not read the catalog. Check the file and try again."
 
-#: app/routes.py:2771
+#: app/routes.py:2976
 msgid "Revisa el costo o precio."
 msgstr "Check the cost or price."
 
-#: app/routes.py:2773
+#: app/routes.py:2978
 msgid ""
 "El formato del importe es ambiguo para la moneda del negocio. Usa "
 "separadores consistentes."
@@ -1139,31 +1202,31 @@ msgstr ""
 "The amount format is ambiguous for the business currency. Use consistent "
 "separators."
 
-#: app/routes.py:2776
+#: app/routes.py:2981
 msgid "Stock y stock mínimo deben ser números enteros no negativos."
 msgstr "Stock and minimum stock must be non-negative whole numbers."
 
-#: app/routes.py:2778
+#: app/routes.py:2983
 msgid "Agrega el nombre del producto."
 msgstr "Add the product name."
 
-#: app/routes.py:2780
+#: app/routes.py:2985
 msgid "El SKU o código de barras está repetido dentro del archivo."
 msgstr "The SKU or barcode is repeated in the file."
 
-#: app/routes.py:2783
+#: app/routes.py:2988
 msgid "El SKU y el código pertenecen a productos distintos."
 msgstr "The SKU and barcode belong to different products."
 
-#: app/routes.py:2788
+#: app/routes.py:2993
 msgid "Revisa los datos de esta fila."
 msgstr "Check the data in this row."
 
-#: app/routes.py:2884
+#: app/routes.py:3089
 msgid "No encontramos filas válidas para importar."
 msgstr "We did not find any valid rows to import."
 
-#: app/routes.py:2904
+#: app/routes.py:3109
 #, python-format
 msgid ""
 "Catálogo listo: %(created)s creados, %(updated)s actualizados y "
@@ -1172,11 +1235,11 @@ msgstr ""
 "Catalog ready: %(created)s created, %(updated)s updated, and %(errors)s "
 "rejected."
 
-#: app/routes.py:2919
+#: app/routes.py:3124
 msgid "El archivo cambió después de la vista previa. Vuelve a validarlo."
 msgstr "The file changed after preview. Validate it again."
 
-#: app/routes.py:2928
+#: app/routes.py:3133
 msgid ""
 "Otro proceso registró un SKU o código de barras durante la importación. "
 "Vuelve a validar el archivo."
@@ -1184,172 +1247,172 @@ msgstr ""
 "Another process registered an SKU or barcode during import. Validate the "
 "file again."
 
-#: app/routes.py:2938
+#: app/routes.py:3143
 msgid "No pudimos completar la importación. Ningún cambio parcial fue guardado."
 msgstr "We could not complete the import. No partial changes were saved."
 
-#: app/routes.py:3042
+#: app/routes.py:3247
 msgid "Restauración de producto archivado"
 msgstr "Archived product restored"
 
-#: app/routes.py:3048
+#: app/routes.py:3253
 msgid "Alta manual de producto"
 msgstr "Product created manually"
 
-#: app/routes.py:3149
+#: app/routes.py:3363
 msgid "Stock actualizado al editar el producto"
 msgstr "Stock updated while editing product"
 
-#: app/routes.py:3182
+#: app/routes.py:3396
 msgid "Ingresa una cantidad recibida válida."
 msgstr "Enter a valid received quantity."
 
-#: app/routes.py:3221
+#: app/routes.py:3435
 msgid "Reabastecimiento de inventario"
 msgstr "Inventory restock"
 
-#: app/routes.py:3297
+#: app/routes.py:3511
 #, python-format
 msgid "No hay suficientes ingredientes. %(product)s: faltan %(amount)s %(unit)s."
 msgstr ""
 "There are not enough ingredients. %(product)s: %(amount)s %(unit)s "
 "missing."
 
-#: app/routes.py:3387 app/routes.py:3702 app/templates/sell.html:51
+#: app/routes.py:3601 app/routes.py:3916 app/templates/sell.html:51
 msgid "Venta registrada"
 msgstr "Sale recorded"
 
-#: app/routes.py:3403
+#: app/routes.py:3617
 #, python-format
 msgid "Venta registrada: %(product)s x%(quantity)s."
 msgstr "Sale recorded: %(product)s x%(quantity)s."
 
-#: app/routes.py:3479
+#: app/routes.py:3693
 msgid "No autenticado"
 msgstr "Not authenticated"
 
-#: app/credit/routes.py:196 app/customers/routes.py:291 app/routes.py:3489
-#: app/routes.py:3539
+#: app/credit/routes.py:196 app/customers/routes.py:291 app/routes.py:3703
+#: app/routes.py:3753
 msgid "Solicitud inválida"
 msgstr "Invalid request"
 
-#: app/routes.py:3493
+#: app/routes.py:3707
 msgid "El carrito está vacío"
 msgstr "The cart is empty"
 
-#: app/routes.py:3497
+#: app/routes.py:3711
 msgid "Selecciona un método de pago válido"
 msgstr "Select a valid payment method"
 
-#: app/routes.py:3503
+#: app/routes.py:3717
 msgid "Abre la caja antes de registrar una venta en efectivo."
 msgstr "Open the cash register before recording a cash sale."
 
-#: app/routes.py:3511
+#: app/routes.py:3725
 msgid "Ingresa el efectivo recibido para continuar."
 msgstr "Enter the cash received to continue."
 
-#: app/routes.py:3519
+#: app/routes.py:3733
 msgid "Ingresa un monto recibido válido."
 msgstr "Enter a valid amount received."
 
-#: app/routes.py:3524
+#: app/routes.py:3738
 msgid "El monto recibido no puede ser negativo."
 msgstr "The amount received cannot be negative."
 
-#: app/routes.py:3545 app/routes.py:3551
+#: app/routes.py:3759 app/routes.py:3765
 msgid "Artículo inválido"
 msgstr "Invalid item"
 
-#: app/routes.py:3554
+#: app/routes.py:3768
 msgid "La cantidad debe ser mayor a cero"
 msgstr "The quantity must be greater than zero"
 
-#: app/routes.py:3591
+#: app/routes.py:3805
 msgid "Producto no encontrado"
 msgstr "Product not found"
 
 #: app/customers/services.py:87 app/customers/services.py:100
-#: app/routes.py:3601 app/routes.py:3712 app/team/services.py:241
+#: app/routes.py:3815 app/routes.py:3926 app/team/services.py:241
 msgid "Acceso no permitido."
 msgstr "Access not allowed."
 
-#: app/routes.py:3616
+#: app/routes.py:3830
 #, python-format
 msgid "Faltan %(amount)s para completar el pago."
 msgstr "%(amount)s is still needed to complete the payment."
 
-#: app/routes.py:3647
+#: app/routes.py:3861
 #, python-format
 msgid "Stock insuficiente: %(product)s"
 msgstr "Insufficient stock: %(product)s"
 
 # PATIA V1.5 - Credit and accounts receivable
-#: app/routes.py:3716
+#: app/routes.py:3930
 msgid "Selecciona un cliente para vender a crédito."
 msgstr "Select a customer for a credit sale."
 
-#: app/routes.py:3750
+#: app/routes.py:3964
 msgid "No hay suficientes ingredientes para preparar este producto."
 msgstr "There are not enough ingredients to prepare this product."
 
-#: app/routes.py:3763
+#: app/routes.py:3977
 msgid "No pudimos preparar la receta seleccionada."
 msgstr "We could not prepare the selected recipe."
 
-#: app/routes.py:3786
+#: app/routes.py:4000
 msgid "No se pudo procesar la venta"
 msgstr "The sale could not be processed"
 
-#: app/routes.py:3810
+#: app/routes.py:4024
 msgid "Los periodos y análisis avanzados están incluidos en PATIA Pro."
 msgstr "Advanced periods and analysis are included in PATIA Pro."
 
-#: app/routes.py:4320
+#: app/routes.py:4642
 #, python-format
 msgid "Tu plan %(plan)s está activo."
 msgstr "Your %(plan)s plan is active."
 
-#: app/routes.py:4337
+#: app/routes.py:4659
 msgid "Venta cancelada. Stock devuelto al inventario."
 msgstr "Sale canceled. Stock returned to inventory."
 
-#: app/routes.py:4349
+#: app/routes.py:4671
 msgid "Devolución registrada. Stock devuelto al inventario."
 msgstr "Return recorded. Stock returned to inventory."
 
-#: app/routes.py:4376
+#: app/routes.py:4698
 msgid "Abre la caja antes de devolver una venta en efectivo."
 msgstr "Open the cash register before refunding a cash sale."
 
-#: app/routes.py:4384
+#: app/routes.py:4706
 msgid "La venta a crédito no tiene un cliente asociado."
 msgstr "The credit sale has no customer attached."
 
-#: app/routes.py:4427
+#: app/routes.py:4749
 #, python-format
 msgid "Devolución de receta: %(name)s"
 msgstr "Recipe return: %(name)s"
 
-#: app/routes.py:4429
+#: app/routes.py:4751
 #, python-format
 msgid "Cancelación de receta: %(name)s"
 msgstr "Recipe cancellation: %(name)s"
 
-#: app/routes.py:4443
+#: app/routes.py:4765
 msgid "Devolución de venta"
 msgstr "Sale return"
 
-#: app/routes.py:4445
+#: app/routes.py:4767
 msgid "Cancelación de venta"
 msgstr "Sale cancellation"
 
-#: app/routes.py:4456
+#: app/routes.py:4778
 #, python-format
 msgid "Devolución de %(folio)s"
 msgstr "Refund for %(folio)s"
 
-#: app/routes.py:4657
+#: app/routes.py:4978
 msgid ""
 "Starter no incluye encargados. Cambia sus accesos a Cajero antes de "
 "solicitar el cambio."
@@ -1357,7 +1420,7 @@ msgstr ""
 "Starter does not include managers. Change their access to Cashier before "
 "requesting the change."
 
-#: app/routes.py:4754
+#: app/routes.py:5075
 #, python-format
 msgid ""
 "Solicitamos el cambio a %(plan)s. Se activará cuando Stripe confirme el "
@@ -1366,72 +1429,72 @@ msgstr ""
 "We requested the change to %(plan)s. It will activate when Stripe "
 "confirms the payment."
 
-#: app/routes.py:4978
+#: app/routes.py:5299
 #, python-format
 msgid "La prueba vence en %(days)s días"
 msgstr "The trial ends in %(days)s days"
 
-#: app/routes.py:4985 app/routes.py:5054 app/routes.py:5206 app/routes.py:5224
+#: app/routes.py:5306 app/routes.py:5375 app/routes.py:5527 app/routes.py:5545
 #: app/templates/admin.html:100 app/templates/admin.html:109
 #: app/templates/admin_organization.html:38 app/templates/subscription.html:37
 msgid "Cancelación programada"
 msgstr "Scheduled cancellation"
 
-#: app/routes.py:4989
+#: app/routes.py:5310
 msgid "Reporte mensual fallido"
 msgstr "Monthly report failed"
 
-#: app/routes.py:4992 app/routes.py:5226 app/templates/admin.html:111
+#: app/routes.py:5313 app/routes.py:5547 app/templates/admin.html:111
 msgid "Cuenta vencida"
 msgstr "Expired account"
 
-#: app/routes.py:4995 app/routes.py:5316 app/templates/admin.html:87
+#: app/routes.py:5316 app/routes.py:5637 app/templates/admin.html:87
 msgid "Trial"
 msgstr "Trial"
 
-#: app/routes.py:4999 app/routes.py:5319 app/templates/admin.html:90
+#: app/routes.py:5320 app/routes.py:5640 app/templates/admin.html:90
 msgid "Cliente anterior"
 msgstr "Existing customer"
 
-#: app/routes.py:5055 app/routes.py:5207 app/templates/admin.html:101
+#: app/routes.py:5376 app/routes.py:5528 app/templates/admin.html:101
 msgid "Vencido"
 msgstr "Expired"
 
-#: app/customers/routes.py:228 app/routes.py:5057 app/routes.py:5204
+#: app/customers/routes.py:228 app/routes.py:5378 app/routes.py:5525
 #: app/templates/admin.html:97 app/templates/admin_organization.html:14
 #: app/templates/admin_organization.html:36 app/templates/quick_load.html:164
 msgid "Activo"
 msgstr "Active"
 
-#: app/routes.py:5183
+#: app/routes.py:5504
 #, python-format
 msgid "Búsqueda: %(value)s"
 msgstr "Search: %(value)s"
 
-#: app/routes.py:5190
+#: app/routes.py:5511
 #, python-format
 msgid "Plan: %(value)s"
 msgstr "Plan: %(value)s"
 
-#: app/routes.py:5215
+#: app/routes.py:5536
 #, python-format
 msgid "Estado: %(value)s"
 msgstr "Status: %(value)s"
 
-#: app/routes.py:5223 app/templates/admin.html:108
+#: app/routes.py:5544 app/templates/admin.html:108
 msgid "Prueba por vencer"
 msgstr "Trial ending soon"
 
-#: app/routes.py:5225 app/templates/admin.html:110
+#: app/routes.py:5546 app/templates/admin.html:110
 msgid "Reporte fallido"
 msgstr "Failed report"
 
-#: app/routes.py:5233
+#: app/routes.py:5554
 #, python-format
 msgid "Atención: %(value)s"
 msgstr "Attention: %(value)s"
 
-#: app/routes.py:5476
+#: app/routes.py:5797
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s productos sin ventas y retiramos %(protected)s del"
@@ -1440,12 +1503,12 @@ msgstr ""
 "We deleted %(deleted)s products without sales and removed %(protected)s "
 "from the catalog while preserving their history."
 
-#: app/routes.py:5484
+#: app/routes.py:5805
 #, python-format
 msgid "Eliminamos %(count)s productos del catálogo."
 msgstr "We deleted %(count)s products from the catalog."
 
-#: app/routes.py:5548
+#: app/routes.py:5869
 #, python-format
 msgid ""
 "Eliminamos %(deleted)s seleccionados y retiramos %(protected)s "
@@ -1454,32 +1517,32 @@ msgstr ""
 "We deleted %(deleted)s selected products and removed %(protected)s while "
 "preserving their history."
 
-#: app/routes.py:5555
+#: app/routes.py:5876
 #, python-format
 msgid "%(count)s productos eliminados."
 msgstr "%(count)s products deleted."
 
-#: app/routes.py:5616 app/routes.py:5643
+#: app/routes.py:5937 app/routes.py:5964
 msgid "El acceso Pro se administra en el propietario de la organización."
 msgstr "Pro access is managed through the organization owner."
 
-#: app/routes.py:5624
+#: app/routes.py:5945
 msgid "Acceso manual Pro activado."
 msgstr "Manual Pro access enabled."
 
-#: app/routes.py:5651
+#: app/routes.py:5972
 msgid "Acceso manual Pro desactivado."
 msgstr "Manual Pro access disabled."
 
-#: app/routes.py:5697
+#: app/routes.py:6018
 msgid "Selecciona un país y una moneda compatibles."
 msgstr "Select a supported country and currency."
 
-#: app/routes.py:5712
+#: app/routes.py:6033
 msgid "Selecciona un tipo de negocio válido."
 msgstr "Select a valid business type."
 
-#: app/routes.py:5728
+#: app/routes.py:6049
 msgid ""
 "Confirma el cambio. Las recetas se conservarán, pero dejarán de estar "
 "disponibles."
@@ -2088,12 +2151,70 @@ msgstr "Monthly goal removed."
 msgid "Meta mensual guardada."
 msgstr "Monthly goal saved."
 
-#: app/pro/routes.py:254
+#: app/pro/routes.py:253
+#, python-format
+msgid "%(dish)s tiene disponibilidad limitada"
+msgstr "%(dish)s has limited availability"
+
+#: app/pro/routes.py:257
+#, python-format
+msgid ""
+"Quedan aproximadamente %(count)s porciones; %(ingredient)s es el "
+"ingrediente limitante."
+msgstr ""
+"Approximately %(count)s portions remain; %(ingredient)s is the limiting "
+"ingredient."
+
+#: app/pro/routes.py:262
+msgid "Revisa ese ingrediente antes de que el platillo deje de estar disponible."
+msgstr "Review that ingredient before the dish becomes unavailable."
+
+#: app/pro/routes.py:264
+msgid "Abrir receta"
+msgstr "Open recipe"
+
+#: app/pro/routes.py:274
+#, python-format
+msgid "Repón %(ingredient)s para tus recetas"
+msgstr "Restock %(ingredient)s for your recipes"
+
+#: app/pro/routes.py:278
+#, python-format
+msgid "Quedan %(stock)s; el mínimo configurado es %(minimum)s."
+msgstr "There are %(stock)s left; the configured minimum is %(minimum)s."
+
+#: app/pro/routes.py:283
+msgid "Su disponibilidad afecta los platillos que utilizan este ingrediente."
+msgstr "Its availability affects dishes that use this ingredient."
+
+#: app/pro/routes.py:285
+msgid "Revisar ingrediente"
+msgstr "Review ingredient"
+
+#: app/pro/routes.py:300
+#, python-format
+msgid "Revisa el margen de %(dish)s"
+msgstr "Review the margin for %(dish)s"
+
+#: app/pro/routes.py:303
+#, python-format
+msgid "Su margen histórico del periodo es %(margin)s%%."
+msgstr "Its historical margin for the period is %(margin)s%%."
+
+#: app/pro/routes.py:307
+msgid "Compara el precio con el costo histórico de sus ingredientes."
+msgstr "Compare its price with the historical cost of its ingredients."
+
+#: app/pro/routes.py:309
+msgid "Ver rentabilidad"
+msgstr "View profitability"
+
+#: app/pro/routes.py:322
 #, python-format
 msgid "%(count)s productos necesitan reposición"
 msgstr "%(count)s products need restocking"
 
-#: app/pro/routes.py:258
+#: app/pro/routes.py:326
 #, python-format
 msgid ""
 "PATIA sugiere pedir %(units)s unidades con base en existencias y ventas "
@@ -2102,7 +2223,7 @@ msgstr ""
 "PATIA suggests ordering %(units)s units based on current stock and recent"
 " sales."
 
-#: app/pro/routes.py:262
+#: app/pro/routes.py:330
 msgid ""
 "Revisa las cantidades sugeridas y prepara el pedido antes de perder una "
 "venta."
@@ -2110,19 +2231,19 @@ msgstr ""
 "Review the suggested quantities and prepare the order before losing a "
 "sale."
 
-#: app/pro/routes.py:264
+#: app/pro/routes.py:332
 msgid "Preparar compra"
 msgstr "Prepare purchase"
 
-#: app/pro/routes.py:273
+#: app/pro/routes.py:341
 msgid "Tu primer reporte mensual está listo para generarse"
 msgstr "Your first monthly report is ready to be generated"
 
-#: app/pro/routes.py:275
+#: app/pro/routes.py:343
 msgid "Guarda una fotografía del mes y descárgala en PDF."
 msgstr "Save a snapshot of the month and download it as a PDF."
 
-#: app/pro/routes.py:278
+#: app/pro/routes.py:346
 msgid ""
 "Crear el resumen ahora te dará una referencia fija para comparar el "
 "siguiente mes."
@@ -2130,19 +2251,19 @@ msgstr ""
 "Creating the summary now will give you a fixed reference for next month's"
 " comparison."
 
-#: app/pro/routes.py:280 app/templates/pro_monthly_reports.html:57
+#: app/pro/routes.py:348 app/templates/pro_monthly_reports.html:57
 msgid "Generar reporte"
 msgstr "Generate report"
 
-#: app/pro/routes.py:291
+#: app/pro/routes.py:359
 msgid "PATIA ordenó la operación y encontró una acción principal."
 msgstr "PATIA reviewed the operation and found one primary action."
 
-#: app/pro/routes.py:304
+#: app/pro/routes.py:372
 msgid "La operación se mantiene estable con los datos disponibles."
 msgstr "The operation remains stable based on the available data."
 
-#: app/pro/routes.py:307
+#: app/pro/routes.py:375
 msgid ""
 "No se detectó una situación urgente en ventas, margen, inventario, "
 "crédito o caja."
@@ -2150,81 +2271,81 @@ msgstr ""
 "No urgent issue was found in sales, margin, inventory, credit, or cash "
 "register activity."
 
-#: app/pro/routes.py:310
+#: app/pro/routes.py:378
 msgid ""
 "Puedes concentrarte en vender y mantener actualizados costos y "
 "existencias."
 msgstr "You can focus on selling and keeping costs and stock up to date."
 
-#: app/pro/routes.py:313
+#: app/pro/routes.py:381
 msgid "Continúa registrando la operación diaria."
 msgstr "Continue recording daily activity."
 
-#: app/pro/routes.py:470
+#: app/pro/routes.py:538
 msgid "No pudimos generar ese reporte mensual."
 msgstr "We could not generate that monthly report."
 
-#: app/pro/routes.py:474
+#: app/pro/routes.py:542
 msgid "Reporte mensual generado."
 msgstr "Monthly report generated."
 
-#: app/pro/routes.py:531
+#: app/pro/routes.py:599
 msgid "Este reporte todavía no tiene snapshot."
 msgstr "This report does not have a snapshot yet."
 
-#: app/pro/routes.py:565
+#: app/pro/routes.py:633
 msgid "Activa el envío mensual y confirma el correo destinatario."
 msgstr "Enable monthly delivery and confirm the recipient email."
 
-#: app/pro/routes.py:573
+#: app/pro/routes.py:641
 msgid "Reporte reenviado correctamente."
 msgstr "Report resent successfully."
 
-#: app/pro/routes.py:577
+#: app/pro/routes.py:645
 msgid "No pudimos reenviar el reporte. Podrás intentarlo de nuevo."
 msgstr "We could not resend the report. You can try again."
 
-#: app/pro/routes.py:642
+#: app/pro/routes.py:710
 msgid "Revisa los productos y cantidades del pedido."
 msgstr "Review the products and quantities in the order."
 
-#: app/pro/routes.py:646
+#: app/pro/routes.py:714
 msgid "Borrador de pedido creado."
 msgstr "Order draft created."
 
-#: app/pro/routes.py:701
+#: app/pro/routes.py:769
 msgid "Revisa las cantidades del pedido."
 msgstr "Review the order quantities."
 
-#: app/pro/routes.py:703
+#: app/pro/routes.py:771
 msgid "Borrador actualizado."
 msgstr "Draft updated."
 
-#: app/pro/routes.py:719
+#: app/pro/routes.py:787
 msgid "Este pedido no puede confirmarse."
 msgstr "This order cannot be confirmed."
 
-#: app/pro/routes.py:721
+#: app/pro/routes.py:789
 msgid "Pedido confirmado y listo para recibir."
 msgstr "Order confirmed and ready to receive."
 
-#: app/pro/routes.py:751
+#: app/pro/routes.py:819
 msgid "Revisa las cantidades recibidas."
 msgstr "Review the received quantities."
 
-#: app/pro/routes.py:757
+#: app/pro/routes.py:825
 msgid "Mercancía recibida e inventario actualizado."
 msgstr "Goods received and inventory updated."
 
-#: app/pro/routes.py:759
+#: app/pro/routes.py:827
 msgid "Esta recepción ya había sido registrada."
 msgstr "This receipt had already been recorded."
 
-#: app/pro/routes.py:778
+#: app/pro/routes.py:846
 msgid "Este pedido ya no puede cancelarse."
 msgstr "This order can no longer be canceled."
 
-#: app/pro/routes.py:782
+#: app/pro/routes.py:850
 msgid "Pedido cancelado. La mercancía recibida anteriormente no cambió."
 msgstr "Order canceled. Previously received merchandise was not changed."
 
@@ -2521,15 +2642,15 @@ msgstr "The main cash register is closed"
 msgid "Las ventas en efectivo necesitan una caja abierta."
 msgstr "Cash sales require an open cash register."
 
-#: app/pro/services.py:994
+#: app/pro/services.py:998
 msgid "Alta"
 msgstr "High"
 
-#: app/pro/services.py:997
+#: app/pro/services.py:1001
 msgid "Media"
 msgstr "Medium"
 
-#: app/pro/services.py:999
+#: app/pro/services.py:1003
 msgid "Informativa"
 msgstr "Informational"
 
@@ -2545,67 +2666,67 @@ msgstr "Recipe created successfully."
 msgid "Receta actualizada correctamente."
 msgstr "Recipe updated successfully."
 
-#: app/recipes/routes.py:274
+#: app/recipes/routes.py:276
 msgid "copia"
 msgstr "copy"
 
-#: app/recipes/routes.py:307
+#: app/recipes/routes.py:309
 msgid "Receta duplicada. Revísala antes de activarla."
 msgstr "Recipe duplicated. Review it before activating it."
 
-#: app/recipes/routes.py:320
+#: app/recipes/routes.py:322
 msgid "Estado de la receta actualizado."
 msgstr "Recipe status updated."
 
-#: app/recipes/routes.py:326
+#: app/recipes/routes.py:328
 msgid "Una preparación no puede depender de sí misma."
 msgstr "A preparation cannot depend on itself."
 
-#: app/recipes/routes.py:327
+#: app/recipes/routes.py:329
 msgid "La unidad no es compatible con el ingrediente."
 msgstr "The unit is not compatible with the ingredient."
 
-#: app/recipes/routes.py:328
+#: app/recipes/routes.py:330
 msgid "Agrega al menos un ingrediente."
 msgstr "Add at least one ingredient."
 
-#: app/recipes/routes.py:329
+#: app/recipes/routes.py:331
 msgid "Revisa los ingredientes duplicados o incompletos."
 msgstr "Review duplicate or incomplete ingredients."
 
-#: app/recipes/routes.py:330
+#: app/recipes/routes.py:332
 msgid "El ingrediente no pertenece a este negocio."
 msgstr "The ingredient does not belong to this business."
 
-#: app/recipes/routes.py:331
+#: app/recipes/routes.py:333
 msgid "Escribe cantidades válidas mayores que cero."
 msgstr "Enter valid quantities greater than zero."
 
-#: app/recipes/routes.py:332
+#: app/recipes/routes.py:334
 msgid "No pudimos leer los ingredientes. Intenta nuevamente."
 msgstr "We could not read the ingredients. Try again."
 
-#: app/recipes/routes.py:333
+#: app/recipes/routes.py:335
 msgid "Selecciona una unidad válida."
 msgstr "Select a valid unit."
 
-#: app/recipes/routes.py:334
+#: app/recipes/routes.py:336
 msgid "Selecciona un ingrediente válido."
 msgstr "Select a valid ingredient."
 
-#: app/recipes/routes.py:335
+#: app/recipes/routes.py:337
 msgid "La preparación seleccionada ya no está disponible."
 msgstr "The selected preparation is no longer available."
 
-#: app/recipes/routes.py:336
+#: app/recipes/routes.py:338
 msgid "Escribe un nombre y selecciona un tipo de receta válido."
 msgstr "Enter a name and select a valid recipe type."
 
-#: app/recipes/routes.py:337
+#: app/recipes/routes.py:339
 msgid "El precio no puede ser negativo."
 msgstr "The price cannot be negative."
 
-#: app/recipes/routes.py:338
+#: app/recipes/routes.py:340
 msgid "Revisa la información de la receta."
 msgstr "Review the recipe information."
 
@@ -3390,8 +3511,8 @@ msgstr "Your business, clearly"
 msgid "Menú"
 msgstr "Menu"
 
-#: app/templates/base.html:33 app/templates/dashboard.html:124
-#: app/templates/dashboard.html:182 app/templates/products.html:129
+#: app/templates/base.html:33 app/templates/dashboard.html:136
+#: app/templates/dashboard.html:194 app/templates/products.html:129
 #: app/templates/sell.html:156 app/templates/sell.html:172
 msgid "Cerrar"
 msgstr "Close"
@@ -3400,7 +3521,7 @@ msgstr "Close"
 msgid "Navegación principal"
 msgstr "Main navigation"
 
-#: app/templates/base.html:40 app/templates/dashboard.html:247
+#: app/templates/base.html:40 app/templates/dashboard.html:259
 msgid "Operación"
 msgstr "Operations"
 
@@ -3412,8 +3533,8 @@ msgstr "Home"
 msgid "Vender"
 msgstr "Sell"
 
-#: app/templates/base.html:43 app/templates/dashboard.html:120
-#: app/templates/dashboard.html:178 app/templates/edit_product.html:7
+#: app/templates/base.html:43 app/templates/dashboard.html:132
+#: app/templates/dashboard.html:190 app/templates/edit_product.html:7
 #: app/templates/landing.html:104 app/templates/pro_hub.html:64
 msgid "Inventario"
 msgstr "Inventory"
@@ -3523,11 +3644,11 @@ msgstr "Opened from Decision Center · %(count)s closings with withdrawals"
 msgid "Controla el efectivo que entra y sale durante el día."
 msgstr "Track the physical cash coming in and going out during the day."
 
-#: app/templates/cash_register.html:25 app/templates/dashboard.html:96
+#: app/templates/cash_register.html:25 app/templates/dashboard.html:108
 msgid "Caja abierta"
 msgstr "Cash is open"
 
-#: app/templates/cash_register.html:26 app/templates/dashboard.html:97
+#: app/templates/cash_register.html:26 app/templates/dashboard.html:109
 msgid "En caja debería haber"
 msgstr "Cash expected in drawer"
 
@@ -3829,7 +3950,7 @@ msgstr "Currently owes %(amount)s"
 msgid "Registrar pago"
 msgstr "Record payment"
 
-#: app/templates/credit_account.html:25 app/templates/dashboard.html:203
+#: app/templates/credit_account.html:25 app/templates/dashboard.html:215
 #: app/templates/quick_load.html:69
 msgid "Cantidad recibida"
 msgstr "Quantity received"
@@ -3998,7 +4119,7 @@ msgstr "Credit sales"
 msgid "Límite"
 msgstr "Limit"
 
-#: app/templates/customer_detail.html:43
+#: app/templates/customer_detail.html:43 app/templates/reports.html:307
 msgid "Disponible"
 msgstr "Available"
 
@@ -4079,7 +4200,7 @@ msgid "¿Cuál será el límite de crédito?"
 msgstr "What will the credit limit be?"
 
 #: app/templates/customer_detail.html:110 app/templates/customer_form.html:32
-#: app/templates/dashboard.html:217 app/templates/edit_product.html:60
+#: app/templates/dashboard.html:229 app/templates/edit_product.html:60
 #: app/templates/inventory_adjust.html:62
 #: app/templates/inventory_adjust.html:73 app/templates/products.html:142
 #: app/templates/recipe_form.html:20 app/templates/sell.html:164
@@ -4294,154 +4415,206 @@ msgstr "%(change)s%% vs. previous month"
 msgid "Aún no hay un mes anterior comparable."
 msgstr "There is no comparable previous month yet."
 
-#: app/templates/dashboard.html:100 app/templates/sell.html:24
+#: app/templates/dashboard.html:95 app/templates/pro_monthly_report.html:145
+msgid "Lectura Restaurant"
+msgstr "Restaurant overview"
+
+#: app/templates/dashboard.html:95
+msgid "Platillos e ingredientes esta semana"
+msgstr "Dishes and ingredients this week"
+
+#: app/templates/dashboard.html:97
+msgid "Platillo más vendido"
+msgstr "Best-selling dish"
+
+#: app/templates/dashboard.html:97
+msgid "Sin ventas todavía"
+msgstr "No sales yet"
+
+#: app/templates/dashboard.html:97
+#: app/templates/emails/monthly_owner_report.html:72
+#: app/templates/emails/monthly_owner_report.html:87
+#, python-format
+msgid "%(count)s unidades"
+msgstr "%(count)s units"
+
+#: app/templates/dashboard.html:98
+msgid "Mejor margen"
+msgstr "Best margin"
+
+#: app/templates/dashboard.html:98 app/templates/reports.html:302
+msgid "Sin datos suficientes"
+msgstr "Not enough data"
+
+#: app/templates/dashboard.html:99
+msgid "Ingredientes críticos"
+msgstr "Critical ingredients"
+
+#: app/templates/dashboard.html:99
+msgid "Revisa qué necesitas reponer"
+msgstr "Review what you need to restock"
+
+#: app/templates/dashboard.html:100
+msgid "Platillos con disponibilidad limitada"
+msgstr "Dishes with limited availability"
+
+#: app/templates/dashboard.html:100 app/templates/recipes.html:21
+#, python-format
+msgid "%(count)s porciones"
+msgstr "%(count)s portions"
+
+#: app/templates/dashboard.html:100
+msgid "Sin límites críticos"
+msgstr "No critical limits"
+
+#: app/templates/dashboard.html:112 app/templates/sell.html:24
 msgid "Ver caja"
 msgstr "View cash register"
 
-#: app/templates/dashboard.html:107
+#: app/templates/dashboard.html:119
 msgid "Qué hacer ahora"
 msgstr "What to do next"
 
-#: app/templates/dashboard.html:109
+#: app/templates/dashboard.html:121
 msgid "Agrega productos para comenzar a vender."
 msgstr "Add products to start selling."
 
-#: app/templates/dashboard.html:111
+#: app/templates/dashboard.html:123
 msgid "PATIA te muestra primero la acción más útil para continuar."
 msgstr "PATIA shows the most useful next action first."
 
-#: app/templates/dashboard.html:113
+#: app/templates/dashboard.html:125
 msgid "Agregar productos"
 msgstr "Add products"
 
-#: app/templates/dashboard.html:121
+#: app/templates/dashboard.html:133
 msgid "Productos con stock bajo"
 msgstr "Products with low stock"
 
-#: app/templates/dashboard.html:122
+#: app/templates/dashboard.html:134
 msgid "Revisa las existencias antes de que afecten una venta."
 msgstr "Review stock levels before they affect a sale."
 
-#: app/templates/dashboard.html:135
+#: app/templates/dashboard.html:147
 #, python-format
 msgid "SKU: %(sku)s"
 msgstr "SKU: %(sku)s"
 
-#: app/templates/dashboard.html:141 app/templates/dashboard.html:194
+#: app/templates/dashboard.html:153 app/templates/dashboard.html:206
 #: app/templates/edit_product.html:46 app/templates/quick_load.html:63
 msgid "Stock actual"
 msgstr "Current stock"
 
-#: app/templates/dashboard.html:144 app/templates/dashboard.html:155
+#: app/templates/dashboard.html:156 app/templates/dashboard.html:167
 #: app/templates/quick_load.html:74 app/templates/quick_load.html:167
 msgid "Reabastecer"
 msgstr "Restock"
 
-#: app/templates/dashboard.html:157
+#: app/templates/dashboard.html:169
 msgid "Ver producto"
 msgstr "View product"
 
-#: app/templates/dashboard.html:163
+#: app/templates/dashboard.html:175
 msgid "Ver inventario filtrado"
 msgstr "View filtered inventory"
 
-#: app/templates/dashboard.html:168 app/templates/products.html:216
+#: app/templates/dashboard.html:180 app/templates/products.html:216
 #: app/templates/products.html:296
 msgid ""
 "Tu inventario está en orden. No hay productos que requieran "
 "reabastecimiento."
 msgstr "Your inventory is in order. No products need restocking."
 
-#: app/templates/dashboard.html:179
+#: app/templates/dashboard.html:191
 msgid "Reabastecer inventario"
 msgstr "Restock inventory"
 
-#: app/templates/dashboard.html:180
+#: app/templates/dashboard.html:192
 msgid "Registra únicamente las unidades que acabas de recibir."
 msgstr "Record only the units you have just received."
 
-#: app/templates/dashboard.html:198
+#: app/templates/dashboard.html:210
 msgid "Nuevo stock"
 msgstr "New stock"
 
-#: app/templates/dashboard.html:212
+#: app/templates/dashboard.html:224
 msgid "Escribe cuántas unidades llegaron físicamente a tu negocio."
 msgstr "Enter how many units physically arrived at your business."
 
-#: app/templates/dashboard.html:218
+#: app/templates/dashboard.html:230
 msgid "Confirmar reabastecimiento"
 msgstr "Confirm restock"
 
-#: app/templates/dashboard.html:228
+#: app/templates/dashboard.html:240
 msgid "Ventas de los últimos 7 días"
 msgstr "Sales over the last 7 days"
 
-#: app/templates/dashboard.html:229
+#: app/templates/dashboard.html:241
 msgid "Ventas frente al periodo anterior"
 msgstr "Sales compared with the previous period"
 
-#: app/templates/dashboard.html:231 app/templates/pro_dashboard.html:37
+#: app/templates/dashboard.html:243 app/templates/pro_dashboard.html:37
 #: app/templates/reports.html:52
 msgid "Últimos 7 días"
 msgstr "Last 7 days"
 
-#: app/templates/dashboard.html:239
+#: app/templates/dashboard.html:251
 msgid "Aún no hay ventas para mostrar"
 msgstr "No sales to display yet"
 
-#: app/templates/dashboard.html:239
+#: app/templates/dashboard.html:251
 msgid "Cuando registres tus primeras ventas, aquí verás su evolución diaria."
 msgstr "Once you record your first sales, their daily trend will appear here."
 
-#: app/templates/dashboard.html:247
+#: app/templates/dashboard.html:259
 msgid "Alertas que requieren atención"
 msgstr "Alerts that need attention"
 
-#: app/templates/dashboard.html:270
+#: app/templates/dashboard.html:282
 msgid "Todo bajo control"
 msgstr "Everything is under control"
 
-#: app/templates/dashboard.html:270
+#: app/templates/dashboard.html:282
 msgid "No detectamos asuntos urgentes en este periodo."
 msgstr "We found no urgent issues during this period."
 
-#: app/templates/dashboard.html:276
+#: app/templates/dashboard.html:288
 msgid "Composición"
 msgstr "Composition"
 
-#: app/templates/dashboard.html:276
+#: app/templates/dashboard.html:288
 msgid "Métodos de pago (últimos 7 días)"
 msgstr "Payment methods (last 7 days)"
 
-#: app/templates/dashboard.html:289
+#: app/templates/dashboard.html:301
 msgid "Aún no hay pagos registrados"
 msgstr "No payments recorded yet"
 
-#: app/templates/dashboard.html:289
+#: app/templates/dashboard.html:301
 msgid "La distribución aparecerá después de tu primera venta."
 msgstr "The breakdown will appear after your first sale."
 
-#: app/templates/dashboard.html:298 app/templates/pro_hub.html:10
+#: app/templates/dashboard.html:310 app/templates/pro_hub.html:10
 msgid "Lectura de tu negocio"
 msgstr "Your business at a glance"
 
-#: app/templates/dashboard.html:299
+#: app/templates/dashboard.html:311
 msgid "Resumen rápido"
 msgstr "Quick summary"
 
-#: app/templates/dashboard.html:311
+#: app/templates/dashboard.html:323
 msgid "De dónde sale:"
 msgstr "Where it comes from:"
 
-#: app/templates/dashboard.html:312
+#: app/templates/dashboard.html:324
 msgid "Qué hacer:"
 msgstr "What to do:"
 
-#: app/templates/dashboard.html:320
+#: app/templates/dashboard.html:332
 msgid "Necesitamos conocer un poco más tu negocio"
 msgstr "We need to learn a little more about your business"
 
-#: app/templates/dashboard.html:320
+#: app/templates/dashboard.html:332
 msgid ""
 "Agrega productos y registra ventas. Con esos datos PATIA podrá darte "
 "recomendaciones útiles y explicables."
@@ -4449,16 +4622,16 @@ msgstr ""
 "Add products and record sales so PATIA can provide useful, explainable "
 "recommendations."
 
-#: app/templates/dashboard.html:327 app/templates/landing.html:128
+#: app/templates/dashboard.html:339 app/templates/landing.html:128
 #: app/templates/pro_hub.html:7
 msgid "Pulso PATIA"
 msgstr "PATIA Pulse"
 
-#: app/templates/dashboard.html:328
+#: app/templates/dashboard.html:340
 msgid "Ver qué pasó, por qué importa y qué hacer ahora"
 msgstr "See what happened, why it matters, and what to do now"
 
-#: app/templates/dashboard.html:335
+#: app/templates/dashboard.html:347
 msgid ""
 "La utilidad estimada corresponde a las ventas de los últimos 7 días menos"
 " el costo registrado de las unidades vendidas."
@@ -4466,15 +4639,15 @@ msgstr ""
 "Estimated profit is calculated from sales over the last 7 days minus the "
 "recorded cost of the units sold."
 
-#: app/templates/dashboard.html:350
+#: app/templates/dashboard.html:362
 msgid "Periodo anterior"
 msgstr "Previous period"
 
-#: app/templates/dashboard.html:351 app/templates/reports.html:312
+#: app/templates/dashboard.html:363 app/templates/reports.html:332
 msgid "Tickets"
 msgstr "Tickets"
 
-#: app/templates/dashboard.html:365 app/templates/quick_load.html:162
+#: app/templates/dashboard.html:377 app/templates/quick_load.html:162
 msgid "Actualizando inventario…"
 msgstr "Updating inventory…"
 
@@ -4514,6 +4687,22 @@ msgstr ""
 #: app/templates/products.html:327 app/templates/quick_load.html:117
 msgid "Unidad base"
 msgstr "Base unit"
+
+#: app/templates/edit_product.html:66
+msgid "Usado en recetas"
+msgstr "Used in recipes"
+
+#: app/templates/edit_product.html:66
+msgid ""
+"Cambiar su costo o existencias actualiza la disponibilidad y el costo "
+"actual de estas recetas; las ventas anteriores no cambian."
+msgstr ""
+"Changing its cost or stock updates the current availability and cost of "
+"these recipes; previous sales do not change."
+
+#: app/templates/edit_product.html:67 app/templates/recipes.html:21
+msgid "Preparación"
+msgstr "Preparation"
 
 #: app/templates/error.html:5
 msgid "Ir al inicio de PATIA"
@@ -5086,12 +5275,12 @@ msgstr "More control to grow"
 msgid "MXN al mes"
 msgstr "MXN per month"
 
-#: app/templates/landing.html:171 app/templates/subscribe.html:44
+#: app/templates/landing.html:171 app/templates/subscribe.html:46
 #: app/templates/subscription.html:101
 msgid "Pro estará disponible para contratación muy pronto."
 msgstr "Pro will be available to subscribe very soon."
 
-#: app/templates/landing.html:173 app/templates/subscribe.html:43
+#: app/templates/landing.html:173 app/templates/subscribe.html:45
 msgid "Disponible próximamente"
 msgstr "Coming soon"
 
@@ -5541,7 +5730,8 @@ msgstr "%(tickets)s receipts in the period"
 
 #: app/templates/pro_dashboard.html:56 app/templates/pro_dashboard.html:107
 #: app/templates/reports.html:111 app/templates/reports.html:261
-#: app/templates/reports.html:309
+#: app/templates/reports.html:298 app/templates/reports.html:302
+#: app/templates/reports.html:329
 msgid "Utilidad"
 msgstr "Profit"
 
@@ -5549,14 +5739,6 @@ msgstr "Profit"
 #, python-format
 msgid "%(coverage)s%% de ventas con costo conocido"
 msgstr "%(coverage)s%% of sales with known cost"
-
-#: app/templates/pro_dashboard.html:57 app/templates/products.html:236
-#: app/templates/products.html:245 app/templates/recipe_detail.html:8
-#: app/templates/recipe_form.html:19 app/templates/recipes.html:12
-#: app/templates/recipes.html:20 app/templates/reports.html:117
-#: app/templates/reports.html:261
-msgid "Margen"
-msgstr "Margin"
 
 #: app/templates/pro_dashboard.html:57
 msgid "Con costos históricos disponibles"
@@ -5705,7 +5887,7 @@ msgstr "Open Decision Center to resolve specific situations."
 msgid "Abrir Centro de decisiones"
 msgstr "Open Decision Center"
 
-#: app/templates/pro_dashboard.html:107 app/templates/reports.html:310
+#: app/templates/pro_dashboard.html:107 app/templates/reports.html:330
 msgid "Ventas del periodo anterior"
 msgstr "Sales from the previous period"
 
@@ -5855,6 +6037,10 @@ msgid "Revisa situaciones priorizadas con evidencia y una acción concreta."
 msgstr "Review prioritized situations with evidence and a concrete action."
 
 #: app/templates/pro_monthly_report.html:2
+msgid "Reporte mensual Restaurant"
+msgstr "Restaurant monthly report"
+
+#: app/templates/pro_monthly_report.html:2
 #: app/templates/pro_monthly_reports.html:2
 msgid "Reporte mensual Pro"
 msgstr "Pro monthly report"
@@ -5875,6 +6061,10 @@ msgstr "This example uses your data, but it was not saved or sent."
 #: app/templates/pro_monthly_report.html:13
 msgid "Conocer PATIA Pro"
 msgstr "Discover PATIA Pro"
+
+#: app/templates/pro_monthly_report.html:22
+msgid "PATIA Restaurant · Reporte mensual"
+msgstr "PATIA Restaurant · Monthly report"
 
 #: app/templates/pro_monthly_report.html:22
 msgid "PATIA Pro · Reporte mensual ejecutivo"
@@ -5946,27 +6136,68 @@ msgstr "Not enough data to highlight products this month."
 msgid "Dónde conviene poner atención"
 msgstr "Where to focus your attention"
 
-#: app/templates/pro_monthly_report.html:144
+#: app/templates/pro_monthly_report.html:145
+msgid "Platillos e ingredientes del mes"
+msgstr "Dishes and ingredients for the month"
+
+#: app/templates/emails/monthly_owner_report.html:81
+#: app/templates/pro_monthly_report.html:147
+msgid "Platillos destacados"
+msgstr "Featured dishes"
+
+#: app/templates/pro_monthly_report.html:147 app/templates/reports.html:242
+#: app/templates/reports.html:261 app/templates/reports.html:298
+msgid "Ingresos"
+msgstr "Revenue"
+
+#: app/templates/emails/monthly_owner_report.html:91
+#: app/templates/pro_monthly_report.html:147 app/templates/reports.html:298
+msgid "Sin platillos vendidos en este periodo."
+msgstr "No dishes were sold in this period."
+
+#: app/templates/emails/monthly_owner_report.html:94
+#: app/templates/pro_monthly_report.html:148
+msgid "Ingredientes con mayor consumo"
+msgstr "Most-consumed ingredients"
+
+#: app/templates/emails/monthly_owner_report.html:104
+#: app/templates/pro_monthly_report.html:148 app/templates/reports.html:307
+msgid "Sin consumo de ingredientes en este periodo."
+msgstr "No ingredient consumption in this period."
+
+#: app/templates/pro_monthly_report.html:150
+#, python-format
+msgid "%(count)s platillo tiene disponibilidad limitada."
+msgid_plural "%(count)s platillos tienen disponibilidad limitada."
+msgstr[0] "%(count)s dish has limited availability."
+msgstr[1] "%(count)s dishes have limited availability."
+
+#: app/templates/pro_monthly_report.html:150
+#, python-format
+msgid "Ingrediente limitante: %(ingredient)s"
+msgstr "Limiting ingredient: %(ingredient)s"
+
+#: app/templates/pro_monthly_report.html:155
 msgid "Conclusión y siguiente paso"
 msgstr "Conclusion and next step"
 
-#: app/templates/pro_monthly_report.html:145
+#: app/templates/pro_monthly_report.html:156
 msgid "Acciones sugeridas para el próximo mes"
 msgstr "Suggested actions for next month"
 
-#: app/templates/pro_monthly_report.html:152
+#: app/templates/pro_monthly_report.html:163
 msgid "Snapshot protegido"
 msgstr "Protected snapshot"
 
-#: app/templates/pro_monthly_report.html:152
+#: app/templates/pro_monthly_report.html:163
 msgid "Vista previa no guardada"
 msgstr "Unsaved preview"
 
-#: app/templates/pro_monthly_report.html:159
+#: app/templates/pro_monthly_report.html:170
 msgid "Este reporte no tiene un snapshot disponible"
 msgstr "This report does not have an available snapshot"
 
-#: app/templates/pro_monthly_report.html:160
+#: app/templates/pro_monthly_report.html:171
 msgid "Genera nuevamente el periodo para crear su vista protegida."
 msgstr "Generate the period again to create its protected view."
 
@@ -6312,6 +6543,11 @@ msgstr "Estimated coverage: %(days)s days"
 
 #: app/templates/pro_purchases.html:67
 #, python-format
+msgid "%(units)s consumidas por ventas en 30 días"
+msgstr "%(units)s consumed by sales in 30 days"
+
+#: app/templates/pro_purchases.html:67
+#, python-format
 msgid "%(units)s vendidas en 30 días"
 msgstr "%(units)s sold in 30 days"
 
@@ -6359,6 +6595,16 @@ msgstr "Review inventory"
 #: app/templates/pro_purchases.html:109
 msgid "Cómo calcula PATIA estas sugerencias"
 msgstr "How PATIA calculates these suggestions"
+
+#: app/templates/pro_purchases.html:110
+msgid ""
+"PATIA considera el consumo real de ingredientes por las recetas vendidas,"
+" existencias, stock mínimo y cobertura. La sugerencia es orientativa y "
+"puedes cambiarla antes de confirmar."
+msgstr ""
+"PATIA considers actual ingredient consumption from sold recipes, current "
+"stock, minimum stock, and coverage. The suggestion is a guide and you can"
+" change it before confirming."
 
 #: app/templates/pro_purchases.html:110
 msgid ""
@@ -7053,6 +7299,11 @@ msgid "Disponibles: %(count)s porciones"
 msgstr "Available: %(count)s portions"
 
 #: app/templates/recipe_detail.html:10
+#, python-format
+msgid "Ingrediente limitante: %(ingredient)s."
+msgstr "Limiting ingredient: %(ingredient)s."
+
+#: app/templates/recipe_detail.html:10
 msgid "Calculado con el ingrediente que se agotará primero."
 msgstr "Calculated using the ingredient that will run out first."
 
@@ -7064,13 +7315,25 @@ msgstr "Ingredients"
 msgid "Costo calculado con el inventario actual."
 msgstr "Cost calculated with current inventory."
 
-#: app/templates/recipe_detail.html:11 app/templates/recipe_form.html:36
-msgid "Ingrediente"
-msgstr "Ingredient"
+#: app/templates/recipe_detail.html:11
+msgid "Stock disponible"
+msgstr "Available stock"
+
+#: app/templates/recipe_detail.html:11
+msgid "Costo unitario actual"
+msgstr "Current unit cost"
 
 #: app/templates/recipe_detail.html:11
 msgid "Cantidad utilizada"
 msgstr "Quantity used"
+
+#: app/templates/recipe_detail.html:11
+msgid "Costo por ingrediente"
+msgstr "Cost by ingredient"
+
+#: app/templates/recipe_detail.html:11
+msgid "Limita la disponibilidad"
+msgstr "Limits availability"
 
 #: app/templates/recipe_form.html:2 app/templates/recipe_form.html:5
 #: app/templates/recipes.html:7 app/templates/recipes.html:35
@@ -7090,16 +7353,16 @@ msgid "Nombre del platillo o preparación"
 msgstr "Dish or preparation name"
 
 #: app/templates/recipe_form.html:11
-msgid "Platillo"
-msgstr "Dish"
-
-#: app/templates/recipe_form.html:11
 msgid "Preparación / subreceta"
 msgstr "Preparation / subrecipe"
 
 #: app/templates/recipe_form.html:13
-msgid "Rendimiento"
-msgstr "Yield"
+msgid "¿Cuánto produce esta receta?"
+msgstr "How much does this recipe yield?"
+
+#: app/templates/recipe_form.html:13
+msgid "Indica la cantidad total que obtienes al preparar esta receta."
+msgstr "Enter the total quantity you get when preparing this recipe."
 
 #: app/templates/recipe_form.html:14
 msgid "Unidad del rendimiento"
@@ -7140,15 +7403,6 @@ msgstr "See the real cost, margin, and availability of every dish."
 #: app/templates/recipes.html:12 app/templates/recipes.html:21
 msgid "Disponibilidad"
 msgstr "Availability"
-
-#: app/templates/recipes.html:21
-#, python-format
-msgid "%(count)s porciones"
-msgstr "%(count)s portions"
-
-#: app/templates/recipes.html:21
-msgid "Preparación"
-msgstr "Preparation"
 
 #: app/templates/recipes.html:22
 msgid "Inactiva"
@@ -7310,10 +7564,6 @@ msgstr "Volume"
 msgid "Productos más vendidos"
 msgstr "Best-selling products"
 
-#: app/templates/reports.html:242 app/templates/reports.html:261
-msgid "Ingresos"
-msgstr "Revenue"
-
 #: app/templates/reports.html:256
 msgid "Rentabilidad"
 msgstr "Profitability"
@@ -7339,10 +7589,58 @@ msgid "Ver Pro"
 msgstr "View Pro"
 
 #: app/templates/reports.html:294
+msgid "Resultados por platillo"
+msgstr "Results by dish"
+
+#: app/templates/reports.html:294
+msgid "Ingresos y rentabilidad calculados con el costo histórico de cada venta."
+msgstr "Revenue and profitability calculated with each sale's historical cost."
+
+#: app/templates/reports.html:297
+msgid "Platillos más vendidos"
+msgstr "Best-selling dishes"
+
+#: app/templates/reports.html:301
+msgid "Rentabilidad de platillos"
+msgstr "Dish profitability"
+
+#: app/templates/reports.html:302
+msgid "Costo histórico"
+msgstr "Historical cost"
+
+#: app/templates/reports.html:306
+msgid "Inventario físico"
+msgstr "Physical inventory"
+
+#: app/templates/reports.html:306
+msgid "Ingredientes consumidos"
+msgstr "Ingredients consumed"
+
+#: app/templates/reports.html:306
+msgid "Consumo real descontado por las recetas vendidas durante el periodo."
+msgstr "Actual consumption deducted by recipes sold during the period."
+
+#: app/templates/reports.html:307
+msgid "Cantidad consumida"
+msgstr "Quantity consumed"
+
+#: app/templates/reports.html:307
+msgid "Costo consumido"
+msgstr "Consumed cost"
+
+#: app/templates/reports.html:307
+msgid "Estado actual"
+msgstr "Current status"
+
+#: app/templates/reports.html:307
+msgid "Stock crítico"
+msgstr "Critical stock"
+
+#: app/templates/reports.html:314
 msgid "Aún no hay ventas en este periodo"
 msgstr "There are no sales in this period yet"
 
-#: app/templates/reports.html:295
+#: app/templates/reports.html:315
 msgid ""
 "Prueba otro periodo o registra una venta para comenzar a analizar el "
 "desempeño de tu negocio."
@@ -7350,11 +7648,11 @@ msgstr ""
 "Try another period or record a sale to begin analyzing your business "
 "performance."
 
-#: app/templates/reports.html:296
+#: app/templates/reports.html:316
 msgid "Registrar una venta"
 msgstr "Record a sale"
 
-#: app/templates/reports.html:311
+#: app/templates/reports.html:331
 msgid "Monto"
 msgstr "Amount"
 
@@ -7999,41 +8297,41 @@ msgstr "Available plans"
 msgid "Para trabajar en equipo"
 msgstr "For working as a team"
 
-#: app/templates/subscribe.html:26
-msgid "Tu plan actual"
-msgstr "Your current plan"
+#: app/templates/subscribe.html:26 app/templates/subscribe.html:34
+msgid "Administrar mi plan"
+msgstr "Manage my plan"
 
 #: app/templates/subscribe.html:31
 #, python-format
 msgid "Cambiar a %(plan)s"
 msgstr "Change to %(plan)s"
 
-#: app/templates/subscribe.html:34
-msgid "Administrar mi plan"
-msgstr "Manage my plan"
+#: app/templates/subscribe.html:37
+msgid "No pudimos validar tu suscripción"
+msgstr "We could not verify your subscription"
 
-#: app/templates/subscribe.html:40
+#: app/templates/subscribe.html:42
 #, python-format
 msgid "Elegir %(plan)s por $%(price)s al mes"
 msgstr "Choose %(plan)s for $%(price)s per month"
 
-#: app/templates/subscribe.html:44
+#: app/templates/subscribe.html:46
 msgid "Este plan estará disponible para contratación muy pronto."
 msgstr "This plan will be available to subscribe very soon."
 
-#: app/templates/subscribe.html:46
+#: app/templates/subscribe.html:48
 msgid "Cambio de plan próximamente"
 msgstr "Plan changes coming soon"
 
-#: app/templates/subscribe.html:47
+#: app/templates/subscribe.html:49
 msgid "Tu plan actual no cambiará hasta que confirmes un cambio."
 msgstr "Your current plan will not change until you confirm it."
 
-#: app/templates/subscribe.html:55
+#: app/templates/subscribe.html:57
 msgid "Tus datos y tu acceso actual están protegidos"
 msgstr "Your data and current access are protected"
 
-#: app/templates/subscribe.html:55
+#: app/templates/subscribe.html:57
 msgid ""
 "Los clientes actuales conservan sus funciones. PATIA no cambiará tu plan "
 "ni eliminará información sin tu confirmación."
@@ -8632,20 +8930,15 @@ msgstr "Incomplete cost"
 msgid "Productos con más movimiento"
 msgstr "Top-moving products"
 
-#: app/templates/emails/monthly_owner_report.html:72
-#, python-format
-msgid "%(count)s unidades"
-msgstr "%(count)s units"
-
-#: app/templates/emails/monthly_owner_report.html:80
+#: app/templates/emails/monthly_owner_report.html:109
 msgid "Acciones recomendadas"
 msgstr "Recommended actions"
 
-#: app/templates/emails/monthly_owner_report.html:101
+#: app/templates/emails/monthly_owner_report.html:130
 msgid "Revisar mi negocio en PATIA"
 msgstr "Review my business in PATIA"
 
-#: app/templates/emails/monthly_owner_report.html:102
+#: app/templates/emails/monthly_owner_report.html:131
 msgid ""
 "Los cálculos se basan únicamente en la información registrada en PATIA "
 "durante el periodo."
@@ -8897,7 +9190,7 @@ msgstr "The invitation expires in 48 hours."
 #~ msgstr "View balances"
 
 #~ msgid "Rendimiento"
-#~ msgstr "Performance"
+#~ msgstr "Yield"
 
 #~ msgid ""
 #~ "Cuando registres tus primeras ventas, "
@@ -9409,9 +9702,6 @@ msgstr "The invitation expires in 48 hours."
 #~ msgid "Aún no hay ventas este mes."
 #~ msgstr "There are no sales this month yet."
 
-msgid "No se pudo confirmar tu suscripción con Stripe."
-msgstr "We could not confirm your subscription with Stripe."
-
 #~ msgid "Ver análisis"
 #~ msgstr "View analysis"
 
@@ -9442,6 +9732,8 @@ msgstr "We could not confirm your subscription with Stripe."
 #~ msgid "Rendimientos y preparaciones"
 #~ msgstr "Yields and preparations"
 
-#: app/templates/subscribe.html:37
-msgid "No pudimos validar tu suscripción"
-msgstr "We could not verify your subscription"
+#~ msgid "Tu plan actual"
+#~ msgstr "Your current plan"
+
+#~ msgid "No se pudo confirmar tu suscripción con Stripe."
+#~ msgstr "We could not confirm your subscription with Stripe."

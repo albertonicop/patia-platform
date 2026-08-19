@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -31,6 +32,12 @@ from app.models import (
     SalesTicket,
     User,
 )
+from app.monthly_reports import (
+    SNAPSHOT_VERSION,
+    build_report_snapshot,
+    payload_from_snapshot,
+    report_payload,
+)
 from app.plans import (
     PRO,
     RESTAURANT,
@@ -50,6 +57,7 @@ from app.recipes.services import (
 from app.team.services import ensure_owner_organization
 from app.units import convert_quantity
 from flask_babel import refresh
+from flask import render_template
 
 
 class RestaurantVerticalTests(unittest.TestCase):
@@ -182,6 +190,9 @@ class RestaurantVerticalTests(unittest.TestCase):
     def test_plan_matrix_and_pricing_are_centralized(self):
         self.assertEqual(PLAN_PRICES_MXN[RESTAURANT], 360)
         self.assertTrue(entitlements_for(RESTAURANT).recipes)
+        self.assertTrue(entitlements_for(RESTAURANT).advanced_reports)
+        self.assertTrue(entitlements_for(RESTAURANT).monthly_owner_report)
+        self.assertTrue(entitlements_for(RESTAURANT).executive_dashboard)
         self.assertFalse(entitlements_for(STARTER).recipes)
         self.assertFalse(entitlements_for(PRO).recipes)
         self.assertIn("ingredient_depletion", capabilities_for(RESTAURANT))
@@ -265,6 +276,64 @@ class RestaurantVerticalTests(unittest.TestCase):
         )
         with self.assertRaises(RecipeError):
             validate_recipe_components(sauce, [cycle])
+
+    def test_preparation_sale_consumes_physical_stock_once_and_cancel_restores_it(self):
+        tomato = self._product(
+            "Tomate para salsa", "TOM-SALE", unit="kg", stock="10", cost="30"
+        )
+        preparation = self.client.post(
+            "/recipes/new",
+            data={
+                "name": "Salsa operativa",
+                "recipe_type": "preparation",
+                "yield_quantity": "5",
+                "yield_unit_code": "L",
+                "is_active": "1",
+                "components_json": json.dumps([{
+                    "source_type": "product", "source_id": tomato.id,
+                    "quantity": "2", "unit_code": "kg",
+                }]),
+            },
+        )
+        self.assertEqual(preparation.status_code, 302)
+        sauce = Recipe.query.filter_by(name="Salsa operativa").one()
+        dish = self.client.post(
+            "/recipes/new",
+            data={
+                "name": "Platillo con salsa operativa",
+                "recipe_type": "dish",
+                "sale_price": "100",
+                "yield_quantity": "1",
+                "yield_unit_code": "portion",
+                "is_active": "1",
+                "components_json": json.dumps([{
+                    "source_type": "recipe", "source_id": sauce.id,
+                    "quantity": "30", "unit_code": "ml",
+                }]),
+            },
+        )
+        self.assertEqual(dish.status_code, 302, dish.get_data(as_text=True))
+        recipe = Recipe.query.filter_by(name="Platillo con salsa operativa").one()
+        sold = self.client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "card",
+                "items": [{"product_id": recipe.sale_product_id, "quantity": 2}],
+            },
+        )
+        self.assertEqual(sold.status_code, 200)
+        db.session.refresh(tomato)
+        self.assertEqual(tomato.stock, Decimal("9.976"))
+        consumption = RecipeSaleConsumption.query.one()
+        self.assertEqual(consumption.quantity, Decimal("0.024"))
+        self.assertEqual(InventoryMovement.query.filter_by(
+            product_id=tomato.id, movement_type="SALE"
+        ).count(), 1)
+        sale = Sale.query.one()
+        self.assertEqual(self.client.post(f"/sales/{sale.id}/cancel").status_code, 302)
+        db.session.refresh(tomato)
+        self.assertEqual(tomato.stock, Decimal("10.000"))
 
     def test_sale_decrements_ingredients_and_freezes_historical_cost(self):
         recipe, bread, meat = self._create_dish()
@@ -508,6 +577,169 @@ class RestaurantVerticalTests(unittest.TestCase):
         page = self.client.get("/recipes")
         self.assertEqual(page.status_code, 200)
         self.assertIn("Recipes", page.get_data(as_text=True))
+        form = self.client.get("/recipes/new").get_data(as_text=True)
+        self.assertIn("How much does this recipe yield?", form)
+        self.assertIn("Enter the total quantity", form)
+
+    def test_complete_restaurant_flow_connects_inventory_reports_and_monthly_snapshot(self):
+        meat = self._product(
+            "Carne", "MEAT-E2E", unit="kg", stock="10", cost="180",
+            minimum="9",
+        )
+        bread = self._product(
+            "Pan hamburguesa", "BREAD-E2E", stock="100", cost="6",
+            minimum="20",
+        )
+        cheese = self._product(
+            "Queso", "CHEESE-E2E", unit="kg", stock="5", cost="150",
+            minimum="4.7",
+        )
+        created = self.client.post(
+            "/recipes/new",
+            data={
+                "name": "Hamburguesa E2E",
+                "category": "Hamburguesas",
+                "recipe_type": "dish",
+                "sale_price": "135",
+                "yield_quantity": "1",
+                "yield_unit_code": "portion",
+                "is_active": "1",
+                "components_json": json.dumps([
+                    {"source_type": "product", "source_id": meat.id, "quantity": "180", "unit_code": "g"},
+                    {"source_type": "product", "source_id": bread.id, "quantity": "1", "unit_code": "piece"},
+                    {"source_type": "product", "source_id": cheese.id, "quantity": "40", "unit_code": "g"},
+                ]),
+            },
+        )
+        self.assertEqual(created.status_code, 302)
+        recipe = Recipe.query.filter_by(name="Hamburguesa E2E").one()
+
+        product_page = self.client.get(f"/products/{meat.id}/edit")
+        self.assertIn("Usado en recetas", product_page.get_data(as_text=True))
+        self.assertIn("Hamburguesa E2E", product_page.get_data(as_text=True))
+        detail = self.client.get(f"/recipes/{recipe.id}")
+        detail_html = detail.get_data(as_text=True)
+        self.assertIn("Stock disponible", detail_html)
+        self.assertIn("Ingrediente limitante", detail_html)
+
+        sold = self.client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "card",
+                "items": [{"product_id": recipe.sale_product_id, "quantity": 10}],
+            },
+        )
+        self.assertEqual(sold.status_code, 200, sold.get_data(as_text=True))
+        for product, expected in (
+            (meat, Decimal("8.200")),
+            (bread, Decimal("90.000")),
+            (cheese, Decimal("4.600")),
+        ):
+            db.session.refresh(product)
+            self.assertEqual(product.stock, expected)
+        sale = Sale.query.one()
+        self.assertEqual(sale.unit_cost, Decimal("44.40"))
+        self.assertEqual(RecipeSaleConsumption.query.count(), 3)
+        self.assertEqual(
+            InventoryMovement.query.filter_by(movement_type="SALE").count(), 3
+        )
+
+        suggestions = purchase_suggestions(self.membership.organization_id)
+        by_id = {item["product_id"]: item for item in suggestions["suggestions"]}
+        self.assertIn(meat.id, by_id)
+        self.assertIn(cheese.id, by_id)
+        self.assertNotIn(recipe.sale_product_id, by_id)
+        self.assertEqual(by_id[meat.id]["recent_units"], Decimal("1.800"))
+
+        reports = self.client.get("/reports?period=this_month")
+        reports_html = reports.get_data(as_text=True)
+        self.assertIn("Resultados por platillo", reports_html)
+        self.assertIn("Ingredientes consumidos", reports_html)
+        self.assertIn("Hamburguesa E2E", reports_html)
+        dashboard = self.client.get("/").get_data(as_text=True)
+        self.assertIn("Lectura Restaurant", dashboard)
+        self.assertIn("Hamburguesa E2E", dashboard)
+        decision_center = self.client.get("/pro/hub")
+        self.assertEqual(decision_center.status_code, 200)
+        self.assertIn(
+            "Repón Carne para tus recetas",
+            decision_center.get_data(as_text=True),
+        )
+
+        now = datetime.utcnow()
+        payload = report_payload(
+            self.membership.organization, now.year, now.month
+        )
+        with self.app.test_request_context("/"):
+            email_html = render_template(
+                "emails/monthly_owner_report.html",
+                reports_url="https://patia.test/pro/monthly-reports",
+                **payload,
+            )
+        self.assertIn("Platillos destacados", email_html)
+        self.assertIn("Hamburguesa E2E", email_html)
+        snapshot = build_report_snapshot(payload, "Reporte Restaurant")
+        self.assertEqual(snapshot["version"], SNAPSHOT_VERSION)
+        self.assertEqual(snapshot["report_type"], "restaurant")
+        self.assertEqual(snapshot["restaurant"]["dish_units"], 10)
+        self.assertEqual(
+            snapshot["restaurant"]["top_selling"][0]["cost"], "444.00"
+        )
+        frozen = json.dumps(snapshot, sort_keys=True)
+        legacy = dict(snapshot)
+        legacy["version"] = 3
+        legacy.pop("restaurant", None)
+        legacy.pop("report_type", None)
+        legacy_payload = payload_from_snapshot(SimpleNamespace(
+            snapshot_json=json.dumps(legacy)
+        ))
+        self.assertIsNone(legacy_payload["restaurant"])
+
+        self.assertEqual(self.client.get("/pro/purchases").status_code, 200)
+        self.assertEqual(self.client.get("/pro/monthly-reports").status_code, 200)
+        monthly_preview = self.client.get("/pro/monthly-reports/preview")
+        self.assertEqual(monthly_preview.status_code, 200)
+        self.assertIn(
+            "Reporte mensual Restaurant",
+            monthly_preview.get_data(as_text=True),
+        )
+
+        # Changing the current recipe must not affect the sold snapshot or
+        # the exact quantities restored from that historical sale.
+        recipe.components[0].quantity = Decimal("160")
+        meat.cost_price = Decimal("250")
+        db.session.commit()
+        self.assertEqual(json.dumps(snapshot, sort_keys=True), frozen)
+        canceled = self.client.post(f"/sales/{sale.id}/cancel")
+        self.assertEqual(canceled.status_code, 302)
+        for product, expected in (
+            (meat, Decimal("10.000")),
+            (bread, Decimal("100.000")),
+            (cheese, Decimal("5.000")),
+        ):
+            db.session.refresh(product)
+            self.assertEqual(product.stock, expected)
+        after_cancellation = purchase_suggestions(
+            self.membership.organization_id
+        )
+        self.assertNotIn(
+            meat.id,
+            {item["product_id"] for item in after_cancellation["suggestions"]},
+        )
+
+    def test_general_business_does_not_receive_restaurant_surfaces(self):
+        general_owner, general_membership = self._owner(
+            "general-surfaces@restaurant.test", PRO, "general"
+        )
+        general_client = self._client(general_owner, general_membership)
+        self.assertNotIn(
+            "Lectura Restaurant", general_client.get("/").get_data(as_text=True)
+        )
+        self.assertNotIn(
+            "Resultados por platillo",
+            general_client.get("/reports").get_data(as_text=True),
+        )
 
 
 if __name__ == "__main__":

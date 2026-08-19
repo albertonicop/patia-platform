@@ -65,7 +65,7 @@ RETRY_DELAYS = (
     timedelta(days=1),
 )
 
-SNAPSHOT_VERSION = 3
+SNAPSHOT_VERSION = 4
 
 
 def _decimal_text(value):
@@ -188,7 +188,54 @@ def build_report_snapshot(payload, subject):
             ),
         },
     }
+    restaurant = analytics.get("restaurant_report")
+    if payload["organization"].business_type == "restaurant" and restaurant:
+        snapshot["report_type"] = "restaurant"
+        snapshot["restaurant"] = {
+            "dish_units": int(restaurant["dish_units"]),
+            "ingredient_cost": _decimal_text(restaurant["ingredient_cost"]),
+            "top_selling": [
+                _restaurant_dish_snapshot(item)
+                for item in restaurant["top_selling"][:5]
+            ],
+            "most_profitable": [
+                _restaurant_dish_snapshot(item)
+                for item in restaurant["most_profitable"][:5]
+            ],
+            "highest_revenue": [
+                _restaurant_dish_snapshot(item)
+                for item in restaurant["highest_revenue"][:5]
+            ],
+            "lowest_margin": [
+                _restaurant_dish_snapshot(item)
+                for item in restaurant["lowest_margin"][:5]
+            ],
+            "ingredients": [
+                {
+                    "product_id": item["product_id"],
+                    "name": item["name"],
+                    "unit_code": item["unit_code"],
+                    "quantity": str(item["quantity"]),
+                    "cost": _decimal_text(item["cost"]),
+                    "is_critical": bool(item["is_critical"]),
+                }
+                for item in restaurant["ingredients"][:10]
+            ],
+            "limited_dishes": list(restaurant["limited_dishes"][:10]),
+        }
     return snapshot
+
+
+def _restaurant_dish_snapshot(item):
+    return {
+        "recipe_id": item["recipe_id"],
+        "name": item["name"],
+        "units": int(item["units"]),
+        "revenue": _decimal_text(item["revenue"]),
+        "cost": _decimal_text(item["cost"]),
+        "profit": _decimal_text(item["profit"]),
+        "margin": _plain_number(item["margin"]),
+    }
 
 
 def enrich_snapshot_narrative(snapshot, organization_id):
@@ -329,6 +376,7 @@ def payload_from_snapshot(record):
                 snapshot["cash"]["net_difference"]
             ),
         },
+        "restaurant": snapshot.get("restaurant"),
         "comparison": snapshot["comparison"],
         "profit_comparison": snapshot["profit_comparison"],
     }
@@ -384,6 +432,11 @@ def monthly_report_pdf(record):
             "no_recommendations": gettext(
                 "Registra actividad durante el mes para recibir acciones específicas."
             ),
+            "restaurant_results": gettext("Platillos e ingredientes"),
+            "dish": gettext("Platillo"),
+            "ingredient": gettext("Ingrediente"),
+            "consumption": gettext("Consumo"),
+            "margin": gettext("Margen"),
         }
     output = BytesIO()
     document = SimpleDocTemplate(
@@ -424,7 +477,11 @@ def monthly_report_pdf(record):
         pdf.saveState()
         pdf.setFillColor(HexColor("#5B45E8"))
         pdf.setFont("Helvetica-Bold", 8)
-        pdf.drawString(18 * mm, letter[1] - 12 * mm, "PATIA PRO")
+        pdf.drawString(
+            18 * mm,
+            letter[1] - 12 * mm,
+            "PATIA RESTAURANT" if snapshot.get("restaurant") else "PATIA PRO",
+        )
         pdf.setFillColor(HexColor("#7A8192"))
         pdf.setFont("Helvetica", 7)
         pdf.drawRightString(letter[0] - 18 * mm, letter[1] - 12 * mm, snapshot["period"]["label"])
@@ -435,9 +492,12 @@ def monthly_report_pdf(record):
         pdf.restoreState()
 
     kpis = snapshot["kpis"]
+    restaurant = snapshot.get("restaurant")
+    fourth_label = gettext("Platillos vendidos") if restaurant else labels["recorded_sales"]
+    fourth_value = restaurant["dish_units"] if restaurant else kpis["ticket_count"]
     kpi_data = [
-        [Paragraph(labels["sales"], small), Paragraph(labels["profit"], small), Paragraph(labels["average_ticket"], small), Paragraph(labels["recorded_sales"], small)],
-        [Paragraph(money_value(kpis["sales"]), number), Paragraph(money_value(kpis["profit"]), number), Paragraph(money_value(kpis["average_ticket"]), number), Paragraph(str(kpis["ticket_count"]), number)],
+        [Paragraph(labels["sales"], small), Paragraph(labels["profit"], small), Paragraph(labels["average_ticket"], small), Paragraph(fourth_label, small)],
+        [Paragraph(money_value(kpis["sales"]), number), Paragraph(money_value(kpis["profit"]), number), Paragraph(money_value(kpis["average_ticket"]), number), Paragraph(str(fourth_value), number)],
     ]
     kpi_table = Table(kpi_data, colWidths=[document.width / 4] * 4, rowHeights=[8 * mm, 12 * mm])
     kpi_table.setStyle(TableStyle([
@@ -520,8 +580,41 @@ def monthly_report_pdf(record):
         ("TOPPADDING", (0, 0), (-1, -1), 7),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
     ]))
+    story.append(customer_table)
+    if restaurant:
+        restaurant_rows = [[
+            Paragraph(labels["dish"], small),
+            Paragraph(labels["units"], small),
+            Paragraph(labels["margin"], small),
+        ]]
+        for item in restaurant.get("top_selling", [])[:5]:
+            restaurant_rows.append([
+                Paragraph(item["name"], body),
+                Paragraph(str(item["units"]), number),
+                Paragraph(
+                    f"{item['margin']:.1f}%" if item.get("margin") is not None else "—",
+                    number,
+                ),
+            ])
+        ingredient_rows = [[
+            Paragraph(labels["ingredient"], small),
+            Paragraph(labels["consumption"], small),
+            Paragraph(labels["result"], small),
+        ]]
+        for item in restaurant.get("ingredients", [])[:5]:
+            ingredient_rows.append([
+                Paragraph(item["name"], body),
+                Paragraph(f"{item['quantity']} {item['unit_code']}", number),
+                Paragraph(money_value(item["cost"]), number),
+            ])
+        story.extend([
+            Spacer(1, 7 * mm),
+            Paragraph(labels["restaurant_results"], h1),
+            Table(restaurant_rows, colWidths=[document.width * .55, document.width * .2, document.width * .25], repeatRows=1),
+            Spacer(1, 4 * mm),
+            Table(ingredient_rows, colWidths=[document.width * .55, document.width * .2, document.width * .25], repeatRows=1),
+        ])
     story.extend([
-        customer_table,
         PageBreak(),
         Paragraph(labels["control_next"], title),
         Paragraph(labels["control_next_help"], body),
@@ -749,6 +842,7 @@ def report_payload(organization: Organization, year: int, month: int):
     analytics = _report_analytics(
         organization.id, period, timezone_name=timezone_name,
         currency_code=organization.currency_code,
+        include_restaurant=(organization.business_type == "restaurant"),
     )
     previous_date = period["start_date"] - timedelta(days=1)
     previous_period = _period(
@@ -759,6 +853,7 @@ def report_payload(organization: Organization, year: int, month: int):
         previous_period,
         timezone_name=timezone_name,
         currency_code=organization.currency_code,
+        include_restaurant=(organization.business_type == "restaurant"),
     )
     sales = analytics["report_kpis"]["sales"]
     previous_sales = previous["report_kpis"]["sales"]
@@ -873,6 +968,35 @@ def report_payload(organization: Organization, year: int, month: int):
                 count=analytics["unknown_cost_lines"],
             )
         )
+    restaurant = analytics.get("restaurant_report")
+    if organization.business_type == "restaurant" and restaurant:
+        if restaurant["top_selling"]:
+            dish = restaurant["top_selling"][0]
+            wins.insert(0, gettext(
+                "%(dish)s fue el platillo más vendido con %(count)s unidades.",
+                dish=dish["name"], count=dish["units"],
+            ))
+        if restaurant["limited_dishes"]:
+            dish = restaurant["limited_dishes"][0]
+            attention.insert(0, gettext(
+                "%(dish)s tiene disponibilidad limitada a %(count)s porciones por falta de %(ingredient)s.",
+                dish=dish["name"], count=dish["availability"],
+                ingredient=dish["limiting_ingredient"],
+            ))
+            recommendations.insert(0, gettext(
+                "Repón %(ingredient)s para mantener disponible %(dish)s.",
+                ingredient=dish["limiting_ingredient"], dish=dish["name"],
+            ))
+        if (
+            restaurant["lowest_margin"]
+            and restaurant["lowest_margin"][0]["margin"] is not None
+            and restaurant["lowest_margin"][0]["margin"] < 25
+        ):
+            dish = restaurant["lowest_margin"][0]
+            attention.insert(0, gettext(
+                "%(dish)s cerró con un margen de %(margin)s%%.",
+                dish=dish["name"], margin=dish["margin"],
+            ))
     if not recommendations:
         recommendations.append(
             gettext(
@@ -915,6 +1039,7 @@ def report_payload(organization: Organization, year: int, month: int):
         "period": period,
         "period_label": format_date(period["start_date"], format="LLLL y"),
         "analytics": analytics,
+        "restaurant": analytics.get("restaurant_report"),
         "comparison": comparison,
         "profit_comparison": profit_comparison,
         "inventory": inventory,
