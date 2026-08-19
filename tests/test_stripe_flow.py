@@ -14,12 +14,22 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_patia")
 os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
-from app.models import StripeWebhookEvent, User
+from app.models import Organization, OrganizationMember, StripeWebhookEvent, User
 from app.routes import has_pro_access
 
 
 def utc_timestamp(value):
     return calendar.timegm(value.utctimetuple())
+
+
+class StripeObjectWithoutGet:
+    """Minimal Stripe SDK 15.x resource: conversion exists, mapping.get does not."""
+
+    def __init__(self, payload):
+        self.payload = payload
+
+    def to_dict(self):
+        return self.payload
 
 
 class StripeFlowTests(unittest.TestCase):
@@ -47,6 +57,8 @@ class StripeFlowTests(unittest.TestCase):
     def setUp(self):
         db.session.rollback()
         StripeWebhookEvent.query.delete()
+        OrganizationMember.query.delete()
+        Organization.query.delete()
         User.query.delete()
         db.session.commit()
         self.client = self.app.test_client()
@@ -124,6 +136,38 @@ class StripeFlowTests(unittest.TestCase):
         self.assertEqual(StripeWebhookEvent.query.count(), 1)
         self.assertEqual(user.subscription_status, "active")
         self.assertEqual(user.plan, "pro")
+
+    def test_webhook_accepts_stripe_sdk_resource_objects(self):
+        user = self.make_user(
+            stripe_customer_id="cus_sdk_object",
+            stripe_subscription_id="sub_sdk_object",
+        )
+        event = self.invoice_event(
+            "evt_sdk_object",
+            "invoice.paid",
+            user,
+            utc_timestamp(datetime.utcnow()),
+        )
+        subscription = self.subscription(user)
+        with (
+            patch(
+                "app.routes.stripe.Webhook.construct_event",
+                return_value=StripeObjectWithoutGet(event),
+            ),
+            patch(
+                "app.routes.stripe.Subscription.retrieve",
+                return_value=StripeObjectWithoutGet(subscription),
+            ),
+        ):
+            response = self.client.post(
+                "/stripe-webhook",
+                data=b"{}",
+                headers={"Stripe-Signature": "valid"},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        db.session.refresh(user)
+        self.assertEqual(user.subscription_status, "active")
 
     def test_checkout_completed_binds_ids_without_granting_pro(self):
         user = self.make_user()
@@ -281,6 +325,24 @@ class StripeFlowTests(unittest.TestCase):
         first_key = create.call_args_list[0].kwargs["idempotency_key"]
         second_key = create.call_args_list[1].kwargs["idempotency_key"]
         self.assertEqual(first_key, second_key)
+
+    def test_checkout_idempotency_key_distinguishes_recreated_user_ids(self):
+        user = self.make_user(email="first-generation@patia.test", email_verified=True)
+        self.login(user)
+        checkout = SimpleNamespace(url="https://checkout.stripe.test/session")
+        with patch(
+            "app.routes.stripe.checkout.Session.create", return_value=checkout
+        ) as create:
+            first = self.client.post("/create-checkout-session")
+            first_key = create.call_args.kwargs["idempotency_key"]
+            user.created_at = user.created_at + timedelta(seconds=1)
+            db.session.commit()
+            second = self.client.post("/create-checkout-session")
+            second_key = create.call_args.kwargs["idempotency_key"]
+
+        self.assertEqual(first.status_code, 303)
+        self.assertEqual(second.status_code, 303)
+        self.assertNotEqual(first_key, second_key)
 
     def test_invoice_paid_grants_and_renews_access(self):
         user = self.make_user(

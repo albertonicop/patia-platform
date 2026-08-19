@@ -438,6 +438,14 @@ class StripeEventIgnored(Exception):
     """Evento válido de Stripe que no pertenece a esta integración."""
 
 
+def _stripe_dict(value):
+    """Normalize Stripe SDK resources without weakening webhook validation."""
+    converter = getattr(value, "to_dict_recursive", None) or getattr(
+        value, "to_dict", None
+    )
+    return converter() if callable(converter) else value
+
+
 def _as_utc_datetime(value):
     if not value:
         return None
@@ -619,7 +627,9 @@ def _has_managed_stripe_subscription(user):
         return True
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     try:
-        subscription = stripe.Subscription.retrieve(user.stripe_subscription_id)
+        subscription = _stripe_dict(
+            stripe.Subscription.retrieve(user.stripe_subscription_id)
+        )
         _validate_subscription(subscription, user=user)
         _sync_subscription_state(user, subscription, datetime.utcnow())
         db.session.commit()
@@ -3981,11 +3991,11 @@ def create_checkout_session():
 
     if user.stripe_customer_id:
         try:
-            subscriptions = stripe.Subscription.list(
+            subscriptions = _stripe_dict(stripe.Subscription.list(
                 customer=user.stripe_customer_id,
                 status="all",
                 limit=10,
-            )
+            ))
             for candidate in subscriptions.get("data", []):
                 if (
                     candidate.get("status") in MANAGED_SUBSCRIPTION_STATUSES
@@ -4036,12 +4046,13 @@ def create_checkout_session():
         checkout_params["customer_email"] = user.email
 
     idempotency_window = int(datetime.utcnow().timestamp() // 1800)
+    user_identity = int(user.created_at.timestamp() * 1_000_000)
     try:
         checkout_session = stripe.checkout.Session.create(
             **checkout_params,
             idempotency_key=(
                 f"patia-checkout-{user.id}-{requested_plan.lower()}-"
-                f"{idempotency_window}"
+                f"{user_identity}-{idempotency_window}"
             ),
         )
         return redirect(checkout_session.url, code=303)
@@ -4082,7 +4093,7 @@ def _process_stripe_event(event):
         if user.stripe_customer_id and user.stripe_customer_id != customer_id:
             raise StripeEventIgnored("Checkout pertenece a otro cliente.")
         _ensure_stripe_ids_available(user, customer_id, subscription_id)
-        subscription = stripe.Subscription.retrieve(subscription_id)
+        subscription = _stripe_dict(stripe.Subscription.retrieve(subscription_id))
         _validate_subscription(subscription, user=user, customer_id=customer_id)
         metadata_user_id = str((subscription.get("metadata") or {}).get("user_id") or "")
         if metadata_user_id and metadata_user_id != str(user.id):
@@ -4115,7 +4126,7 @@ def _process_stripe_event(event):
         subscription_id = _invoice_subscription_id(data)
         if not subscription_id:
             raise StripeEventIgnored("Factura sin suscripción.")
-        subscription = stripe.Subscription.retrieve(subscription_id)
+        subscription = _stripe_dict(stripe.Subscription.retrieve(subscription_id))
         _validate_subscription(subscription, customer_id=data.get("customer"))
         user = _find_subscription_user(subscription)
         if not user:
@@ -4202,7 +4213,9 @@ def stripe_webhook():
     endpoint_secret = current_app.config["STRIPE_WEBHOOK_SECRET"]
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        event = _stripe_dict(
+            stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        )
     except ValueError:
         return "", 400
     except stripe.error.SignatureVerificationError:
@@ -4282,7 +4295,9 @@ def stripe_success():
 
     try:
         stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
-        checkout_session = stripe.checkout.Session.retrieve(checkout_session_id)
+        checkout_session = _stripe_dict(
+            stripe.checkout.Session.retrieve(checkout_session_id)
+        )
     except Exception:
         current_app.logger.exception("No se pudo consultar la sesión de Checkout")
         flash("No se pudo validar la sesión de pago.", "danger")
@@ -4468,7 +4483,9 @@ def subscription():
     if user.stripe_subscription_id and not current_app.config["STRIPE_DISABLED"]:
         stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
         try:
-            sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
+            sub = _stripe_dict(
+                stripe.Subscription.retrieve(user.stripe_subscription_id)
+            )
             _validate_subscription(sub, user=user)
             _sync_subscription_state(user, sub, datetime.utcnow())
             db.session.commit()
@@ -4645,9 +4662,9 @@ def change_subscription_plan():
 
     stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
     try:
-        subscription = stripe.Subscription.retrieve(
+        subscription = _stripe_dict(stripe.Subscription.retrieve(
             owner.stripe_subscription_id
-        )
+        ))
         _validate_subscription(subscription, user=owner)
         items = (subscription.get("items") or {}).get("data") or []
         if len(items) != 1 or not items[0].get("id"):
@@ -4664,17 +4681,17 @@ def change_subscription_plan():
         if target_plan == STARTER:
             schedule_id = subscription.get("schedule")
             if schedule_id:
-                schedule = stripe.SubscriptionSchedule.retrieve(
+                schedule = _stripe_dict(stripe.SubscriptionSchedule.retrieve(
                     schedule_id
-                )
+                ))
             else:
-                schedule = stripe.SubscriptionSchedule.create(
+                schedule = _stripe_dict(stripe.SubscriptionSchedule.create(
                     from_subscription=owner.stripe_subscription_id,
                     idempotency_key=(
                         f"patia-plan-schedule-{owner.id}-starter-"
                         f"{subscription.get('current_period_end')}"
                     ),
-                )
+                ))
             current_price = (items[0].get("price") or {}).get("id")
             stripe.SubscriptionSchedule.modify(
                 schedule.get("id"),
