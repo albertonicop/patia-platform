@@ -5407,6 +5407,64 @@ msgstr ""
 msgid "PATIA © 2026"
 msgstr ""
 
+#: app/templates/sell.html
+msgid "Punto de venta Restaurant"
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Agrega platillos en un clic y combina productos vendibles sin salir del cobro."
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Buscar platillo o producto"
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Buscar platillo o producto…"
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Platillos"
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Selecciona desde tus recetas activas"
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Haz clic en la tarjeta o en Agregar para sumar 1 unidad al carrito actual."
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Categorías de platillos"
+msgstr ""
+
+#: app/templates/sell.html
+#, python-format
+msgid "Agotado por %(ingredient)s"
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Todos"
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Agregar"
+msgstr ""
+
+#: app/templates/sell.html
+#, python-format
+msgid "%(count)s platillos visibles."
+msgstr ""
+
+#: app/templates/sell.html
+msgid "No hay platillos activos para esta categoría."
+msgstr ""
+
+#: app/templates/sell.html
+msgid "Agotado"
+msgstr ""
+
 #: app/templates/pro_alerts.html:2
 msgid "Alertas inteligentes"
 msgstr ""

@@ -2,7 +2,7 @@
 {% block title %}{{ _("Punto de venta") }}{% endblock %}
 {% block content %}
 
-<div class="pos-v2">
+<div class="pos-v2{% if restaurant_pos_enabled %} pos-v2--restaurant{% endif %}">
   <div class="pos-v2__mode-bar">
     <div>
       <i class="fa-solid fa-display" aria-hidden="true"></i>
@@ -63,8 +63,13 @@
     <section class="card pos-v2__sale-panel" aria-labelledby="sale-panel-title">
       <header class="pos-v2__panel-head">
         <span class="pos-v2__eyebrow">{{ _("Venta nueva") }}</span>
-        <h2 id="sale-panel-title">{{ _("Busca y agrega productos") }}</h2>
-        <p>{{ _("Escribe nombre, SKU o código de barras. También puedes usar tu escáner.") }}</p>
+        {% if restaurant_pos_enabled %}
+          <h2 id="sale-panel-title">{{ _("Punto de venta Restaurant") }}</h2>
+          <p>{{ _("Agrega platillos en un clic y combina productos vendibles sin salir del cobro.") }}</p>
+        {% else %}
+          <h2 id="sale-panel-title">{{ _("Busca y agrega productos") }}</h2>
+          <p>{{ _("Escribe nombre, SKU o código de barras. También puedes usar tu escáner.") }}</p>
+        {% endif %}
       </header>
 
       <section class="pos-customer-v1" aria-labelledby="pos-customer-title">
@@ -87,17 +92,32 @@
       </section>
 
       <div class="pos-v2__search">
-        <label for="product-search">{{ _("Buscar producto") }}</label>
+        <label for="product-search">{{ _("Buscar platillo o producto") if restaurant_pos_enabled else _("Buscar producto") }}</label>
         <div class="pos-v2__search-control">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
           <input id="product-search" type="search" autocomplete="off" autofocus
-                 placeholder="{{ _('Nombre, SKU o código de barras') }}"
+                 placeholder="{{ _('Buscar platillo o producto…') if restaurant_pos_enabled else _('Nombre, SKU o código de barras') }}"
                  role="combobox" aria-autocomplete="list" aria-expanded="false"
                  aria-controls="product-results">
         </div>
         <div id="product-results" class="pos-v2__results" role="listbox" aria-label="{{ _('Productos encontrados') }}" hidden></div>
         <p id="product-search-status" class="pos-v2__search-status" role="status" aria-live="polite"></p>
       </div>
+
+      {% if restaurant_pos_enabled %}
+      <section id="restaurant-pos-panel" class="pos-restaurant-v1" aria-labelledby="restaurant-dishes-title">
+        <header class="pos-restaurant-v1__head">
+          <div>
+            <span class="pos-v2__eyebrow">{{ _("Platillos") }}</span>
+            <h3 id="restaurant-dishes-title">{{ _("Selecciona desde tus recetas activas") }}</h3>
+          </div>
+          <p>{{ _("Haz clic en la tarjeta o en Agregar para sumar 1 unidad al carrito actual.") }}</p>
+        </header>
+        <nav id="restaurant-category-filters" class="pos-restaurant-v1__filters" aria-label="{{ _('Categorías de platillos') }}"></nav>
+        <div id="restaurant-recipe-grid" class="pos-restaurant-v1__grid" role="list"></div>
+        <p id="restaurant-recipe-status" class="pos-v2__search-status" role="status" aria-live="polite"></p>
+      </section>
+      {% endif %}
 
       <div class="pos-v2__cart-head">
         <div><span class="pos-v2__eyebrow">{{ _("Carrito") }}</span><h3>{{ _("Productos de la venta") }}</h3></div>
@@ -257,6 +277,7 @@ const POS_I18N = {
   noResults: {{ _("No encontramos productos con esa búsqueda.")|tojson }},
   available: {{ _("%(count)s disponibles", count="__COUNT__")|tojson }},
   outOfStock: {{ _("Sin existencias")|tojson }},
+  outOfStockByIngredient: {{ _("Agotado por %(ingredient)s", ingredient="__INGREDIENT__")|tojson }},
   results: {{ _("%(count)s productos encontrados.", count="__COUNT__")|tojson }},
   unavailable: {{ _("%(name)s no tiene existencias disponibles.", name="__NAME__")|tojson }},
   limited: {{ _("Solo hay %(count)s unidades disponibles de %(name)s.", count="__COUNT__", name="__NAME__")|tojson }},
@@ -285,6 +306,12 @@ const POS_I18N = {
   ,cashPrompt: {{ _("Ingresa cuánto entregó el cliente.")|tojson }}
   ,cashChange: {{ _("Cambio: %(amount)s", amount="__AMOUNT__")|tojson }}
   ,cashMissing: {{ _("Faltan %(amount)s", amount="__AMOUNT__")|tojson }}
+  ,allCategories: {{ _("Todos")|tojson }}
+  ,add: {{ _("Agregar")|tojson }}
+  ,recipeGridResults: {{ _("%(count)s platillos visibles.", count="__COUNT__")|tojson }}
+  ,recipeGridEmpty: {{ _("No hay platillos activos para esta categoría.")|tojson }}
+  ,recipeStock: {{ _("%(count)s disponibles", count="__COUNT__")|tojson }}
+  ,recipeOut: {{ _("Agotado")|tojson }}
 };
 const PRODUCTS = [
   {% for product in products %}
@@ -295,10 +322,13 @@ const PRODUCTS = [
     sku: {{ (product.sku or "") | tojson }},
     price: {{ product.sale_price }},
     stock: {{ product.pos_stock }},
-    isRecipe: {{ (product.item_type == 'recipe')|tojson }}
+    isRecipe: {{ (product.item_type == 'recipe')|tojson }},
+    recipeCategory: {{ (product.pos_recipe_category or "")|tojson }},
+    limitingIngredient: {{ (product.pos_limiting_ingredient or "")|tojson }}
   },
   {% endfor %}
 ];
+const RESTAURANT_CATEGORY_ORDER = {{ restaurant_recipe_categories|tojson }};
 
 const searchInput = document.getElementById("product-search");
 const resultsBox = document.getElementById("product-results");
@@ -319,6 +349,11 @@ let visibleResults = [];
 let activeResultIndex = -1;
 let saleSubmitting = false;
 let selectedCustomer = null;
+const restaurantPanel = document.getElementById("restaurant-pos-panel");
+const restaurantCategoryFilters = document.getElementById("restaurant-category-filters");
+const restaurantRecipeGrid = document.getElementById("restaurant-recipe-grid");
+const restaurantRecipeStatus = document.getElementById("restaurant-recipe-status");
+let activeRestaurantCategory = "__all__";
 
 function cartAmount() {
   return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -370,6 +405,20 @@ function matchingProducts(query) {
     normalizeSearch(product.sku).includes(normalized) ||
     normalizeSearch(product.barcode).includes(normalized)
   ).slice(0, 8);
+}
+
+function normalizeCategory(value) {
+  return normalizeSearch(String(value || "").trim());
+}
+
+function recipeAvailabilityText(product) {
+  if (product.stock > 0) {
+    return POS_I18N.recipeStock.replace("__COUNT__", product.stock);
+  }
+  if (product.limitingIngredient) {
+    return POS_I18N.outOfStockByIngredient.replace("__INGREDIENT__", product.limitingIngredient);
+  }
+  return POS_I18N.recipeOut;
 }
 
 function closeResults() {
@@ -426,7 +475,9 @@ function renderResults() {
     const price = document.createElement("b");
     price.textContent = formatMoney(product.price);
     const stock = document.createElement("small");
-    stock.textContent = product.stock > 0 ? POS_I18N.available.replace("__COUNT__", product.stock) : POS_I18N.outOfStock;
+    stock.textContent = product.isRecipe
+      ? recipeAvailabilityText(product)
+      : (product.stock > 0 ? POS_I18N.available.replace("__COUNT__", product.stock) : POS_I18N.outOfStock);
     availability.append(price, stock);
     option.append(details, availability);
     option.addEventListener("click", () => selectProduct(product));
@@ -435,6 +486,90 @@ function renderResults() {
   resultsBox.hidden = false;
   searchInput.setAttribute("aria-expanded", "true");
   searchStatus.textContent = POS_I18N.results.replace("__COUNT__", visibleResults.length);
+}
+
+function currentRestaurantRecipes() {
+  const recipes = PRODUCTS.filter(product => product.isRecipe);
+  if (activeRestaurantCategory === "__all__") {
+    return recipes;
+  }
+  return recipes.filter(product => normalizeCategory(product.recipeCategory) === activeRestaurantCategory);
+}
+
+function renderRestaurantCategoryFilters() {
+  if (!restaurantPanel || !restaurantCategoryFilters) return;
+  restaurantCategoryFilters.replaceChildren();
+  const categories = [
+    ...new Set(
+      RESTAURANT_CATEGORY_ORDER
+        .concat(PRODUCTS.filter(product => product.isRecipe).map(product => product.recipeCategory))
+        .map(category => String(category || "").trim())
+        .filter(Boolean)
+    ),
+  ];
+  const values = [{label: POS_I18N.allCategories, value: "__all__"}].concat(
+    categories.map(category => ({label: category, value: normalizeCategory(category)}))
+  );
+  values.forEach(category => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pos-restaurant-v1__filter";
+    if (category.value === activeRestaurantCategory) {
+      button.classList.add("is-active");
+      button.setAttribute("aria-current", "true");
+    }
+    button.textContent = category.label;
+    button.addEventListener("click", () => {
+      activeRestaurantCategory = category.value;
+      renderRestaurantCategoryFilters();
+      renderRestaurantGrid();
+    });
+    restaurantCategoryFilters.appendChild(button);
+  });
+}
+
+function renderRestaurantGrid() {
+  if (!restaurantPanel || !restaurantRecipeGrid || !restaurantRecipeStatus) return;
+  const recipes = currentRestaurantRecipes().sort((left, right) =>
+    left.name.localeCompare(right.name, "es", {sensitivity: "base"})
+  );
+  restaurantRecipeGrid.replaceChildren();
+  if (!recipes.length) {
+    const empty = document.createElement("p");
+    empty.className = "pos-restaurant-v1__empty";
+    empty.textContent = POS_I18N.recipeGridEmpty;
+    restaurantRecipeGrid.appendChild(empty);
+    restaurantRecipeStatus.textContent = POS_I18N.recipeGridResults.replace("__COUNT__", 0);
+    return;
+  }
+  recipes.forEach(product => {
+    const card = document.createElement("button");
+    const unavailable = product.stock <= 0;
+    card.type = "button";
+    card.className = "pos-restaurant-v1__card";
+    card.setAttribute("role", "listitem");
+    if (unavailable) {
+      card.classList.add("is-out");
+      card.disabled = true;
+    }
+
+    const title = document.createElement("strong");
+    title.textContent = product.name;
+    const price = document.createElement("span");
+    price.className = "pos-restaurant-v1__price";
+    price.textContent = formatMoney(product.price);
+    const availability = document.createElement("span");
+    availability.className = "pos-restaurant-v1__availability";
+    availability.textContent = recipeAvailabilityText(product);
+    const add = document.createElement("span");
+    add.className = "pos-restaurant-v1__add";
+    add.textContent = POS_I18N.add;
+
+    card.append(title, price, availability, add);
+    card.addEventListener("click", () => selectProduct(product));
+    restaurantRecipeGrid.appendChild(card);
+  });
+  restaurantRecipeStatus.textContent = POS_I18N.recipeGridResults.replace("__COUNT__", recipes.length);
 }
 
 function selectProduct(product) {
@@ -947,6 +1082,8 @@ confirmationModal.addEventListener("keydown", event => {
 });
 
 renderCart();
+renderRestaurantCategoryFilters();
+renderRestaurantGrid();
 </script>
 {% endif %}
 {% endblock %}

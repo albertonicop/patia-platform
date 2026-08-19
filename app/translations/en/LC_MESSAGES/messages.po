@@ -5574,6 +5574,64 @@ msgstr "."
 msgid "PATIA © 2026"
 msgstr "PATIA © 2026"
 
+#: app/templates/sell.html
+msgid "Punto de venta Restaurant"
+msgstr "Restaurant point of sale"
+
+#: app/templates/sell.html
+msgid "Agrega platillos en un clic y combina productos vendibles sin salir del cobro."
+msgstr "Add dishes in one click and combine sellable products without leaving checkout."
+
+#: app/templates/sell.html
+msgid "Buscar platillo o producto"
+msgstr "Search dish or product"
+
+#: app/templates/sell.html
+msgid "Buscar platillo o producto…"
+msgstr "Search dish or product..."
+
+#: app/templates/sell.html
+msgid "Platillos"
+msgstr "Dishes"
+
+#: app/templates/sell.html
+msgid "Selecciona desde tus recetas activas"
+msgstr "Select from your active recipes"
+
+#: app/templates/sell.html
+msgid "Haz clic en la tarjeta o en Agregar para sumar 1 unidad al carrito actual."
+msgstr "Click the card or Add to include 1 unit in the current cart."
+
+#: app/templates/sell.html
+msgid "Categorías de platillos"
+msgstr "Dish categories"
+
+#: app/templates/sell.html
+#, python-format
+msgid "Agotado por %(ingredient)s"
+msgstr "Out of stock due to %(ingredient)s"
+
+#: app/templates/sell.html
+msgid "Todos"
+msgstr "All"
+
+#: app/templates/sell.html
+msgid "Agregar"
+msgstr "Add"
+
+#: app/templates/sell.html
+#, python-format
+msgid "%(count)s platillos visibles."
+msgstr "%(count)s dishes visible."
+
+#: app/templates/sell.html
+msgid "No hay platillos activos para esta categoría."
+msgstr "There are no active dishes for this category."
+
+#: app/templates/sell.html
+msgid "Agotado"
+msgstr "Out of stock"
+
 #: app/templates/pro_alerts.html:2
 msgid "Alertas inteligentes"
 msgstr "Smart alerts"

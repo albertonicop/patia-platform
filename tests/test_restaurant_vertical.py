@@ -222,6 +222,119 @@ class RestaurantVerticalTests(unittest.TestCase):
         self._create_dish()
         self.assertEqual(self._client(cashier, cashier_member).get("/sell").status_code, 200)
 
+    def test_restaurant_sell_shows_recipe_grid_categories_and_search_copy(self):
+        recipe, _, _ = self._create_dish()
+        recipe.category = "Hamburguesas"
+        tortilla = self._product("Tortilla", "TORT", stock="60", cost="1")
+        filling = self._product("Pastor", "PAST", unit="kg", stock="6.000", cost="140")
+        second = self.client.post(
+            "/recipes/new",
+            data={
+                "name": "Taco al pastor",
+                "category": "Tacos",
+                "recipe_type": "dish",
+                "sale_price": "45",
+                "yield_quantity": "1",
+                "yield_unit_code": "portion",
+                "is_active": "1",
+                "components_json": json.dumps([
+                    {
+                        "source_type": "product",
+                        "source_id": tortilla.id,
+                        "quantity": "2",
+                        "unit_code": "piece",
+                    },
+                    {
+                        "source_type": "product",
+                        "source_id": filling.id,
+                        "quantity": "120",
+                        "unit_code": "g",
+                    },
+                ]),
+            },
+        )
+        self.assertEqual(second.status_code, 302)
+        drink = self._product("Coca-Cola", "COCA", stock="30", cost="35")
+        drink.barcode = "7501055300147"
+        db.session.commit()
+
+        html = self.client.get("/sell").get_data(as_text=True)
+        self.assertIn('id="restaurant-pos-panel"', html)
+        self.assertIn("Buscar platillo o producto", html)
+        self.assertIn("placeholder=\"Buscar platillo o producto…\"", html)
+        self.assertIn("Hamburguesas", html)
+        self.assertIn("Tacos", html)
+        self.assertIn('name: "Coca-Cola"', html)
+        self.assertIn('isRecipe: true', html)
+        self.assertIn('isRecipe: false', html)
+        self.assertIn('recipeCategory: "Hamburguesas"', html)
+        self.assertIn('recipeCategory: "Tacos"', html)
+        self.assertIn('sku: "COCA"', html)
+        self.assertIn('barcode: "7501055300147"', html)
+        self.assertEqual(Recipe.query.filter_by(id=recipe.id).one().category, "Hamburguesas")
+
+    def test_general_sell_keeps_existing_pos_without_restaurant_grid(self):
+        general_owner, general_member = self._owner(
+            "general-pos@restaurant.test", PRO, "general"
+        )
+        general_client = self._client(general_owner, general_member)
+        product = Product(
+            organization_id=general_member.organization_id,
+            user_id=general_owner.id,
+            name="Producto general",
+            sku="GEN-1",
+            category="General",
+            cost_price=Decimal("10"),
+            sale_price=Decimal("20"),
+            stock=Decimal("8"),
+            min_stock=Decimal("0"),
+            unit_code="piece",
+        )
+        db.session.add(product)
+        db.session.commit()
+
+        html = general_client.get("/sell").get_data(as_text=True)
+        self.assertNotIn('id="restaurant-pos-panel"', html)
+        self.assertIn("Buscar producto", html)
+        self.assertIn("Nombre, SKU o código de barras", html)
+
+    def test_out_of_stock_recipe_marks_limiting_ingredient_in_pos_payload(self):
+        recipe, _, meat = self._create_dish()
+        recipe.category = "Hamburguesas"
+        meat.stock = Decimal("0.100")
+        db.session.commit()
+
+        html = self.client.get("/sell").get_data(as_text=True)
+        self.assertIn('name: "Hamburguesa cl\\u00e1sica"', html)
+        self.assertIn('stock: 0', html)
+        self.assertIn('limitingIngredient: "Carne molida"', html)
+        self.assertIn("outOfStockByIngredient", html)
+
+    def test_mixed_cart_sale_with_recipe_and_product_keeps_existing_flow(self):
+        recipe, bread, meat = self._create_dish()
+        drink = self._product("Agua mineral", "AGUA", stock="40", cost="18")
+
+        response = self.client.post(
+            "/sell-cart",
+            json={
+                "request_id": str(uuid.uuid4()),
+                "payment_method": "card",
+                "items": [
+                    {"product_id": recipe.sale_product_id, "quantity": 2},
+                    {"product_id": drink.id, "quantity": 1},
+                ],
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        db.session.refresh(bread)
+        db.session.refresh(meat)
+        db.session.refresh(drink)
+        self.assertEqual(bread.stock, Decimal("18.000"))
+        self.assertEqual(meat.stock, Decimal("12.140"))
+        self.assertEqual(drink.stock, Decimal("39.000"))
+        self.assertEqual(Sale.query.count(), 2)
+        self.assertEqual(RecipeSaleConsumption.query.count(), 2)
+
     def test_exact_unit_conversions_and_incompatible_families(self):
         self.assertEqual(convert_quantity("180", "g", "kg"), Decimal("0.180"))
         self.assertEqual(convert_quantity("250", "ml", "L"), Decimal("0.250"))

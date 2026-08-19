@@ -3641,20 +3641,56 @@ def sell():
         is_active=True,
     ).order_by(Product.name).all()
     recipe_products = [product for product in products if product.item_type == "recipe"]
-    if recipe_products:
-        from .recipes.services import recipe_availability, recipe_query
-        recipes_by_product = {
-            recipe.sale_product_id: recipe
-            for recipe in recipe_query(organization_id).filter(
-                Recipe.is_active.is_(True)
-            ).all()
-        }
+    from .plans import has_entitlement
+
+    restaurant_pos_enabled = bool(
+        membership
+        and membership.organization.business_type == "restaurant"
+        and has_entitlement(owner, "recipes")
+    )
+    restaurant_recipe_categories = []
+    if recipe_products and restaurant_pos_enabled:
+        from .recipes.services import recipe_operational_summary, recipe_query
+
+        recipe_metadata = {}
+        for recipe in recipe_query(organization_id).filter(Recipe.is_active.is_(True)).all():
+            if not recipe.sale_product_id:
+                continue
+            summary = recipe_operational_summary(recipe)
+            limiting = summary.get("limiting_ingredient")
+            recipe_metadata[recipe.sale_product_id] = {
+                "availability": summary["availability"],
+                "category": (recipe.category or "").strip(),
+                "limiting_ingredient": (
+                    limiting["product"].name if limiting and limiting.get("product") else ""
+                ),
+            }
+
+        restaurant_recipe_categories = sorted(
+            {
+                value["category"]
+                for value in recipe_metadata.values()
+                if value["category"]
+            },
+            key=str.casefold,
+        )
         for product in recipe_products:
-            recipe = recipes_by_product.get(product.id)
-            product.pos_stock = recipe_availability(recipe) if recipe else 0
+            metadata = recipe_metadata.get(product.id)
+            if metadata:
+                product.pos_stock = metadata["availability"]
+                product.pos_recipe_category = metadata["category"]
+                product.pos_limiting_ingredient = metadata["limiting_ingredient"]
+            else:
+                product.pos_stock = 0
+                product.pos_recipe_category = ""
+                product.pos_limiting_ingredient = ""
     for product in products:
         if not hasattr(product, "pos_stock"):
             product.pos_stock = product.stock
+        if not hasattr(product, "pos_recipe_category"):
+            product.pos_recipe_category = ""
+        if not hasattr(product, "pos_limiting_ingredient"):
+            product.pos_limiting_ingredient = ""
     return render_template(
         "sell.html",
         products=products,
@@ -3664,6 +3700,8 @@ def sell():
         payment_method_labels=_translated_payment_method_labels(),
         cash_session=cash_session,
         cashier_mode=bool(session.get("cashier_mode")),
+        restaurant_pos_enabled=restaurant_pos_enabled,
+        restaurant_recipe_categories=restaurant_recipe_categories,
     )
 
 

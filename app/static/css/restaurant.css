@@ -41,6 +41,30 @@
 .pro-monthly-report-v2__restaurant{display:grid;gap:16px;margin-top:26px}
 .pro-monthly-report-v2__restaurant>header span{color:var(--primary);font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
 .pro-monthly-report-v2__restaurant>header h3{margin:5px 0 0}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1{display:grid;gap:14px;margin-top:18px;padding:18px;border:1px solid var(--border);border-radius:18px;background:color-mix(in srgb,var(--card) 88%,#fff 12%)}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__head h3{margin:4px 0 0}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__head p{margin:0;max-width:580px;color:var(--muted);font-size:.84rem}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__filters{display:flex;flex-wrap:wrap;gap:8px}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__filter{min-height:40px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text);font-weight:700;cursor:pointer}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__filter.is-active{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 10%,#fff);color:var(--primary)}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-width:0}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__card{display:grid;gap:7px;text-align:left;min-height:132px;padding:14px;border:1px solid var(--border);border-radius:16px;background:#fff;color:var(--text);cursor:pointer;transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__card:hover,.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__card:focus-visible{outline:none;transform:translateY(-1px);border-color:var(--primary);box-shadow:0 10px 24px rgba(31,36,56,.08)}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__card strong{font-size:.98rem;line-height:1.3}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__price{font-weight:800;font-variant-numeric:tabular-nums}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__availability{color:var(--muted);font-size:.82rem}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__add{justify-self:start;min-height:34px;padding:6px 11px;border:1px solid color-mix(in srgb,var(--primary) 35%,#fff);border-radius:10px;background:color-mix(in srgb,var(--primary) 8%,#fff);color:var(--primary);font-size:.8rem;font-weight:800;line-height:1.35}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__card.is-out{opacity:.6;cursor:not-allowed}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__card.is-out .pos-restaurant-v1__add{border-color:var(--border);background:#f2f4f8;color:#70798d}
+.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__empty{margin:0;padding:16px;border:1px dashed var(--border);border-radius:14px;background:#fff;color:var(--muted)}
+.patia-v11--pos .pos-v2--restaurant .pos-v2__checkout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:14px}
+.patia-v11--pos .pos-v2--restaurant .pos-v2__checkout .btn{width:100%;min-width:0}
+.patia-v11--pos .pos-v2--restaurant .pos-v2__cash-tender,.patia-v11--pos .pos-v2--restaurant .pos-v2__payment-method{width:100%;min-width:0}
+@media(max-width:1100px){.patia-v11--pos .pos-v2--restaurant .pos-v2__checkout{grid-template-columns:1fr}.patia-v11--pos .pos-v2--restaurant .pos-v2__cash-input input{min-width:0}}
+body.app-shell-v2--cashier-mode .pos-v2--restaurant .pos-restaurant-v1{padding:14px}
+body.app-shell-v2--cashier-mode .pos-v2--restaurant .pos-restaurant-v1__head p{display:none}
+body.app-shell-v2--cashier-mode .pos-v2--restaurant .pos-restaurant-v1__card{min-height:112px;padding:12px}
 @media(max-width:1024px){.restaurant-dashboard-v1{grid-template-columns:1fr}.restaurant-dashboard-v1>div{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:768px){.recipe-v1__summary{grid-template-columns:repeat(2,minmax(0,1fr))}.recipe-v1__component{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.recipe-v1__component select:first-child{grid-column:1/-1}.recipe-v1__cost{position:static;grid-template-columns:1fr}.recipe-v1__ingredients-head{align-items:flex-start;flex-direction:column}.recipe-v1__ingredients-head .btn{width:100%}.restaurant-dashboard-v1>div{grid-template-columns:1fr 1fr}}
-@media(max-width:480px){.restaurant-v1{gap:18px}.recipe-v1__summary{grid-template-columns:1fr}.recipe-v1__component{grid-template-columns:1fr}.recipe-v1__component select:first-child{grid-column:auto}.recipe-v1__component .btn{width:100%}.recipe-v1__table table{min-width:640px}.recipe-v1__table th,.recipe-v1__table td{white-space:nowrap}.restaurant-dashboard-v1>div{grid-template-columns:1fr}.recipe-v1__usage li{align-items:flex-start;flex-direction:column;gap:3px}}
+@media(max-width:768px){.recipe-v1__summary{grid-template-columns:repeat(2,minmax(0,1fr))}.recipe-v1__component{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.recipe-v1__component select:first-child{grid-column:1/-1}.recipe-v1__cost{position:static;grid-template-columns:1fr}.recipe-v1__ingredients-head{align-items:flex-start;flex-direction:column}.recipe-v1__ingredients-head .btn{width:100%}.restaurant-dashboard-v1>div{grid-template-columns:1fr 1fr}.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.restaurant-v1{gap:18px}.recipe-v1__summary{grid-template-columns:1fr}.recipe-v1__component{grid-template-columns:1fr}.recipe-v1__component select:first-child{grid-column:auto}.recipe-v1__component .btn{width:100%}.recipe-v1__table table{min-width:640px}.recipe-v1__table th,.recipe-v1__table td{white-space:nowrap}.restaurant-dashboard-v1>div{grid-template-columns:1fr}.recipe-v1__usage li{align-items:flex-start;flex-direction:column;gap:3px}.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1{padding:14px}.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__grid{grid-template-columns:1fr}.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__card{min-height:122px}.patia-v11--pos .pos-v2--restaurant .pos-restaurant-v1__filter{width:100%;text-align:left}}
