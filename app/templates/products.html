@@ -408,6 +408,10 @@ function renderImportInspection(data) {
     return li;
   }));
   importErrors.hidden = !data.errors.length;
+  // Each preview starts a new confirmation, even after a successful import.
+  importConfirm.hidden = false;
+  importConfirm.textContent = {{ _("Importar filas válidas")|tojson }};
+  document.getElementById("catalog-import-finish").hidden = true;
   importConfirm.disabled = !data.ready;
   importDialogStatus.textContent = data.ready
     ? (data.errors.length
