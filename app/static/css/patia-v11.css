@@ -1435,3 +1435,12 @@ body.patia-v11--workspace {
 .patia-v11--inventory .inventory-v2 .inventory-v2__catalog {
   border-color: transparent !important;
 }
+
+/* Excel template action uses the existing inventory button design. */
+.patia-v11--inventory .inventory-v2__template-download {
+  margin-top: 12px;
+  max-width: 100%;
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
+}

@@ -119,8 +119,9 @@
         <button id="catalog-import-submit" class="btn" type="submit">{{ _("Detectar y revisar") }}</button>
         <p id="catalog-import-status" class="inventory-v2__import-status" role="status" aria-live="polite" hidden></p>
       </form>
-      <a href="/download-template" class="inventory-v2__template-help">
-        {{ _("¿Empiezas desde cero? Descarga la plantilla opcional.") }}
+      <a href="{{ url_for('main.download_template') }}" class="btn ghost inventory-v2__template-download" download>
+        <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
+        {{ _("Descargar plantilla Excel") }}
       </a>
 
       <dialog id="catalog-import-dialog" class="inventory-import-v3" aria-labelledby="catalog-import-title">

@@ -125,6 +125,63 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual(example["B2"].value, "07501234560001")
         workbook.close()
 
+    def test_template_button_visible_with_empty_and_populated_inventory(self):
+        for populated in (False, True):
+            if populated:
+                self.add_product()
+            html = self.inventory_html()
+            self.assertRegex(html, r'<a[^>]*href="/download-template"[^>]*class="btn ghost inventory-v2__template-download"[^>]*download>')
+            self.assertIn("Descargar plantilla Excel", html)
+
+    def test_downloaded_xlsx_round_trip_through_current_importer(self):
+        from app.inventory.imports import FIELDS, auto_mapping
+
+        for language in ("es", "en"):
+            with self.subTest(language=language):
+                with self.client.session_transaction() as session:
+                    session["language"] = language
+                response = self.client.get("/download-template")
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.mimetype, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                self.assertIn("plantilla_productos_PATIA.xlsx", response.headers["Content-Disposition"])
+                workbook = load_workbook(io.BytesIO(response.data))
+                products, examples = workbook.worksheets
+                headers = [cell.value for cell in products[4]]
+                self.assertEqual(set(auto_mapping(headers)), set(FIELDS))
+                self.assertEqual(products["B5"].number_format, "@")
+                self.assertTrue(all(cell.value is None for cell in products[5]))
+                # Fill the actual downloaded first sheet with its fictitious example.
+                for column, cell in enumerate(examples[2], 1):
+                    products.cell(5, column, cell.value)
+                products["A5"] = "ROUND-" + language
+                products["B5"] = "000750000000" + str(len(language)) + language
+                products["H5"] = 1.5
+                products["J5"] = "kg"
+                output = io.BytesIO()
+                workbook.save(output)
+                workbook.close()
+                content = output.getvalue()
+                filename = "plantilla_productos_PATIA.xlsx"
+                preview_response = self.client.post(
+                    "/api/products/import/preview",
+                    data={"catalog_file": (io.BytesIO(content), filename)},
+                    content_type="multipart/form-data",
+                )
+                self.assertEqual(preview_response.status_code, 200)
+                preview = preview_response.get_json()
+                self.assertTrue(preview["ready"])
+                self.assertEqual(preview["errors"], [])
+                self.assertEqual(preview["summary"]["valid"], 1)
+                committed = self.commit_catalog(content, preview, filename)
+                self.assertEqual(committed.status_code, 200)
+                self.assertEqual(committed.get_json()["summary"]["created"], 1)
+                product = Product.query.filter_by(sku="ROUND-" + language).one()
+                self.assertEqual(product.barcode, products["B5"].value)
+                self.assertEqual(product.stock, Decimal("1.500"))
+                self.assertEqual(product.unit_code, "kg")
+                self.assertEqual(product.sale_price, Decimal("1299.00"))
+                self.assertEqual(InventoryMovement.query.filter_by(product_id=product.id).count(), 1)
+
     def test_inventory_with_products_keeps_catalog_controls(self):
         self.add_product()
 

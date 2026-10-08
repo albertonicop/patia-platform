@@ -2606,6 +2606,7 @@ def download_template():
         gettext("Precio de venta"),
         gettext("Stock inicial"),
         gettext("Stock mínimo"),
+        gettext("Unidad base"),
     ]
     df = pd.DataFrame(columns=columns)
     example_rows = [
@@ -2619,6 +2620,7 @@ def download_template():
             "1299.00",
             8,
             3,
+            "piece",
         ],
         [
             "PIN-0001",
@@ -2630,6 +2632,7 @@ def download_template():
             "899.00",
             12,
             4,
+            "piece",
         ],
         [
             "TOR-0001",
@@ -2641,6 +2644,7 @@ def download_template():
             "2.50",
             500,
             100,
+            "piece",
         ],
     ]
     examples = pd.DataFrame(example_rows, columns=columns)
@@ -2662,8 +2666,14 @@ def download_template():
         ws["A2"] = gettext(
             "Llena esta tabla con tus productos. No cambies los nombres de las columnas."
         )
-        ws.merge_cells("A1:I1")
-        ws.merge_cells("A2:I2")
+        ws.merge_cells("A1:J1")
+        ws.merge_cells("A2:J2")
+
+        ws["A3"] = gettext(
+            "Obligatorios: nombre, precio de venta y stock. Ejemplos en la segunda hoja; "
+            "no se importan. Unidad: piece, kg, g, L, ml, dozen o portion."
+        )
+        ws.merge_cells("A3:J3")
 
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -2687,18 +2697,22 @@ def download_template():
             cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
         for row in range(5, 105):
-            for col in range(1, 10):
+            for col in range(1, 11):
                 ws.cell(row=row, column=col).border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
-        table = Table(displayName="TablaProductosPATIA", ref="A4:I104")
+        table = Table(displayName="TablaProductosPATIA", ref="A4:J104")
         style = TableStyleInfo(name="TableStyleMedium2", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         table.tableStyleInfo = style
         ws.add_table(table)
 
-        widths = {"A": 18, "B": 22, "C": 32, "D": 20, "E": 24, "F": 14, "G": 18, "H": 18, "I": 18}
+        widths = {"A": 18, "B": 22, "C": 32, "D": 20, "E": 24, "F": 14, "G": 18, "H": 18, "I": 18, "J": 18}
         for col, width in widths.items():
             ws.column_dimensions[col].width = width
         ws.freeze_panes = "A5"
+        # Keep identifiers as text when Excel users enter leading zeroes.
+        for row in ws.iter_rows(min_row=5, max_row=104, max_col=2):
+            for cell in row:
+                cell.number_format = "@"
 
         example_ws = writer.sheets[example_sheet_name]
         for cell in example_ws[1]:
