@@ -117,6 +117,13 @@ def create_app():
             1,
         )
 
+    # Keep the installed psycopg2 driver explicit; SQLAlchemy 2.1 changed
+    # the PostgreSQL default to psycopg (v3).
+    if database_url.startswith("postgresql://"):
+        database_url = database_url.replace(
+            "postgresql://", "postgresql+psycopg2://", 1
+        )
+
     app.config.update(
         SECRET_KEY=secret_key,
         SQLALCHEMY_DATABASE_URI=database_url,
