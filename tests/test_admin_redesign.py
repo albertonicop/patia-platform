@@ -200,6 +200,37 @@ class AdminRedesignTests(unittest.TestCase):
         self.assertIn('href="/sell"', response.get_data(as_text=True))
         self.assertNotIn('href="/admin"', response.get_data(as_text=True))
 
+    def test_admin_button_is_exclusive_even_for_staff_in_admin_company(self):
+        for role in ["OWNER", "MANAGER", "CASHIER"]:
+            user, member = self._add_owner(f"{role.lower()}@example.com", role)
+            if role != "OWNER":
+                member.role = role
+                member.organization_id = self.admin_membership.organization_id
+                db.session.commit()
+            self._login(user, member)
+            page = self.client.get("/", follow_redirects=True)
+            self.assertEqual(page.status_code, 200, role)
+            html = page.get_data(as_text=True)
+            self.assertIn('id="primary-navigation"', html, role)
+            self.assertNotIn('href="/admin"', html, role)
+            response = self.client.get("/admin")
+            self.assertEqual(response.status_code, 302, role)
+            self.assertNotIn("admin-v4__directory", response.get_data(as_text=True))
+            response = self.client.get(f"/admin/organizations/{self.trial_membership.organization_id}")
+            self.assertEqual(response.status_code, 302, role)
+        self._login(self.admin, self.admin_membership)
+        self.assertIn('href="/admin"', self.client.get("/").get_data(as_text=True))
+
+    def test_brand_social_links_appear_in_company_and_admin_footers(self):
+        for user, member, path in [(self.admin, self.admin_membership, "/"), (self.admin, self.admin_membership, "/admin"), (self.trial, self.trial_membership, "/")]:
+            self._login(user, member)
+            html = self.client.get(path).get_data(as_text=True)
+            self.assertIn('class="patia-social-footer"', html)
+            self.assertIn('href="https://www.instagram.com/patia.official/"', html)
+            self.assertIn('href="https://www.tiktok.com/@patia.offcial"', html)
+            self.assertIn('css/social-footer.css', html)
+            self.assertLess(html.index('class="patia-social-footer"'), html.index('class="app-legal-footer-v1"'))
+
     def test_admin_filters_search_plan_and_attention(self):
         self._login(self.admin, self.admin_membership)
 

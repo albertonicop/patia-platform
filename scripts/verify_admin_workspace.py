@@ -54,8 +54,11 @@ try:
             page.goto(base + "/", wait_until="networkidle")
             assert page.locator('#primary-navigation a[href="/products"]').count() == 1
             assert page.locator('#primary-navigation a[href="/admin"]').count() == 1
+            assert page.locator(".patia-social-footer a").count() == 2
+            page.locator(".patia-social-footer").scroll_into_view_if_needed()
+            assert page.locator(".patia-social-footer").is_visible()
             page.goto(base + "/admin", wait_until="networkidle")
-            socials = page.locator(".admin-social-footer")
+            socials = page.locator(".patia-social-footer")
             socials.scroll_into_view_if_needed()
             assert socials.is_visible()
             assert socials.locator("a").count() == 2
