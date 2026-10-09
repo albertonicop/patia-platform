@@ -18,7 +18,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db
 from app.models import Customer, MonthlyOwnerReport, Product, Sale, User
-from app.plans import PRO
+from app.plans import PRO, RESTAURANT
 from app.team.services import ensure_owner_organization
 
 
@@ -140,6 +140,7 @@ class AdminRedesignTests(unittest.TestCase):
         self.assertIn("1 negocio", html)
         self.assertIn("Tienda Pro", html)
         self.assertNotIn("MRR", html)
+        self.assertNotIn("None None", html)
 
     def test_admin_filters_search_plan_and_attention(self):
         self._login(self.admin, self.admin_membership)
@@ -154,6 +155,61 @@ class AdminRedesignTests(unittest.TestCase):
         self.assertNotIn("Abarrotes La Prueba", html)
         self.assertIn("Plan: Control", html)
         self.assertIn("Reporte fallido", html)
+
+    def test_priority_queue_and_shortcuts_include_all_attention_reasons(self):
+        from flask import render_template
+        self._login(self.admin, self.admin_membership)
+        self.trial.created_at = datetime.utcnow() - timedelta(days=12)
+        db.session.commit()
+        with patch("app.routes.render_template", wraps=render_template) as render:
+            response = self.client.get("/admin?attention=any")
+        self.assertEqual(response.status_code, 200)
+        context = render.call_args.kwargs
+        self.assertEqual([c["user"].id for c in context["clients"]], [self.trial.id, self.pro.id])
+        self.assertEqual(context["attention_counts"]["trial"], 1)
+        self.assertEqual(context["attention_counts"]["report"], 1)
+        self.assertEqual(context["matched_count"], 2)
+        self.assertIn("La prueba vence en 2", response.get_data(as_text=True))
+
+    def test_activity_sort_places_businesses_with_sales_before_unused_accounts(self):
+        from flask import render_template
+        self._login(self.admin, self.admin_membership)
+        with patch("app.routes.render_template", wraps=render_template) as render:
+            self.client.get("/admin?sort=activity")
+        self.assertEqual(render.call_args.kwargs["clients"][0]["user"].id, self.pro.id)
+        self.assertTrue(all(c["last_activity"] is None for c in render.call_args.kwargs["clients"][1:]))
+
+    def test_cocina_filter_and_empty_filter_label_use_current_name(self):
+        self._login(self.admin, self.admin_membership)
+        self.pro.subscription_plan_code = RESTAURANT
+        db.session.commit()
+        html = self.client.get("/admin?plan=restaurant").get_data(as_text=True)
+        self.assertIn("Plan: Cocina", html)
+        self.assertIn("Tienda Pro", html)
+        self.assertNotIn("Abarrotes La Prueba", html)
+        html = self.client.get("/admin?plan=restaurant&q=missing").get_data(as_text=True)
+        self.assertIn("Plan: Cocina", html)
+
+    def test_directory_paginates_after_filtering_and_keeps_sort(self):
+        from flask import render_template
+        self._login(self.admin, self.admin_membership)
+        for index in range(26):
+            user, membership = self._add_owner(f"directory-{index}@example.com", f"Directorio {index:02d}")
+        with patch("app.routes.render_template", wraps=render_template) as render:
+            response = self.client.get("/admin?q=Directorio&sort=name&page=2")
+        context = render.call_args.kwargs
+        self.assertEqual(context["matched_count"], 26)
+        self.assertEqual(context["page_count"], 2)
+        self.assertEqual(context["page"], 2)
+        self.assertEqual([c["organization"].name for c in context["clients"]], ["Directorio 25"])
+        self.assertIn("sort=name", response.get_data(as_text=True))
+        with patch("app.routes.render_template", wraps=render_template) as render:
+            self.client.get("/admin?q=Directorio&sort=name&page=999")
+        self.assertEqual(render.call_args.kwargs["page"], 2)
+        with patch("app.routes.render_template", wraps=render_template) as render:
+            self.client.get("/admin?sort=invalid&page=-5")
+        self.assertEqual(render.call_args.kwargs["selected_sort"], "priority")
+        self.assertEqual(render.call_args.kwargs["page"], 1)
 
     def test_admin_detail_shows_usage_and_failed_report_action(self):
         self._login(self.admin, self.admin_membership)
@@ -179,6 +235,9 @@ class AdminRedesignTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertIn("/", response.location)
+        response = self.client.get("/admin")
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn("Tienda Pro", response.get_data(as_text=True))
 
     def test_admin_can_retry_failed_report_explicitly(self):
         self._login(self.admin, self.admin_membership)

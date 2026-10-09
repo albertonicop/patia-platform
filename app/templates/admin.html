@@ -1,14 +1,106 @@
 {% extends 'base.html' %}
 {% block title %}{{ _("Administración PATIA") }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-workspace.css') }}?v=1">{% endblock %}
 {% block content %}
-<div class="admin-v4">
+{% macro directory_pages() %}
+    {% if page_count > 1 %}
+    <nav class="admin-workspace__pagination" aria-label="{{ _('Páginas de negocios') }}">
+      {% if page > 1 %}<a class="btn ghost" href="{{ url_for('main.admin', q=query, plan=selected_plan, status=selected_status, attention=selected_attention, sort=selected_sort, page=page-1) }}#admin-directory-title">{{ _("Anterior") }}</a>{% else %}<span></span>{% endif %}
+      <span>{{ _("Página %(page)s de %(total)s", page=page, total=page_count) }}</span>
+      {% if page < page_count %}<a class="btn ghost" href="{{ url_for('main.admin', q=query, plan=selected_plan, status=selected_status, attention=selected_attention, sort=selected_sort, page=page+1) }}#admin-directory-title">{{ _("Siguiente") }}</a>{% else %}<span></span>{% endif %}
+    </nav>
+    {% endif %}
+{% endmacro %}
+<div class="admin-v4 admin-workspace">
   <header class="module-intro-v2 admin-v4__intro">
     <div>
       <span>{{ _("Operación comercial") }}</span>
-      <h2>{{ _("Tu negocio de PATIA, de un vistazo") }}</h2>
-      <p>{{ _("Clientes, ingresos y asuntos que necesitan atención, sin ruido técnico.") }}</p>
+      <h2>{{ _("Centro de administración") }}</h2>
+      <p>{{ _("Encuentra un negocio, revisa sus pendientes y resuelve lo que necesita atención.") }}</p>
     </div>
+    <a class="btn ghost" href="#admin-directory-title">{{ _("Ver directorio") }} <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
   </header>
+
+  <section class="card admin-workspace__command" aria-label="{{ _('Buscar y filtrar negocios') }}">
+    <form class="admin-v4__toolbar" method="GET" action="{{ url_for('main.admin') }}">
+      <label class="admin-v4__search">
+        <span class="sr-only">{{ _("Buscar negocio") }}</span>
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input id="admin-search" type="search" name="q" value="{{ query }}" placeholder="{{ _('Buscar negocio, propietario o correo...') }}">
+      </label>
+      <details class="admin-v4__filter">
+        <summary class="btn ghost"><i class="fa-solid fa-sliders" aria-hidden="true"></i> {{ _("Filtrar") }}</summary>
+        <div class="card admin-v4__filter-panel">
+          <label>{{ _("Plan") }}
+            <select name="plan">
+              <option value="all"{% if selected_plan == "ALL" %} selected{% endif %}>{{ _("Todos") }}</option>
+              <option value="trial"{% if selected_plan == "TRIAL" %} selected{% endif %}>{{ _("Trial") }}</option>
+              <option value="starter"{% if selected_plan == "STARTER" %} selected{% endif %}>{{ _("Esencial") }}</option>
+              <option value="pro"{% if selected_plan == "PRO" %} selected{% endif %}>{{ _("Control") }}</option>
+              <option value="restaurant"{% if selected_plan == "RESTAURANT" %} selected{% endif %}>{{ _("Cocina") }}</option>
+              <option value="grandfathered"{% if selected_plan == "GRANDFATHERED" %} selected{% endif %}>{{ _("Cliente anterior") }}</option>
+              <option value="manual"{% if selected_plan == "MANUAL" %} selected{% endif %}>{{ _("Acceso manual") }}</option>
+            </select>
+          </label>
+          <label>{{ _("Estado") }}
+            <select name="status">
+              <option value="all"{% if selected_status == "all" %} selected{% endif %}>{{ _("Todos") }}</option>
+              <option value="active"{% if selected_status == "active" %} selected{% endif %}>{{ _("Activo") }}</option>
+              <option value="trial"{% if selected_status == "trial" %} selected{% endif %}>{{ _("En prueba") }}</option>
+              <option value="payment_pending"{% if selected_status == "payment_pending" %} selected{% endif %}>{{ _("Pago pendiente") }}</option>
+              <option value="cancelling"{% if selected_status == "cancelling" %} selected{% endif %}>{{ _("Cancelación programada") }}</option>
+              <option value="expired"{% if selected_status == "expired" %} selected{% endif %}>{{ _("Vencido") }}</option>
+            </select>
+          </label>
+          <label>{{ _("Atención") }}
+            <select name="attention">
+              <option value="all"{% if selected_attention == "all" %} selected{% endif %}>{{ _("Cualquiera") }}</option>
+              <option value="any"{% if selected_attention == "any" %} selected{% endif %}>{{ _("Requieren atención") }}</option>
+              <option value="payment"{% if selected_attention == "payment" %} selected{% endif %}>{{ _("Pago pendiente") }}</option>
+              <option value="trial"{% if selected_attention == "trial" %} selected{% endif %}>{{ _("Prueba por vencer") }}</option>
+              <option value="cancellation"{% if selected_attention == "cancellation" %} selected{% endif %}>{{ _("Cancelación programada") }}</option>
+              <option value="report"{% if selected_attention == "report" %} selected{% endif %}>{{ _("Reporte fallido") }}</option>
+              <option value="expired"{% if selected_attention == "expired" %} selected{% endif %}>{{ _("Cuenta vencida") }}</option>
+            </select>
+          </label>
+          <div>
+            <a class="btn ghost" href="{{ url_for('main.admin') }}">{{ _("Limpiar") }}</a>
+            <button class="btn" type="submit">{{ _("Aplicar filtros") }}</button>
+          </div>
+        </div>
+      </details>
+      <label class="admin-workspace__sort">{{ _("Ordenar por") }}
+        <select name="sort" aria-label="{{ _('Ordenar negocios') }}">
+          <option value="priority"{% if selected_sort == 'priority' %} selected{% endif %}>{{ _("Prioridad") }}</option>
+          <option value="recent"{% if selected_sort == 'recent' %} selected{% endif %}>{{ _("Registro más reciente") }}</option>
+          <option value="name"{% if selected_sort == 'name' %} selected{% endif %}>{{ _("Nombre") }}</option>
+          <option value="activity"{% if selected_sort == 'activity' %} selected{% endif %}>{{ _("Última venta") }}</option>
+        </select>
+      </label>
+      <button class="btn admin-v4__search-submit" type="submit">{{ _("Buscar") }}</button>
+    </form>
+
+    {% if applied_filters %}
+    <div class="admin-v4__chips" aria-label="{{ _('Filtros aplicados') }}">
+      {% for key, value, label in applied_filters %}
+      <a href="{{ url_for('main.admin',
+        q='' if key == 'q' else query,
+        plan='all' if key == 'plan' else selected_plan,
+        status='all' if key == 'status' else selected_status,
+        attention='all' if key == 'attention' else selected_attention, sort=selected_sort) }}">
+        {{ label }} <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </a>
+      {% endfor %}
+      <a class="admin-v4__clear" href="{{ url_for('main.admin') }}">{{ _("Quitar todos") }}</a>
+    </div>
+    {% endif %}
+
+  </section>
+  <nav class="admin-workspace__shortcuts" aria-label="{{ _('Pendientes por tipo') }}">
+    {% for code, label, count in [('all', _('Todos'), total_clients), ('any', _('Requieren atención'), attention_clients|length), ('payment', _('Pago pendiente'), attention_counts.payment), ('trial', _('Prueba por vencer'), attention_counts.trial), ('report', _('Reporte fallido'), attention_counts.report), ('cancellation', _('Cancelación programada'), attention_counts.cancellation)] %}
+    <a href="{{ url_for('main.admin', attention=code) }}#admin-directory-title"{% if selected_attention == code and selected_plan == 'ALL' and selected_status == 'all' and not query %} class="is-active" aria-current="page"{% endif %}><span>{{ label }}</span><strong>{{ count }}</strong></a>
+    {% endfor %}
+  </nav>
 
   <section class="admin-v4__metrics" aria-label="{{ _('Resumen comercial') }}">
     <article class="card"><span>{{ _("Negocios totales") }}</span><strong>{{ total_clients }}</strong></article>
@@ -23,6 +115,7 @@
     <dl>
       <div><dt>{{ _("Esencial activos") }}</dt><dd>{{ plan_counts.STARTER }}</dd></div>
       <div><dt>{{ _("Control activos") }}</dt><dd>{{ plan_counts.PRO }}</dd></div>
+      <div><dt>{{ _("Cocina activos") }}</dt><dd>{{ plan_counts.RESTAURANT }}</dd></div>
       <div><dt>{{ _("Clientes anteriores") }}</dt><dd>{{ plan_counts.GRANDFATHERED }}</dd></div>
       <div><dt>{{ _("Accesos manuales") }}</dt><dd>{{ plan_counts.MANUAL }}</dd></div>
       <div><dt>{{ _("Renovaciones próximas") }}</dt><dd>{{ upcoming_renewals }}</dd></div>
@@ -32,7 +125,7 @@
     </dl>
   </details>
 
-  {% if attention_clients %}
+  {% if attention_clients and not applied_filters %}
   <section class="admin-v4__attention" aria-labelledby="admin-attention-title">
     <header>
       <div>
@@ -40,9 +133,10 @@
         <h3 id="admin-attention-title">{{ _("Necesitan atención") }}</h3>
       </div>
       <small>{{ _("%(count)s negocio", count=attention_clients|length) if attention_clients|length == 1 else _("%(count)s negocios", count=attention_clients|length) }}</small>
+      <a class="btn ghost" href="{{ url_for('main.admin', attention='any') }}#admin-directory-title">{{ _("Ver todos los pendientes") }}</a>
     </header>
     <div class="admin-v4__attention-list">
-      {% for c in attention_clients[:6] %}
+      {% for c in attention_clients[:3] %}
       <article class="card">
         <div>
           <strong>{{ c.organization.name }}</strong>
@@ -69,72 +163,10 @@
         <span>{{ _("Directorio") }}</span>
         <h3 id="admin-directory-title">{{ _("Negocios") }}</h3>
       </div>
-      <small>{{ _("%(count)s resultado", count=clients|length) if clients|length == 1 else _("%(count)s resultados", count=clients|length) }}</small>
+      <small>{{ _("%(count)s resultado", count=matched_count) if matched_count == 1 else _("%(count)s resultados", count=matched_count) }}</small>
     </header>
 
-    <form class="admin-v4__toolbar" method="GET" action="{{ url_for('main.admin') }}">
-      <label class="admin-v4__search">
-        <span class="sr-only">{{ _("Buscar negocio") }}</span>
-        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        <input type="search" name="q" value="{{ query }}" placeholder="{{ _('Buscar negocio, propietario o correo...') }}">
-      </label>
-      <details class="admin-v4__filter">
-        <summary class="btn ghost"><i class="fa-solid fa-sliders" aria-hidden="true"></i> {{ _("Filtrar") }}</summary>
-        <div class="card admin-v4__filter-panel">
-          <label>{{ _("Plan") }}
-            <select name="plan">
-              <option value="all"{% if selected_plan == "ALL" %} selected{% endif %}>{{ _("Todos") }}</option>
-              <option value="trial"{% if selected_plan == "TRIAL" %} selected{% endif %}>{{ _("Trial") }}</option>
-              <option value="starter"{% if selected_plan == "STARTER" %} selected{% endif %}>{{ _("Esencial") }}</option>
-              <option value="pro"{% if selected_plan == "PRO" %} selected{% endif %}>{{ _("Control") }}</option>
-              <option value="grandfathered"{% if selected_plan == "GRANDFATHERED" %} selected{% endif %}>{{ _("Cliente anterior") }}</option>
-              <option value="manual"{% if selected_plan == "MANUAL" %} selected{% endif %}>{{ _("Acceso manual") }}</option>
-            </select>
-          </label>
-          <label>{{ _("Estado") }}
-            <select name="status">
-              <option value="all"{% if selected_status == "all" %} selected{% endif %}>{{ _("Todos") }}</option>
-              <option value="active"{% if selected_status == "active" %} selected{% endif %}>{{ _("Activo") }}</option>
-              <option value="trial"{% if selected_status == "trial" %} selected{% endif %}>{{ _("En prueba") }}</option>
-              <option value="payment_pending"{% if selected_status == "payment_pending" %} selected{% endif %}>{{ _("Pago pendiente") }}</option>
-              <option value="cancelling"{% if selected_status == "cancelling" %} selected{% endif %}>{{ _("Cancelación programada") }}</option>
-              <option value="expired"{% if selected_status == "expired" %} selected{% endif %}>{{ _("Vencido") }}</option>
-            </select>
-          </label>
-          <label>{{ _("Atención") }}
-            <select name="attention">
-              <option value="all"{% if selected_attention == "all" %} selected{% endif %}>{{ _("Cualquiera") }}</option>
-              <option value="payment"{% if selected_attention == "payment" %} selected{% endif %}>{{ _("Pago pendiente") }}</option>
-              <option value="trial"{% if selected_attention == "trial" %} selected{% endif %}>{{ _("Prueba por vencer") }}</option>
-              <option value="cancellation"{% if selected_attention == "cancellation" %} selected{% endif %}>{{ _("Cancelación programada") }}</option>
-              <option value="report"{% if selected_attention == "report" %} selected{% endif %}>{{ _("Reporte fallido") }}</option>
-              <option value="expired"{% if selected_attention == "expired" %} selected{% endif %}>{{ _("Cuenta vencida") }}</option>
-            </select>
-          </label>
-          <div>
-            <a class="btn ghost" href="{{ url_for('main.admin') }}">{{ _("Limpiar") }}</a>
-            <button class="btn" type="submit">{{ _("Aplicar filtros") }}</button>
-          </div>
-        </div>
-      </details>
-      <button class="btn admin-v4__search-submit" type="submit">{{ _("Buscar") }}</button>
-    </form>
-
-    {% if applied_filters %}
-    <div class="admin-v4__chips" aria-label="{{ _('Filtros aplicados') }}">
-      {% for key, value, label in applied_filters %}
-      <a href="{{ url_for('main.admin',
-        q='' if key == 'q' else query,
-        plan='all' if key == 'plan' else selected_plan,
-        status='all' if key == 'status' else selected_status,
-        attention='all' if key == 'attention' else selected_attention) }}">
-        {{ label }} <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-      </a>
-      {% endfor %}
-      <a class="admin-v4__clear" href="{{ url_for('main.admin') }}">{{ _("Quitar todos") }}</a>
-    </div>
-    {% endif %}
-
+    {{ directory_pages() }}
     {% if clients %}
     <div class="card admin-v4__table-wrap">
       <table class="admin-v4__table">
@@ -152,13 +184,15 @@
         <tbody>
           {% for c in clients %}
           <tr>
-            <td><strong>{{ c.organization.name }}</strong><small>{{ c.user.city or _("Sin ciudad") }}</small></td>
-            <td>{{ (c.user.first_name ~ " " ~ c.user.last_name).strip() or _("Sin nombre") }}<small>{{ c.user.email }}</small></td>
+            <td><strong>{{ c.organization.name }}</strong><small>{{ c.user.city or _("Sin ciudad") }} · {{ _("%(count)s productos", count=c.products_count) }}</small>
+              {% if c.attention_reasons %}<div class="admin-workspace__reasons">{% for code, label in c.attention_reasons %}<span class="admin-v4__reason admin-v4__reason--{{ code }}">{{ label }}</span>{% endfor %}</div>{% endif %}
+            </td>
+            <td>{{ ((c.user.first_name or "") ~ " " ~ (c.user.last_name or "")).strip() or _("Sin nombre") }}<small>{{ c.user.email }}</small></td>
             <td><span class="admin-v4__plan admin-v4__plan--{{ c.plan_code|lower }}">{{ c.plan_label }}</span></td>
             <td><span class="admin-v4__status admin-v4__status--{{ c.status_code }}">{{ c.status_label }}</span></td>
             <td>{% if c.renewal_date %}{{ c.renewal_date.strftime('%d/%m/%Y') }}{% elif c.trial_end %}{{ _("Prueba hasta %(date)s", date=c.trial_end.strftime('%d/%m/%Y')) }}{% else %}—{% endif %}</td>
             <td>{% if c.last_activity %}{{ c.last_activity.strftime('%d/%m/%Y') }}{% else %}{{ _("Sin ventas") }}{% endif %}</td>
-            <td><a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a></td>
+            <td><div class="admin-workspace__row-actions"><a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a><a href="mailto:{{ c.user.email }}" aria-label="{{ _('Contactar a %(name)s', name=c.organization.name) }}">{{ _("Contactar") }}</a></div></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -170,14 +204,17 @@
       <article class="card">
         <header><strong>{{ c.organization.name }}</strong><span class="admin-v4__status admin-v4__status--{{ c.status_code }}">{{ c.status_label }}</span></header>
         <p>{{ c.plan_label }} · {{ c.user.email }}</p>
+        {% if c.attention_reasons %}<div class="admin-workspace__reasons">{% for code, label in c.attention_reasons %}<span class="admin-v4__reason admin-v4__reason--{{ code }}">{{ label }}</span>{% endfor %}</div>{% endif %}
         <small>{% if c.last_activity %}{{ _("Última actividad: %(date)s", date=c.last_activity.strftime('%d/%m/%Y')) }}{% else %}{{ _("Sin ventas registradas") }}{% endif %}</small>
         <a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a>
+        <a href="mailto:{{ c.user.email }}">{{ _("Contactar") }}</a>
       </article>
       {% endfor %}
     </div>
     {% else %}
     <div class="card module-empty-v2"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><h3>{{ _("No encontramos negocios con estos filtros") }}</h3><p>{{ _("Prueba otra búsqueda o quita alguno de los filtros.") }}</p><a class="btn ghost" href="{{ url_for('main.admin') }}">{{ _("Ver todos los negocios") }}</a></div>
     {% endif %}
+    {{ directory_pages() }}
   </section>
 </div>
 {% endblock %}

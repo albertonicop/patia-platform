@@ -1,0 +1,61 @@
+/* Administration workspace. Styles are limited to this screen. */
+.app-shell-v2 .admin-workspace { gap: 18px; }
+/* This stylesheet is loaded only by the administration screen. */
+.app-shell-v2 .app-topbar-v2__plan { display: none; }
+.admin-workspace .admin-v4__intro { display: flex; justify-content: space-between; gap: 16px; }
+.admin-workspace .admin-v4__intro .btn { flex-shrink: 0; }
+.app-shell-v2 .admin-workspace__command { padding: 18px; overflow: visible; }
+.app-shell-v2 .admin-workspace .admin-v4__toolbar {
+  display: grid; grid-template-columns: minmax(180px, 1fr) auto minmax(165px, 200px) auto;
+  align-items: end; gap: 12px; margin: 0;
+}
+.admin-workspace__sort { display: grid; gap: 5px; color: #526078; font-size: .75rem; font-weight: 700; }
+.admin-workspace__sort select { min-height: 44px; margin: 0; background: #fff; }
+.admin-workspace .admin-v4__search input { min-height: 44px; margin: 0; }
+.admin-workspace .admin-v4__chips { margin-top: 14px; }
+.admin-workspace__shortcuts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 9px; }
+.admin-workspace__shortcuts a {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-width: 0; padding: 13px 12px; border: 1px solid #dce1e8;
+  border-radius: 12px; background: #fff; text-decoration: none; color: #42506a;
+  font-size: .78rem; line-height: 1.35;
+}
+.admin-workspace__shortcuts a:hover { border-color: #6654dc; background: #f8f7ff; }
+.admin-workspace__shortcuts a.is-active { background: #eeeaff; border-color: #b5a9f6; color: #4936b7; }
+.admin-workspace__shortcuts strong { font-size: 1.1rem; color: inherit; }
+.admin-workspace__shortcuts a:focus-visible,
+.admin-workspace a:focus-visible { outline: 3px solid #8c7af2; outline-offset: 3px; }
+.app-shell-v2 .admin-workspace .admin-v4__attention-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.app-shell-v2 .admin-workspace .admin-v4__attention-list article { padding: 16px; gap: 12px; }
+.admin-workspace .admin-v4__attention-list article strong { overflow-wrap: anywhere; }
+.admin-workspace .admin-v4__attention > header { flex-wrap: wrap; }
+.admin-workspace .admin-v4__attention > header small { margin-left: auto; }
+.admin-workspace__reasons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.admin-workspace__reasons .admin-v4__reason { font-size: .69rem; line-height: 1.35; white-space: normal; }
+.admin-workspace__row-actions { display: grid; gap: 8px; justify-items: start; }
+.admin-workspace__row-actions > a:last-child { font-size: .78rem; font-weight: 700; }
+.app-shell-v2 .admin-workspace .admin-v4__plan--restaurant { color: #6a3c10; background: #fff2dd; }
+.admin-workspace__pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; color: #526078; font-size: .82rem; }
+.admin-workspace #admin-directory-title { scroll-margin-top: 24px; }
+@media (max-width: 1200px) {
+  .admin-workspace__shortcuts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .app-shell-v2 .admin-workspace .admin-v4__toolbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .admin-workspace .admin-v4__search { grid-column: 1 / -1; }
+  .admin-workspace__sort { grid-column: 1; grid-row: 2; }
+  .admin-workspace .admin-v4__filter { grid-column: 2; grid-row: 2; }
+  .admin-workspace .admin-v4__search-submit { grid-column: 1 / -1; }
+  .app-shell-v2 .admin-workspace .admin-v4__attention-list { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .app-shell-v2 .admin-workspace .admin-v4__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-workspace .admin-v4__metric--revenue { grid-column: 1 / -1; }
+  .admin-workspace .admin-v4__intro { align-items: stretch; flex-direction: column; }
+  .admin-workspace .admin-v4__intro .btn { align-self: start; }
+  .admin-workspace__shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-workspace .admin-v4__filter-panel { position: absolute; width: min(320px, calc(100vw - 48px)); right: 0; left: auto; z-index: 40; }
+  .admin-workspace .admin-v4__attention > header small { margin-left: 0; }
+  .admin-workspace__pagination { gap: 8px; font-size: .75rem; }
+  .admin-workspace__pagination .btn { padding: 10px; }
+}

@@ -10017,3 +10017,48 @@ msgstr "For restaurants only"
 
 msgid "Cocina está disponible para cuentas registradas como restaurante."
 msgstr "Cocina is available for accounts registered as restaurants."
+
+msgid "Centro de administración"
+msgstr "Administration center"
+
+msgid "Encuentra un negocio, revisa sus pendientes y resuelve lo que necesita atención."
+msgstr "Find a business, review its pending tasks and address what needs attention."
+
+msgid "Ver directorio"
+msgstr "View directory"
+
+msgid "Cocina activos"
+msgstr "Active Cocina accounts"
+
+msgid "Ver todos los pendientes"
+msgstr "View all pending tasks"
+
+msgid "Ordenar por"
+msgstr "Sort by"
+
+msgid "Ordenar negocios"
+msgstr "Sort businesses"
+
+msgid "Registro más reciente"
+msgstr "Newest registration"
+
+msgid "Última venta"
+msgstr "Latest sale"
+
+msgid "Buscar y filtrar negocios"
+msgstr "Search and filter businesses"
+
+msgid "Pendientes por tipo"
+msgstr "Pending tasks by type"
+
+msgid "%(count)s productos"
+msgstr "%(count)s products"
+
+msgid "Contactar a %(name)s"
+msgstr "Contact %(name)s"
+
+msgid "Páginas de negocios"
+msgstr "Business pages"
+
+msgid "Página %(page)s de %(total)s"
+msgstr "Page %(page)s of %(total)s"

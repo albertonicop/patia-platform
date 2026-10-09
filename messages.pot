@@ -8974,3 +8974,48 @@ msgstr ""
 
 msgid "al mes"
 msgstr ""
+
+msgid "Centro de administración"
+msgstr ""
+
+msgid "Encuentra un negocio, revisa sus pendientes y resuelve lo que necesita atención."
+msgstr ""
+
+msgid "Ver directorio"
+msgstr ""
+
+msgid "Cocina activos"
+msgstr ""
+
+msgid "Ver todos los pendientes"
+msgstr ""
+
+msgid "Ordenar por"
+msgstr ""
+
+msgid "Ordenar negocios"
+msgstr ""
+
+msgid "Registro más reciente"
+msgstr ""
+
+msgid "Última venta"
+msgstr ""
+
+msgid "Buscar y filtrar negocios"
+msgstr ""
+
+msgid "Pendientes por tipo"
+msgstr ""
+
+msgid "%(count)s productos"
+msgstr ""
+
+msgid "Contactar a %(name)s"
+msgstr ""
+
+msgid "Páginas de negocios"
+msgstr ""
+
+msgid "Página %(page)s de %(total)s"
+msgstr ""

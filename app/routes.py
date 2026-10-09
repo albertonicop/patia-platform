@@ -5505,16 +5505,24 @@ def admin():
         bool(client["monthly_report"] and client["monthly_report"].status == "failed")
         for client in clients
     )
+    def admin_priority(client):
+        ranks = {"payment": 0, "expired": 1, "trial": 2, "report": 3, "cancellation": 4}
+        rank = min((ranks[reason] for reason, _ in client["attention_reasons"]), default=5)
+        trial_days = client["trial_days_left"]
+        return (
+            rank,
+            trial_days if isinstance(trial_days, int) else 999,
+            client["organization"].name.casefold(),
+            client["organization"].id,
+        )
+
+    attention_counts = {
+        reason: sum(any(code == reason for code, _ in c["attention_reasons"]) for c in clients)
+        for reason in ("payment", "trial", "report", "cancellation", "expired")
+    }
     attention_clients = sorted(
         (client for client in clients if client["attention_reasons"]),
-        key=lambda client: (
-            0
-            if client["status_code"] == "payment_pending"
-            else 1
-            if client["status_code"] == "expired"
-            else 2,
-            client["organization"].name.lower(),
-        ),
+        key=admin_priority,
     )
     query = request.args.get("q", "").strip()
     selected_plan = request.args.get("plan", "all").strip().upper()
@@ -5531,6 +5539,7 @@ def admin():
     }
     valid_attention = {
         "all",
+        "any",
         "payment",
         "trial",
         "cancellation",
@@ -5577,11 +5586,26 @@ def admin():
         visible_clients = [
             client
             for client in visible_clients
-            if any(
+            if (selected_attention == "any" and client["attention_reasons"]) or any(
                 reason_code == selected_attention
                 for reason_code, _ in client["attention_reasons"]
             )
         ]
+
+    selected_sort = request.args.get("sort", "priority").strip().lower()
+    if selected_sort not in {"priority", "recent", "name", "activity"}:
+        selected_sort = "priority"
+    if selected_sort == "priority":
+        visible_clients = sorted(visible_clients, key=admin_priority)
+    elif selected_sort == "name":
+        visible_clients = sorted(visible_clients, key=lambda c: (c["organization"].name.casefold(), c["organization"].id))
+    elif selected_sort == "activity":
+        visible_clients = sorted(visible_clients, key=lambda c: (c["last_activity"] or datetime.min, c["organization"].id), reverse=True)
+    # "recent" keeps the existing registration order from the database.
+    matched_count = len(visible_clients)
+    page_count = max(1, (matched_count + 24) // 25)
+    page = min(max(1, request.args.get("page", 1, type=int)), page_count)
+    visible_clients = visible_clients[(page - 1) * 25:page * 25]
 
     applied_filters = []
     if query:
@@ -5599,7 +5623,7 @@ def admin():
                             for client in clients
                             if client["plan_code"] == selected_plan
                         ),
-                        selected_plan.title(),
+                        current_plan_label(selected_plan),
                     ),
                 ),
             )
@@ -5624,6 +5648,7 @@ def admin():
         )
     if selected_attention != "all":
         attention_labels = {
+            "any": gettext("Requieren atención"),
             "payment": gettext("Pago pendiente"),
             "trial": gettext("Prueba por vencer"),
             "cancellation": gettext("Cancelación programada"),
@@ -5652,6 +5677,11 @@ def admin():
         past_due_count=sum(c["subscription_status"] == "past_due" for c in clients),
         paying_clients=paying_clients,
         attention_clients=attention_clients,
+        attention_counts=attention_counts,
+        matched_count=matched_count,
+        selected_sort=selected_sort,
+        page=page,
+        page_count=page_count,
         query=query,
         selected_plan=selected_plan,
         selected_status=selected_status,
