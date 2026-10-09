@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v2-landing.css') }}?v=2">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/social-footer.css') }}?v=2">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/founder-section.css') }}?v=1">
 </head>
 
 <body class="patia-landing-v2">
@@ -181,6 +182,23 @@
             {% endif %}
           </article>
           {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="pl2-founder" aria-labelledby="pl2-founder-title">
+      <div class="pl2-container pl2-founder__inner">
+        <figure class="pl2-founder__portrait">
+          <img src="{{ url_for('static', filename='img/landing/patia-founder.png') }}" width="765" height="1512" loading="lazy" decoding="async" alt="{{ 'Creador de PATIA' if current_language == 'es' else 'Creator of PATIA' }}">
+          <figcaption>{{ 'Creador de PATIA' if current_language == 'es' else 'Creator of PATIA' }}</figcaption>
+        </figure>
+        <div class="pl2-founder__copy">
+          <span class="pl2-overline">{{ 'La idea detrás de PATIA' if current_language == 'es' else 'The idea behind PATIA' }}</span>
+          <h2 id="pl2-founder-title">{{ 'Conoce al creador de PATIA' if current_language == 'es' else 'Meet the creator of PATIA' }}</h2>
+          <blockquote>
+            <p>{{ '“Lo que busco con PATIA es ayudar a las pequeñas y medianas empresas de todo México a trabajar con más orden, entender mejor su negocio y crecer con confianza. Quiero que la tecnología sea una herramienta cercana y accesible para quienes salen adelante cada día con su esfuerzo.”' if current_language == 'es' else '“My goal with PATIA is to help small and medium-sized businesses across Mexico stay organized, understand their business better, and grow with confidence. I want technology to be an accessible, approachable tool for the people who work hard every day to move their businesses forward.”' }}</p>
+          </blockquote>
+          <p class="pl2-founder__signature">{{ 'Un compromiso con los negocios de México.' if current_language == 'es' else 'A commitment to businesses across Mexico.' }}</p>
         </div>
       </div>
     </section>

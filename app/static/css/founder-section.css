@@ -1,0 +1,16 @@
+.pl2-founder { padding: 84px 0; border-top: 1px solid var(--pl2-border); background: #0b1020; }
+.pl2-founder__inner { display: grid; grid-template-columns: minmax(240px, 360px) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+.pl2-founder__portrait { margin: 0; position: relative; overflow: hidden; border-radius: 24px; border: 1px solid rgba(255,255,255,.12); aspect-ratio: 3 / 4; background: #151a2a; }
+.pl2-founder__portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 72%; }
+.pl2-founder__portrait figcaption { position: absolute; bottom: 0; left: 0; right: 0; padding: 42px 24px 22px; background: linear-gradient(transparent, rgba(4,6,13,.8)); color: #fff; font-weight: 600; font-size: .85rem; }
+.pl2-founder__copy { min-width: 0; }
+.pl2-founder__copy h2 { font-size: clamp(1.8rem, 3.2vw, 2.75rem); line-height: 1.15; letter-spacing: -.035em; margin: 16px 0 28px; max-width: 560px; }
+.pl2-founder__copy blockquote { margin: 0; padding-left: 24px; border-left: 3px solid #7c5cff; }
+.pl2-founder__copy blockquote p { margin: 0; color: #e1e5f0; font-size: clamp(1rem, 1.7vw, 1.3rem); line-height: 1.75; }
+.pl2-founder__signature { color: #96a5bf; margin: 24px 0 0; font-size: .95rem; }
+@media (max-width: 700px) {
+ .pl2-founder { padding: 56px 0; }
+ .pl2-founder__inner { grid-template-columns: 1fr; gap: 32px; }
+ .pl2-founder__portrait { width: min(100%, 340px); justify-self: center; }
+ .pl2-founder__copy blockquote { padding-left: 18px; }
+}
