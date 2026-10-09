@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v2-landing.css') }}?v=2">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/social-footer.css') }}?v=2">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/founder-section.css') }}?v=2">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/founder-section.css') }}?v=3">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/pricing-promotion.css') }}?v=1">
 </head>
 
@@ -204,7 +204,7 @@
             <p>{{ '“Creé PATIA con una idea sencilla: que ningún negocio en México tenga que ser grande para tener acceso a tecnología de primer nivel. Quiero que cada emprendedor tenga las herramientas para entender su empresa, tomar mejores decisiones y crecer con confianza.”' if current_language == 'es' else '“I created PATIA with a simple idea: no business in Mexico should have to be big to access first-class technology. I want every entrepreneur to have the tools to understand their business, make better decisions, and grow with confidence.”' }}</p>
           </blockquote>
           <p class="pl2-founder__signature"><strong>Alberto Nicolás Patjane</strong><span>{{ 'Fundador de PATIA' if current_language == 'es' else 'Founder of PATIA' }}</span></p>
-          <a class="pl2-button pl2-button--ghost pl2-founder__cta" href="#funciones">{{ 'Conoce cómo funciona PATIA' if current_language == 'es' else 'See how PATIA works' }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+          <button class="pl2-button pl2-button--ghost pl2-founder__cta" type="button" disabled aria-disabled="true">{{ 'Video del fundador · Próximamente' if current_language == 'es' else 'Founder video · Coming soon' }}<i class="fa-solid fa-video" aria-hidden="true"></i></button>
         </div>
       </div>
     </section>

@@ -17,3 +17,6 @@
 .pl2-founder__signature strong { display: block; color: #f7f8ff; font-size: 1rem; margin-bottom: 6px; }
 .pl2-founder__signature span { display: block; }
 .pl2-founder__copy .pl2-founder__cta { margin-top: 28px; max-width: 100%; white-space: normal; text-align: center; }
+
+.patia-landing-v2 .pl2-founder__copy .pl2-founder__signature { margin: 28px 0 0; }
+.pl2-founder__cta:disabled { opacity: .75; cursor: default; box-shadow: none; transform: none; }
