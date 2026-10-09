@@ -1,0 +1,8 @@
+.pl2-header__brand-group { display: flex; align-items: center; gap: 18px; flex: 0 0 auto; }
+.pl2-header .pl2-header__brand-group .language-switcher { display: flex; flex: 0 0 auto; }
+@media (max-width: 600px) {
+ .pl2-header__inner { gap: 12px; }
+ .pl2-header__brand-group { gap: 12px; }
+ .pl2-header .pl2-header__brand-group .language-switcher { padding: 4px; gap: 2px; }
+ .pl2-header .pl2-header__brand-group .language-switcher button { min-width: 26px; padding: 5px; }
+}

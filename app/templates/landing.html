@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/social-footer.css') }}?v=2">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/founder-section.css') }}?v=3">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/pricing-promotion.css') }}?v=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing-header-layout.css') }}?v=1">
 </head>
 
 <body class="patia-landing-v2">
@@ -22,9 +23,12 @@
 
   <header class="pl2-header" data-landing-header>
     <div class="pl2-header__inner">
+      <div class="pl2-header__brand-group">
       <a href="/" class="pl2-brand" aria-label="{{ _('PATIA, inicio') }}">
         <img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" width="184" height="44" alt="PATIA">
       </a>
+        {% include "_language_selector.html" %}
+      </div>
 
       <nav class="pl2-nav" aria-label="{{ _('Navegación principal') }}">
         <a href="#funciones">{{ _("Funciones") }}</a>
@@ -34,7 +38,6 @@
       </nav>
 
       <div class="pl2-header__actions">
-        {% include "_language_selector.html" %}
         <a class="pl2-login" href="/login">{{ _("Iniciar sesión") }}</a>
         <a class="pl2-button pl2-button--compact" href="/register">{{ _("Probar 14 días") }}</a>
       </div>
@@ -48,7 +51,6 @@
           <button type="button" data-demo-open>{{ _("Demo") }}</button>
           <a href="/login">{{ _("Iniciar sesión") }}</a>
           <a class="pl2-button" href="/register">{{ _("Probar 14 días") }}</a>
-          {% include "_language_selector.html" %}
         </div>
       </details>
     </div>
