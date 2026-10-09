@@ -63,3 +63,10 @@
 .admin-delete form { display: grid; gap: 12px; max-width: 480px; }
 .admin-delete input { width: 100%; }
 .admin-delete .btn { background: #a52b35; color: #fff; justify-self: start; }
+
+.admin-social-footer { margin-top: 28px; padding: 20px 0; border-top: 1px solid #dce1e8; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; color: #526078; font-size: .85rem; }
+.admin-social-footer > div { display: flex; flex-wrap: wrap; gap: 12px; }
+.admin-social-footer a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; border-radius: 10px; color: #4936b7; text-decoration: none; font-weight: 700; }
+.admin-social-footer a:hover { background: #eeeaff; }
+.admin-social-footer a:focus-visible { outline: 3px solid #8c7af2; outline-offset: 3px; }
+@media print { .admin-social-footer { display: none; } }

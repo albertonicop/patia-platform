@@ -135,6 +135,15 @@
     {% endwith %}
 
     {% block content %}{% endblock %}
+    {% if admin_screen %}
+    <nav class="admin-social-footer" aria-label="PATIA en redes">
+      <span>PATIA en redes</span>
+      <div>
+        <a href="https://www.instagram.com/patia.official/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram" aria-hidden="true"></i> Instagram</a>
+        <a href="https://www.tiktok.com/@patia.offcial" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-tiktok" aria-hidden="true"></i> TikTok</a>
+      </div>
+    </nav>
+    {% endif %}
     <footer class="app-legal-footer-v1">
       <a href="{{ url_for('main.terms') }}">{{ _("Términos") }}</a>
       <a href="{{ url_for('main.privacy') }}">{{ _("Privacidad") }}</a>

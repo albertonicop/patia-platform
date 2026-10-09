@@ -51,6 +51,14 @@ try:
             assert page.locator("#primary-navigation a").count() == 1
             assert page.locator("#primary-navigation a").get_attribute("href") == "/admin"
             assert page.locator('.app-topbar-v2__notification').count() == 0
+            socials = page.locator(".admin-social-footer")
+            socials.scroll_into_view_if_needed()
+            assert socials.is_visible()
+            assert socials.locator("a").count() == 2
+            assert socials.get_by_role("link", name="Instagram", exact=True).get_attribute("href") == "https://www.instagram.com/patia.official/"
+            assert socials.get_by_role("link", name="TikTok", exact=True).get_attribute("href") == "https://www.tiktok.com/@patia.offcial"
+            assert socials.locator("a").first.get_attribute("rel") == "noopener noreferrer"
+            page.evaluate("window.scrollTo(0, 0)")
             assert page.locator("#admin-search").is_visible()
             assert page.locator("#admin-search").evaluate("el => el.getBoundingClientRect().bottom <= innerHeight"), (width, "search below first screen")
             assert page.locator(".admin-workspace__shortcuts a").count() == 0
