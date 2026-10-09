@@ -1444,3 +1444,32 @@ body.patia-v11--workspace {
   white-space: normal;
   text-align: center;
 }
+
+/* Dashboard: keep controls in the header and use the active light palette. */
+.patia-v11--dashboard .restaurant-dashboard-v1 { margin-bottom: 16px; }
+.patia-v11--dashboard .dashboard-v3__summary-card > a,
+.patia-v11--dashboard .dashboard-v3__alerts-list > a {
+  color: var(--patia-accent); text-decoration: none;
+}
+.patia-v11--dashboard .dashboard-v3__summary-card > a:hover,
+.patia-v11--dashboard .dashboard-v3__alerts-list > a:hover { text-decoration: underline; }
+.patia-v11--dashboard .app-topbar-v2 .language-switcher {
+  position: static; flex-shrink: 0; margin: 0; z-index: auto;
+  background: var(--patia-surface); box-shadow: none; border-color: transparent;
+}
+.patia-v11--dashboard .restaurant-dashboard-v1 {
+  background: var(--patia-surface); color: var(--patia-ink);
+  border-radius: var(--patia-radius-md); box-shadow: none;
+}
+.patia-v11--dashboard .restaurant-dashboard-v1 header span { color: var(--patia-accent); }
+.patia-v11--dashboard .restaurant-dashboard-v1 a {
+  color: var(--patia-ink); text-decoration: none; padding: 8px 0;
+}
+.patia-v11--dashboard .restaurant-dashboard-v1 a span,
+.patia-v11--dashboard .restaurant-dashboard-v1 a small { color: var(--patia-muted); }
+.patia-v11--dashboard .restaurant-dashboard-v1 a strong {
+  white-space: normal; overflow-wrap: anywhere; line-height: 1.4;
+}
+.patia-v11--dashboard .restaurant-dashboard-v1 a:hover strong { color: var(--patia-accent); }
+.patia-v11--dashboard .dashboard-v11__cash-status { border: 0; border-left: 3px solid var(--patia-success); border-radius: var(--patia-radius-sm); }
+.patia-v11--dashboard .dashboard-v2__recommendation { border: 0; }

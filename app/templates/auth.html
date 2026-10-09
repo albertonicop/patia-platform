@@ -7,6 +7,7 @@
   <title>{{ title }} | PATIA</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=131">
+  {% if mode == "login" %}<link rel="stylesheet" href="{{ url_for('static', filename='css/auth-password.css') }}?v=1">{% endif %}
 </head>
 
 <body class="auth-body auth-v2">
@@ -168,7 +169,16 @@
               <label for="password">{{ _("Contraseña") }}</label>
               {% if mode == "login" %}<a href="/forgot-password">{{ _("¿La olvidaste?") }}</a>{% endif %}
             </div>
+            {% if mode == "login" %}
+            <div class="auth-password">
             <input id="password" type="password" name="password" placeholder="{{ _('Mínimo 8 caracteres') }}" autocomplete="{% if mode == 'login' %}current-password{% else %}new-password{% endif %}" required minlength="8">
+              <button class="auth-password__toggle" type="button" aria-controls="password" aria-pressed="false" aria-label="{{ _('Mostrar contraseña') }}" data-show-label="{{ _('Mostrar contraseña') }}" data-hide-label="{{ _('Ocultar contraseña') }}">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="auth-password__slash" d="m3 3 18 18" hidden/></svg>
+              </button>
+            </div>
+            {% else %}
+            <input id="password" type="password" name="password" placeholder="{{ _('Mínimo 8 caracteres') }}" autocomplete="{% if mode == 'login' %}current-password{% else %}new-password{% endif %}" required minlength="8">
+            {% endif %}
           </div>
 
           <button type="submit" class="auth-btn auth-v2__submit">{{ button }}</button>
@@ -206,5 +216,6 @@
     });
   })();
   </script>{% endif %}
+  {% if mode == "login" %}<script src="{{ url_for('static', filename='js/auth-password.js') }}?v=1"></script>{% endif %}
 </body>
 </html>

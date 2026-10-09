@@ -298,8 +298,8 @@ function initializeDashboardCharts() {
                     tooltip: {callbacks: {label: context => `${context.dataset.label}: ${reportMoney(context.raw)}`}}
                 },
                 scales: {
-                    x: {grid: {display: false}, ticks: {color: "#687085"}},
-                    y: {beginAtZero: true, grid: {color: "rgba(218, 222, 232, .7)"}, ticks: {color: "#687085", callback: value => reportMoney(value)}}
+                    x: {grid: {display: false}, border: {display: false}, ticks: {color: "#687085", maxTicksLimit: 7}},
+                    y: {beginAtZero: true, grid: {color: "rgba(218, 222, 232, .35)", drawTicks: false}, border: {display: false}, ticks: {maxTicksLimit: 5, color: "#687085", callback: value => reportMoney(value)}}
                 }
             }
         });
