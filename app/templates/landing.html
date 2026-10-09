@@ -9,9 +9,14 @@
   <meta name="description" content="{{ _('Inventario, ventas, caja, clientes y decisiones en un solo lugar. Prueba PATIA gratis durante 14 días.') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v2-landing.css') }}?v=2">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/social-footer.css') }}?v=2">
 </head>
 
 <body class="patia-landing-v2">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}<div class="patia-landing-notices" role="status">{% for category, message in messages %}<p>{{ message }}</p>{% endfor %}</div>{% endif %}
+  {% endwith %}
+
   <a class="pl2-skip" href="#contenido">{{ _("Saltar al contenido") }}</a>
 
   <header class="pl2-header" data-landing-header>
@@ -210,6 +215,13 @@
     <div class="pl2-container pl2-footer__inner">
       <div><img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" width="148" height="35" alt="PATIA"><p>{{ _("Control claro para negocios que quieren crecer.") }}</p></div>
       <nav aria-label="{{ _('Enlaces del pie de página') }}"><a href="#funciones">{{ _("Funciones") }}</a><a href="#precios">{{ _("Precios") }}</a><a href="{{ url_for('main.terms') }}">{{ _("Términos") }}</a><a href="{{ url_for('main.privacy') }}">{{ _("Privacidad") }}</a><a href="/login">{{ _("Iniciar sesión") }}</a></nav>
+      <nav class="patia-social-footer" aria-label="PATIA en redes">
+        <span>PATIA en redes</span>
+        <div>
+          <a href="https://www.instagram.com/patia.official/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram" aria-hidden="true"></i> Instagram</a>
+          <a href="https://www.tiktok.com/@patia.offcial" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-tiktok" aria-hidden="true"></i> TikTok</a>
+        </div>
+      </nav>
       <p>{{ _("PATIA © 2026 · NP Ventures") }}</p>
     </div>
   </footer>

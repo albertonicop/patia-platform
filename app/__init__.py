@@ -470,7 +470,7 @@ def create_app():
             gettext("Tu sesión ya terminó. Inicia sesión nuevamente."),
             "info",
         )
-        return redirect(url_for("main.login"))
+        return redirect(url_for("main.dashboard"))
 
     for status_code in (400, 403, 404, 429):
         app.register_error_handler(

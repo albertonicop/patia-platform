@@ -4,3 +4,9 @@
 .patia-social-footer a:hover { background: #eeeaff; }
 .patia-social-footer a:focus-visible { outline: 3px solid #8c7af2; outline-offset: 3px; }
 @media print { .patia-social-footer { display: none; } }
+
+.pl2-footer .patia-social-footer { grid-column: 1 / -1; margin-top: 0; padding: 16px 0; justify-content: space-between; color: #c7cfde; border-color: rgba(255,255,255,.12); }
+.pl2-footer .patia-social-footer a { color: #e6e2ff; }
+.pl2-footer .patia-social-footer a:hover { background: rgba(124,92,255,.15); }
+.patia-landing-notices { padding: 12px 24px; background: #10372e; color: #e4fff6; text-align: center; }
+.patia-landing-notices p { margin: 0; }

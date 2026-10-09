@@ -1338,7 +1338,7 @@ def logout_get():
         gettext("Tu sesión ya terminó. Inicia sesión nuevamente."),
         "info",
     )
-    return redirect(url_for("main.login"))
+    return redirect(url_for("main.dashboard"))
 
 
 @main.post("/logout")
@@ -1347,7 +1347,7 @@ def logout():
     session.clear()
     session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
     flash(gettext("Has cerrado sesión correctamente."), "success")
-    return redirect(url_for("main.login"))
+    return redirect(url_for("main.dashboard"))
 
 
 @main.app_template_filter("money")
@@ -2103,8 +2103,11 @@ def dashboard():
         ):
             return authentication_required_response()
         language = session.get("language", "es")
+        notices = session.get("_flashes", [])
         session.clear()
         session["language"] = language if language in SUPPORTED_LANGUAGES else "es"
+        if notices:
+            session["_flashes"] = notices
         from .plans import commercial_plans
 
         return render_template(

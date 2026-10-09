@@ -99,6 +99,19 @@ try:
             assert page.locator("#delete-confirmation").is_visible()
             assert page.locator("#delete-company form").get_attribute("method") == "POST"
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
+            if not page.locator(".sidebar-v2__logout-button").is_visible():
+                page.locator(".sidebar-v2__toggle").click()
+            page.locator(".sidebar-v2__logout-button").click()
+            page.wait_for_load_state("networkidle")
+            assert page.url == base + "/"
+            assert page.locator("body.patia-landing-v2").count() == 1
+            public_socials = page.locator(".pl2-footer .patia-social-footer")
+            public_socials.scroll_into_view_if_needed()
+            assert public_socials.is_visible()
+            assert public_socials.get_by_role("link", name="Instagram", exact=True).is_visible()
+            assert public_socials.get_by_role("link", name="TikTok", exact=True).is_visible()
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
+            page.screenshot(path=str(artifacts / f"landing-footer-{width}.png"), full_page=False)
             context.close()
             print(f"PASS {width}px: priority, quick filters, search, pagination, Cocina filter, no page overflow.")
         browser.close()

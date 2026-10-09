@@ -134,7 +134,7 @@ class LogoutExperienceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         return self._csrf(response.get_data(as_text=True))
 
-    def test_valid_post_logs_out_redirects_to_login_and_preserves_language(self):
+    def test_valid_post_logs_out_redirects_to_public_home_and_preserves_language(self):
         client = self._client(language="es")
         token = self._page_token(client)
 
@@ -146,6 +146,11 @@ class LogoutExperienceTests(unittest.TestCase):
 
         html = response.get_data(as_text=True)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.request.path, "/")
+        self.assertIn('class="patia-landing-v2"', html)
+        self.assertIn('class="patia-social-footer"', html)
+        self.assertIn('href="https://www.instagram.com/patia.official/"', html)
+        self.assertIn('href="https://www.tiktok.com/@patia.offcial"', html)
         self.assertIn("Has cerrado sesión correctamente.", html)
         with client.session_transaction() as browser_session:
             self.assertNotIn("user_id", browser_session)
@@ -182,7 +187,7 @@ class LogoutExperienceTests(unittest.TestCase):
         )
 
         self.assertEqual(first.status_code, 302)
-        self.assertEqual(first.location, "/login")
+        self.assertEqual(first.location, "/")
         self.assertEqual(second.status_code, 200)
         second_html = second.get_data(as_text=True)
         self.assertIn(
