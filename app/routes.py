@@ -1040,7 +1040,7 @@ def register():
                 subject=gettext("Verifica tu correo en PATIA"),
                 html=f"""
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
+                <img src="{_public_url('/static/img/brand/patia-logo-original.png')}" style="width:160px;margin-bottom:24px;">
                 <h1 style="color:#29d3a8;">{gettext("Verifica tu correo")}</h1>
                 <p style="color:#9aa8c7;font-size:16px;">{gettext("Tu código de verificación es:")}</p>
                 <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#fff;margin:24px 0;">{code}</div>
@@ -1095,7 +1095,7 @@ def verify_email():
                 subject=gettext("¡Bienvenido a PATIA!"),
                 html=f"""
             <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
+                <img src="{_public_url('/static/img/brand/patia-logo-original.png')}" style="width:160px;margin-bottom:24px;">
                 <h1 style="color:#29d3a8;">{gettext("Bienvenido a PATIA, %(name)s!", name=user.first_name or user.company_name)}</h1>
                 <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">{gettext("Tu cuenta está lista. Tienes 14 días gratis para explorar todo.")}</p>
                 <a href="{_public_url('/products')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Ir a mi inventario")}</a>
@@ -1306,7 +1306,7 @@ def login():
                     subject=gettext("Tu prueba gratuita de PATIA termina en 2 días"),
                     html=f"""
                 <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#0b1020;color:#eef3ff;padding:40px;border-radius:24px;">
-                    <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
+                    <img src="{_public_url('/static/img/brand/patia-logo-original.png')}" style="width:160px;margin-bottom:24px;">
                     <h1 style="color:#ff5c7a;">{gettext("Tu prueba termina en 2 días")}</h1>
                     <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">{gettext("Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.", name=access_user.first_name or access_user.company_name)}</p>
                     <a href="{_public_url('/subscribe')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Activar PATIA Control")}</a>

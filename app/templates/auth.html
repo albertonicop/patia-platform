@@ -15,7 +15,7 @@
   <main class="auth-v2__page">
     <aside class="auth-v2__story">
       <a href="/" class="auth-v2__brand" aria-label="{{ _('Volver al inicio de PATIA') }}">
-        <img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA">
+        <img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" alt="PATIA">
       </a>
       <div class="auth-v2__story-copy">
         <span class="auth-v2__eyebrow">{{ _("Control para negocios reales") }}</span>
@@ -38,7 +38,7 @@
     <section class="auth-v2__content">
       <div class="auth-v2__card">
         <header class="auth-v2__header">
-          <span class="auth-v2__mobile-brand"><img src="{{ url_for('static', filename='img/logo-patia.png') }}" alt="PATIA"></span>
+          <span class="auth-v2__mobile-brand"><img src="{{ url_for('static', filename='img/brand/patia-logo-original-dark.png') }}" alt="PATIA"></span>
           <span class="auth-v2__eyebrow">{% if mode == "login" %}{{ _("Bienvenido de nuevo") }}{% else %}{{ _("Prueba gratuita de 14 días") }}{% endif %}</span>
           <h2>{{ title }}</h2>
           {% if mode == "login" %}
