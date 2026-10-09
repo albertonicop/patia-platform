@@ -63,7 +63,7 @@ try:
             assert socials.is_visible()
             assert socials.locator("a").count() == 2
             assert socials.get_by_role("link", name="Instagram", exact=True).get_attribute("href") == "https://www.instagram.com/patia.official/"
-            assert socials.get_by_role("link", name="TikTok", exact=True).get_attribute("href") == "https://www.tiktok.com/@patia.offcial"
+            assert socials.get_by_role("link", name="TikTok", exact=True).get_attribute("href") == "https://www.tiktok.com/@patia.official"
             assert socials.locator("a").first.get_attribute("rel") == "noopener noreferrer"
             page.evaluate("window.scrollTo(0, 0)")
             assert page.locator("#admin-search").is_visible()

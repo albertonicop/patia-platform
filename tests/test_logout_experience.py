@@ -150,7 +150,7 @@ class LogoutExperienceTests(unittest.TestCase):
         self.assertIn('class="patia-landing-v2"', html)
         self.assertIn('class="patia-social-footer"', html)
         self.assertIn('href="https://www.instagram.com/patia.official/"', html)
-        self.assertIn('href="https://www.tiktok.com/@patia.offcial"', html)
+        self.assertIn('href="https://www.tiktok.com/@patia.official"', html)
         self.assertIn("Has cerrado sesión correctamente.", html)
         with client.session_transaction() as browser_session:
             self.assertNotIn("user_id", browser_session)

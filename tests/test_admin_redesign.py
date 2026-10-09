@@ -227,7 +227,7 @@ class AdminRedesignTests(unittest.TestCase):
             html = self.client.get(path).get_data(as_text=True)
             self.assertIn('class="patia-social-footer"', html)
             self.assertIn('href="https://www.instagram.com/patia.official/"', html)
-            self.assertIn('href="https://www.tiktok.com/@patia.offcial"', html)
+            self.assertIn('href="https://www.tiktok.com/@patia.official"', html)
             self.assertIn('css/social-footer.css', html)
             self.assertLess(html.index('class="patia-social-footer"'), html.index('class="app-legal-footer-v1"'))
 
