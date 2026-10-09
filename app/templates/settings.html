@@ -87,13 +87,9 @@
         </div>
         <div class="field-v2 settings-v2__wide">
           <label for="organization-business-type">{{ _("Tipo de negocio") }}</label>
-          <select id="organization-business-type" name="business_type">
-            <option value="general"{% if organization.business_type == 'general' %} selected{% endif %}>{{ _("Negocio / tienda") }}</option>
-            <option value="restaurant"{% if organization.business_type == 'restaurant' %} selected{% endif %}>{{ _("Restaurante") }}</option>
-          </select>
-          <small>{{ _("Adapta las herramientas disponibles sin cambiar tus datos actuales.") }}</small>
+          <input id="organization-business-type" type="text" value="{{ _('Restaurante') if organization.business_type == 'restaurant' else _('Negocio / tienda') }}" readonly>
+          <small>{{ _("El tipo de negocio se define al crear tu cuenta y no se puede cambiar desde Configuración.") }}</small>
         </div>
-        {% if request.args.get('confirm_business_type_change') == '1' %}<label class="check-row settings-v2__wide"><input type="checkbox" name="confirm_business_type_change" value="1" required> {{ _("Entiendo que las recetas se conservarán, pero dejarán de estar disponibles.") }}</label>{% endif %}
       </div>
     </section>
 

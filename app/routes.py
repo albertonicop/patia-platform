@@ -196,10 +196,10 @@ def _trial_access_response(user, *, json_response=False):
     if json_response:
         return jsonify({
             "ok": False,
-            "error": gettext("Tu periodo de prueba terminó. Activa PATIA Pro para continuar."),
+            "error": gettext("Tu periodo de prueba terminó. Activa PATIA Control para continuar."),
         }), 403
     flash(
-        "Tu periodo de prueba terminó. Activa PATIA Pro para continuar.",
+        "Tu periodo de prueba terminó. Activa PATIA Control para continuar.",
         "danger",
     )
     return render_template("trial_expired.html"), 403
@@ -938,6 +938,19 @@ def register():
         ).upper()
         if requested_plan not in {STARTER, PRO, RESTAURANT}:
             requested_plan = RESTAURANT if business_type == "restaurant" else STARTER
+        if requested_plan == RESTAURANT and business_type != "restaurant":
+            flash(
+                gettext("Cocina está disponible para cuentas registradas como restaurante."),
+                "danger",
+            )
+            return render_template(
+                "auth.html",
+                title=gettext("Crear cuenta"),
+                button=gettext("Crear cuenta"),
+                mode="register",
+                plan=requested_plan.lower(),
+                form_data=request.form,
+            ), 400
         user = User(
             email=email,
             company_name=company_name,
@@ -1277,7 +1290,7 @@ def login():
                     <img src="{_public_url('/static/img/logo-patia.png')}" style="width:160px;margin-bottom:24px;">
                     <h1 style="color:#ff5c7a;">{gettext("Tu prueba termina en 2 días")}</h1>
                     <p style="color:#9aa8c7;font-size:16px;line-height:1.6;">{gettext("Hola %(name)s, tu periodo de prueba gratuita de PATIA termina pronto. No pierdas el acceso a tu inventario y ventas.", name=access_user.first_name or access_user.company_name)}</p>
-                    <a href="{_public_url('/subscribe')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Activar PATIA Pro")}</a>
+                    <a href="{_public_url('/subscribe')}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#7c5cff,#29d3a8);color:white;text-decoration:none;border-radius:14px;font-weight:800;">{gettext("Activar PATIA Control")}</a>
                 </div>
                 """,
                     language=access_user.preferred_language,
@@ -4073,7 +4086,7 @@ def reports():
         period_args = {"period": "7d"}
         flash(
             gettext(
-                "Los periodos y análisis avanzados están incluidos en PATIA Pro."
+                "Los periodos y análisis avanzados están incluidos en PATIA Control."
             ),
             "info",
         )
@@ -4180,7 +4193,7 @@ def subscribe():
         return redirect(url_for("main.login"))
     if not user.email_verified:
         session["post_verify_destination"] = "subscribe"
-        flash("Verifica tu correo antes de activar PATIA Pro.", "info")
+        flash("Verifica tu correo antes de activar PATIA Control.", "info")
         return redirect(url_for("main.verify_email"))
     if request.args.get("checkout") == "cancelled":
         flash("El pago fue cancelado. No se realizó ningún cargo.", "info")
@@ -4208,6 +4221,7 @@ def subscribe():
         "subscribe.html",
         user=user,
         commercial_plans=commercial_plans(current_app.config),
+        restaurant_account=(active_membership(current_user()).organization.business_type == "restaurant"),
         manageable_subscription=manageable_subscription,
         stripe_reference_check_failed=stripe_reference_check_failed,
     )
@@ -4247,7 +4261,7 @@ def create_checkout_session():
     user = current_organization_owner(user)
     if not user.email_verified:
         session["post_verify_destination"] = "subscribe"
-        flash("Verifica tu correo antes de activar PATIA Pro.", "info")
+        flash("Verifica tu correo antes de activar PATIA Control.", "info")
         return redirect(url_for("main.verify_email"))
     if current_app.config["STRIPE_DISABLED"]:
         flash("La facturación no está disponible en este entorno.", "danger")
@@ -4260,6 +4274,10 @@ def create_checkout_session():
     ).strip().upper()
     if requested_plan not in PAID_PLAN_CODES:
         flash("Selecciona un plan válido.", "danger")
+        return redirect(url_for("main.subscribe"))
+    organization = Organization.query.filter_by(owner_user_id=user.id).first()
+    if requested_plan == "RESTAURANT" and (not organization or organization.business_type != "restaurant"):
+        flash(gettext("Cocina está disponible para cuentas registradas como restaurante."), "danger")
         return redirect(url_for("main.subscribe"))
     price_id = price_id_for(current_app.config, requested_plan)
     if not price_id:
@@ -4890,6 +4908,15 @@ def subscription():
         if organization
         else None
     )
+    billed_price = None
+    if subscription_info:
+        items = (subscription_info.get("items") or {}).get("data") or []
+        price = items[0].get("price", {}) if items else {}
+        amount = price.get("unit_amount") if isinstance(price, dict) else None
+        if amount is not None:
+            billed_price = format_organization_currency(
+                Decimal(amount) / 100, str(price.get("currency", "mxn")).upper()
+            )
     return render_template(
         "subscription.html",
         user=user,
@@ -4900,6 +4927,8 @@ def subscription():
         current_plan_code=plan_code,
         current_plan_label=current_plan_label(plan_code),
         current_plan_price=plan_price(plan_code),
+        billed_price=billed_price,
+        pending_plan_label=current_plan_label(user.pending_plan_code),
         commercial_plans=commercial_plans(current_app.config),
         organization=organization,
         monthly_report_available=(
@@ -4944,7 +4973,7 @@ def update_monthly_report_settings():
         )
     ):
         flash(
-            "El reporte mensual para el propietario está incluido en PATIA Pro.",
+            "El reporte mensual para el propietario está incluido en PATIA Control.",
             "info",
         )
         return redirect(url_for("main.subscribe"))
@@ -4988,6 +5017,9 @@ def change_subscription_plan():
     if not owner or not membership or target_plan not in PAID_PLAN_CODES:
         flash("Selecciona un plan válido.", "danger")
         return redirect(url_for("main.subscription"))
+    if target_plan == "RESTAURANT" and membership.organization.business_type != "restaurant":
+        flash(gettext("Cocina está disponible para cuentas registradas como restaurante."), "danger")
+        return redirect(url_for("main.subscription"))
     if not owner.stripe_subscription_id:
         return redirect(url_for("main.subscribe"))
     if current_app.config["STRIPE_DISABLED"]:
@@ -5014,7 +5046,7 @@ def change_subscription_plan():
         ).count()
         if member_count > entitlements_for(STARTER).max_members:
             flash(
-                "Tu negocio tiene más personas de las permitidas en Starter. "
+                "Tu negocio tiene más personas de las permitidas en Esencial. "
                 "Desactiva las necesarias antes de solicitar el cambio.",
                 "warning",
             )
@@ -5027,7 +5059,7 @@ def change_subscription_plan():
         if active_manager:
             flash(
                 gettext(
-                    "Starter no incluye encargados. Cambia sus accesos a Cajero antes de solicitar el cambio."
+                    "Esencial no incluye encargados. Cambia sus accesos a Cajero antes de solicitar el cambio."
                 ),
                 "warning",
             )
@@ -5104,7 +5136,7 @@ def change_subscription_plan():
             owner.pending_plan_code = target_plan
             owner.pending_plan_effective_at = period_end
             flash(
-                "El cambio a Starter quedó programado para el final de tu periodo pagado.",
+                "El cambio a Esencial quedó programado para el final de tu periodo pagado.",
                 "success",
             )
         else:
@@ -5366,9 +5398,9 @@ def admin():
 
         plan_admin_labels = {
             "TRIAL": gettext("Trial"),
-            "STARTER": gettext("Starter"),
-            "PRO": gettext("Pro"),
-            "RESTAURANT": gettext("Restaurant"),
+            "STARTER": gettext("Esencial"),
+            "PRO": gettext("Control"),
+            "RESTAURANT": gettext("Cocina"),
             "GRANDFATHERED": gettext("Cliente anterior"),
             "MANUAL": gettext("Acceso manual"),
         }
@@ -5687,8 +5719,9 @@ def admin_organization_detail(organization_id):
     plan_code = current_plan_code(owner, has_paid_access=paid_access)
     plan_label = {
         "TRIAL": gettext("Trial"),
-        "STARTER": gettext("Starter"),
-        "PRO": gettext("Pro"),
+        "STARTER": gettext("Esencial"),
+        "PRO": gettext("Control"),
+        "RESTAURANT": gettext("Cocina"),
         "GRANDFATHERED": gettext("Cliente anterior"),
         "MANUAL": gettext("Acceso manual"),
     }.get(plan_code, gettext("Plan actual"))
@@ -5986,7 +6019,7 @@ def admin_make_pro(user_id):
     if not organization:
         flash(
             gettext(
-                "El acceso Pro se administra en el propietario de la organización."
+                "El acceso Control se administra en el propietario de la organización."
             ),
             "danger",
         )
@@ -5994,7 +6027,7 @@ def admin_make_pro(user_id):
     user.manual_pro_access = True
     sync_user_plan(user)
     db.session.commit()
-    flash(gettext("Acceso manual Pro activado."), "success")
+    flash(gettext("Acceso manual Control activado."), "success")
     return redirect(
         url_for(
             "main.admin_organization_detail",
@@ -6013,7 +6046,7 @@ def admin_remove_manual_pro(user_id):
     if not organization:
         flash(
             gettext(
-                "El acceso Pro se administra en el propietario de la organización."
+                "El acceso Control se administra en el propietario de la organización."
             ),
             "danger",
         )
@@ -6021,7 +6054,7 @@ def admin_remove_manual_pro(user_id):
     user.manual_pro_access = False
     sync_user_plan(user)
     db.session.commit()
-    flash(gettext("Acceso manual Pro desactivado."), "success")
+    flash(gettext("Acceso manual Control desactivado."), "success")
     return redirect(
         url_for(
             "main.admin_organization_detail",
@@ -6041,6 +6074,17 @@ def settings():
         access_block = _trial_access_response(user)
         if access_block:
             return access_block
+        requested_business_type = request.form.get("business_type")
+        if (
+            requested_business_type is not None
+            and requested_business_type.strip().lower()
+            != membership.organization.business_type
+        ):
+            flash(
+                gettext("El tipo de negocio no se puede cambiar desde Configuración."),
+                "danger",
+            )
+            return redirect(url_for("main.settings"))
         company_name = request.form.get("company_name", "").strip()
         if not company_name:
             flash("El nombre del negocio es obligatorio.", "danger")
@@ -6076,42 +6120,12 @@ def settings():
             request.form.get("locale_code") or suggested_locale,
             currency_code,
         )
-        business_type = str(
-            request.form.get("business_type")
-            or membership.organization.business_type
-            or "general"
-        ).lower()
-        if business_type not in {"general", "restaurant"}:
-            flash(gettext("Selecciona un tipo de negocio válido."), "danger")
-            return redirect(url_for("main.settings"))
-        if (
-            membership.organization.business_type == "restaurant"
-            and business_type == "general"
-        ):
-            has_active_recipes = Recipe.query.filter_by(
-                organization_id=membership.organization_id,
-                is_active=True,
-            ).first() is not None
-            if (
-                has_active_recipes
-                and request.form.get("confirm_business_type_change") != "1"
-            ):
-                flash(
-                    gettext(
-                        "Confirma el cambio. Las recetas se conservarán, pero dejarán de estar disponibles."
-                    ),
-                    "warning",
-                )
-                return redirect(
-                    url_for("main.settings", confirm_business_type_change=1)
-                )
         membership.organization.name = company_name
         membership.organization.timezone = user.timezone
         membership.organization.country_code = country_code
         membership.organization.currency_code = currency_code
         membership.organization.locale_code = locale_code
         membership.organization.currency = currency_code
-        membership.organization.business_type = business_type
         db.session.commit()
         flash("Configuración guardada.", "success")
         return redirect(url_for("main.settings"))

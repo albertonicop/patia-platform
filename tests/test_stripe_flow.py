@@ -52,6 +52,7 @@ class StripeFlowTests(unittest.TestCase):
             STRIPE_STARTER_PRICE_ID="price_patia_starter",
             STRIPE_PRO_PRICE_ID="price_patia_pro",
             STRIPE_RESTAURANT_PRICE_ID="price_patia_restaurant",
+            STRIPE_COCINA_PRICE_ID="price_patia_restaurant",
         )
         cls.context = cls.app.app_context()
         cls.context.push()
@@ -646,7 +647,7 @@ class StripeFlowTests(unittest.TestCase):
         plans_html = plans.get_data(as_text=True)
         db.session.refresh(user)
         self.assertEqual(plans.status_code, 200)
-        self.assertIn("Elegir Restaurant por $360 al mes", plans_html)
+        self.assertIn("Elegir Cocina por $499 al mes", plans_html)
         self.assertNotIn("Administrar mi plan", plans_html)
         self.assertTrue(user.manual_pro_access)
         self.assertEqual(current_plan_code(user), MANUAL)
@@ -680,7 +681,9 @@ class StripeFlowTests(unittest.TestCase):
             subscription_status="active",
             email_verified=True,
         )
-        ensure_owner_organization(user)
+        membership = ensure_owner_organization(user)
+        membership.organization.business_type = "restaurant"
+        db.session.commit()
         self.login(user)
         checkout = SimpleNamespace(url="https://checkout.stripe.test/new")
         with (
@@ -717,7 +720,9 @@ class StripeFlowTests(unittest.TestCase):
             subscription_status="active",
             email_verified=True,
         )
-        ensure_owner_organization(user)
+        membership = ensure_owner_organization(user)
+        membership.organization.business_type = "restaurant"
+        db.session.commit()
         self.login(user)
         with (
             patch(
@@ -744,7 +749,9 @@ class StripeFlowTests(unittest.TestCase):
             stripe_customer_id="cus_deleted_without_subscription",
             email_verified=True,
         )
-        ensure_owner_organization(user)
+        membership = ensure_owner_organization(user)
+        membership.organization.business_type = "restaurant"
+        db.session.commit()
         self.login(user)
         checkout = SimpleNamespace(url="https://checkout.stripe.test/fresh-customer")
         with (
@@ -901,6 +908,29 @@ class StripeFlowTests(unittest.TestCase):
         self.assertEqual(reactivate.status_code, 302)
         self.assertEqual(modify.call_count, 2)
 
+    def test_cancel_button_and_legacy_price_then_reactivate_button(self):
+        user = self.make_user(stripe_customer_id="cus_manage", stripe_subscription_id="sub_manage",
+                              subscription_status="active", subscription_plan_code="RESTAURANT",
+                              current_period_end=datetime.utcnow() + timedelta(days=30))
+        self.login(user)
+        subscription = self.subscription(user, price_id="price_patia_restaurant", plan_code="RESTAURANT")
+        subscription["items"]["data"][0]["price"].update(unit_amount=36000, currency="mxn")
+        with patch("app.routes.stripe.Subscription.retrieve", return_value=subscription), patch("app.routes.stripe.Customer.retrieve", return_value={"id": "cus_manage"}):
+            html = self.client.get("/subscription").get_data(as_text=True)
+        self.assertIn("Cancelar suscripci\u00f3n", html)
+        self.assertIn("360.00", html)
+        self.assertNotIn("499.00", html)
+        with patch("app.routes.stripe.Subscription.modify") as modify:
+            response = self.client.post("/cancel-subscription")
+            modify.assert_called_once_with("sub_manage", cancel_at_period_end=True)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(has_pro_access(user))
+        subscription["cancel_at_period_end"] = True
+        with patch("app.routes.stripe.Subscription.retrieve", return_value=subscription), patch("app.routes.stripe.Customer.retrieve", return_value={"id": "cus_manage"}):
+            html = self.client.get("/subscription").get_data(as_text=True)
+        self.assertIn("Reactivar suscripci\u00f3n", html)
+        self.assertNotIn('action="/cancel-subscription"', html)
+
     def test_admin_cannot_delete_user_with_managed_subscription(self):
         admin = self.make_user(email="albertonicopat@gmail.com")
         subscriber = self.make_user(
@@ -910,7 +940,9 @@ class StripeFlowTests(unittest.TestCase):
             subscription_status="past_due",
         )
         self.login(admin)
-        response = self.client.post(f"/admin/delete-user/{subscriber.id}")
+        subscription = self.subscription(subscriber, status="past_due")
+        with patch("app.routes.stripe.Subscription.retrieve", return_value=subscription), patch("app.routes.stripe.Customer.retrieve", return_value={"id": "cus_keep"}):
+            response = self.client.post(f"/admin/delete-user/{subscriber.id}")
 
         self.assertEqual(response.status_code, 302)
         self.assertIsNotNone(db.session.get(User, subscriber.id))

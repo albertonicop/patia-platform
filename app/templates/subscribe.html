@@ -21,7 +21,10 @@
         <header><h3>PATIA {{ plan.name }}</h3><p>{{ plan.description }}</p></header>
         <div class="plans-v2__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN al mes") }}</span></div>
         <ul>{% for feature in plan.features %}<li><i class="fa-solid fa-check" aria-hidden="true"></i>{{ feature }}</li>{% endfor %}</ul>
-        {% if manageable_subscription %}
+        {% if plan.code == "RESTAURANT" and not restaurant_account %}
+          <button class="btn ghost" type="button" disabled>{{ _("Solo para restaurantes") }}</button>
+          <small>{{ _("Cocina está disponible para cuentas registradas como restaurante.") }}</small>
+        {% elif manageable_subscription %}
           {% if current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and plan.code == current_plan_code %}
             <a class="btn ghost" href="{{ url_for('main.subscription') }}">{{ _("Administrar mi plan") }}</a>
           {% elif current_plan_code in ["STARTER", "PRO", "RESTAURANT"] and plan.configured and not user.pending_plan_code %}
@@ -43,7 +46,7 @@
           </form>
         {% elif not plan.configured %}
           <button class="btn ghost" type="button" disabled>{{ _("Disponible próximamente") }}</button>
-          <small>{{ _("Pro estará disponible para contratación muy pronto.") if plan.code == "PRO" else _("Este plan estará disponible para contratación muy pronto.") }}</small>
+          <small>{{ _("Control estará disponible para contratación muy pronto.") if plan.code == "PRO" else _("Este plan estará disponible para contratación muy pronto.") }}</small>
         {% else %}
           <button class="btn ghost" type="button" disabled>{{ _("Cambio de plan próximamente") }}</button>
           <small>{{ _("Tu plan actual no cambiará hasta que confirmes un cambio.") }}</small>

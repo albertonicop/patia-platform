@@ -21,8 +21,8 @@
   <details class="admin-v4__secondary card">
     <summary>{{ _("Ver más métricas") }}</summary>
     <dl>
-      <div><dt>{{ _("Starter activos") }}</dt><dd>{{ plan_counts.STARTER }}</dd></div>
-      <div><dt>{{ _("Pro activos") }}</dt><dd>{{ plan_counts.PRO }}</dd></div>
+      <div><dt>{{ _("Esencial activos") }}</dt><dd>{{ plan_counts.STARTER }}</dd></div>
+      <div><dt>{{ _("Control activos") }}</dt><dd>{{ plan_counts.PRO }}</dd></div>
       <div><dt>{{ _("Clientes anteriores") }}</dt><dd>{{ plan_counts.GRANDFATHERED }}</dd></div>
       <div><dt>{{ _("Accesos manuales") }}</dt><dd>{{ plan_counts.MANUAL }}</dd></div>
       <div><dt>{{ _("Renovaciones próximas") }}</dt><dd>{{ upcoming_renewals }}</dd></div>
@@ -85,8 +85,8 @@
             <select name="plan">
               <option value="all"{% if selected_plan == "ALL" %} selected{% endif %}>{{ _("Todos") }}</option>
               <option value="trial"{% if selected_plan == "TRIAL" %} selected{% endif %}>{{ _("Trial") }}</option>
-              <option value="starter"{% if selected_plan == "STARTER" %} selected{% endif %}>{{ _("Starter") }}</option>
-              <option value="pro"{% if selected_plan == "PRO" %} selected{% endif %}>{{ _("Pro") }}</option>
+              <option value="starter"{% if selected_plan == "STARTER" %} selected{% endif %}>{{ _("Esencial") }}</option>
+              <option value="pro"{% if selected_plan == "PRO" %} selected{% endif %}>{{ _("Control") }}</option>
               <option value="grandfathered"{% if selected_plan == "GRANDFATHERED" %} selected{% endif %}>{{ _("Cliente anterior") }}</option>
               <option value="manual"{% if selected_plan == "MANUAL" %} selected{% endif %}>{{ _("Acceso manual") }}</option>
             </select>

@@ -55,7 +55,7 @@ def _pro_preview(module):
     previews = {
         "hub": {
             "icon": "fa-gem",
-            "eyebrow": gettext("PATIA Pro"),
+            "eyebrow": gettext("PATIA Control"),
             "title": gettext("Pulso PATIA convierte tus datos en decisiones"),
             "description": gettext(
                 "Te muestra qué pasó, por qué importa y qué hacer ahora, "
@@ -127,7 +127,7 @@ def _pro_access(preview=None):
             )
         flash(
             gettext(
-                "El Centro de decisiones está incluido en PATIA Pro. "
+                "El Centro de decisiones está incluido en PATIA Control. "
                 "Compara los planes para activarlo."
             ),
             "info",

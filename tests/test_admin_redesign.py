@@ -152,7 +152,7 @@ class AdminRedesignTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Tienda Pro", html)
         self.assertNotIn("Abarrotes La Prueba", html)
-        self.assertIn("Plan: Pro", html)
+        self.assertIn("Plan: Control", html)
         self.assertIn("Reporte fallido", html)
 
     def test_admin_detail_shows_usage_and_failed_report_action(self):
@@ -216,7 +216,7 @@ class AdminRedesignTests(unittest.TestCase):
         self.assertEqual(enabled.status_code, 200)
         self.assertTrue(self.trial.manual_pro_access)
         self.assertEqual(self.trial.plan, "pro")
-        self.assertIn("Acceso manual Pro activado", enabled.get_data(as_text=True))
+        self.assertIn("Acceso manual Control activado", enabled.get_data(as_text=True))
 
         disabled = self.client.post(
             f"/admin/remove-manual-pro/{self.trial.id}",
@@ -228,7 +228,7 @@ class AdminRedesignTests(unittest.TestCase):
         self.assertFalse(self.trial.manual_pro_access)
         self.assertEqual(self.trial.plan, "trial")
         self.assertIn(
-            "Acceso manual Pro desactivado",
+            "Acceso manual Control desactivado",
             disabled.get_data(as_text=True),
         )
 

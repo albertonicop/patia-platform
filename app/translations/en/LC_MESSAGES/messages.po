@@ -9795,3 +9795,225 @@ msgstr "The invitation expires in 48 hours."
 
 #~ msgid "No se pudo confirmar tu suscripción con Stripe."
 #~ msgstr "We could not confirm your subscription with Stripe."
+
+msgid "Inventario y recetas"
+msgstr "Inventory and recipes"
+
+msgid "Primero los ingredientes, después las recetas"
+msgstr "Ingredients first, then recipes"
+
+msgid "Carga harina, canela y demás ingredientes con sus unidades y existencias. Luego crea la receta del producto que vendes: cada venta descontará las cantidades de sus ingredientes."
+msgstr "Load flour, cinnamon and other ingredients with their units and stock. Then create the recipe for the item you sell: each sale will deduct its ingredient quantities."
+
+msgid "Crear receta con mi inventario"
+msgstr "Create recipe from my inventory"
+
+msgid "Cargar ingredientes"
+msgstr "Load ingredients"
+
+msgid "Siguiente: crear receta con estos ingredientes"
+msgstr "Next: create a recipe with these ingredients"
+
+msgid "Esta receta usa tu inventario"
+msgstr "This recipe uses your inventory"
+
+msgid "Para un rol de canela, define cuánta harina, canela y demás ingredientes usa una pieza. Selecciona esos ingredientes del inventario, indica sus cantidades y guarda la receta con rendimiento de 1 pieza. Al venderla, PATIA descontará esos ingredientes automáticamente."
+msgstr "For a cinnamon roll, define how much flour, cinnamon and other ingredients one piece uses. Select those ingredients from inventory, enter their quantities and save the recipe with a yield of 1 piece. Selling it will automatically deduct those ingredients."
+
+msgid "Las cantidades deben ser las reales de tu negocio. Puedes capturar gramos aunque el ingrediente esté registrado en kilogramos."
+msgstr "Use your business's actual quantities. You can enter grams even when the ingredient is stored in kilograms."
+
+msgid "Cargar o revisar ingredientes"
+msgstr "Load or review ingredients"
+
+msgid "Primero carga tus ingredientes en Inventario. Después podrás agregarlos a esta receta."
+msgstr "Load your ingredients in Inventory first. You can then add them to this recipe."
+
+msgid "Costo por pieza / porción"
+msgstr "Cost per piece / portion"
+
+msgid "Costo de la preparación"
+msgstr "Preparation cost"
+
+msgid "Si preparas 12 piezas, captura 12 y las cantidades de ingredientes de toda la tanda."
+msgstr "If you make 12 pieces, enter 12 and the ingredient quantities for the entire batch."
+
+msgid "Esencial"
+msgstr "Esencial"
+
+msgid "Control"
+msgstr "Control"
+
+msgid "Cocina"
+msgstr "Cocina"
+
+msgid "Todo lo incluido en Esencial"
+msgstr "Everything included in Esencial"
+
+msgid "Tu periodo de prueba terminó. Activa PATIA Control para continuar."
+msgstr "Your trial period is over. Activate PATIA Control to continue."
+
+msgid "Activar PATIA Control"
+msgstr "Activate PATIA Control"
+
+msgid "Los periodos y análisis avanzados están incluidos en PATIA Control."
+msgstr "Advanced periods and analysis are included in PATIA Control."
+
+msgid "Esencial no incluye encargados. Cambia sus accesos a Cajero antes de solicitar el cambio."
+msgstr "Esencial does not include managers. Change their access to Cashier before requesting the change."
+
+msgid "El acceso Control se administra en el propietario de la organización."
+msgstr "Control access is managed through the organization owner."
+
+msgid "Acceso manual Control activado."
+msgstr "Manual Control access enabled."
+
+msgid "Acceso manual Control desactivado."
+msgstr "Manual Control access disabled."
+
+msgid "PATIA Control"
+msgstr "PATIA Control"
+
+msgid "El Centro de decisiones está incluido en PATIA Control. Compara los planes para activarlo."
+msgstr "The Decision Center is included in PATIA Control. Compare plans to activate it."
+
+msgid "Tu plan Esencial incluye al propietario y un cajero. Cambia a Control para agregar encargados y usar permisos avanzados."
+msgstr "Your Esencial plan includes the owner and one cashier. Upgrade to Control to add managers and use advanced permissions."
+
+msgid "Tu plan Esencial incluye al propietario y un cajero. Cambia a Control para agregar hasta cinco personas y usar permisos avanzados."
+msgstr "Your Esencial plan includes the owner and one cashier. Upgrade to Control to add up to five people and use advanced permissions."
+
+msgid "Los accesos de encargado están incluidos en PATIA Control."
+msgstr "Manager access is included in PATIA Control."
+
+msgid "Cambia a esta persona a Cajero antes de reactivar su acceso en Esencial."
+msgstr "Change this person to Cashier before reactivating their access on Esencial."
+
+msgid "Esencial activos"
+msgstr "Active Esencial"
+
+msgid "Control activos"
+msgstr "Active Control"
+
+msgid "Para controlar recetas e ingredientes, te recomendamos el plan Cocina."
+msgstr "To control recipes and ingredients, we recommend the Cocina plan."
+
+msgid "Lectura Cocina"
+msgstr "Cocina overview"
+
+msgid "Esta vista avanzada está incluida en PATIA Control."
+msgstr "This advanced view is included in PATIA Control."
+
+msgid "Esencial muestra los últimos 90 días."
+msgstr "Esencial shows the last 90 days."
+
+msgid "Control estará disponible para contratación muy pronto."
+msgstr "Control will be available to subscribe very soon."
+
+msgid "Punto de venta Cocina"
+msgstr "Cocina point of sale"
+
+msgid "Volver a PATIA Control"
+msgstr "Back to PATIA Control"
+
+msgid "Herramientas Control"
+msgstr "Control tools"
+
+msgid "Reporte mensual Cocina"
+msgstr "Cocina monthly report"
+
+msgid "Reporte mensual Control"
+msgstr "Control monthly report"
+
+msgid "Vista previa de PATIA Control"
+msgstr "PATIA Control preview"
+
+msgid "Conocer PATIA Control"
+msgstr "Discover PATIA Control"
+
+msgid "PATIA Cocina · Reporte mensual"
+msgstr "PATIA Cocina · Monthly report"
+
+msgid "PATIA Control · Reporte mensual ejecutivo"
+msgstr "PATIA Control · Executive monthly report"
+
+msgid "Incluido en Control"
+msgstr "Included in Control"
+
+msgid "Actualizar a Control"
+msgstr "Upgrade to Control"
+
+msgid "Tu operación Esencial permanece completa. Control agrega supervisión, análisis y automatización."
+msgstr "Your Esencial operation remains complete. Control adds oversight, analysis, and automation."
+
+msgid "Más periodos con Control"
+msgstr "More periods with Control"
+
+msgid "Compara costos, utilidad y margen por producto con PATIA Control."
+msgstr "Compare cost, profit, and margin by product with PATIA Control."
+
+msgid "Ver Control"
+msgstr "View Control"
+
+msgid "Cambia a Control por $349 MXN al mes. Stripe calculará el ajuste proporcional del periodo actual."
+msgstr "Upgrade to Control for $349 MXN per month. Stripe will calculate the prorated adjustment for the current period."
+
+msgid "Cambiar a Control"
+msgstr "Upgrade to Control"
+
+msgid "El cambio a Esencial se aplicará al terminar el periodo pagado. Antes, tu equipo debe cumplir el límite de dos personas."
+msgstr "The change to Esencial will apply at the end of the paid period. First, your team must meet the two-person limit."
+
+msgid "Cambiar a Esencial"
+msgstr "Change to Esencial"
+
+msgid "Funciones incluidas en tu plan Esencial"
+msgstr "Features included in your Esencial plan"
+
+msgid "Funciones incluidas en tu plan Control"
+msgstr "Features included in your Control plan"
+
+msgid "Funciones incluidas en tu plan Cocina"
+msgstr "Features included in your Cocina plan"
+
+msgid "Solo en Control"
+msgstr "Control only"
+
+msgid "Ver plan Control"
+msgstr "View Control plan"
+
+msgid "Ver plan Control para agregar encargados"
+msgstr "View Control plan to add managers"
+
+msgid "Todo lo incluido en Control"
+msgstr "Everything included in Control"
+
+msgid "Cancelar suscripción"
+msgstr "Cancel subscription"
+
+msgid "Incluido en Control y Cocina"
+msgstr "Included in Control and Cocina"
+
+msgid "El tipo de negocio no se puede cambiar desde Configuración."
+msgstr "The business type cannot be changed in Settings."
+
+msgid "El tipo de negocio se define al crear tu cuenta y no se puede cambiar desde Configuración."
+msgstr "The business type is set when you create your account and cannot be changed in Settings."
+
+msgid "Consulta el importe de tu suscripción en Administrar pagos"
+msgstr "Check your subscription amount in Manage payments"
+
+msgid "Tu plan Starter incluye al propietario y un cajero. Cambia a Control para agregar encargados y usar permisos avanzados."
+msgstr "Your Starter plan includes the owner and one cashier. Upgrade to Control to add managers and use advanced permissions."
+
+msgid "Tu plan Starter incluye al propietario y un cajero. Cambia a Control para agregar hasta cinco personas y usar permisos avanzados."
+msgstr "Your Starter plan includes the owner and one cashier. Upgrade to Control to add up to five people and use advanced permissions."
+
+msgid "Tu operación Starter permanece completa. Control agrega supervisión, análisis y automatización."
+msgstr "Your Starter operation remains complete. Control adds oversight, analysis, and automation."
+
+msgid "Solo para restaurantes"
+msgstr "For restaurants only"
+
+msgid "Cocina está disponible para cuentas registradas como restaurante."
+msgstr "Cocina is available for accounts registered as restaurants."

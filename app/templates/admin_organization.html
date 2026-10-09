@@ -92,7 +92,7 @@
       {% else %}
       <form method="POST" action="{{ url_for('main.admin_make_pro', user_id=owner.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn ghost" type="submit">{{ _("Activar PATIA Pro") }}</button>
+        <button class="btn ghost" type="submit">{{ _("Activar PATIA Control") }}</button>
       </form>
       {% endif %}
     </div>

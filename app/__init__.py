@@ -89,6 +89,7 @@ def create_app():
         "STRIPE_STARTER_PRICE_ID": os.environ.get("STRIPE_STARTER_PRICE_ID"),
         "STRIPE_PRO_PRICE_ID": os.environ.get("STRIPE_PRO_PRICE_ID"),
         "STRIPE_RESTAURANT_PRICE_ID": os.environ.get("STRIPE_RESTAURANT_PRICE_ID"),
+        "STRIPE_COCINA_PRICE_ID": os.environ.get("STRIPE_COCINA_PRICE_ID"),
         "STRIPE_WEBHOOK_SECRET": os.environ.get("STRIPE_WEBHOOK_SECRET"),
     }
     if not stripe_disabled:

@@ -210,7 +210,7 @@ class ProPhaseTwoTests(unittest.TestCase):
         self.assertEqual(starter_response.status_code, 200)
         starter_html = starter_response.get_data(as_text=True)
         self.assertIn("Pulso PATIA convierte tus datos en decisiones", starter_html)
-        self.assertIn("Actualizar a Pro", starter_html)
+        self.assertIn("Actualizar a Control", starter_html)
 
     def test_starter_can_preview_every_pro_entry_point(self):
         starter, membership = self._owner(
@@ -228,7 +228,7 @@ class ProPhaseTwoTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 html = response.get_data(as_text=True)
                 self.assertIn(expected, html)
-                self.assertIn("Actualizar a Pro", html)
+                self.assertIn("Actualizar a Control", html)
 
     def test_empty_pro_views_explain_the_next_step(self):
         owner, membership = self._owner(
@@ -321,7 +321,7 @@ class ProPhaseTwoTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            "PATIA Pro preview",
+            "PATIA Control preview",
             response.get_data(as_text=True),
         )
         self.assertIn(

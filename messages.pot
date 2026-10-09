@@ -8749,3 +8749,228 @@ msgstr ""
 #: app/templates/emails/team_invitation.html:5
 msgid "La invitación vence en 48 horas."
 msgstr ""
+
+msgid "Inventario y recetas"
+msgstr ""
+
+msgid "Primero los ingredientes, después las recetas"
+msgstr ""
+
+msgid "Carga harina, canela y demás ingredientes con sus unidades y existencias. Luego crea la receta del producto que vendes: cada venta descontará las cantidades de sus ingredientes."
+msgstr ""
+
+msgid "Crear receta con mi inventario"
+msgstr ""
+
+msgid "Cargar ingredientes"
+msgstr ""
+
+msgid "Siguiente: crear receta con estos ingredientes"
+msgstr ""
+
+msgid "Esta receta usa tu inventario"
+msgstr ""
+
+msgid "Para un rol de canela, define cuánta harina, canela y demás ingredientes usa una pieza. Selecciona esos ingredientes del inventario, indica sus cantidades y guarda la receta con rendimiento de 1 pieza. Al venderla, PATIA descontará esos ingredientes automáticamente."
+msgstr ""
+
+msgid "Las cantidades deben ser las reales de tu negocio. Puedes capturar gramos aunque el ingrediente esté registrado en kilogramos."
+msgstr ""
+
+msgid "Cargar o revisar ingredientes"
+msgstr ""
+
+msgid "Primero carga tus ingredientes en Inventario. Después podrás agregarlos a esta receta."
+msgstr ""
+
+msgid "Costo por pieza / porción"
+msgstr ""
+
+msgid "Costo de la preparación"
+msgstr ""
+
+msgid "Si preparas 12 piezas, captura 12 y las cantidades de ingredientes de toda la tanda."
+msgstr ""
+
+msgid "Esencial"
+msgstr ""
+
+msgid "Control"
+msgstr ""
+
+msgid "Cocina"
+msgstr ""
+
+msgid "Todo lo incluido en Esencial"
+msgstr ""
+
+msgid "Tu periodo de prueba terminó. Activa PATIA Control para continuar."
+msgstr ""
+
+msgid "Activar PATIA Control"
+msgstr ""
+
+msgid "Los periodos y análisis avanzados están incluidos en PATIA Control."
+msgstr ""
+
+msgid "Esencial no incluye encargados. Cambia sus accesos a Cajero antes de solicitar el cambio."
+msgstr ""
+
+msgid "El acceso Control se administra en el propietario de la organización."
+msgstr ""
+
+msgid "Acceso manual Control activado."
+msgstr ""
+
+msgid "Acceso manual Control desactivado."
+msgstr ""
+
+msgid "PATIA Control"
+msgstr ""
+
+msgid "El Centro de decisiones está incluido en PATIA Control. Compara los planes para activarlo."
+msgstr ""
+
+msgid "Tu plan Esencial incluye al propietario y un cajero. Cambia a Control para agregar encargados y usar permisos avanzados."
+msgstr ""
+
+msgid "Tu plan Esencial incluye al propietario y un cajero. Cambia a Control para agregar hasta cinco personas y usar permisos avanzados."
+msgstr ""
+
+msgid "Los accesos de encargado están incluidos en PATIA Control."
+msgstr ""
+
+msgid "Cambia a esta persona a Cajero antes de reactivar su acceso en Esencial."
+msgstr ""
+
+msgid "Esencial activos"
+msgstr ""
+
+msgid "Control activos"
+msgstr ""
+
+msgid "Para controlar recetas e ingredientes, te recomendamos el plan Cocina."
+msgstr ""
+
+msgid "Lectura Cocina"
+msgstr ""
+
+msgid "Esta vista avanzada está incluida en PATIA Control."
+msgstr ""
+
+msgid "Esencial muestra los últimos 90 días."
+msgstr ""
+
+msgid "Control estará disponible para contratación muy pronto."
+msgstr ""
+
+msgid "Punto de venta Cocina"
+msgstr ""
+
+msgid "Volver a PATIA Control"
+msgstr ""
+
+msgid "Herramientas Control"
+msgstr ""
+
+msgid "Reporte mensual Cocina"
+msgstr ""
+
+msgid "Reporte mensual Control"
+msgstr ""
+
+msgid "Vista previa de PATIA Control"
+msgstr ""
+
+msgid "Conocer PATIA Control"
+msgstr ""
+
+msgid "PATIA Cocina · Reporte mensual"
+msgstr ""
+
+msgid "PATIA Control · Reporte mensual ejecutivo"
+msgstr ""
+
+msgid "Incluido en Control"
+msgstr ""
+
+msgid "Actualizar a Control"
+msgstr ""
+
+msgid "Tu operación Esencial permanece completa. Control agrega supervisión, análisis y automatización."
+msgstr ""
+
+msgid "Más periodos con Control"
+msgstr ""
+
+msgid "Compara costos, utilidad y margen por producto con PATIA Control."
+msgstr ""
+
+msgid "Ver Control"
+msgstr ""
+
+msgid "Cambia a Control por $349 MXN al mes. Stripe calculará el ajuste proporcional del periodo actual."
+msgstr ""
+
+msgid "Cambiar a Control"
+msgstr ""
+
+msgid "El cambio a Esencial se aplicará al terminar el periodo pagado. Antes, tu equipo debe cumplir el límite de dos personas."
+msgstr ""
+
+msgid "Cambiar a Esencial"
+msgstr ""
+
+msgid "Funciones incluidas en tu plan Esencial"
+msgstr ""
+
+msgid "Funciones incluidas en tu plan Control"
+msgstr ""
+
+msgid "Funciones incluidas en tu plan Cocina"
+msgstr ""
+
+msgid "Solo en Control"
+msgstr ""
+
+msgid "Ver plan Control"
+msgstr ""
+
+msgid "Ver plan Control para agregar encargados"
+msgstr ""
+
+msgid "Todo lo incluido en Control"
+msgstr ""
+
+msgid "Cancelar suscripción"
+msgstr ""
+
+msgid "Incluido en Control y Cocina"
+msgstr ""
+
+msgid "El tipo de negocio no se puede cambiar desde Configuración."
+msgstr ""
+
+msgid "El tipo de negocio se define al crear tu cuenta y no se puede cambiar desde Configuración."
+msgstr ""
+
+msgid "Consulta el importe de tu suscripción en Administrar pagos"
+msgstr ""
+
+msgid "Tu plan Starter incluye al propietario y un cajero. Cambia a Control para agregar encargados y usar permisos avanzados."
+msgstr ""
+
+msgid "Tu plan Starter incluye al propietario y un cajero. Cambia a Control para agregar hasta cinco personas y usar permisos avanzados."
+msgstr ""
+
+msgid "Tu operación Starter permanece completa. Control agrega supervisión, análisis y automatización."
+msgstr ""
+
+msgid "Solo para restaurantes"
+msgstr ""
+
+msgid "Cocina está disponible para cuentas registradas como restaurante."
+msgstr ""
+
+msgid "al mes"
+msgstr ""

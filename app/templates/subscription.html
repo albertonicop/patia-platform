@@ -39,14 +39,14 @@
         </div>
         <div>
           <dt>{{ _("Precio actual") }}</dt>
-          <dd>{% if current_plan_code == "TRIAL" %}{{ _("$0 durante la prueba") }}{% elif current_plan_price %}${{ current_plan_price }} {{ _("MXN al mes") }}{% else %}{{ _("Acceso protegido sin cambio de precio") }}{% endif %}</dd>
+          <dd>{% if current_plan_code == "TRIAL" %}{{ _("$0 durante la prueba") }}{% elif billed_price %}{{ billed_price }} {{ _("al mes") }}{% elif user.stripe_subscription_id %}{{ _("Consulta el importe de tu suscripción en Administrar pagos") }}{% elif current_plan_price %}${{ current_plan_price }} {{ _("MXN al mes") }}{% else %}{{ _("Acceso protegido sin cambio de precio") }}{% endif %}</dd>
         </div>
       </dl>
 
       {% if user.pending_plan_code %}
         <div class="subscription-v2__payment-alert" role="status">
           <i class="fa-solid fa-clock" aria-hidden="true"></i>
-          <div><strong>{{ _("Cambio de plan pendiente: %(plan)s", plan=user.pending_plan_code|title) }}</strong><p>{% if user.pending_plan_effective_at %}{{ _("Fecha estimada: %(date)s", date=user.pending_plan_effective_at.strftime("%d/%m/%Y")) }}{% else %}{{ _("Se aplicará cuando Stripe lo confirme.") }}{% endif %}</p></div>
+          <div><strong>{{ _("Cambio de plan pendiente: %(plan)s", plan=pending_plan_label) }}</strong><p>{% if user.pending_plan_effective_at %}{{ _("Fecha estimada: %(date)s", date=user.pending_plan_effective_at.strftime("%d/%m/%Y")) }}{% else %}{{ _("Se aplicará cuando Stripe lo confirme.") }}{% endif %}</p></div>
         </div>
       {% endif %}
 
@@ -72,7 +72,7 @@
         {% if manageable_subscription and not user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
           <form method="POST" action="{{ url_for('main.cancel_subscription') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn ghost">{{ _("Cancelar al final del periodo") }}</button>
+            <button type="submit" class="btn ghost">{{ _("Cancelar suscripción") }}</button>
           </form>
         {% elif manageable_subscription and user.cancel_at_period_end and user.subscription_status in ["active", "trialing", "past_due", "unpaid"] %}
           <form method="POST" action="{{ url_for('main.reactivate_subscription') }}">
@@ -94,18 +94,18 @@
               <form method="POST" action="{{ url_for('main.change_subscription_plan') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="plan_code" value="PRO">
-                <p>{{ _("Cambia a Pro por $349 MXN al mes. Stripe calculará el ajuste proporcional del periodo actual.") }}</p>
-                <button class="btn" type="submit">{{ _("Cambiar a Pro") }}</button>
+                <p>{{ _("Cambia a Control por $349 MXN al mes. Stripe calculará el ajuste proporcional del periodo actual.") }}</p>
+                <button class="btn" type="submit">{{ _("Cambiar a Control") }}</button>
               </form>
             {% else %}
-              <p>{{ _("Pro estará disponible para contratación muy pronto.") }}</p>
+              <p>{{ _("Control estará disponible para contratación muy pronto.") }}</p>
             {% endif %}
           {% else %}
             <form method="POST" action="{{ url_for('main.change_subscription_plan') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input type="hidden" name="plan_code" value="STARTER">
-              <p>{{ _("El cambio a Starter se aplicará al terminar el periodo pagado. Antes, tu equipo debe cumplir el límite de dos personas.") }}</p>
-              <button class="btn ghost" type="submit">{{ _("Cambiar a Starter") }}</button>
+              <p>{{ _("El cambio a Esencial se aplicará al terminar el periodo pagado. Antes, tu equipo debe cumplir el límite de dos personas.") }}</p>
+              <button class="btn ghost" type="submit">{{ _("Cambiar a Esencial") }}</button>
             </form>
           {% endif %}
         </div>
@@ -118,11 +118,11 @@
         {% if current_plan_code == "TRIAL" %}
           {{ _("Funciones incluidas durante tu prueba") }}
         {% elif current_plan_code == "STARTER" %}
-          {{ _("Funciones incluidas en tu plan Starter") }}
+          {{ _("Funciones incluidas en tu plan Esencial") }}
         {% elif current_plan_code == "PRO" %}
-          {{ _("Funciones incluidas en tu plan Pro") }}
+          {{ _("Funciones incluidas en tu plan Control") }}
         {% elif current_plan_code == "RESTAURANT" %}
-          {{ _("Funciones incluidas en tu plan Restaurant") }}
+          {{ _("Funciones incluidas en tu plan Cocina") }}
         {% else %}
           {{ _("Funciones incluidas en tu acceso actual") }}
         {% endif %}
@@ -139,7 +139,7 @@
   </section>
   <section class="card subscription-v3__monthly-report">
     <div>
-      <span class="subscription-v2__eyebrow">{{ _("Solo en Pro") }}</span>
+      <span class="subscription-v2__eyebrow">{{ _("Incluido en Control y Cocina") }}</span>
       <h3>{{ _("Reporte mensual por correo") }}</h3>
       <p>{{ _("Recibe cada mes un resumen de ventas, inventario, caja y saldos pendientes.") }}</p>
       {% if last_monthly_report %}<small>{{ _("Último estado: %(status)s · %(year)s-%(month)02d", status=last_monthly_report.status, year=last_monthly_report.report_year, month=last_monthly_report.report_month) }}</small>{% endif %}
@@ -158,7 +158,7 @@
     {% else %}
       <div>
         <a class="btn ghost" href="{{ url_for('pro.monthly_report_preview') }}">{{ _("Ver ejemplo con mis datos") }}</a>
-        <a class="btn primary" href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Pro") }}</a>
+        <a class="btn primary" href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Control") }}</a>
       </div>
     {% endif %}
   </section>

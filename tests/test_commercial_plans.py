@@ -54,6 +54,7 @@ class CommercialPlanTests(unittest.TestCase):
             STRIPE_STARTER_PRICE_ID="price_starter",
             STRIPE_PRO_PRICE_ID="price_pro",
             STRIPE_RESTAURANT_PRICE_ID="price_restaurant",
+            STRIPE_COCINA_PRICE_ID="price_restaurant",
         )
         self.context = self.app.app_context()
         self.context.push()
@@ -227,6 +228,8 @@ class CommercialPlanTests(unittest.TestCase):
         self.assertTrue(has_entitlement(self.owner, "monthly_owner_report"))
 
     def test_checkout_uses_requested_paid_plan_prices(self):
+        self.membership.organization.business_type = "restaurant"
+        db.session.commit()
         client = self.client_for(self.owner)
         for plan_code, expected_price in (
             (STARTER, "price_starter"),
@@ -251,12 +254,91 @@ class CommercialPlanTests(unittest.TestCase):
             self.assertEqual(params["metadata"]["plan_code"], plan_code)
             self.assertIn(plan_code.lower(), params["idempotency_key"])
 
+    def test_store_cannot_buy_or_switch_to_cocina(self):
+        client = self.client_for(self.owner)
+        html = client.get("/subscribe").get_data(as_text=True)
+        self.assertIn("Solo para restaurantes", html)
+        with patch("app.routes.stripe.checkout.Session.create") as checkout:
+            response = client.post("/create-checkout-session", data={"plan_code": RESTAURANT})
+        self.assertEqual(response.status_code, 302)
+        checkout.assert_not_called()
+        self.activate(PRO)
+        with patch("app.routes.stripe.Subscription.modify") as modify, patch("app.routes.stripe.Subscription.retrieve") as retrieve:
+            response = client.post("/subscription/change-plan", data={"plan_code": RESTAURANT})
+        self.assertEqual(response.status_code, 302)
+        modify.assert_not_called()
+        retrieve.assert_not_called()
+        self.assertEqual(self.owner.subscription_plan_code, PRO)
+        self.assertEqual(self.membership.organization.business_type, "general")
+
+    def test_new_names_prices_and_cocina_includes_control(self):
+        from app.plans import commercial_plans, capabilities_for
+        plans = commercial_plans(self.app.config)
+        self.assertEqual([(p["name"], p["price"]) for p in plans],
+                         [("Esencial", 199), ("Control", 349), ("Cocina", 499)])
+        self.assertTrue(capabilities_for(PRO) <= capabilities_for(RESTAURANT))
+
+    def test_cocina_registration_defaults_to_restaurant_and_rejects_store(self):
+        client = self.app.test_client()
+        html = client.get("/register?plan=restaurant").get_data(as_text=True)
+        self.assertIn('<option value="restaurant" selected>', html)
+        data = {
+            "email": "new-cocina@commercial.test", "password": "Password123",
+            "company_name": "Cocina nueva", "plan": "restaurant",
+            "business_type": "general",
+            "first_name": "Ana", "last_name": "Prueba", "phone": "5555555555",
+            "address": "Calle ficticia 1", "city": "Puebla", "state": "Puebla",
+            "postal_code": "72000",
+        }
+        with patch("app.routes.send_email", return_value=True), patch("app.routes.validate_email"):
+            response = client.post("/register", data=data)
+            self.assertEqual(response.status_code, 400)
+            self.assertIsNone(User.query.filter_by(email=data["email"]).first())
+            data["business_type"] = "restaurant"
+            response = client.post("/register", data=data)
+        self.assertEqual(response.status_code, 302)
+        user = User.query.filter_by(email=data["email"]).one()
+        self.assertEqual(user.trial_plan_code, RESTAURANT)
+        self.assertEqual(OrganizationMember.query.filter_by(user_id=user.id, role="OWNER").one().organization.business_type, "restaurant")
+        with patch("app.routes.send_email"), patch("app.routes.stripe.checkout.Session.create") as checkout:
+            verified = client.post("/verify-email", data={"code": user.verification_code})
+            self.assertEqual(verified.status_code, 302)
+            self.assertEqual(client.get("/recipes").status_code, 200)
+        self.assertTrue(has_entitlement(user, "recipes", has_paid_access=False))
+        self.assertIsNone(user.stripe_subscription_id)
+        checkout.assert_not_called()
+
+    def test_legacy_restaurant_price_is_recognized_but_not_sold_as_cocina(self):
+        from app.plans import configured_price_plan, price_id_for
+        self.app.config["STRIPE_COCINA_PRICE_ID"] = "price_cocina_499"
+        self.assertEqual(configured_price_plan(self.app.config, "price_restaurant"), RESTAURANT)
+        self.assertEqual(configured_price_plan(self.app.config, "price_cocina_499"), RESTAURANT)
+        self.assertEqual(price_id_for(self.app.config, RESTAURANT), "price_cocina_499")
+        self.app.config["STRIPE_COCINA_PRICE_ID"] = None
+        self.assertIsNone(price_id_for(self.app.config, RESTAURANT))
+
+    def test_settings_cannot_switch_business_type_and_still_saves_other_fields(self):
+        client = self.client_for(self.owner)
+        html = client.get("/settings").get_data(as_text=True)
+        self.assertNotIn('name="business_type"', html)
+        self.assertIn('readonly', html)
+        response = client.post("/settings", data={"company_name": "Unwanted change", "business_type": "restaurant"})
+        self.assertEqual(response.status_code, 302)
+        db.session.refresh(self.membership.organization)
+        db.session.refresh(self.owner)
+        self.assertEqual(self.membership.organization.business_type, "general")
+        self.assertEqual(self.owner.company_name, "Tienda Planes")
+        response = client.post("/settings", data={"company_name": "Updated store", "timezone": "America/Mexico_City"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.membership.organization.name, "Updated store")
+        self.assertEqual(self.membership.organization.business_type, "general")
+
     def test_landing_presents_restaurant_without_fake_checkout(self):
-        self.app.config["STRIPE_RESTAURANT_PRICE_ID"] = None
+        self.app.config["STRIPE_COCINA_PRICE_ID"] = None
         html = self.app.test_client().get("/").get_data(as_text=True)
         self.assertEqual(html.count('<article class="pl2-plan'), 3)
-        self.assertIn("PATIA Restaurant", html)
-        self.assertIn("$360", html)
+        self.assertIn("PATIA Cocina", html)
+        self.assertIn("$499", html)
         self.assertIn("Control especializado para restaurantes.", html)
         self.assertIn("Costeo real por platillo", html)
         self.assertIn("Kg, g, L, ml y piezas", html)
@@ -267,25 +349,26 @@ class CommercialPlanTests(unittest.TestCase):
     def test_landing_enables_restaurant_only_with_its_own_price(self):
         self.app.config.update(
             STRIPE_RESTAURANT_PRICE_ID="price_restaurant",
+            STRIPE_COCINA_PRICE_ID="price_restaurant",
             STRIPE_STARTER_PRICE_ID="price_starter",
             STRIPE_PRO_PRICE_ID="price_pro",
         )
         html = self.app.test_client().get("/").get_data(as_text=True)
         self.assertIn("/register?plan=restaurant", html)
-        self.assertIn("Comenzar prueba con Restaurant", html)
+        self.assertIn("Comenzar prueba con Cocina", html)
 
-        self.app.config["STRIPE_RESTAURANT_PRICE_ID"] = None
+        self.app.config["STRIPE_COCINA_PRICE_ID"] = None
         html = self.app.test_client().get("/").get_data(as_text=True)
         self.assertNotIn("/register?plan=restaurant", html)
         self.assertIn("/register?plan=starter", html)
         self.assertIn("/register?plan=pro", html)
 
     def test_landing_presents_restaurant_in_english(self):
-        self.app.config["STRIPE_RESTAURANT_PRICE_ID"] = None
+        self.app.config["STRIPE_COCINA_PRICE_ID"] = None
         client = self.app.test_client()
         client.post("/language", data={"language": "en", "next": "/"})
         html = client.get("/").get_data(as_text=True)
-        self.assertIn("PATIA Restaurant", html)
+        self.assertIn("PATIA Cocina", html)
         self.assertIn("For restaurants that want to control recipes", html)
         self.assertIn("Specialized control for restaurants.", html)
         self.assertIn("Real cost per dish", html)

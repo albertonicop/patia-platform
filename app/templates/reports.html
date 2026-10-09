@@ -64,7 +64,7 @@
        aria-expanded="{{ 'true' if show_custom_period else 'false' }}"
        {% if show_custom_period %}class="is-active" aria-current="page"{% endif %}>{{ _("Rango personalizado") }}</a>
     {% else %}
-      <a class="reports-v3__pro-period" href="{{ url_for('main.subscribe') }}">{{ _("Más periodos con Pro") }}</a>
+      <a class="reports-v3__pro-period" href="{{ url_for('main.subscribe') }}">{{ _("Más periodos con Control") }}</a>
     {% endif %}
   </nav>
 
@@ -283,15 +283,15 @@
         <article class="card reports-v3__panel reports-v3__upgrade">
           <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
           <h3>{{ _("Rentabilidad detallada") }}</h3>
-          <p>{{ _("Compara costos, utilidad y margen por producto con PATIA Pro.") }}</p>
-          <a class="btn ghost" href="{{ url_for('main.subscribe') }}">{{ _("Ver Pro") }}</a>
+          <p>{{ _("Compara costos, utilidad y margen por producto con PATIA Control.") }}</p>
+          <a class="btn ghost" href="{{ url_for('main.subscribe') }}">{{ _("Ver Control") }}</a>
         </article>
       {% endif %}
     </section>
 
     {% if restaurant_report %}
     <section id="restaurant-dishes" class="reports-v3__restaurant" aria-labelledby="restaurant-dishes-title">
-      <header class="reports-v3__panel-head"><div><span>{{ _("Restaurant") }}</span><h3 id="restaurant-dishes-title">{{ _("Resultados por platillo") }}</h3><p>{{ _("Ingresos y rentabilidad calculados con el costo histórico de cada venta.") }}</p></div></header>
+      <header class="reports-v3__panel-head"><div><span>{{ _("Cocina") }}</span><h3 id="restaurant-dishes-title">{{ _("Resultados por platillo") }}</h3><p>{{ _("Ingresos y rentabilidad calculados con el costo histórico de cada venta.") }}</p></div></header>
       <div class="reports-v3__rankings">
         <article class="card reports-v3__panel">
           <header><h3>{{ _("Platillos más vendidos") }}</h3></header>

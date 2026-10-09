@@ -9,6 +9,7 @@ from typing import Any
 from flask_babel import gettext
 
 
+
 TRIAL = "TRIAL"
 STARTER = "STARTER"
 PRO = "PRO"
@@ -64,7 +65,7 @@ RESTAURANT_ENTITLEMENTS = PlanEntitlements(
     advanced_reports=True,
     advanced_exports=True,
     monthly_owner_report=True,
-    priority_support=False,
+    priority_support=True,
     executive_dashboard=True,
     recipes=True,
 )
@@ -269,16 +270,16 @@ def has_entitlement(
 def current_plan_label(plan_code: str) -> str:
     labels = {
         TRIAL: gettext("Prueba gratuita"),
-        STARTER: gettext("Starter"),
-        PRO: gettext("Pro"),
-        RESTAURANT: gettext("Restaurant"),
+        STARTER: gettext("Esencial"),
+        PRO: gettext("Control"),
+        RESTAURANT: gettext("Cocina"),
         GRANDFATHERED: gettext("Plan actual protegido"),
         MANUAL: gettext("Acceso manual"),
     }
     return labels.get(plan_code, gettext("Plan actual"))
 
 
-PLAN_PRICES_MXN = {STARTER: 199, PRO: 349, RESTAURANT: 360}
+PLAN_PRICES_MXN = {STARTER: 199, PRO: 349, RESTAURANT: 499}
 
 
 def plan_price(plan_code: str) -> int | None:
@@ -294,7 +295,7 @@ def price_id_for(config, plan_code: str) -> str | None:
     if code == PRO:
         return config.get("STRIPE_PRO_PRICE_ID")
     if code == RESTAURANT:
-        return config.get("STRIPE_RESTAURANT_PRICE_ID")
+        return config.get("STRIPE_COCINA_PRICE_ID")
     return None
 
 
@@ -303,7 +304,11 @@ def configured_price_plan(config, price_id: str | None) -> str | None:
         return None
     if price_id_for(config, PRO) == price_id:
         return PRO
-    if price_id_for(config, RESTAURANT) == price_id:
+    # Keep the old price recognizable for existing subscribers and webhooks.
+    if price_id in {
+        price_id_for(config, RESTAURANT),
+        config.get("STRIPE_RESTAURANT_PRICE_ID"),
+    }:
         return RESTAURANT
     if price_id_for(config, STARTER) == price_id:
         return STARTER
@@ -315,8 +320,8 @@ def commercial_plans(config) -> list[dict]:
     definitions = (
         {
             "code": STARTER,
-            "name": gettext("Starter"),
-            "price": 199,
+            "name": gettext("Esencial"),
+            "price": PLAN_PRICES_MXN[STARTER],
             "audience": gettext(
                 "Negocios pequeños manejados por el propietario y un cajero."
             ),
@@ -333,8 +338,8 @@ def commercial_plans(config) -> list[dict]:
         },
         {
             "code": PRO,
-            "name": gettext("Pro"),
-            "price": 349,
+            "name": gettext("Control"),
+            "price": PLAN_PRICES_MXN[PRO],
             "audience": gettext(
                 "Negocios con varias personas que necesitan más control."
             ),
@@ -342,7 +347,7 @@ def commercial_plans(config) -> list[dict]:
                 "Más control para negocios que trabajan con varias personas."
             ),
             "features": (
-                gettext("Todo lo incluido en Starter"),
+                gettext("Todo lo incluido en Esencial"),
                 gettext("Hasta cinco personas"),
                 gettext("Encargados y permisos avanzados"),
                 gettext("Historial y reportes avanzados"),
@@ -352,14 +357,14 @@ def commercial_plans(config) -> list[dict]:
         },
         {
             "code": RESTAURANT,
-            "name": gettext("Restaurant"),
+            "name": gettext("Cocina"),
             "price": PLAN_PRICES_MXN[RESTAURANT],
             "audience": gettext("Control especializado para restaurantes."),
             "description": gettext(
                 "Para restaurantes que quieren controlar recetas, ingredientes y el costo real de cada platillo."
             ),
             "features": (
-                gettext("Todo lo necesario para operar"),
+                gettext("Todo lo incluido en Control"),
                 gettext("Recetas e ingredientes"),
                 gettext("Costeo real por platillo"),
                 gettext("Kg, g, L, ml y piezas"),

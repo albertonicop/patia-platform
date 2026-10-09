@@ -134,7 +134,7 @@ def invite():
     if role == "MANAGER" and not plan_entitlements.advanced_roles:
         flash(
             gettext(
-                "Tu plan Starter incluye al propietario y un cajero. Cambia a Pro para agregar encargados y usar permisos avanzados."
+                "Tu plan Esencial incluye al propietario y un cajero. Cambia a Control para agregar encargados y usar permisos avanzados."
             ),
             "warning",
         )
@@ -163,7 +163,7 @@ def invite():
         if plan_entitlements.max_members == 2:
             flash(
                 gettext(
-                    "Tu plan Starter incluye al propietario y un cajero. Cambia a Pro para agregar hasta cinco personas y usar permisos avanzados."
+                    "Tu plan Esencial incluye al propietario y un cajero. Cambia a Control para agregar hasta cinco personas y usar permisos avanzados."
                 ),
                 "warning",
             )
@@ -420,7 +420,7 @@ def change_role(member_id):
     ):
         flash(
             gettext(
-                "Los accesos de encargado están incluidos en PATIA Pro."
+                "Los accesos de encargado están incluidos en PATIA Control."
             ),
             "warning",
         )
@@ -461,7 +461,7 @@ def toggle_member(member_id):
         if member.role == "MANAGER" and not plan_entitlements.advanced_roles:
             flash(
                 gettext(
-                    "Cambia a esta persona a Cajero antes de reactivar su acceso en Starter."
+                    "Cambia a esta persona a Cajero antes de reactivar su acceso en Esencial."
                 ),
                 "warning",
             )

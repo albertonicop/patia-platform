@@ -3,6 +3,17 @@
 
 {% block content %}
 <div class="inventory-v2">
+  {% if can_use_recipes and current_membership.role in ['OWNER', 'MANAGER'] %}
+  <section class="card inventory-v2__quick-load-callout" aria-labelledby="inventory-recipes-title">
+    <span class="inventory-v2__quick-load-icon" aria-hidden="true"><i class="fa-solid fa-utensils"></i></span>
+    <div>
+      <span class="inventory-v2__eyebrow">{{ _("Inventario y recetas") }}</span>
+      <h2 id="inventory-recipes-title">{{ _("Primero los ingredientes, después las recetas") }}</h2>
+      <p>{{ _("Carga harina, canela y demás ingredientes con sus unidades y existencias. Luego crea la receta del producto que vendes: cada venta descontará las cantidades de sus ingredientes.") }}</p>
+    </div>
+    <a class="btn ghost" href="{{ url_for('recipes.create') if catalog_count > 0 else '#importar-catalogo' }}">{{ _("Crear receta con mi inventario") if catalog_count > 0 else _("Cargar ingredientes") }}</a>
+  </section>
+  {% endif %}
   <section class="card inventory-v2__quick-load-callout" aria-labelledby="quick-load-callout-title">
     <span class="inventory-v2__quick-load-icon" aria-hidden="true"><i class="fa-solid fa-barcode"></i></span>
     <div>
@@ -139,6 +150,9 @@
         <div class="table-wrap inventory-import-v3__preview"><table><thead><tr><th>{{ _("Fila") }}</th><th>{{ _("Producto") }}</th><th>{{ _("SKU") }}</th><th>{{ _("Precio") }}</th><th>{{ _("Stock") }}</th><th>{{ _("Acción") }}</th></tr></thead><tbody id="catalog-import-preview"></tbody></table></div>
         </section>
         <section id="catalog-import-errors" class="inventory-import-v3__errors" hidden><h4>{{ _("Filas separadas para corregir") }}</h4><p>{{ _("Puedes importar las filas válidas ahora y descargar únicamente las rechazadas.") }}</p><ul></ul><button id="catalog-errors-download" class="btn ghost" type="button">{{ _("Descargar filas con errores") }}</button></section>
+        {% if can_use_recipes and current_membership.role in ['OWNER', 'MANAGER'] %}
+        <a id="catalog-import-recipes" class="btn ghost" href="{{ url_for('recipes.create') }}" hidden>{{ _("Siguiente: crear receta con estos ingredientes") }}</a>
+        {% endif %}
         <p id="catalog-import-dialog-status" role="status" aria-live="polite"></p>
         <div class="inventory-import-v3__actions"><button class="btn ghost" type="button" data-import-close>{{ _("Cancelar") }}</button><a id="catalog-import-finish" class="btn ghost" href="{{ url_for('main.products') }}#catalogo" hidden>{{ _("Ver inventario") }}</a><button id="catalog-import-confirm" class="btn" type="button" disabled>{{ _("Importar filas válidas") }}</button></div>
       </dialog>
@@ -409,6 +423,8 @@ function renderImportInspection(data) {
   }));
   importErrors.hidden = !data.errors.length;
   // Each preview starts a new confirmation, even after a successful import.
+  const recipesNext = document.getElementById("catalog-import-recipes");
+  if (recipesNext) recipesNext.hidden = true;
   importConfirm.hidden = false;
   importConfirm.textContent = {{ _("Importar filas válidas")|tojson }};
   document.getElementById("catalog-import-finish").hidden = true;
@@ -463,6 +479,8 @@ importConfirm.addEventListener("click", async () => {
     importInspection.errors = data.errors || [];
     importInspection.summary = data.summary;
     importDialogStatus.textContent = data.message;
+    const recipesNext = document.getElementById("catalog-import-recipes");
+    if (recipesNext) recipesNext.hidden = false;
     importConfirm.hidden = true;
     document.getElementById("catalog-import-finish").hidden = false;
     if (data.errors?.length) {

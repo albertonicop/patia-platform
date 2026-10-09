@@ -14,7 +14,7 @@
   </header>
   <div class="team-v3__plan-note">
     <span>{{ _("Tu plan permite hasta %(count)s personas.", count=team_entitlements.max_members) }}</span>
-    {% if not team_entitlements.advanced_roles %}<a href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Pro para agregar encargados") }}</a>{% endif %}
+    {% if not team_entitlements.advanced_roles %}<a href="{{ url_for('main.subscribe') }}">{{ _("Ver plan Control para agregar encargados") }}</a>{% endif %}
   </div>
 
   {% if members|length == 1 and not invitations %}

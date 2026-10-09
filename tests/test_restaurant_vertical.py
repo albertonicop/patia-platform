@@ -72,6 +72,7 @@ class RestaurantVerticalTests(unittest.TestCase):
             WTF_CSRF_ENABLED=False,
             RATELIMIT_ENABLED=False,
             STRIPE_RESTAURANT_PRICE_ID="price_restaurant",
+            STRIPE_COCINA_PRICE_ID="price_restaurant",
         )
         self.context = self.app.app_context()
         self.context.push()
@@ -187,8 +188,100 @@ class RestaurantVerticalTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         return Recipe.query.filter_by(name="Hamburguesa clásica").one(), bread, meat
 
+    def test_inventory_guides_recipe_setup_only_for_authorized_restaurants(self):
+        html = self.client.get("/products").get_data(as_text=True)
+        self.assertIn('id="inventory-recipes-title"', html)
+        self.assertIn('id="catalog-import-recipes"', html)
+        self.assertIn("Cargar ingredientes", html)
+        recipe_form = self.client.get("/recipes/new").get_data(as_text=True)
+        self.assertIn("Cargar o revisar ingredientes", recipe_form)
+        general, member = self._owner("general-guidance@test.local", STARTER, "general")
+        html = self._client(general, member).get("/products").get_data(as_text=True)
+        self.assertNotIn('id="inventory-recipes-title"', html)
+        self.assertNotIn('id="catalog-import-recipes"', html)
+
+    def test_imported_ingredients_feed_cinnamon_roll_sales_and_cancellation(self):
+        from io import BytesIO
+        from openpyxl import load_workbook
+
+        response = self.client.get("/download-template")
+        self.assertEqual(response.status_code, 200)
+        workbook = load_workbook(BytesIO(response.data))
+        sheet = workbook.worksheets[0]
+        ingredients = [
+            ["HARINA", "", "Harina de prueba", "Ingredientes", "", 20, 0, 10, 1, "kg"],
+            ["CANELA", "", "Canela de prueba", "Ingredientes", "", 100, 0, 1, 0.1, "kg"],
+        ]
+        for row_number, values in enumerate(ingredients, 5):
+            for column, value in enumerate(values, 1):
+                sheet.cell(row_number, column, value)
+        buffer = BytesIO()
+        workbook.save(buffer)
+        workbook.close()
+        content = buffer.getvalue()
+        filename = "ingredientes.xlsx"
+        preview = self.client.post("/api/products/import/preview", data={
+            "catalog_file": (BytesIO(content), filename),
+        }, content_type="multipart/form-data")
+        self.assertEqual(preview.status_code, 200)
+        payload = preview.get_json()
+        self.assertTrue(payload["ready"])
+        self.assertEqual(payload["errors"], [])
+        imported = self.client.post("/api/products/import/commit", data={
+            "catalog_file": (BytesIO(content), filename),
+            "mapping": json.dumps(payload["mapping"]), "digest": payload["digest"],
+        }, content_type="multipart/form-data")
+        self.assertEqual(imported.status_code, 200)
+        flour = Product.query.filter_by(sku="HARINA").one()
+        cinnamon = Product.query.filter_by(sku="CANELA").one()
+        response = self.client.post("/recipes/new", data={
+            "name": "Rol de canela de prueba", "category": "Panaderia",
+            "recipe_type": "dish", "sale_price": "30", "yield_quantity": "1",
+            "yield_unit_code": "piece", "is_active": "1",
+            "components_json": json.dumps([
+                {"source_type": "product", "source_id": flour.id, "quantity": "100", "unit_code": "g"},
+                {"source_type": "product", "source_id": cinnamon.id, "quantity": "5", "unit_code": "g"},
+            ]),
+        })
+        self.assertEqual(response.status_code, 302)
+        recipe = Recipe.query.filter_by(name="Rol de canela de prueba").one()
+        sale_request = {"request_id": str(uuid.uuid4()), "payment_method": "card",
+                        "items": [{"product_id": recipe.sale_product_id, "quantity": 2}]}
+        response = self.client.post("/sell-cart", json=sale_request)
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        db.session.refresh(flour)
+        db.session.refresh(cinnamon)
+        self.assertEqual(flour.stock, Decimal("9.800"))
+        self.assertEqual(cinnamon.stock, Decimal("0.990"))
+        self.assertEqual(Product.query.filter_by(sku="HARINA").count(), 1)
+        sale = Sale.query.one()
+        self.assertEqual(self.client.post(f"/sales/{sale.id}/cancel").status_code, 302)
+        db.session.refresh(flour)
+        db.session.refresh(cinnamon)
+        self.assertEqual(flour.stock, Decimal("10.000"))
+        self.assertEqual(cinnamon.stock, Decimal("1.000"))
+
+    def test_recipe_batch_yield_prices_and_depletes_each_sold_piece(self):
+        flour = self._product("Harina tanda", "HAR-TANDA", unit="kg", stock="10", cost="20")
+        response = self.client.post("/recipes/new", data={
+            "name": "Roles por tanda", "recipe_type": "dish", "sale_price": "30",
+            "yield_quantity": "10", "yield_unit_code": "piece", "is_active": "1",
+            "components_json": json.dumps([{"source_type": "product", "source_id": flour.id,
+                                            "quantity": "1000", "unit_code": "g"}]),
+        })
+        self.assertEqual(response.status_code, 302)
+        recipe = Recipe.query.filter_by(name="Roles por tanda").one()
+        self.assertEqual(recipe_cost(recipe, 1)[0], Decimal("2.00"))
+        self.assertEqual(recipe.sale_product.cost_price, Decimal("2.00"))
+        sale = self.client.post("/sell-cart", json={"request_id": str(uuid.uuid4()),
+            "payment_method": "card", "items": [{"product_id": recipe.sale_product_id, "quantity": 2}]})
+        self.assertEqual(sale.status_code, 200, sale.get_data(as_text=True))
+        db.session.refresh(flour)
+        self.assertEqual(flour.stock, Decimal("9.800"))
+        self.assertEqual(Sale.query.one().unit_cost, Decimal("2.00"))
+
     def test_plan_matrix_and_pricing_are_centralized(self):
-        self.assertEqual(PLAN_PRICES_MXN[RESTAURANT], 360)
+        self.assertEqual(PLAN_PRICES_MXN[RESTAURANT], 499)
         self.assertTrue(entitlements_for(RESTAURANT).recipes)
         self.assertTrue(entitlements_for(RESTAURANT).advanced_reports)
         self.assertTrue(entitlements_for(RESTAURANT).monthly_owner_report)
@@ -599,12 +692,12 @@ class RestaurantVerticalTests(unittest.TestCase):
         }
         warning = self.client.post("/settings", data=settings)
         self.assertEqual(warning.status_code, 302)
-        self.assertIn("confirm_business_type_change=1", warning.location)
+        self.assertTrue(warning.location.endswith("/settings"))
         self.assertEqual(self.membership.organization.business_type, "restaurant")
         settings["confirm_business_type_change"] = "1"
         changed = self.client.post("/settings", data=settings)
         self.assertEqual(changed.status_code, 302)
-        self.assertEqual(self.membership.organization.business_type, "general")
+        self.assertEqual(self.membership.organization.business_type, "restaurant")
         self.assertEqual(Recipe.query.count(), 2)
 
     def test_restaurant_products_do_not_pollute_inventory_but_ingredients_restock(self):
@@ -771,7 +864,7 @@ class RestaurantVerticalTests(unittest.TestCase):
         self.assertIn("Ingredientes consumidos", reports_html)
         self.assertIn("Hamburguesa E2E", reports_html)
         dashboard = self.client.get("/").get_data(as_text=True)
-        self.assertIn("Lectura Restaurant", dashboard)
+        self.assertIn("Lectura Cocina", dashboard)
         self.assertIn("Hamburguesa E2E", dashboard)
         decision_center = self.client.get("/pro/hub")
         self.assertEqual(decision_center.status_code, 200)
@@ -814,7 +907,7 @@ class RestaurantVerticalTests(unittest.TestCase):
         monthly_preview = self.client.get("/pro/monthly-reports/preview")
         self.assertEqual(monthly_preview.status_code, 200)
         self.assertIn(
-            "Reporte mensual Restaurant",
+            "Reporte mensual Cocina",
             monthly_preview.get_data(as_text=True),
         )
 
@@ -847,7 +940,7 @@ class RestaurantVerticalTests(unittest.TestCase):
         )
         general_client = self._client(general_owner, general_membership)
         self.assertNotIn(
-            "Lectura Restaurant", general_client.get("/").get_data(as_text=True)
+            "Lectura Cocina", general_client.get("/").get_data(as_text=True)
         )
         self.assertNotIn(
             "Resultados por platillo",
