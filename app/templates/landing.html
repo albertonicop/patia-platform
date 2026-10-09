@@ -166,7 +166,7 @@
         <div class="pl2-plans">
           {% for plan in commercial_plans %}
           <article class="pl2-plan{% if plan.code == 'PRO' %} pl2-plan--featured{% endif %}">
-            {% if plan.code == "PRO" %}<span class="pl2-plan__badge">{{ _("Más control para crecer") }}</span>{% endif %}
+            {% if plan.code == "PRO" %}<span class="pl2-plan__badge">{{ 'Precio de lanzamiento' if current_language == 'es' else 'Launch price' }}</span>{% endif %}
             <span class="pl2-plan__name">PATIA {{ plan.name }}</span>
             <p>{{ plan.description }}</p>
             <div class="pl2-plan__price"><strong>${{ plan.price }}</strong><span>{{ _("MXN al mes") }}</span></div>
