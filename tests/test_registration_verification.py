@@ -67,6 +67,32 @@ class RegistrationVerificationTests(unittest.TestCase):
     def verification_code_for(self, email):
         return User.query.filter_by(email=email).one().verification_code
 
+    def test_registration_code_blocks_modules_until_verified(self):
+        from datetime import datetime, timedelta
+        email = "blocked@patia.test"
+        self.register(email)
+        user = User.query.filter_by(email=email).one()
+        self.assertEqual(len(user.verification_code), 6)
+        self.assertTrue(user.verification_code.isdigit())
+        for path in ["/", "/products", "/sell", "/settings", "/admin"]:
+            response = self.client.get(path)
+            self.assertTrue(response.location.endswith("/verify-email"), path)
+        self.client.post("/verify-email", data={"code": "invalid"})
+        self.assertFalse(user.email_verified)
+        code = user.verification_code
+        user.verification_code_expires = datetime.utcnow() - timedelta(seconds=1)
+        db.session.commit()
+        self.client.post("/verify-email", data={"code": code})
+        self.assertFalse(user.email_verified)
+        with patch("app.routes.send_email", return_value=True) as mail:
+            self.client.post("/resend-verification")
+            mail.assert_called_once()
+            code = user.verification_code
+            self.client.post("/verify-email", data={"code": code})
+        self.assertTrue(user.email_verified)
+        self.assertIsNone(user.verification_code)
+        self.assertEqual(self.client.get("/").status_code, 200)
+
     def test_pro_registration_requires_email_verification(self):
         email = "pro@patia.test"
         response, send_email = self.register(email, plan="pro")

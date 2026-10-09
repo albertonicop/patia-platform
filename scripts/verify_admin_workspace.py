@@ -53,11 +53,12 @@ try:
             assert page.locator('.app-topbar-v2__notification').count() == 0
             assert page.locator("#admin-search").is_visible()
             assert page.locator("#admin-search").evaluate("el => el.getBoundingClientRect().bottom <= innerHeight"), (width, "search below first screen")
-            assert page.locator(".admin-workspace__shortcuts a").count() == 6
+            assert page.locator(".admin-workspace__shortcuts a").count() == 0
+            assert page.locator(".admin-v4__metrics").count() == 0
             assert page.locator('select[name="sort"]').input_value() == "priority"
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), (width, "overflow")
             page.screenshot(path=str(artifacts / f"admin-workspace-{width}.png"), full_page=False)
-            page.locator('.admin-workspace__shortcuts a[href*="attention=payment"]').click()
+            page.goto(base + "/admin?attention=payment", wait_until="networkidle")
             page.wait_for_load_state("networkidle")
             assert page.locator(".admin-v4__table tbody tr").count() == 1
             page.goto(base + "/admin?q=Directorio&sort=name", wait_until="networkidle")
@@ -77,6 +78,12 @@ try:
             assert "Plan: Cocina" in page.locator(".admin-v4__chips").inner_text()
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
             assert not errors, errors
+            page.goto(base + "/admin?q=Abarrotes", wait_until="networkidle")
+            page.locator('a[href$="#delete-company"]:visible').first.click()
+            page.wait_for_load_state("networkidle")
+            assert page.locator("#delete-confirmation").is_visible()
+            assert page.locator("#delete-company form").get_attribute("method") == "POST"
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
             context.close()
             print(f"PASS {width}px: priority, quick filters, search, pagination, Cocina filter, no page overflow.")
         browser.close()

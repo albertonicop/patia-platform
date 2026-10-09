@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ _("Administración PATIA") }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-workspace.css') }}?v=2">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-workspace.css') }}?v=3">{% endblock %}
 {% block content %}
 {% macro directory_pages() %}
     {% if page_count > 1 %}
@@ -12,15 +12,6 @@
     {% endif %}
 {% endmacro %}
 <div class="admin-v4 admin-workspace">
-  <header class="module-intro-v2 admin-v4__intro">
-    <div>
-      <span>{{ _("Operación comercial") }}</span>
-      <h2>{{ _("Centro de administración") }}</h2>
-      <p>{{ _("Encuentra un negocio, revisa sus pendientes y resuelve lo que necesita atención.") }}</p>
-    </div>
-    <a class="btn ghost" href="#admin-directory-title">{{ _("Ver directorio") }} <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
-  </header>
-
   <section class="card admin-workspace__command" aria-label="{{ _('Buscar y filtrar negocios') }}">
     <form class="admin-v4__toolbar" method="GET" action="{{ url_for('main.admin') }}">
       <label class="admin-v4__search">
@@ -71,7 +62,7 @@
       </details>
       <label class="admin-workspace__sort">{{ _("Ordenar por") }}
         <select name="sort" aria-label="{{ _('Ordenar negocios') }}">
-          <option value="priority"{% if selected_sort == 'priority' %} selected{% endif %}>{{ _("Prioridad") }}</option>
+          <option value="priority"{% if selected_sort == 'priority' %} selected{% endif %}>{{ _("Pendientes primero") }}</option>
           <option value="recent"{% if selected_sort == 'recent' %} selected{% endif %}>{{ _("Registro más reciente") }}</option>
           <option value="name"{% if selected_sort == 'name' %} selected{% endif %}>{{ _("Nombre") }}</option>
           <option value="activity"{% if selected_sort == 'activity' %} selected{% endif %}>{{ _("Última venta") }}</option>
@@ -96,67 +87,6 @@
     {% endif %}
 
   </section>
-  <nav class="admin-workspace__shortcuts" aria-label="{{ _('Pendientes por tipo') }}">
-    {% for code, label, count in [('all', _('Todos'), total_clients), ('any', _('Requieren atención'), attention_clients|length), ('payment', _('Pago pendiente'), attention_counts.payment), ('trial', _('Prueba por vencer'), attention_counts.trial), ('report', _('Reporte fallido'), attention_counts.report), ('cancellation', _('Cancelación programada'), attention_counts.cancellation)] %}
-    <a href="{{ url_for('main.admin', attention=code) }}#admin-directory-title"{% if selected_attention == code and selected_plan == 'ALL' and selected_status == 'all' and not query %} class="is-active" aria-current="page"{% endif %}><span>{{ label }}</span><strong>{{ count }}</strong></a>
-    {% endfor %}
-  </nav>
-
-  <section class="admin-v4__metrics" aria-label="{{ _('Resumen comercial') }}">
-    <article class="card"><span>{{ _("Negocios totales") }}</span><strong>{{ total_clients }}</strong></article>
-    <article class="card"><span>{{ _("Clientes de pago") }}</span><strong>{{ paying_clients }}</strong></article>
-    <article class="card admin-v4__metric--revenue"><span>{{ _("Ingreso mensual estimado") }}</span><strong>${{ estimated_mrr }} <small>{{ _("MXN") }}</small></strong></article>
-    <article class="card"><span>{{ _("Pruebas activas") }}</span><strong>{{ plan_counts.TRIAL }}</strong></article>
-    <article class="card{% if attention_clients %} admin-v4__metric--attention{% endif %}"><span>{{ _("Requieren atención") }}</span><strong>{{ attention_clients|length }}</strong></article>
-  </section>
-
-  <details class="admin-v4__secondary card">
-    <summary>{{ _("Ver más métricas") }}</summary>
-    <dl>
-      <div><dt>{{ _("Esencial activos") }}</dt><dd>{{ plan_counts.STARTER }}</dd></div>
-      <div><dt>{{ _("Control activos") }}</dt><dd>{{ plan_counts.PRO }}</dd></div>
-      <div><dt>{{ _("Cocina activos") }}</dt><dd>{{ plan_counts.RESTAURANT }}</dd></div>
-      <div><dt>{{ _("Clientes anteriores") }}</dt><dd>{{ plan_counts.GRANDFATHERED }}</dd></div>
-      <div><dt>{{ _("Accesos manuales") }}</dt><dd>{{ plan_counts.MANUAL }}</dd></div>
-      <div><dt>{{ _("Renovaciones próximas") }}</dt><dd>{{ upcoming_renewals }}</dd></div>
-      <div><dt>{{ _("Cancelaciones") }}</dt><dd>{{ scheduled_cancellations }}</dd></div>
-      <div><dt>{{ _("Reportes enviados") }}</dt><dd>{{ report_sent }}</dd></div>
-      <div><dt>{{ _("Reportes fallidos") }}</dt><dd>{{ report_failed }}</dd></div>
-    </dl>
-  </details>
-
-  {% if attention_clients and not applied_filters %}
-  <section class="admin-v4__attention" aria-labelledby="admin-attention-title">
-    <header>
-      <div>
-        <span>{{ _("Prioridad") }}</span>
-        <h3 id="admin-attention-title">{{ _("Necesitan atención") }}</h3>
-      </div>
-      <small>{{ _("%(count)s negocio", count=attention_clients|length) if attention_clients|length == 1 else _("%(count)s negocios", count=attention_clients|length) }}</small>
-      <a class="btn ghost" href="{{ url_for('main.admin', attention='any') }}#admin-directory-title">{{ _("Ver todos los pendientes") }}</a>
-    </header>
-    <div class="admin-v4__attention-list">
-      {% for c in attention_clients[:3] %}
-      <article class="card">
-        <div>
-          <strong>{{ c.organization.name }}</strong>
-          <span>{{ c.user.email }}</span>
-        </div>
-        <ul>
-          {% for reason_code, reason_label in c.attention_reasons %}
-          <li class="admin-v4__reason admin-v4__reason--{{ reason_code }}">{{ reason_label }}</li>
-          {% endfor %}
-        </ul>
-        <div class="admin-v4__attention-actions">
-          <a class="btn ghost" href="mailto:{{ c.user.email }}">{{ _("Contactar") }}</a>
-          <a class="btn" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Revisar") }}</a>
-        </div>
-      </article>
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
-
   <section class="admin-v4__directory" aria-labelledby="admin-directory-title">
     <header>
       <div>
@@ -192,7 +122,7 @@
             <td><span class="admin-v4__status admin-v4__status--{{ c.status_code }}">{{ c.status_label }}</span></td>
             <td>{% if c.renewal_date %}{{ c.renewal_date.strftime('%d/%m/%Y') }}{% elif c.trial_end %}{{ _("Prueba hasta %(date)s", date=c.trial_end.strftime('%d/%m/%Y')) }}{% else %}—{% endif %}</td>
             <td>{% if c.last_activity %}{{ c.last_activity.strftime('%d/%m/%Y') }}{% else %}{{ _("Sin ventas") }}{% endif %}</td>
-            <td><div class="admin-workspace__row-actions"><a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a><a href="mailto:{{ c.user.email }}" aria-label="{{ _('Contactar a %(name)s', name=c.organization.name) }}">{{ _("Contactar") }}</a></div></td>
+            <td><div class="admin-workspace__row-actions"><a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a><a href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}#delete-company">{{ _("Eliminar empresa") }}</a></div></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -207,7 +137,7 @@
         {% if c.attention_reasons %}<div class="admin-workspace__reasons">{% for code, label in c.attention_reasons %}<span class="admin-v4__reason admin-v4__reason--{{ code }}">{{ label }}</span>{% endfor %}</div>{% endif %}
         <small>{% if c.last_activity %}{{ _("Última actividad: %(date)s", date=c.last_activity.strftime('%d/%m/%Y')) }}{% else %}{{ _("Sin ventas registradas") }}{% endif %}</small>
         <a class="btn ghost" href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}">{{ _("Ver negocio") }}</a>
-        <a href="mailto:{{ c.user.email }}">{{ _("Contactar") }}</a>
+        <a href="{{ url_for('main.admin_organization_detail', organization_id=c.organization.id) }}#delete-company">{{ _("Eliminar empresa") }}</a>
       </article>
       {% endfor %}
     </div>

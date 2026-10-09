@@ -842,6 +842,25 @@ def send_email(
         return False
 
 
+@main.before_app_request
+def require_registration_verification():
+    """Do not let a new owner bypass the registration code via another URL."""
+    allowed = {"static", "main.verify_email", "main.resend_verification",
+               "main.change_verification_email", "main.logout", "main.login",
+               "main.register", "main.set_language"}
+    if request.endpoint is None or request.endpoint in allowed:
+        return None
+    user_id = session.get("user_id")
+    user = db.session.get(User, user_id) if user_id else None
+    if user and not user.email_verified and (
+        user.verification_code is not None or user.verification_code_expires is not None
+    ):
+        if request.endpoint in {"main.subscribe", "main.create_checkout_session"}:
+            session["post_verify_destination"] = "subscribe"
+        return redirect(url_for("main.verify_email"))
+    return None
+
+
 @main.route("/register", methods=["GET", "POST"])
 @limiter.limit("3 per hour", methods=["POST"])
 def register():
@@ -5267,6 +5286,7 @@ def admin():
 
     organizations = (
         Organization.query.options(selectinload(Organization.owner))
+        .filter(Organization.is_active.is_(True))
         .order_by(Organization.created_at.desc())
         .all()
     )
@@ -5708,7 +5728,7 @@ def admin_organization_detail(organization_id):
             selectinload(Organization.owner),
             selectinload(Organization.members),
         )
-        .filter_by(id=organization_id)
+        .filter_by(id=organization_id, is_active=True)
         .first_or_404()
     )
     owner = organization.owner
@@ -6013,6 +6033,29 @@ def delete_supplier(supplier_id):
     db.session.commit()
     flash("Proveedor eliminado correctamente.", "success")
     return redirect(url_for("main.suppliers"))
+
+
+@main.route("/admin/organizations/<int:organization_id>/delete", methods=["POST"])
+def admin_delete_organization(organization_id):
+    admin_user = current_user()
+    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+        abort(403)
+    organization = Organization.query.filter_by(id=organization_id, is_active=True).first_or_404()
+    if organization.owner_user_id == admin_user.id:
+        abort(403)
+    if request.form.get("confirmation", "").strip() != organization.name:
+        flash("El nombre no coincide. La empresa no fue eliminada.", "danger")
+        return redirect(url_for("main.admin_organization_detail", organization_id=organization.id))
+    if organization.owner.stripe_subscription_id:
+        flash("Primero cancela la suscripción y espera a que termine.", "danger")
+        return redirect(url_for("main.admin_organization_detail", organization_id=organization.id))
+    organization.is_active = False
+    organization.monthly_report_enabled = False
+    for member in organization.members:
+        member.is_active = False
+    db.session.commit()
+    flash("Empresa eliminada del panel. Su historial se conserva y el acceso quedó desactivado.", "success")
+    return redirect(url_for("main.admin"))
 
 
 @main.route("/admin/delete-user/<int:user_id>", methods=["POST"])

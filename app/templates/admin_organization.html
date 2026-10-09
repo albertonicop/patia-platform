@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ organization.name }} · {{ _("Administración PATIA") }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-workspace.css') }}?v=3">{% endblock %}
 {% block content %}
 <div class="admin-detail-v1">
   <nav class="module-back-v2"><a href="{{ url_for('main.admin') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> {{ _("Volver a negocios") }}</a></nav>
@@ -96,6 +97,20 @@
       </form>
       {% endif %}
     </div>
+  </section>
+  <section id="delete-company" class="card admin-delete">
+    <h3>{{ _("Eliminar empresa") }}</h3>
+    <p>{{ _("La empresa dejará de aparecer en tu panel y sus integrantes perderán el acceso. Su historial se conserva. Esta acción no cancela pagos en Stripe.") }}</p>
+    {% if owner.stripe_subscription_id %}
+    <p>{{ _("Primero cancela la suscripción y espera a que termine para poder eliminar esta empresa.") }}</p>
+    {% else %}
+    <form method="POST" action="{{ url_for('main.admin_delete_organization', organization_id=organization.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="delete-confirmation">{{ _("Escribe el nombre de la empresa para confirmar:") }} <strong>{{ organization.name }}</strong></label>
+      <input id="delete-confirmation" name="confirmation" required autocomplete="off">
+      <button class="btn" type="submit">{{ _("Eliminar empresa") }}</button>
+    </form>
+    {% endif %}
   </section>
 </div>
 {% endblock %}

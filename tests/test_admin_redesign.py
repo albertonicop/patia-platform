@@ -133,14 +133,46 @@ class AdminRedesignTests(unittest.TestCase):
         html = response.get_data(as_text=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Clientes de pago", html)
-        self.assertIn("Ingreso mensual estimado", html)
+        self.assertNotIn("Clientes de pago", html)
+        self.assertNotIn("Ingreso mensual estimado", html)
         self.assertIn("Requieren atenci", html)
         self.assertIn("Reporte mensual fallido", html)
-        self.assertIn("1 negocio", html)
+        self.assertNotIn("Ver m?s métricas", html)
         self.assertIn("Tienda Pro", html)
         self.assertNotIn("MRR", html)
         self.assertNotIn("None None", html)
+
+    def test_delete_company_requires_confirmation_and_removes_access(self):
+        self._login(self.admin, self.admin_membership)
+        org = self.trial_membership.organization
+        path = f"/admin/organizations/{org.id}/delete"
+        self.client.post(path, data={"confirmation": "incorrecto"})
+        self.assertTrue(org.is_active)
+        response = self.client.post(path, data={"confirmation": org.name})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(org.is_active)
+        self.assertFalse(self.trial_membership.is_active)
+        self.assertNotIn(org.name, self.client.get("/admin").get_data(as_text=True))
+        self.assertEqual(self.client.get(f"/admin/organizations/{org.id}").status_code, 404)
+        self._login(self.trial, self.trial_membership)
+        self.assertEqual(self.client.get("/products").status_code, 302)
+        login = self.client.post("/login", data={"email": self.trial.email, "password": "Password123"})
+        self.assertFalse(login.location and login.location.endswith("/"))
+        self.assertIsNotNone(db.session.get(User, self.trial.id))
+
+    def test_delete_company_protects_admin_subscription_and_other_companies(self):
+        self._login(self.trial, self.trial_membership)
+        path = f"/admin/organizations/{self.pro_membership.organization_id}/delete"
+        self.assertEqual(self.client.post(path, data={"confirmation": "Tienda Pro"}).status_code, 403)
+        self._login(self.admin, self.admin_membership)
+        self.client.post(path, data={"confirmation": "Tienda Pro"})
+        self.assertTrue(self.pro_membership.organization.is_active)
+        self.assertEqual(self.pro.stripe_subscription_id, "sub_admin_pro")
+        own = f"/admin/organizations/{self.admin_membership.organization_id}/delete"
+        self.assertEqual(self.client.post(own, data={"confirmation": self.admin.company_name}).status_code, 403)
+        self.assertTrue(self.admin_membership.organization.is_active)
+        self.app.config["WTF_CSRF_ENABLED"] = True
+        self.assertEqual(self.client.post(path, data={"confirmation": "Tienda Pro"}).status_code, 400)
 
     def test_admin_enters_only_admin_workspace_and_business_users_keep_their_menu(self):
         self._login(self.admin, self.admin_membership)

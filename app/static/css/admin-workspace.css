@@ -57,3 +57,9 @@
   .admin-workspace__pagination { gap: 8px; font-size: .75rem; }
   .admin-workspace__pagination .btn { padding: 10px; }
 }
+
+/* Compact administration: search and businesses are the primary content. */
+.admin-delete { margin-top: 20px; border: 1px solid #e3b8b8; }
+.admin-delete form { display: grid; gap: 12px; max-width: 480px; }
+.admin-delete input { width: 100%; }
+.admin-delete .btn { background: #a52b35; color: #fff; justify-self: start; }
