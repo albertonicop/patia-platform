@@ -142,6 +142,26 @@ class AdminRedesignTests(unittest.TestCase):
         self.assertNotIn("MRR", html)
         self.assertNotIn("None None", html)
 
+    def test_admin_enters_only_admin_workspace_and_business_users_keep_their_menu(self):
+        self._login(self.admin, self.admin_membership)
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/admin"))
+        for path in ["/admin", f"/admin/organizations/{self.pro_membership.organization_id}"]:
+            html = self.client.get(path).get_data(as_text=True)
+            self.assertNotIn('href="/sell"', html)
+            self.assertNotIn('href="/products"', html)
+            self.assertNotIn('href="/subscription"', html)
+            self.assertIn('action="/logout"', html)
+        self.client.post("/logout")
+        response = self.client.post("/login?next=/products", data={"email": self.admin.email, "password": "Password123"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/admin"))
+        self._login(self.trial, self.trial_membership)
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('href="/sell"', response.get_data(as_text=True))
+
     def test_admin_filters_search_plan_and_attention(self):
         self._login(self.admin, self.admin_membership)
 

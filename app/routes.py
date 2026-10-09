@@ -1299,6 +1299,8 @@ def login():
                 access_user.trial_warning_sent = True
                 db.session.commit()
         flash(gettext("Sesión iniciada correctamente."), "success")
+        if user.email == "albertonicopat@gmail.com":
+            return redirect(url_for("main.admin"))
         return redirect(_safe_next_url(request.args.get("next")))
 
     return render_template("auth.html", title=gettext("Iniciar sesión"), button=gettext("Entrar"), mode="login")
@@ -2073,6 +2075,8 @@ def _report_analytics(
 @main.route("/")
 def dashboard():
     user = current_user()
+    if user and user.email == "albertonicopat@gmail.com":
+        return redirect(url_for("main.admin"))
     if not user:
         if any(
             session.get(flag)

@@ -1,7 +1,5 @@
 /* Administration workspace. Styles are limited to this screen. */
 .app-shell-v2 .admin-workspace { gap: 18px; }
-/* This stylesheet is loaded only by the administration screen. */
-.app-shell-v2 .app-topbar-v2__plan { display: none; }
 .admin-workspace .admin-v4__intro { display: flex; justify-content: space-between; gap: 16px; }
 .admin-workspace .admin-v4__intro .btn { flex-shrink: 0; }
 .app-shell-v2 .admin-workspace__command { padding: 18px; overflow: visible; }

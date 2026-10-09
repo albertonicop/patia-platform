@@ -1,3 +1,4 @@
+{% set admin_screen = request.path.startswith('/admin') %}
 <!doctype html>
 <html lang="{{ current_language }}" data-currency-code="{{ organization_currency }}" data-locale-code="{{ organization_locale }}">
 <head>
@@ -28,7 +29,7 @@
     <div class="sidebar-v2__head">
       <div class="brand sidebar-v2__brand">
         <img src="{{ url_for('static', filename='img/logo-patia.png') }}" class="logo-img" alt="PATIA">
-        <span class="sidebar-v2__brand-copy">{{ _("Tu negocio claro") }}</span>
+        <span class="sidebar-v2__brand-copy">{{ _("Administración PATIA") if admin_screen else _("Tu negocio claro") }}</span>
       </div>
       <button class="sidebar-v2__toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"
               data-open-label="{{ _('Menú') }}" data-close-label="{{ _('Cerrar') }}">
@@ -38,6 +39,9 @@
     </div>
 
    <nav id="primary-navigation" class="sidebar-nav sidebar-v2__nav" aria-label="{{ _('Navegación principal') }}">
+    {% if admin_screen %}
+      <a href="{{ url_for('main.admin') }}" class="is-active" aria-current="page"><i class="fa-solid fa-gauge" aria-hidden="true"></i><span>{{ _("Administración PATIA") }}</span></a>
+    {% else %}
     <div class="sidebar-v2__section-label">{{ _("Operación") }}</div>
     {% if can_view_dashboard %}<a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-house" aria-hidden="true"></i><span>{{ _("Inicio") }}</span></a>{% endif %}
     {% if can_use_pos %}<a href="/sell"{% if request.path.startswith('/sell') or request.path.startswith('/sales/') or request.path.startswith('/ticket/') or request.path.startswith('/receipt/') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-cash-register" aria-hidden="true"></i><span>{{ _("Vender") }}</span></a>{% endif %}
@@ -68,6 +72,7 @@
       {% if can_manage_subscription %}<a href="/subscription"{% if request.path.startswith('/subscription') or request.path.startswith('/subscribe') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-credit-card" aria-hidden="true"></i><span>{{ _("Suscripción") }}</span></a>{% endif %}
     {% endif %}
 
+    {% endif %}
 <form method="POST" action="{{ url_for('main.logout') }}" class="sidebar-v2__logout" data-submit-once>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <button type="submit" class="btn ghost sidebar-v2__logout-button">
@@ -77,7 +82,7 @@
 
 </nav>
 
-    <a
+    {% if not admin_screen %}<a
         href="https://wa.me/522381186483?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20PATIA"
         class="whatsapp-float whatsapp-float-v2"
         target="_blank"
@@ -86,25 +91,25 @@
     >
         <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
         <span>{{ _("Ayuda") }}</span>
-    </a>
+    </a>{% endif %}
 
   </aside>
 
   <main class="main app-main-v2">
     <header class="topbar app-topbar-v2">
       <div>
-        <span class="eyebrow">{{ _("Pulso y decisiones") if request.path.startswith('/pro') else _("Tu negocio hoy") }}</span>
+        <span class="eyebrow">{{ _("Administración PATIA") if admin_screen else _("Pulso y decisiones") if request.path.startswith('/pro') else _("Tu negocio hoy") }}</span>
         <h1>{% block title %}{% endblock %}</h1>
       </div>
       <div class="app-topbar-v2__actions">
         {% if request.path == "/" %}{% include "_language_selector.html" %}{% endif %}
-        {% if can_view_reports %}
+        {% if can_view_reports and not admin_screen %}
           <a class="app-topbar-v2__notification" href="{{ url_for('pro.alerts') if has_pro_access else url_for('main.dashboard', _anchor='alertas-operativas') }}" aria-label="{{ _('Ver notificaciones') }}">
             <i class="fa-regular fa-bell" aria-hidden="true"></i>
             <span>{{ _("Notificaciones") }}</span>
           </a>
         {% endif %}
-        {% if can_manage_subscription %}
+        {% if can_manage_subscription and not admin_screen %}
           <a class="app-topbar-v2__plan" href="{{ url_for('main.subscription') }}">
             <span>{{ _("Plan") }}</span>
             <strong>

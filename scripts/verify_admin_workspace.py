@@ -48,6 +48,9 @@ try:
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.route("**/*", lambda route: route.continue_() if route.request.url.startswith(base) else route.abort())
             page.goto(base + "/admin", wait_until="networkidle")
+            assert page.locator("#primary-navigation a").count() == 1
+            assert page.locator("#primary-navigation a").get_attribute("href") == "/admin"
+            assert page.locator('.app-topbar-v2__notification').count() == 0
             assert page.locator("#admin-search").is_visible()
             assert page.locator("#admin-search").evaluate("el => el.getBoundingClientRect().bottom <= innerHeight"), (width, "search below first screen")
             assert page.locator(".admin-workspace__shortcuts a").count() == 6
