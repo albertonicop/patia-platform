@@ -174,25 +174,31 @@ class AdminRedesignTests(unittest.TestCase):
         self.app.config["WTF_CSRF_ENABLED"] = True
         self.assertEqual(self.client.post(path, data={"confirmation": "Tienda Pro"}).status_code, 400)
 
-    def test_admin_enters_only_admin_workspace_and_business_users_keep_their_menu(self):
+    def test_admin_can_enter_company_and_separate_admin_workspace(self):
         self._login(self.admin, self.admin_membership)
         response = self.client.get("/")
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.location.endswith("/admin"))
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn('href="/sell"', html)
+        self.assertIn('href="/admin"', html)
         for path in ["/admin", f"/admin/organizations/{self.pro_membership.organization_id}"]:
             html = self.client.get(path).get_data(as_text=True)
             self.assertNotIn('href="/sell"', html)
             self.assertNotIn('href="/products"', html)
             self.assertNotIn('href="/subscription"', html)
+            self.assertIn('href="/" class="sidebar-v2__workspace-link"', html)
             self.assertIn('action="/logout"', html)
         self.client.post("/logout")
-        response = self.client.post("/login?next=/products", data={"email": self.admin.email, "password": "Password123"})
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.location.endswith("/admin"))
+        for next_path, destination in [("", "/"), ("?next=/products", "/products"), ("?next=/admin", "/admin"), ("?next=https://example.com", "/")]:
+            response = self.client.post("/login" + next_path, data={"email": self.admin.email, "password": "Password123"})
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.location, destination)
+            self.client.post("/logout")
         self._login(self.trial, self.trial_membership)
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertIn('href="/sell"', response.get_data(as_text=True))
+        self.assertNotIn('href="/admin"', response.get_data(as_text=True))
 
     def test_admin_filters_search_plan_and_attention(self):
         self._login(self.admin, self.admin_membership)

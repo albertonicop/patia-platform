@@ -41,6 +41,7 @@
    <nav id="primary-navigation" class="sidebar-nav sidebar-v2__nav" aria-label="{{ _('Navegación principal') }}">
     {% if admin_screen %}
       <a href="{{ url_for('main.admin') }}" class="is-active" aria-current="page"><i class="fa-solid fa-gauge" aria-hidden="true"></i><span>{{ _("Administración PATIA") }}</span></a>
+      <a href="{{ url_for('main.dashboard') }}" class="sidebar-v2__workspace-link"><i class="fa-solid fa-store" aria-hidden="true"></i><span>{{ _("Mi empresa") }}</span></a>
     {% else %}
     <div class="sidebar-v2__section-label">{{ _("Operación") }}</div>
     {% if can_view_dashboard %}<a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-house" aria-hidden="true"></i><span>{{ _("Inicio") }}</span></a>{% endif %}
@@ -72,6 +73,9 @@
       {% if can_manage_subscription %}<a href="/subscription"{% if request.path.startswith('/subscription') or request.path.startswith('/subscribe') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-credit-card" aria-hidden="true"></i><span>{{ _("Suscripción") }}</span></a>{% endif %}
     {% endif %}
 
+    {% if current_membership and current_membership.user.email == 'albertonicopat@gmail.com' %}
+      <a href="{{ url_for('main.admin') }}"><i class="fa-solid fa-gauge" aria-hidden="true"></i><span>{{ _("Administración PATIA") }}</span></a>
+    {% endif %}
     {% endif %}
 <form method="POST" action="{{ url_for('main.logout') }}" class="sidebar-v2__logout" data-submit-once>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

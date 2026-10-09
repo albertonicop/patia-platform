@@ -70,3 +70,5 @@
 .admin-social-footer a:hover { background: #eeeaff; }
 .admin-social-footer a:focus-visible { outline: 3px solid #8c7af2; outline-offset: 3px; }
 @media print { .admin-social-footer { display: none; } }
+
+.sidebar-v2__nav .sidebar-v2__workspace-link { margin-top: 8px; border-top: 1px solid #dce1e8; }

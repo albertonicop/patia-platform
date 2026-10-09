@@ -48,9 +48,13 @@ try:
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.route("**/*", lambda route: route.continue_() if route.request.url.startswith(base) else route.abort())
             page.goto(base + "/admin", wait_until="networkidle")
-            assert page.locator("#primary-navigation a").count() == 1
-            assert page.locator("#primary-navigation a").get_attribute("href") == "/admin"
+            assert page.locator("#primary-navigation a").count() == 2
+            assert page.locator("#primary-navigation a").first.get_attribute("href") == "/admin"
             assert page.locator('.app-topbar-v2__notification').count() == 0
+            page.goto(base + "/", wait_until="networkidle")
+            assert page.locator('#primary-navigation a[href="/products"]').count() == 1
+            assert page.locator('#primary-navigation a[href="/admin"]').count() == 1
+            page.goto(base + "/admin", wait_until="networkidle")
             socials = page.locator(".admin-social-footer")
             socials.scroll_into_view_if_needed()
             assert socials.is_visible()
