@@ -3,6 +3,7 @@ from decimal import Decimal
 import tempfile
 import unittest
 import uuid
+from unittest.mock import patch
 from pathlib import Path
 
 
@@ -129,6 +130,67 @@ class CashRegisterTests(unittest.TestCase):
                 ],
             },
         )
+
+    def test_close_rejects_missing_or_blank_count_without_changing_register(self):
+        client = self.client_for(self.owner)
+        self.open_register(client)
+        cash_session = CashRegisterSession.query.one()
+        for data in ({}, {"counted_cash": ""}, {"counted_cash": "   "}):
+            with self.subTest(data=data):
+                response = client.post("/cash-register/close", data=data)
+                self.assertEqual(response.status_code, 302)
+                db.session.refresh(cash_session)
+                self.assertEqual(cash_session.status, "OPEN")
+                self.assertIsNone(cash_session.closed_at)
+                self.assertIsNone(cash_session.expected_cash_at_close)
+                self.assertEqual(expected_cash(cash_session.id), Decimal("100.00"))
+        response = client.post("/cash-register/close", data={"counted_cash": "0"})
+        self.assertEqual(response.status_code, 302)
+        db.session.refresh(cash_session)
+        self.assertEqual(cash_session.status, "CLOSED")
+        self.assertEqual(cash_session.difference, Decimal("-100.00"))
+
+    def test_concurrent_open_conflict_is_handled_at_flush(self):
+        client = self.client_for(self.owner)
+        self.open_register(client)
+        with patch("app.cash.routes.open_cash_session", return_value=None):
+            response = self.open_register(client)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(CashRegisterSession.query.count(), 1)
+        self.assertEqual(CashMovement.query.count(), 1)
+
+    def test_replaying_reversed_ticket_cannot_create_another_sale(self):
+        client = self.client_for(self.owner)
+        self.open_register(client)
+        payload = {
+            "request_id": str(uuid.uuid4()),
+            "payment_method": "cash",
+            "amount_received": "10.00",
+            "items": [{"product_id": self.product.id, "quantity": 1}],
+        }
+        response = client.post("/sell-cart", json=payload)
+        self.assertEqual(response.status_code, 200)
+        sale_id = Sale.query.one().id
+        self.assertEqual(client.post(f"/sales/{sale_id}/return").status_code, 302)
+        response = client.post("/sell-cart", json=payload)
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.get_json()["error_code"], "sale_already_reversed")
+        db.session.refresh(self.product)
+        self.assertEqual(self.product.stock, 30)
+        self.assertEqual(SalesTicket.query.count(), 1)
+        self.assertEqual(Sale.query.count(), 0)
+        self.assertEqual(CashMovement.query.filter_by(movement_type="SALE_CASH").count(), 1)
+        self.assertEqual(CashMovement.query.filter_by(movement_type="REFUND").count(), 1)
+        self.assertEqual(expected_cash(CashRegisterSession.query.one().id), Decimal("100.00"))
+        self.assertEqual(client.post(f"/sales/{sale_id}/return").status_code, 404)
+        self.assertEqual(CashMovement.query.filter_by(movement_type="REFUND").count(), 1)
+
+    def test_extreme_amount_returns_form_error_without_opening_register(self):
+        client = self.client_for(self.owner)
+        response = self.open_register(client, "1" + "0" * 100)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(CashRegisterSession.query.count(), 0)
+        self.assertEqual(CashMovement.query.count(), 0)
 
     def test_opening_is_unique_and_records_initial_fund(self):
         client = self.client_for(self.owner)

@@ -348,6 +348,7 @@ let cart = [];
 let visibleResults = [];
 let activeResultIndex = -1;
 let saleSubmitting = false;
+let pendingSaleRequest = null;
 let selectedCustomer = null;
 const restaurantPanel = document.getElementById("restaurant-pos-panel");
 const restaurantCategoryFilters = document.getElementById("restaurant-category-filters");
@@ -356,7 +357,7 @@ const restaurantRecipeStatus = document.getElementById("restaurant-recipe-status
 let activeRestaurantCategory = "__all__";
 
 function cartAmount() {
-  return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  return cart.reduce((sum, item) => sum + Math.round(item.price * 100) * item.quantity, 0) / 100;
 }
 
 function formatMoney(value) {
@@ -1008,7 +1009,16 @@ checkoutButton.addEventListener("click", async () => {
   checkoutButton.disabled = true;
   checkoutButton.textContent = POS_I18N.submitting;
   checkoutError.hidden = true;
-  const requestId = newRequestId();
+  const fingerprint = JSON.stringify({
+    items: cart.map(item => ({product_id: item.id, quantity: item.quantity})),
+    payment_method: paymentMethod.value,
+    amount_received: paymentMethod.value === "cash" ? amountReceived.value : null,
+    customer_id: selectedCustomer ? selectedCustomer.id : null
+  });
+  if (!pendingSaleRequest || pendingSaleRequest.fingerprint !== fingerprint) {
+    pendingSaleRequest = {fingerprint, requestId: newRequestId()};
+  }
+  const requestId = pendingSaleRequest.requestId;
   if (
     paymentMethod.value === "credit"
     && selectedCustomer

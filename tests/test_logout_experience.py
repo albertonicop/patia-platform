@@ -157,6 +157,19 @@ class LogoutExperienceTests(unittest.TestCase):
             self.assertNotIn("organization_id", browser_session)
             self.assertEqual(browser_session["language"], "es")
 
+    def test_public_home_preserves_pending_notice_and_shows_it_once(self):
+        client = self.app.test_client()
+        with client.session_transaction() as browser_session:
+            browser_session["language"] = "es"
+            browser_session["display_currency"] = "USD"
+            browser_session["_flashes"] = [("success", "Notice regression sentinel")]
+        response = client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_data(as_text=True).count("Notice regression sentinel"), 1)
+        response = client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("Notice regression sentinel", response.get_data(as_text=True))
+
     def test_valid_logout_message_is_translated_to_english(self):
         client = self._client(language="en")
         token = self._page_token(client)

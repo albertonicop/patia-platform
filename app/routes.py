@@ -3861,6 +3861,14 @@ def sell_cart():
                 organization_id=organization_id,
                 ticket_id=request_id,
             ).order_by(Sale.id).all()
+            if not previous_sales and SalesTicket.query.filter_by(
+                organization_id=organization_id, public_id=request_id
+            ).first():
+                return jsonify({
+                    "ok": False,
+                    "error": gettext("Esta venta ya fue procesada y cancelada. Inicia una nueva venta."),
+                    "error_code": "sale_already_reversed",
+                }), 409
             if previous_sales:
                 folio = _short_sale_folio(previous_sales)
                 return jsonify({
@@ -3926,6 +3934,14 @@ def sell_cart():
                 organization_id=organization_id,
                 ticket_id=request_id,
             ).order_by(Sale.id).all()
+            if not previous_sales and SalesTicket.query.filter_by(
+                organization_id=organization_id, public_id=request_id
+            ).first():
+                return jsonify({
+                    "ok": False,
+                    "error": gettext("Esta venta ya fue procesada y cancelada. Inicia una nueva venta."),
+                    "error_code": "sale_already_reversed",
+                }), 409
             if previous_sales:
                 return jsonify({
                     "ok": True,
@@ -4776,7 +4792,7 @@ def _reverse_sale(sale_id, *, movement_type, success_message):
     membership = active_membership(user)
     sale = Sale.query.filter_by(
         id=sale_id, organization_id=organization_id
-    ).first_or_404()
+    ).with_for_update().first_or_404()
     payment_method = (
         sale.sales_ticket.payment_method
         if sale.sales_ticket

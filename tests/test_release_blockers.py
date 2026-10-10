@@ -4,6 +4,8 @@ import unittest
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
+from flask import g
+
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "release-blocker-tests-secret")
@@ -37,6 +39,8 @@ class ReleaseBlockerTests(unittest.TestCase):
         cls.context.pop()
 
     def setUp(self):
+        # This suite keeps an app context open; reset the per-request tenant cache.
+        g.pop("_active_membership_cache", None)
         db.session.remove()
         Sale.query.delete()
         Product.query.delete()

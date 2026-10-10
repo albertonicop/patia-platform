@@ -235,7 +235,7 @@ class PosFirstSaleTests(unittest.TestCase):
 
         logout = self.client.post("/logout")
         self.assertEqual(logout.status_code, 302)
-        self.assertEqual(logout.location, "/login")
+        self.assertEqual(logout.location, "/")
         with self.client.session_transaction() as browser_session:
             self.assertNotIn("cashier_mode", browser_session)
 

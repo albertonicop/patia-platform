@@ -20,7 +20,10 @@ def money_decimal(value, *, allow_none=False, nonnegative=True) -> Decimal | Non
         raise ValueError("invalid monetary value") from error
     if not amount.is_finite():
         raise ValueError("monetary value must be finite")
-    amount = amount.quantize(MONEY_SCALE, rounding=ROUND_HALF_UP)
+    try:
+        amount = amount.quantize(MONEY_SCALE, rounding=ROUND_HALF_UP)
+    except InvalidOperation as error:
+        raise ValueError("monetary value exceeds supported precision") from error
     if nonnegative and amount < MONEY_ZERO:
         raise ValueError("monetary value must be nonnegative")
     if abs(amount) > MONEY_MAX:

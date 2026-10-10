@@ -24,6 +24,12 @@ class DecimalMoneyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             money_decimal(MONEY_MAX + Decimal("0.01"))
 
+    def test_extreme_finite_inputs_raise_value_error_instead_of_decimal_exception(self):
+        for value in ("1e100", "9" * 100, "-1e100"):
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    money_decimal(value)
+
     def test_sums_and_serializes_without_binary_float_arithmetic(self):
         total = money_sum(("0.10", "0.10", "0.10"))
         self.assertEqual(total, Decimal("0.30"))

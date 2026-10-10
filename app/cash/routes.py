@@ -206,7 +206,12 @@ def open_register():
         opening_cash=opening_cash,
     )
     db.session.add(cash_session)
-    db.session.flush()
+    try:
+        db.session.flush()
+    except IntegrityError:
+        db.session.rollback()
+        flash(gettext("La caja principal ya tiene un turno abierto."), "danger")
+        return redirect(url_for("cash.index"))
     if opening_cash > 0:
         record_cash_movement(
             cash_session,
@@ -273,7 +278,10 @@ def close_register():
         flash(gettext("No hay una caja abierta para cerrar."), "danger")
         return redirect(url_for("cash.index"))
     try:
-        counted = money_decimal(request.form.get("counted_cash"))
+        raw_counted = request.form.get("counted_cash")
+        if raw_counted is None or not raw_counted.strip():
+            raise ValueError
+        counted = money_decimal(raw_counted)
     except ValueError:
         flash(gettext("Ingresa el efectivo contado."), "danger")
         return redirect(url_for("cash.index"))
