@@ -1,0 +1,8 @@
+{% for group in owner_navigation %}
+<div class="sidebar-v2__section-label">{{ group.label }}</div>
+{% for entry in group.entries %}
+<a href="{{ entry.href }}" data-work-nav="{{ entry.key }}" class="{% if entry.active %}is-active {% endif %}{% if entry.pro %}sidebar-v2__pro-link{% endif %}"{% if entry.active %} aria-current="page"{% endif %}>
+  <i class="fa-solid fa-{{ entry.icon }}" aria-hidden="true"></i><span>{{ entry.label }}</span>
+</a>
+{% endfor %}
+{% endfor %}

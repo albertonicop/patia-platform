@@ -65,6 +65,7 @@ from .credit.services import (
     record_credit_reversal,
 )
 from .money import MONEY_ZERO, money_decimal, money_json, money_sum
+from .work_style import initialize_new_owner, is_platform_admin, owner_preference
 from .currencies import (
     COUNTRY_OPTIONS,
     SUPPORTED_CURRENCIES,
@@ -1017,6 +1018,7 @@ def register():
         try:
             db.session.flush()
             membership = ensure_owner_organization(user)
+            initialize_new_owner(user)
             membership.organization.business_type = business_type
             membership.organization.country_code = country_code
             membership.organization.currency_code = currency_code
@@ -2146,6 +2148,8 @@ def dashboard():
         membership.organization,
         {"period": "7d"},
     )
+    work_preference = owner_preference(user, membership)
+    work_setup_pending = bool(work_preference and work_preference.mode == "pending")
     has_basic_data = all(
         (owner.company_name, owner.phone, owner.city, owner.state)
     )
@@ -2189,6 +2193,15 @@ def dashboard():
             "action_url": None,
         },
     ]
+    if work_preference:
+        onboarding_steps.insert(0, {
+            "title": gettext("Define tu forma de trabajo"),
+            "text": gettext("Organiza el panel según cómo participas en tu negocio."),
+            "completed": not work_setup_pending,
+            "action_label": None,
+            "action_url": None,
+            "work_style_step": True,
+        })
     completed_steps = sum(step["completed"] for step in onboarding_steps)
     onboarding_progress = round(completed_steps / len(onboarding_steps) * 100)
     onboarding_completed = completed_steps == len(onboarding_steps)
@@ -2201,7 +2214,7 @@ def dashboard():
         onboarding_steps=onboarding_steps,
         onboarding_completed=onboarding_completed,
         onboarding_progress=onboarding_progress,
-        show_onboarding=not has_products or not has_sales,
+        show_onboarding=work_setup_pending or not has_products or not has_sales,
         dashboard_executive=dashboard_executive,
         can_use_advanced_reports=can_use_advanced_reports,
         can_edit_goal=has_permission(membership, "manage_subscription"),
@@ -5349,7 +5362,7 @@ def admin():
     if not user:
         session.clear()
         return redirect(url_for("main.login"))
-    if user.email != "albertonicopat@gmail.com":
+    if not is_platform_admin(user):
         flash("No autorizado.", "danger")
         return redirect(url_for("main.dashboard"))
 
@@ -5788,7 +5801,7 @@ def admin_organization_detail(organization_id):
     if not admin_user:
         session.clear()
         return redirect(url_for("main.login"))
-    if admin_user.email != "albertonicopat@gmail.com":
+    if not is_platform_admin(admin_user):
         flash("No autorizado.", "danger")
         return redirect(url_for("main.dashboard"))
 
@@ -5868,7 +5881,7 @@ def admin_organization_detail(organization_id):
 )
 def admin_retry_monthly_report(report_id):
     admin_user = current_user()
-    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+    if not is_platform_admin(admin_user):
         return redirect(url_for("main.dashboard"))
     report = db.session.get(MonthlyOwnerReport, report_id)
     if not report:
@@ -6107,7 +6120,7 @@ def delete_supplier(supplier_id):
 @main.route("/admin/organizations/<int:organization_id>/delete", methods=["POST"])
 def admin_delete_organization(organization_id):
     admin_user = current_user()
-    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+    if not is_platform_admin(admin_user):
         abort(403)
     organization = Organization.query.filter_by(id=organization_id, is_active=True).first_or_404()
     if organization.owner_user_id == admin_user.id:
@@ -6130,7 +6143,7 @@ def admin_delete_organization(organization_id):
 @main.route("/admin/delete-user/<int:user_id>", methods=["POST"])
 def admin_delete_user(user_id):
     admin_user = current_user()
-    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+    if not is_platform_admin(admin_user):
         return redirect(url_for("main.dashboard"))
     user = User.query.get_or_404(user_id)
     if user.email == "albertonicopat@gmail.com":
@@ -6158,7 +6171,7 @@ def admin_delete_user(user_id):
 @main.route("/admin/make-pro/<int:user_id>", methods=["POST"])
 def admin_make_pro(user_id):
     admin_user = current_user()
-    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+    if not is_platform_admin(admin_user):
         return redirect(url_for("main.dashboard"))
     user = User.query.get_or_404(user_id)
     organization = Organization.query.filter_by(owner_user_id=user.id).first()
@@ -6185,7 +6198,7 @@ def admin_make_pro(user_id):
 @main.route("/admin/remove-manual-pro/<int:user_id>", methods=["POST"])
 def admin_remove_manual_pro(user_id):
     admin_user = current_user()
-    if not admin_user or admin_user.email != "albertonicopat@gmail.com":
+    if not is_platform_admin(admin_user):
         return redirect(url_for("main.dashboard"))
     user = User.query.get_or_404(user_id)
     organization = Organization.query.filter_by(owner_user_id=user.id).first()

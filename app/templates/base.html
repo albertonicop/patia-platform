@@ -21,6 +21,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/social-footer.css') }}?v=3">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/work-style.css') }}?v=1">
   {% block extra_css %}{% endblock %}
 </head>
 
@@ -43,6 +44,9 @@
     {% if admin_screen %}
       <a href="{{ url_for('main.admin') }}" class="is-active" aria-current="page"><i class="fa-solid fa-gauge" aria-hidden="true"></i><span>{{ _("Administración PATIA") }}</span></a>
       <a href="{{ url_for('main.dashboard') }}" class="sidebar-v2__workspace-link"><i class="fa-solid fa-store" aria-hidden="true"></i><span>{{ _("Mi empresa") }}</span></a>
+    {% else %}
+    {% if owner_navigation %}
+      {% include '_owner_navigation.html' %}
     {% else %}
     <div class="sidebar-v2__section-label">{{ _("Operación") }}</div>
     {% if can_view_dashboard %}<a href="/"{% if request.path == '/' %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-house" aria-hidden="true"></i><span>{{ _("Inicio") }}</span></a>{% endif %}
@@ -74,7 +78,8 @@
       {% if can_manage_subscription %}<a href="/subscription"{% if request.path.startswith('/subscription') or request.path.startswith('/subscribe') %} class="is-active" aria-current="page"{% endif %}><i class="fa-solid fa-credit-card" aria-hidden="true"></i><span>{{ _("Suscripción") }}</span></a>{% endif %}
     {% endif %}
 
-    {% if current_membership and current_membership.user.email == 'albertonicopat@gmail.com' %}
+    {% endif %}
+    {% if platform_admin %}
       <a href="{{ url_for('main.admin') }}"><i class="fa-solid fa-gauge" aria-hidden="true"></i><span>{{ _("Administración PATIA") }}</span></a>
     {% endif %}
     {% endif %}
@@ -87,7 +92,7 @@
 
 </nav>
 
-    {% if not admin_screen %}<a
+    <a
         href="https://wa.me/522381186483?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20PATIA"
         class="whatsapp-float whatsapp-float-v2"
         target="_blank"
@@ -96,7 +101,7 @@
     >
         <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
         <span>{{ _("Ayuda") }}</span>
-    </a>{% endif %}
+    </a>
 
   </aside>
 
@@ -153,5 +158,6 @@
   </main>
 
   <script src="{{ url_for('static', filename='js/app.js') }}?v=116"></script>
+  <script src="{{ url_for('static', filename='js/work-style.js') }}?v=1"></script>
 </body>
 </html>

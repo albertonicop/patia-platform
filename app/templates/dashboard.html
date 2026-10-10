@@ -4,7 +4,7 @@
 {% block content %}
 
 <div class="dashboard-v2">
-{% if show_onboarding %}
+{% if show_onboarding or show_work_setup %}
 <section class="dashboard-v2__onboarding" aria-labelledby="onboarding-title" data-onboarding-progress="{{ onboarding_progress }}">
   <header class="dashboard-v2__onboarding-head">
     <div>
@@ -24,6 +24,12 @@
 
   <ol class="dashboard-v2__steps">
     {% for step in onboarding_steps %}
+      {% if step.work_style_step and show_work_setup %}
+      <li class="dashboard-v2__step dashboard-v2__step--work-style">
+        {% set work_form_source = 'onboarding' %}
+        {% include '_work_style_form.html' %}
+      </li>
+      {% else %}
       <li class="dashboard-v2__step{% if step.completed %} dashboard-v2__step--completed{% endif %}">
         <span class="dashboard-v2__step-status" aria-hidden="true">
           {% if step.completed %}<i class="fa-solid fa-check"></i>{% else %}{{ loop.index }}{% endif %}
@@ -38,6 +44,7 @@
           <span class="dashboard-v2__step-label">{{ _("Completado") if step.completed else _("Disponible después") }}</span>
         {% endif %}
       </li>
+      {% endif %}
     {% endfor %}
   </ol>
 
@@ -47,6 +54,15 @@
       <a href="{{ url_for('main.products') }}#importar-catalogo">{{ _("Importar catálogo") }}</a>
     </div>
   {% endif %}
+</section>
+{% endif %}
+
+{% if owner_navigation %}
+<section class="card work-style-priorities" aria-label="{{ _('Herramientas para tu día') }}">
+  <p><strong>{{ work_mode_label }}</strong> · <a href="{{ url_for('main.settings', _anchor='work-style') }}">{{ _("Cambiar forma de trabajo") }}</a></p>
+  {% for entry in owner_navigation[0].entries %}
+  <a class="btn ghost" href="{{ entry.href }}"><i class="fa-solid fa-{{ entry.icon }}" aria-hidden="true"></i> {{ entry.label }}</a>
+  {% endfor %}
 </section>
 {% endif %}
 

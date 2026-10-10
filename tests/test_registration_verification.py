@@ -12,6 +12,7 @@ os.environ.setdefault("PUBLIC_BASE_URL", "https://patia.test")
 
 from app import create_app, db, limiter
 from app.models import User
+from app.work_style import OwnerWorkPreference
 
 
 class RegistrationVerificationTests(unittest.TestCase):
@@ -36,6 +37,7 @@ class RegistrationVerificationTests(unittest.TestCase):
     def setUp(self):
         limiter.reset()
         db.session.rollback()
+        OwnerWorkPreference.query.delete()
         User.query.delete()
         db.session.commit()
         self.client = self.app.test_client()

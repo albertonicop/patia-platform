@@ -1,0 +1,39 @@
+{% set setup = work_form_source == 'onboarding' %}
+<form method="post" action="{{ url_for('work_style.save') }}" class="work-style-form" data-work-style-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="source" value="{{ work_form_source }}">
+  <fieldset>
+    <legend>{{ _("¿Cómo trabajas en tu negocio?") }}</legend>
+    <label><input type="radio" name="work_style" value="solo" required{% if work_mode == 'solo' %} checked{% endif %}>
+      <span><strong>{{ _("Trabajo solo") }}</strong><small>{{ _("Primero Inicio, Vender, Inventario y Caja del día. Conservas todas tus herramientas.") }}</small></span>
+    </label>
+    <label><input type="radio" name="work_style" value="team" required{% if work_mode in ['team_operations', 'team_supervision'] %} checked{% endif %}>
+      <span><strong>{{ _("Trabajo con un equipo") }}</strong><small>{{ _("Organiza el panel según si también cobras o principalmente supervisas.") }}</small></span>
+    </label>
+    {% if not setup %}
+    <label><input type="radio" name="work_style" value="deferred"{% if work_mode in ['deferred', 'pending'] %} checked{% endif %}>
+      <span><strong>{{ _("Menú completo actual") }}</strong><small>{{ _("Conserva el orden habitual, sin prioridades personalizadas.") }}</small></span>
+    </label>
+    {% endif %}
+  </fieldset>
+  <fieldset data-owner-activity>
+    <legend>{{ _("Si trabajas con un equipo: ¿tú también atiendes y cobras o principalmente supervisas?") }}</legend>
+    <label><input type="radio" name="owner_activity" value="operations"{% if work_mode == 'team_operations' %} checked{% endif %}>
+      <span>{{ _("También atiendo y cobro") }}</span></label>
+    <label><input type="radio" name="owner_activity" value="supervision"{% if work_mode == 'team_supervision' %} checked{% endif %}>
+      <span>{{ _("Principalmente superviso") }}</span></label>
+    <small>{{ _("Siempre puedes vender y usar caja. Esta elección solo ordena tu panel.") }}</small>
+  </fieldset>
+  <div class="work-style-form__team" data-work-team>
+    <h4>{{ _("Cada persona con su propio acceso") }}</h4>
+    <p>{{ _("Encargado: operación, inventario, caja, reportes, costos y devoluciones; no administra personal ni suscripciones.") }}</p>
+    <p>{{ _("Cajero: ventas, cobros y caja; no accede a configuración, costos ni reportes, y no autoriza cancelaciones o devoluciones.") }}</p>
+    <p>{{ _("Los accesos y límites dependen de tu plan. Las personas se agregan en Personal; no se crea nadie automáticamente.") }}</p>
+    <button class="btn ghost" type="submit" name="action" value="team">{{ _("Guardar e ir a Personal") }}</button>
+    <small>{{ _("También puedes agregarlas después desde Personal.") }}</small>
+  </div>
+  <div class="work-style-form__actions">
+    <button class="btn" type="submit" name="action" value="save">{{ _("Guardar forma de trabajo") }}</button>
+    <button class="btn ghost" type="submit" name="action" value="defer" formnovalidate>{{ _("Configurar después") }}</button>
+  </div>
+</form>

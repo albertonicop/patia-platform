@@ -148,6 +148,13 @@
     </div>
   </form>
 
+  <section id="work-style" class="card module-card-v2 work-style-settings" aria-labelledby="work-style-title">
+    <h3 id="work-style-title">{{ _("Forma de trabajo") }}</h3>
+    <p>{{ _("Ordena el panel a tu manera. Conservas todos los permisos y herramientas disponibles en tu plan.") }}</p>
+    {% set work_form_source = 'settings' %}
+    {% include '_work_style_form.html' %}
+  </section>
+
   <section class="settings-v2__shortcuts">
     <article class="card">
       <i class="fa-solid fa-user-group" aria-hidden="true"></i>

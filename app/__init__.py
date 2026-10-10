@@ -203,6 +203,8 @@ def create_app():
     from .team.routes import team
 
     app.register_blueprint(team)
+    from .work_style import work_style
+    app.register_blueprint(work_style)
     from .cash.routes import cash
 
     app.register_blueprint(cash)
