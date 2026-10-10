@@ -65,7 +65,7 @@ from .credit.services import (
     record_credit_reversal,
 )
 from .money import MONEY_ZERO, money_decimal, money_json, money_sum
-from .work_style import initialize_new_owner, is_platform_admin, owner_preference
+from .work_style import initialize_new_owner, is_platform_admin
 from .currencies import (
     COUNTRY_OPTIONS,
     SUPPORTED_CURRENCIES,
@@ -2148,8 +2148,6 @@ def dashboard():
         membership.organization,
         {"period": "7d"},
     )
-    work_preference = owner_preference(user, membership)
-    work_setup_pending = bool(work_preference and work_preference.mode == "pending")
     has_basic_data = all(
         (owner.company_name, owner.phone, owner.city, owner.state)
     )
@@ -2193,15 +2191,6 @@ def dashboard():
             "action_url": None,
         },
     ]
-    if work_preference:
-        onboarding_steps.insert(0, {
-            "title": gettext("Define tu forma de trabajo"),
-            "text": gettext("Organiza el panel según cómo participas en tu negocio."),
-            "completed": not work_setup_pending,
-            "action_label": None,
-            "action_url": None,
-            "work_style_step": True,
-        })
     completed_steps = sum(step["completed"] for step in onboarding_steps)
     onboarding_progress = round(completed_steps / len(onboarding_steps) * 100)
     onboarding_completed = completed_steps == len(onboarding_steps)
@@ -2214,7 +2203,7 @@ def dashboard():
         onboarding_steps=onboarding_steps,
         onboarding_completed=onboarding_completed,
         onboarding_progress=onboarding_progress,
-        show_onboarding=work_setup_pending or not has_products or not has_sales,
+        show_onboarding=not has_products or not has_sales,
         dashboard_executive=dashboard_executive,
         can_use_advanced_reports=can_use_advanced_reports,
         can_edit_goal=has_permission(membership, "manage_subscription"),

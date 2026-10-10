@@ -93,7 +93,8 @@ class RegistrationVerificationTests(unittest.TestCase):
             self.client.post("/verify-email", data={"code": code})
         self.assertTrue(user.email_verified)
         self.assertIsNone(user.verification_code)
-        self.assertEqual(self.client.get("/").status_code, 200)
+        self.assertEqual(self.client.get("/").location, "/settings/work-style/setup")
+        self.assertEqual(self.client.get("/settings/work-style/setup").status_code, 200)
 
     def test_pro_registration_requires_email_verification(self):
         email = "pro@patia.test"

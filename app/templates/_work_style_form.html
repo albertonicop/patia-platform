@@ -1,39 +1,42 @@
-{% set setup = work_form_source == 'onboarding' %}
+{% set chosen_style = selected_style if selected_style is defined else ('solo' if work_mode == 'solo' else 'team' if work_mode in ['team_operations', 'team_supervision'] else '') %}
+{% set chosen_activity = selected_activity if selected_activity is defined else ('operations' if work_mode == 'team_operations' else 'supervision' if work_mode == 'team_supervision' else '') %}
 <form method="post" action="{{ url_for('work_style.save') }}" class="work-style-form" data-work-style-form>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="source" value="{{ work_form_source }}">
+  {% if work_save_error %}<div class="work-style-error" role="alert">{{ work_save_error }}</div>{% endif %}
   <fieldset>
     <legend>{{ _("¿Cómo trabajas en tu negocio?") }}</legend>
-    <label><input type="radio" name="work_style" value="solo" required{% if work_mode == 'solo' %} checked{% endif %}>
-      <span><strong>{{ _("Trabajo solo") }}</strong><small>{{ _("Primero Inicio, Vender, Inventario y Caja del día. Conservas todas tus herramientas.") }}</small></span>
-    </label>
-    <label><input type="radio" name="work_style" value="team" required{% if work_mode in ['team_operations', 'team_supervision'] %} checked{% endif %}>
-      <span><strong>{{ _("Trabajo con un equipo") }}</strong><small>{{ _("Organiza el panel según si también cobras o principalmente supervisas.") }}</small></span>
-    </label>
-    {% if not setup %}
-    <label><input type="radio" name="work_style" value="deferred"{% if work_mode in ['deferred', 'pending'] %} checked{% endif %}>
-      <span><strong>{{ _("Menú completo actual") }}</strong><small>{{ _("Conserva el orden habitual, sin prioridades personalizadas.") }}</small></span>
-    </label>
-    {% endif %}
+    <div class="work-style-options">
+      <label class="work-style-choice"><input type="radio" name="work_style" value="solo" required{% if chosen_style == 'solo' %} checked{% endif %}>
+        <span class="work-style-choice__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/></svg></span>
+        <span><strong>{{ _("Trabajo solo") }}</strong><small>{{ _("Primero Inicio, Vender, Inventario y Caja del día.") }}</small></span>
+      </label>
+      <label class="work-style-choice"><input type="radio" name="work_style" value="team" required{% if chosen_style == 'team' %} checked{% endif %}>
+        <span class="work-style-choice__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3.5"/><path d="M2 22v-3a7 7 0 0 1 14 0v3M16 5a3.5 3.5 0 0 1 0 7M18 15a6 6 0 0 1 4 6"/></svg></span>
+        <span><strong>{{ _("Trabajo con un equipo") }}</strong><small>{{ _("Organiza tus herramientas según cómo participas.") }}</small></span>
+      </label>
+    </div>
   </fieldset>
   <fieldset data-owner-activity>
-    <legend>{{ _("Si trabajas con un equipo: ¿tú también atiendes y cobras o principalmente supervisas?") }}</legend>
-    <label><input type="radio" name="owner_activity" value="operations"{% if work_mode == 'team_operations' %} checked{% endif %}>
-      <span>{{ _("También atiendo y cobro") }}</span></label>
-    <label><input type="radio" name="owner_activity" value="supervision"{% if work_mode == 'team_supervision' %} checked{% endif %}>
-      <span>{{ _("Principalmente superviso") }}</span></label>
-    <small>{{ _("Siempre puedes vender y usar caja. Esta elección solo ordena tu panel.") }}</small>
+    <legend>{{ _("¿Cómo participas en tu equipo?") }}</legend>
+    <div class="work-style-options">
+      <label class="work-style-choice"><input type="radio" name="owner_activity" value="operations"{% if chosen_activity == 'operations' %} checked{% endif %}>
+        <span class="work-style-choice__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M7 8V3h10v5M7 13h3m4 0h3M7 17h10"/></svg></span>
+        <span><strong>{{ _("También atiendo y cobro") }}</strong><small>{{ _("Prioriza ventas, inventario y caja.") }}</small></span>
+      </label>
+      <label class="work-style-choice"><input type="radio" name="owner_activity" value="supervision"{% if chosen_activity == 'supervision' %} checked{% endif %}>
+        <span class="work-style-choice__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v18h18M7 17v-5m5 5V7m5 10V4"/></svg></span>
+        <span><strong>{{ _("Principalmente superviso") }}</strong><small>{{ _("Prioriza Inicio, Reportes y Centro de decisiones.") }}</small></span>
+      </label>
+    </div>
   </fieldset>
   <div class="work-style-form__team" data-work-team>
-    <h4>{{ _("Cada persona con su propio acceso") }}</h4>
-    <p>{{ _("Encargado: operación, inventario, caja, reportes, costos y devoluciones; no administra personal ni suscripciones.") }}</p>
-    <p>{{ _("Cajero: ventas, cobros y caja; no accede a configuración, costos ni reportes, y no autoriza cancelaciones o devoluciones.") }}</p>
-    <p>{{ _("Los accesos y límites dependen de tu plan. Las personas se agregan en Personal; no se crea nadie automáticamente.") }}</p>
-    <button class="btn ghost" type="submit" name="action" value="team">{{ _("Guardar e ir a Personal") }}</button>
-    <small>{{ _("También puedes agregarlas después desde Personal.") }}</small>
+    <strong>{{ _("Tu equipo se administra en Personal") }}</strong>
+    <p>{{ _("Encargado: operación, inventario, caja y reportes. Cajero: ventas, cobros y caja, según los permisos de tu plan.") }}</p>
+    <small>{{ _("Agregar personas es opcional. Puedes hacerlo después; no se crea nadie automáticamente.") }}</small>
   </div>
+  <p class="work-style-assurance">{{ _("Conservas tus herramientas, datos y permisos. Siempre puedes vender y usar caja.") }}</p>
   <div class="work-style-form__actions">
-    <button class="btn" type="submit" name="action" value="save">{{ _("Guardar forma de trabajo") }}</button>
-    <button class="btn ghost" type="submit" name="action" value="defer" formnovalidate>{{ _("Configurar después") }}</button>
+    <button class="btn" type="submit" name="action" value="save">{{ _("Guardar y entrar") }}</button>
   </div>
 </form>

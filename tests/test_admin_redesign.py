@@ -20,6 +20,7 @@ from app import create_app, db
 from app.models import Customer, MonthlyOwnerReport, Product, Sale, User
 from app.plans import PRO, RESTAURANT
 from app.team.services import ensure_owner_organization
+from app.work_style import OwnerWorkPreference
 
 
 class AdminRedesignTests(unittest.TestCase):
@@ -117,6 +118,7 @@ class AdminRedesignTests(unittest.TestCase):
         db.session.add(user)
         db.session.flush()
         membership = ensure_owner_organization(user)
+        db.session.add(OwnerWorkPreference(user_id=user.id, mode="solo"))
         db.session.commit()
         return user, membership
 

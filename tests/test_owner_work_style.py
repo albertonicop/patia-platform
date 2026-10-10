@@ -26,18 +26,15 @@ class OwnerWorkStyleTests(unittest.TestCase):
     def save(self, **values):
         return self.client.post('/settings/work-style', data=values)
 
-    def test_legacy_owner_keeps_menu_and_only_new_registration_gets_question(self):
-        html = self.client.get('/').get_data(as_text=True)
-        self.assertNotIn('data-work-style-form', html)
-        self.assertNotIn('data-work-nav=', html)
-        self.assertIsNone(db.session.get(OwnerWorkPreference, self.audit.owner.id))
+    def test_legacy_and_new_owners_must_complete_before_dashboard(self):
+        OwnerWorkPreference.query.delete()
+        db.session.commit()
+        self.assertEqual(self.client.get('/').location, '/settings/work-style/setup')
         initialize_new_owner(self.audit.owner)
         db.session.commit()
-        html = self.client.get('/').get_data(as_text=True)
-        self.assertEqual(html.count('¿Cómo trabajas en tu negocio?'), 1)
-        self.assertEqual(html.count('id="onboarding-title"'), 1)
+        self.assertEqual(self.client.get('/').location, '/settings/work-style/setup')
+        html = self.client.get('/settings/work-style/setup').get_data(as_text=True)
         self.assertEqual(html.count('data-work-style-form'), 1)
-        self.assertIn('Configurar después', html)
 
     def test_choices_persist_and_preserve_tools_roles_plan_and_employees(self):
         audit = self.audit
@@ -70,25 +67,17 @@ class OwnerWorkStyleTests(unittest.TestCase):
         self.assertEqual((audit.owner.plan,audit.owner.subscription_plan_code,audit.owner.trial_plan_code), initial_plan)
         self.assertEqual(ROLE_PERMISSIONS, initial_permissions)
         self.assertIn('Forma de trabajo', self.client.get('/settings').get_data(as_text=True))
-        self.assertEqual(self.save(work_style='team',owner_activity='supervision',action='team').location, '/team')
+        self.assertEqual(self.save(work_style='team',owner_activity='supervision',source='settings').location, '/settings#work-style')
 
-    def test_defer_is_permanent_until_changed_and_invalid_payload_does_not_save(self):
-        initialize_new_owner(self.audit.owner)
+    def test_deferred_is_not_complete_and_cannot_be_saved_again(self):
+        db.session.get(OwnerWorkPreference, self.audit.owner.id).mode = 'deferred'
         db.session.commit()
-        response = self.save(work_style='team', owner_activity='OWNER', source='onboarding')
-        self.assertEqual(response.status_code, 303)
-        self.assertEqual(db.session.get(OwnerWorkPreference,self.audit.owner.id).mode, 'pending')
-        self.save(action='defer', source='onboarding')
-        self.client.post('/logout')
-        self.client.post('/login',data={'email':self.audit.owner.email,'password':'Password123'})
-        html = self.client.get('/').get_data(as_text=True)
-        self.assertNotIn('data-work-style-form',html)
-        self.assertNotIn('data-work-nav=',html)
-        self.assertEqual(db.session.get(OwnerWorkPreference,self.audit.owner.id).mode,'deferred')
-        self.save(work_style='solo')
-        self.assertEqual(db.session.get(OwnerWorkPreference,self.audit.owner.id).mode,'solo')
-        self.save(work_style='deferred')
-        self.assertNotIn('data-work-nav=',self.client.get('/').get_data(as_text=True))
+        self.assertEqual(self.client.get('/').location, '/settings/work-style/setup')
+        self.assertEqual(self.save(action='defer', source='onboarding').status_code, 422)
+        self.assertEqual(self.save(work_style='deferred').status_code, 422)
+        self.assertEqual(db.session.get(OwnerWorkPreference, self.audit.owner.id).mode, 'deferred')
+        self.assertEqual(self.save(work_style='solo').status_code, 303)
+        self.assertEqual(self.client.get('/').status_code, 200)
 
     def test_employees_do_not_inherit_owner_preferences_or_platform_admin(self):
         audit=self.audit
@@ -155,7 +144,8 @@ class OwnerWorkStyleTests(unittest.TestCase):
         self.assertEqual(db.session.get(OwnerWorkPreference,user.id).mode,'pending')
         self.assertIn('/verify-email',client.get('/').location)
         client.post('/verify-email',data={'code':user.verification_code})
-        self.assertIn('data-work-style-form',client.get('/').get_data(as_text=True))
+        self.assertEqual(client.get('/').location, '/settings/work-style/setup')
+        self.assertIn('data-work-style-form',client.get('/settings/work-style/setup').get_data(as_text=True))
 
 
 class OwnerWorkStyleMigrationTests(unittest.TestCase):

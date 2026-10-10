@@ -1,9 +1,9 @@
 """Owner presentation preferences; never a source of roles or entitlements."""
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, request, url_for
+from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_babel import gettext
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 
 from . import db
 from .team.services import active_membership, has_permission, require_roles
@@ -34,29 +34,43 @@ class OwnerWorkUpdateNotice(db.Model):
         "action IN ('seen','personalize','later')", name="ck_owner_work_update_notice_action"),)
 
 
-def eligible_for_update(user, membership):
-    from .plans import subscription_access_is_active
+COMPLETED_MODES = frozenset(MODES[2:])
+PUBLIC_ENDPOINTS = frozenset({
+    "static", "main.login", "main.register", "main.logout", "main.logout_get",
+    "main.verify_email", "main.resend_verification", "main.change_verification_email",
+    "main.forgot_password", "main.reset_password", "main.set_language", "main.set_display_currency",
+    "main.terms", "main.privacy", "main.stripe_webhook", "main.stripe_success", "team.accept",
+})
 
-    return bool(user and membership and membership.role == "OWNER"
-                and owner_preference(user, membership) is None
-                and (user.manual_pro_access or user.subscription_status != "trialing")
-                and subscription_access_is_active(user))
+
+def setup_required(user, membership):
+    if not user or not membership or membership.role != "OWNER":
+        return False
+    preference = owner_preference(user, membership)
+    return not preference or preference.mode not in COMPLETED_MODES
 
 
-def claim_update_notice(user, membership):
-    if not eligible_for_update(user, membership):
-        return False
-    if db.session.get(OwnerWorkUpdateNotice, user.id):
-        return False
-    # The primary key also prevents two devices displaying the notice concurrently.
-    try:
-        with db.session.begin_nested():
-            db.session.add(OwnerWorkUpdateNotice(user_id=user.id))
-            db.session.flush()
-        db.session.commit()
-    except IntegrityError:
-        return False
-    return True
+@work_style.before_app_request
+def require_owner_setup():
+    # Only authenticated business requests; CLI jobs and public callbacks are untouched.
+    if (not request.endpoint or request.endpoint in PUBLIC_ENDPOINTS
+            or request.endpoint.startswith("work_style.") or not session.get("user_id")):
+        return None
+    from .routes import current_user
+
+    user = current_user()
+    membership = active_membership(user) if user else None
+    # Checkout's own email-verification check precedes personalization, including
+    # legacy unverified accounts without a pending registration code.
+    if user and not user.email_verified and request.endpoint in {"main.subscribe", "main.create_checkout_session"}:
+        return None
+    if setup_required(user, membership):
+        destination = url_for("work_style.setup")
+        if request.is_json or request.accept_mimetypes.best == "application/json":
+            return jsonify(ok=False, error_code="work_style_required",
+                           error=gettext("Completa tu forma de trabajo para continuar."), setup_url=destination), 409
+        return redirect(destination), 303
+    return None
 
 
 def initialize_new_owner(user):
@@ -126,36 +140,21 @@ def presentation_context():
     mode = preference.mode if preference else "deferred"
     labels = {"solo": gettext("Trabajo solo"), "team_operations": gettext("Equipo · también atiendo y cobro"),
               "team_supervision": gettext("Equipo · principalmente superviso")}
-    return dict(work_mode=mode, work_mode_label=labels.get(mode), show_work_setup=mode == "pending",
-                owner_navigation=prioritized_navigation(membership, mode), platform_admin=is_platform_admin(user),
-                show_work_update=(request.method == "GET" and request.endpoint == "main.dashboard"
-                                  and claim_update_notice(user, membership)))
+    return dict(work_mode=mode, work_mode_label=labels.get(mode),
+                work_setup_required=setup_required(user, membership),
+                owner_navigation=prioritized_navigation(membership, mode), platform_admin=is_platform_admin(user))
 
 
 @work_style.post("/settings/work-style/update")
 @require_roles("OWNER")
 def acknowledge_update():
-    from .routes import current_user
-
-    user = current_user()
-    action = request.form.get("action")
-    if action not in {"personalize", "later"}:
-        return redirect(url_for("main.dashboard")), 303
-    membership = active_membership(user)
-    if eligible_for_update(user, membership):
-        claim_update_notice(user, membership)
-        notice = db.session.get(OwnerWorkUpdateNotice, user.id)
-        notice.action = action
-        db.session.commit()
-    destination = "work_style.setup" if action == "personalize" else "main.dashboard"
-    return redirect(url_for(destination)), 303
+    # Retired notice links cannot postpone the now-required setup.
+    return redirect(url_for("work_style.setup")), 303
 
 
 @work_style.get("/settings/work-style/setup")
 @require_roles("OWNER")
 def setup():
-    from flask import render_template
-
     return render_template("work_style_setup.html")
 
 
@@ -168,22 +167,25 @@ def save():
     membership = active_membership(user)
     destination = "main.dashboard" if request.form.get("source") == "onboarding" else "main.settings"
     style = request.form.get("work_style")
-    if request.form.get("action") == "defer" or style == "deferred":
-        mode = "deferred"
-    elif style == "solo":
+    activity = request.form.get("owner_activity")
+    if style == "solo" and request.form.get("action") not in {"defer", "later", "skip"}:
         mode = "solo"
-    elif style == "team" and request.form.get("owner_activity") in {"operations", "supervision"}:
-        mode = "team_" + request.form["owner_activity"]
+    elif style == "team" and activity in {"operations", "supervision"} and request.form.get("action") not in {"defer", "later", "skip"}:
+        mode = "team_" + activity
     else:
-        flash(gettext("Selecciona cómo trabajas y, si tienes equipo, cómo participas."), "warning")
-        return redirect(url_for(destination)), 303
-    preference = owner_preference(user, membership)
-    if preference is None:
-        preference = OwnerWorkPreference(user_id=user.id)
-        db.session.add(preference)
-    preference.mode = mode
-    db.session.commit()
+        return render_template("work_style_setup.html", selected_style=style, selected_activity=activity,
+                               work_save_error=gettext("Selecciona cómo trabajas y, si tienes equipo, cómo participas.")), 422
+    try:
+        preference = owner_preference(user, membership)
+        if preference is None:
+            preference = OwnerWorkPreference(user_id=user.id)
+            db.session.add(preference)
+        preference.mode = mode
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        current_app.logger.exception("Could not persist owner work preference")
+        return render_template("work_style_setup.html", selected_style=style, selected_activity=activity,
+                               work_save_error=gettext("No pudimos guardar tu forma de trabajo. Tu selección se conserva; vuelve a intentarlo.")), 503
     flash(gettext("Forma de trabajo guardada. Tus permisos y tu plan siguen iguales."), "success")
-    if request.form.get("action") == "team" and mode in {"team_operations", "team_supervision"}:
-        return redirect(url_for("team.index")), 303
     return redirect(url_for(destination, _anchor="work-style" if destination == "main.settings" else None)), 303

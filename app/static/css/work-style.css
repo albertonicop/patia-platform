@@ -1,21 +1,33 @@
-.work-style-form { display: grid; gap: 18px; width: 100%; min-width: 0; }
-.work-style-form fieldset { margin: 0; padding: 16px; border: 1px solid #d9d6e3; border-radius: 12px; min-width: 0; }
-.work-style-form legend { font-weight: 700; padding: 0 5px; white-space: normal; }
-.work-style-form fieldset label { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; cursor: pointer; }
-.work-style-form input[type="radio"] { flex: 0 0 auto; margin-top: 4px; width: 18px; height: 18px; }
-.work-style-form small { display: block; margin-top: 5px; color: #626d80; line-height: 1.5; }
-.work-style-form__actions { display: flex; gap: 12px; flex-wrap: wrap; }
-.work-style-form__team { padding: 16px; background: #f3f1ff; border-radius: 12px; }
-.work-style-form [hidden] { display: none !important; }
 .work-style-settings { margin: 24px 0; }
-.work-style-update { padding: 22px; margin-bottom: 24px; }
-.work-style-update small { display: block; margin-top: 12px; color: #626d80; }
-.dashboard-v2__step--work-style { display: block !important; grid-column: 1 / -1; }
-.work-style-priorities { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 24px; padding: 18px; }
-.work-style-priorities p { flex: 1 1 100%; margin: 0; }
-.work-style-priorities a { white-space: normal; }
-@media (max-width: 560px) {
-  .work-style-form__actions { flex-direction: column; }
-  .work-style-form__actions .btn { width: 100%; justify-content: center; }
-  .work-style-form fieldset { padding: 12px; }
+.work-style-setup { max-width: 920px; margin: 12px auto 28px; padding: clamp(22px, 4vw, 42px); }
+.work-style-kicker { color: #6250dc; font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.work-style-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.work-style-heading .language-switcher { position: static; margin: 0; flex: 0 0 auto; }
+.work-style-setup h2 { font-size: clamp(24px, 3vw, 34px); line-height: 1.2; margin: 12px 0; }
+.work-style-setup > p { color: #626d80; margin-bottom: 26px; }
+.work-style-form { display: grid; gap: 24px; width: 100%; min-width: 0; }
+.work-style-form fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.work-style-form legend { font-size: 18px; font-weight: 700; padding: 0; margin-bottom: 14px; white-space: normal; }
+.work-style-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.work-style-form .work-style-choice { display: grid; grid-template-columns: 20px 40px minmax(0, 1fr); align-items: start; gap: 12px; padding: 20px; margin: 0; border: 2px solid #dddce7; border-radius: 16px; background: #fff; cursor: pointer; transition: border-color .15s, background .15s; }
+.work-style-choice:hover { border-color: #a498ed; }
+.work-style-choice:has(input:checked) { border-color: #6250dc; background: #f3f0ff; box-shadow: 0 0 0 1px #6250dc; }
+.work-style-choice:focus-within { outline: 3px solid #bbafff; outline-offset: 3px; }
+.work-style-form input[type="radio"] { accent-color: #6250dc; margin: 9px 0 0; width: 20px; height: 20px; }
+.work-style-choice__icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #efebff; color: #6250dc; }
+.work-style-choice__icon svg { width: 25px; height: 25px; }
+.work-style-choice strong { display: block; font-size: 16px; line-height: 1.5; }
+.work-style-form small { display: block; margin-top: 5px; color: #626d80; line-height: 1.5; }
+.work-style-form__actions { display: flex; justify-content: flex-end; }
+.work-style-form__actions .btn { padding: 14px 28px; border-radius: 12px; font-size: 16px; }
+.work-style-form__team { padding: 18px; background: #f5f3fc; border-radius: 12px; }
+.work-style-form__team p { margin: 8px 0; }
+.work-style-assurance { color: #626d80; line-height: 1.5; margin: 0; }
+.work-style-error { padding: 14px 18px; background: #fff1f0; color: #a32c28; border: 1px solid #ecc3c0; border-radius: 12px; }
+.work-style-form [hidden] { display: none !important; }
+@media (max-width: 650px) {
+  .work-style-options { grid-template-columns: minmax(0, 1fr); }
+  .work-style-form .work-style-choice { padding: 16px; gap: 10px; }
+  .work-style-form__actions .btn { width: 100%; }
+  .work-style-setup { margin: 0 0 20px; padding: 22px 18px; }
 }

@@ -116,13 +116,14 @@ class OwnerWorkUpdatePostgresTests(unittest.TestCase):
                 session['user_id'] = owner_id
                 session['organization_id'] = organization_id
             response = client.get('/')
-            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 303)
+            self.assertEqual(response.location, '/settings/work-style/setup')
             return 'data-work-update' in response.get_data(as_text=True)
         with ThreadPoolExecutor(max_workers=2) as pool:
             results = list(pool.map(lambda _: visit(), range(2)))
-        self.assertEqual(sum(results), 1)
+        self.assertEqual(sum(results), 0)
         with self.app.app_context():
-            self.assertEqual(OwnerWorkUpdateNotice.query.count(), 1)
+            self.assertEqual(OwnerWorkUpdateNotice.query.count(), 0)
             self.assertIsNone(db.session.get(OwnerWorkPreference, owner_id))
             self.assertEqual(db.session.get(OwnerWorkPreference, configured_id).mode, 'team_supervision')
             with self.connect(self.database) as connection:

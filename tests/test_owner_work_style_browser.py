@@ -7,7 +7,7 @@ import unittest
 
 from werkzeug.serving import make_server, WSGIRequestHandler
 from app import db, limiter
-from app.work_style import initialize_new_owner
+from app.work_style import OwnerWorkPreference
 from test_cashier_session import CashierFixture
 
 
@@ -23,7 +23,7 @@ class OwnerWorkStyleBrowserTests(unittest.TestCase):
         limiter.enabled=False
         self.addCleanup(setattr,limiter,'enabled',previous_enabled)
         manager,_=audit.fixture.add_member('MANAGER','manager.demo@example.com')
-        initialize_new_owner(audit.owner)
+        db.session.get(OwnerWorkPreference, audit.owner.id).mode = 'pending'
         db.session.commit()
         audit.app.config['WTF_CSRF_ENABLED']=True
 
@@ -76,16 +76,17 @@ class OwnerWorkStyleBrowserTests(unittest.TestCase):
                 page.goto(origin+'/',wait_until='domcontentloaded')
                 form=page.locator('[data-work-style-form]')
                 self.assertEqual(form.count(),1)
-                self.assertEqual(page.locator('#onboarding-title').count(),1)
+                self.assertTrue(page.url.endswith('/settings/work-style/setup'))
                 form.locator('input[value="team"]').check()
                 self.assertTrue(form.locator('[data-owner-activity]').is_visible())
-                self.assertTrue(form.get_by_text('Cada persona con su propio acceso',exact=True).is_visible())
+                self.assertTrue(form.get_by_text('Tu equipo se administra en Personal',exact=True).is_visible())
                 form.locator('input[value="supervision"]').check()
-                capture(page,'asistente-equipo')
+                capture(page,'formulario-equipo')
                 with page.expect_navigation(wait_until='domcontentloaded'):
-                    form.locator('button[value="defer"]').click()
+                    form.locator('input[value="operations"]').check()
+                    form.locator('button[value="save"]').click()
                 self.assertEqual(page.locator('[data-work-style-form]').count(),0)
-                capture(page,'menu-actual')
+                capture(page,'inicio-sin-bloque')
 
                 for mode,style,activity,expected in [
                     ('solo','solo',None,['home','pos','inventory','cash']),
@@ -98,6 +99,7 @@ class OwnerWorkStyleBrowserTests(unittest.TestCase):
                         form.locator(f'input[name="owner_activity"][value="{activity}"]').check()
                     else:
                         self.assertFalse(form.locator('[data-owner-activity]').is_visible())
+                    capture(page,f'formulario-{mode}')
                     with page.expect_navigation(wait_until='domcontentloaded'):
                         form.locator('button[value="save"]').click()
                     capture(page,f'configuracion-{mode}')
@@ -106,6 +108,7 @@ class OwnerWorkStyleBrowserTests(unittest.TestCase):
                     self.assertEqual(keys[:len(expected)],expected)
                     self.assertEqual(len(keys),len(set(keys)))
                     self.assertEqual(page.locator('[data-work-style-form]').count(),0)
+                    self.assertEqual(page.locator('.work-style-priorities').count(),0)
                     capture(page,mode)
                 # Server persistence across logout and a fresh browser profile.
                 with page.expect_navigation(wait_until='domcontentloaded'):

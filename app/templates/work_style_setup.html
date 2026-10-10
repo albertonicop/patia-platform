@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}{{ _("Forma de trabajo") }}{% endblock %}
+{% block title %}{{ _("Personaliza tu espacio de trabajo") }}{% endblock %}
 {% block content %}
-<section class="card work-style-settings" aria-labelledby="work-style-title">
-  <h2 id="work-style-title">{{ _("Forma de trabajo") }}</h2>
-  <p>{{ _("Organiza tu panel. Conservas tus herramientas, datos y permisos.") }}</p>
+<section class="card work-style-settings work-style-setup" aria-labelledby="work-style-title">
+  <div class="work-style-heading">
+    <span class="work-style-kicker">{{ _("Tu negocio, a tu manera") }}</span>
+    {% include '_language_selector.html' %}
+  </div>
+  <h2 id="work-style-title">{{ _("Personaliza tu espacio de trabajo") }}</h2>
+  <p>{{ _("Elige cómo trabajas para tener a mano lo que más usas.") }}</p>
   {% set work_form_source = 'onboarding' %}
   {% include '_work_style_form.html' %}
 </section>

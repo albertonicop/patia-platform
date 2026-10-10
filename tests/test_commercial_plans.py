@@ -36,6 +36,7 @@ from app.plans import (
     has_entitlement,
 )
 from app.team.services import ensure_owner_organization
+from app.work_style import OwnerWorkPreference
 
 
 class CommercialPlanTests(unittest.TestCase):
@@ -84,6 +85,7 @@ class CommercialPlanTests(unittest.TestCase):
         db.session.add(user)
         db.session.flush()
         membership = ensure_owner_organization(user)
+        db.session.add(OwnerWorkPreference(user_id=user.id, mode="solo"))
         db.session.commit()
         return user, membership
 
@@ -303,6 +305,8 @@ class CommercialPlanTests(unittest.TestCase):
         with patch("app.routes.send_email"), patch("app.routes.stripe.checkout.Session.create") as checkout:
             verified = client.post("/verify-email", data={"code": user.verification_code})
             self.assertEqual(verified.status_code, 302)
+            self.assertEqual(client.get("/recipes").location, "/settings/work-style/setup")
+            self.assertEqual(client.post("/settings/work-style", data={"work_style": "solo", "source": "onboarding"}).status_code, 303)
             self.assertEqual(client.get("/recipes").status_code, 200)
         self.assertTrue(has_entitlement(user, "recipes", has_paid_access=False))
         self.assertIsNone(user.stripe_subscription_id)

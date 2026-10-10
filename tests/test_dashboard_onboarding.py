@@ -16,6 +16,7 @@ from flask_babel import force_locale
 from app.models import Product, Sale, User
 from app.routes import analytics
 from app.team.services import ensure_owner_organization
+from app.work_style import OwnerWorkPreference
 from app.timezones import local_date_bounds_utc, local_today
 
 
@@ -42,6 +43,7 @@ class DashboardOnboardingTests(unittest.TestCase):
         db.session.rollback()
         Sale.query.delete()
         Product.query.delete()
+        OwnerWorkPreference.query.delete()
         User.query.delete()
         db.session.commit()
         self.client = self.app.test_client()
@@ -59,6 +61,7 @@ class DashboardOnboardingTests(unittest.TestCase):
         db.session.add(user)
         db.session.flush()
         ensure_owner_organization(user)
+        db.session.add(OwnerWorkPreference(user_id=user.id, mode="solo"))
         db.session.commit()
         with self.client.session_transaction() as session:
             session["user_id"] = user.id

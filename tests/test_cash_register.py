@@ -78,6 +78,9 @@ class CashRegisterTests(unittest.TestCase):
         db.session.add(user)
         db.session.flush()
         membership = ensure_owner_organization(user)
+        # Operational fixtures represent an owner who already completed setup.
+        from app.work_style import OwnerWorkPreference
+        db.session.add(OwnerWorkPreference(user_id=user.id, mode="solo"))
         db.session.commit()
         return user, membership
 
