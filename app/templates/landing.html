@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/founder-section.css') }}?v=3">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/pricing-promotion.css') }}?v=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/landing-header-layout.css') }}?v=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/brand-logo.css') }}?v=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/brand-logo.css') }}?v=2">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -49,7 +49,7 @@
     <div class="pl2-header__inner">
       <div class="pl2-header__brand-group">
       <a href="/" class="pl2-brand" aria-label="{{ _('PATIA, inicio') }}">
-        <img src="{{ url_for('static', filename='img/brand/patia-logo-original-dark.png') }}" width="184" height="44" alt="PATIA">
+        <img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" width="184" height="44" alt="PATIA">
       </a>
         {% include "_language_selector.html" %}
       </div>
@@ -263,7 +263,7 @@
 
   <footer class="pl2-footer">
     <div class="pl2-container pl2-footer__inner">
-      <div><img src="{{ url_for('static', filename='img/brand/patia-logo-original-dark.png') }}" width="148" height="35" alt="PATIA"><p>{{ _("Control claro para negocios que quieren crecer.") }}</p></div>
+      <div><img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" width="148" height="35" alt="PATIA"><p>{{ _("Control claro para negocios que quieren crecer.") }}</p></div>
       <nav aria-label="{{ _('Enlaces del pie de página') }}"><a href="#funciones">{{ _("Funciones") }}</a><a href="#precios">{{ _("Precios") }}</a><a href="{{ url_for('main.terms') }}">{{ _("Términos") }}</a><a href="{{ url_for('main.privacy') }}">{{ _("Privacidad") }}</a><a href="/login">{{ _("Iniciar sesión") }}</a></nav>
       <nav class="patia-social-footer" aria-label="PATIA en redes">
         <span>PATIA en redes</span>

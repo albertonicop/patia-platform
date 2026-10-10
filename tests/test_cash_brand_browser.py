@@ -59,7 +59,7 @@ class CashBrandBrowserTests(unittest.TestCase):
                 self.page.locator(".pl2-header").screenshot(path=str(path / f"{name}-header.png"))
                 self.page.locator(".pl2-footer").screenshot(path=str(path / f"{name}-footer.png"))
 
-    def assert_logo(self, selector):
+    def assert_logo(self, selector, filename="patia-logo-original-dark.png"):
         logo = self.page.locator(selector)
         logo.wait_for(state="visible")
         self.page.wait_for_function(
@@ -76,7 +76,7 @@ class CashBrandBrowserTests(unittest.TestCase):
                 ratio: img.naturalWidth / img.naturalHeight,
                 background: style.backgroundColor};
         }""")
-        self.assertEqual(properties["src"], "/static/img/brand/patia-logo-original-dark.png")
+        self.assertEqual(properties["src"], f"/static/img/brand/{filename}")
         self.assertEqual(properties["filter"], "none")
         self.assertEqual(properties["opacity"], "1")
         self.assertAlmostEqual(properties["contentWidth"] / properties["contentHeight"], properties["ratio"], delta=0.05)
@@ -89,8 +89,8 @@ class CashBrandBrowserTests(unittest.TestCase):
                 self.public = True
                 self.page.goto("https://patia.test/")
                 for selector in (".pl2-brand img", ".pl2-footer__inner > div > img"):
-                    logo = self.assert_logo(selector)
-                    self.assertEqual(logo["background"], "rgb(234, 231, 224)")
+                    logo = self.assert_logo(selector, "patia-logo-original.png")
+                    self.assertEqual(logo["background"], "rgba(0, 0, 0, 0)")
                 self.assertLessEqual(self.page.evaluate("document.documentElement.scrollWidth"), width)
                 self.screenshot(f"public-{width}")
                 self.public = False
