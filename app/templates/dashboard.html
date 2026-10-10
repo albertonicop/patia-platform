@@ -4,6 +4,18 @@
 {% block content %}
 
 <div class="dashboard-v2">
+{% if show_work_update %}
+<section class="card work-style-update" aria-labelledby="work-update-title" data-work-update>
+  <h3 id="work-update-title">{{ _("Actualización de PATIA") }}</h3>
+  <p>{{ _("Ahora puedes organizar tu panel según cómo trabajas: solo o con un equipo. Conservas tus herramientas, datos y permisos.") }}</p>
+  <form method="post" action="{{ url_for('work_style.acknowledge_update') }}" class="work-style-form__actions">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn" type="submit" name="action" value="personalize">{{ _("Personalizar mi panel") }}</button>
+    <button class="btn ghost" type="submit" name="action" value="later">{{ _("Más tarde") }}</button>
+  </form>
+  <small>{{ _("También puedes configurarlo después desde Negocio → Forma de trabajo.") }}</small>
+</section>
+{% endif %}
 {% if show_onboarding or show_work_setup %}
 <section class="dashboard-v2__onboarding" aria-labelledby="onboarding-title" data-onboarding-progress="{{ onboarding_progress }}">
   <header class="dashboard-v2__onboarding-head">

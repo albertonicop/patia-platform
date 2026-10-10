@@ -8,6 +8,8 @@
 .work-style-form__team { padding: 16px; background: #f3f1ff; border-radius: 12px; }
 .work-style-form [hidden] { display: none !important; }
 .work-style-settings { margin: 24px 0; }
+.work-style-update { padding: 22px; margin-bottom: 24px; }
+.work-style-update small { display: block; margin-top: 12px; color: #626d80; }
 .dashboard-v2__step--work-style { display: block !important; grid-column: 1 / -1; }
 .work-style-priorities { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 24px; padding: 18px; }
 .work-style-priorities p { flex: 1 1 100%; margin: 0; }

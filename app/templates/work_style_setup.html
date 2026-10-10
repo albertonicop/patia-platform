@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}{{ _("Forma de trabajo") }}{% endblock %}
+{% block content %}
+<section class="card work-style-settings" aria-labelledby="work-style-title">
+  <h2 id="work-style-title">{{ _("Forma de trabajo") }}</h2>
+  <p>{{ _("Organiza tu panel. Conservas tus herramientas, datos y permisos.") }}</p>
+  {% set work_form_source = 'onboarding' %}
+  {% include '_work_style_form.html' %}
+</section>
+{% endblock %}

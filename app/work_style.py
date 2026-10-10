@@ -3,6 +3,7 @@ from datetime import datetime
 
 from flask import Blueprint, flash, redirect, request, url_for
 from flask_babel import gettext
+from sqlalchemy.exc import IntegrityError
 
 from . import db
 from .team.services import active_membership, has_permission, require_roles
@@ -21,6 +22,41 @@ class OwnerWorkPreference(db.Model):
         "mode IN ('pending','deferred','solo','team_operations','team_supervision')",
         name="ck_owner_work_preference_mode",
     ),)
+
+
+class OwnerWorkUpdateNotice(db.Model):
+    """Independent of preferences: seeing the update never changes the menu."""
+    __tablename__ = "owner_work_update_notice"
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), primary_key=True)
+    seen_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    action = db.Column(db.String(16), nullable=False, default="seen")
+    __table_args__ = (db.CheckConstraint(
+        "action IN ('seen','personalize','later')", name="ck_owner_work_update_notice_action"),)
+
+
+def eligible_for_update(user, membership):
+    from .plans import subscription_access_is_active
+
+    return bool(user and membership and membership.role == "OWNER"
+                and owner_preference(user, membership) is None
+                and (user.manual_pro_access or user.subscription_status != "trialing")
+                and subscription_access_is_active(user))
+
+
+def claim_update_notice(user, membership):
+    if not eligible_for_update(user, membership):
+        return False
+    if db.session.get(OwnerWorkUpdateNotice, user.id):
+        return False
+    # The primary key also prevents two devices displaying the notice concurrently.
+    try:
+        with db.session.begin_nested():
+            db.session.add(OwnerWorkUpdateNotice(user_id=user.id))
+            db.session.flush()
+        db.session.commit()
+    except IntegrityError:
+        return False
+    return True
 
 
 def initialize_new_owner(user):
@@ -91,7 +127,36 @@ def presentation_context():
     labels = {"solo": gettext("Trabajo solo"), "team_operations": gettext("Equipo · también atiendo y cobro"),
               "team_supervision": gettext("Equipo · principalmente superviso")}
     return dict(work_mode=mode, work_mode_label=labels.get(mode), show_work_setup=mode == "pending",
-                owner_navigation=prioritized_navigation(membership, mode), platform_admin=is_platform_admin(user))
+                owner_navigation=prioritized_navigation(membership, mode), platform_admin=is_platform_admin(user),
+                show_work_update=(request.method == "GET" and request.endpoint == "main.dashboard"
+                                  and claim_update_notice(user, membership)))
+
+
+@work_style.post("/settings/work-style/update")
+@require_roles("OWNER")
+def acknowledge_update():
+    from .routes import current_user
+
+    user = current_user()
+    action = request.form.get("action")
+    if action not in {"personalize", "later"}:
+        return redirect(url_for("main.dashboard")), 303
+    membership = active_membership(user)
+    if eligible_for_update(user, membership):
+        claim_update_notice(user, membership)
+        notice = db.session.get(OwnerWorkUpdateNotice, user.id)
+        notice.action = action
+        db.session.commit()
+    destination = "work_style.setup" if action == "personalize" else "main.dashboard"
+    return redirect(url_for(destination)), 303
+
+
+@work_style.get("/settings/work-style/setup")
+@require_roles("OWNER")
+def setup():
+    from flask import render_template
+
+    return render_template("work_style_setup.html")
 
 
 @work_style.post("/settings/work-style")
