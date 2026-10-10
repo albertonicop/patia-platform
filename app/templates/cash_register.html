@@ -113,7 +113,7 @@
       <form method="POST" action="{{ url_for('cash.open_register') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="opening-cash">{{ _("Efectivo inicial") }}</label>
-        <input id="opening-cash" name="opening_cash" type="number" min="0" step="0.01" value="0.00" required autofocus aria-describedby="opening-cash-help">
+        <input id="opening-cash" name="opening_cash" type="number" min="0" step="0.01" required autofocus aria-describedby="opening-cash-help">
         <small id="opening-cash-help">{{ _("Cuenta el dinero que usarás para dar cambio.") }}</small>
         <button class="btn" type="submit">{{ _("Abrir caja") }}</button>
       </form>

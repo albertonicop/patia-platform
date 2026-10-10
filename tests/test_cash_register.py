@@ -131,6 +131,22 @@ class CashRegisterTests(unittest.TestCase):
             },
         )
 
+    def test_open_requires_an_explicit_amount_and_accepts_zero(self):
+        client = self.client_for(self.owner)
+        for data in ({}, {"opening_cash": ""}, {"opening_cash": "   "}):
+            with self.subTest(data=data):
+                response = client.post("/cash-register/open", data=data, follow_redirects=True)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("Ingresa un efectivo inicial", response.get_data(as_text=True))
+                self.assertEqual(CashRegisterSession.query.count(), 0)
+                self.assertEqual(CashMovement.query.count(), 0)
+        response = self.open_register(client, "0")
+        self.assertEqual(response.status_code, 302)
+        cash_session = CashRegisterSession.query.one()
+        self.assertEqual(cash_session.opening_cash, Decimal("0.00"))
+        self.assertEqual(expected_cash(cash_session.id), Decimal("0.00"))
+        self.assertEqual(CashMovement.query.count(), 0)
+
     def test_close_rejects_missing_or_blank_count_without_changing_register(self):
         client = self.client_for(self.owner)
         self.open_register(client)

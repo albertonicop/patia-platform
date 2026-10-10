@@ -1,0 +1,13 @@
+/* The public site uses the same full-color asset as the workspace sidebar.
+   A light surface keeps the original dark lettering readable on the dark page. */
+.pl2-brand img,
+.pl2-footer__inner > div > img {
+  display: block;
+  height: auto;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #eae7e0;
+  object-fit: contain;
+  filter: none;
+  opacity: 1;
+}

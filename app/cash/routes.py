@@ -189,7 +189,10 @@ def index():
 def open_register():
     _, membership = _current_context()
     try:
-        opening_cash = money_decimal(request.form.get("opening_cash") or 0)
+        raw_opening_cash = request.form.get("opening_cash")
+        if raw_opening_cash is None or not raw_opening_cash.strip():
+            raise ValueError("opening cash is required")
+        opening_cash = money_decimal(raw_opening_cash)
     except ValueError:
         flash(gettext("Ingresa un efectivo inicial válido."), "danger")
         return redirect(url_for("cash.index"))

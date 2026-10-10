@@ -10,3 +10,7 @@
 .pl2-footer .patia-social-footer a:hover { background: rgba(124,92,255,.15); }
 .patia-landing-notices { padding: 12px 24px; background: #10372e; color: #e4fff6; text-align: center; }
 .patia-landing-notices p { margin: 0; }
+
+/* Keep the workspace links compact without a social heading. */
+.app-main-v2 > .patia-social-footer { padding: 8px 0; justify-content: flex-start; }
+.app-main-v2 > .patia-social-footer + .app-legal-footer-v1 { padding-top: 8px; }
