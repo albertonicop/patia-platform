@@ -19,6 +19,7 @@ class CashBrandBrowserTests(unittest.TestCase):
         self.client = self.fixture.client_for(self.fixture.owner)
         self.public_client = self.fixture.app.test_client()
         self.public = False
+        self.navigation_requests = 0
         self.playwright = sync_playwright().start()
         self.addCleanup(self.playwright.stop)
         try:
@@ -37,6 +38,8 @@ class CashBrandBrowserTests(unittest.TestCase):
         if not request.url.startswith("https://patia.test/"):
             route.abort()
             return
+        if request.is_navigation_request():
+            self.navigation_requests += 1
         path = request.url.split("patia.test", 1)[1]
         client = self.public_client if self.public else self.client
         response = client.open(
@@ -82,6 +85,25 @@ class CashBrandBrowserTests(unittest.TestCase):
         self.assertAlmostEqual(properties["contentWidth"] / properties["contentHeight"], properties["ratio"], delta=0.05)
         return properties
 
+    def assert_logo_does_not_navigate(self, selector):
+        logo = self.page.locator(selector)
+        self.assertTrue(logo.evaluate("img => img.closest('a, button, [role=button]') === null"))
+        url = self.page.url
+        requests = self.navigation_requests
+        logo.click()
+        self.assertEqual(self.page.url, url)
+        self.assertEqual(self.navigation_requests, requests)
+
+    def test_login_logo_does_not_leave_login(self):
+        self.public = True
+        for width in (1440, 390):
+            with self.subTest(width=width):
+                self.page.set_viewport_size({"width": width, "height": 900})
+                self.page.goto("https://patia.test/login")
+                selector = ".auth-v2__brand img" if width == 1440 else ".auth-v2__mobile-brand img"
+                self.assert_logo_does_not_navigate(selector)
+                self.assertTrue(self.page.locator("#auth-form").is_visible())
+
     def test_public_and_dashboard_brand_and_footer_at_desktop_and_mobile(self):
         for width in (1440, 390):
             with self.subTest(width=width):
@@ -91,11 +113,13 @@ class CashBrandBrowserTests(unittest.TestCase):
                 for selector in (".pl2-brand img", ".pl2-footer__inner > div > img"):
                     logo = self.assert_logo(selector, "patia-logo-original.png")
                     self.assertEqual(logo["background"], "rgba(0, 0, 0, 0)")
+                    self.assert_logo_does_not_navigate(selector)
                 self.assertLessEqual(self.page.evaluate("document.documentElement.scrollWidth"), width)
                 self.screenshot(f"public-{width}")
                 self.public = False
                 self.page.goto("https://patia.test/")
                 self.assert_logo(".sidebar-v2__brand .logo-img")
+                self.assert_logo_does_not_navigate(".sidebar-v2__brand .logo-img")
                 footer = self.page.locator(".app-main-v2 > .patia-social-footer")
                 self.assertNotIn("PATIA en redes", footer.inner_text())
                 self.assertEqual(footer.locator("a").count(), 2)

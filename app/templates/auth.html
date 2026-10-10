@@ -14,9 +14,9 @@
   {% include "_language_selector.html" %}
   <main class="auth-v2__page">
     <aside class="auth-v2__story">
-      <a href="/" class="auth-v2__brand" aria-label="{{ _('Volver al inicio de PATIA') }}">
+      <span class="auth-v2__brand">
         <img src="{{ url_for('static', filename='img/brand/patia-logo-original.png') }}" alt="PATIA">
-      </a>
+      </span>
       <div class="auth-v2__story-copy">
         <span class="auth-v2__eyebrow">{{ _("Control para negocios reales") }}</span>
         {% if mode == "login" %}
