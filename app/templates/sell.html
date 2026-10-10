@@ -219,7 +219,7 @@
     <header class="pos-v2__panel-head">
       <span class="pos-v2__eyebrow">{{ _("Historial inmediato") }}</span>
       <h2 id="recent-sales-title">{{ _("Ventas recientes") }}</h2>
-      {% if sale_groups %}<p>{{ _("Cada operación aparece en un solo ticket. La cancelación se mantiene por producto y devuelve sus unidades al inventario.") }}</p>{% endif %}
+      {% if sale_groups and (can_cancel_sales or can_process_returns) %}<p>{{ _("Cada operación aparece en un solo ticket. La cancelación se mantiene por producto y devuelve sus unidades al inventario.") }}</p>{% endif %}
     </header>
 
     {% if sale_groups %}
@@ -229,32 +229,38 @@
           <tbody>
             {% for ticket in sale_groups %}
               <tr>
-                <td data-label="{{ _('Folio') }}"><strong>{{ ticket.folio }}</strong></td>
+                <td data-label="{{ _('Folio') }}"><strong>{{ ticket.folio }}</strong>{% if ticket.status %}<small>{{ ticket.status }}</small>{% endif %}</td>
                 <td data-label="{{ _('Fecha y hora') }}">{{ ticket.created_at_local.strftime('%d/%m/%Y %H:%M') }}</td>
                 <td data-label="{{ _('Artículos') }}">{{ ticket.item_count }} {{ _("artículo") if ticket.item_count == 1 else _("artículos") }}<small>{{ ticket.sales|length }} {{ _("producto") if ticket.sales|length == 1 else _("productos") }}</small></td>
                 <td data-label="{{ _('Método') }}">{{ payment_method_labels.get(ticket.payment_method, _("No especificado")) }}</td>
-                <td data-label="{{ _('Total') }}">{{ ticket.total|money }}</td>
+                <td data-label="{{ _('Total') }}">{{ ticket.total|money }}{% if ticket.status %}<small>{{ _("Importe original") }}</small>{% endif %}</td>
                 <td data-label="{{ _('Acciones') }}">
                   <div class="pos-v2__sale-actions">
                     <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id) }}" class="btn ghost" target="_blank" rel="noopener">{{ _("Ver ticket") }}</a>
                     <a href="{{ url_for('main.ticket', ticket_ref=ticket.ticket_id, print=1) }}" class="btn ghost" target="_blank" rel="noopener">{{ _("Reimprimir") }}</a>
                   </div>
+                  {% if ticket.active_sales and (can_cancel_sales or can_process_returns) %}
                   <details class="pos-v2__cancel-lines">
                     <summary>{{ _("Cancelar un producto") }}</summary>
                     <p>{{ _("La cancelación se aplica solo a la línea seleccionada, no al ticket completo.") }}</p>
-                    {% for sale in ticket.sales %}
+                    {% for sale in ticket.active_sales %}
+                    {% if can_cancel_sales %}
                     <form method="POST" action="/sales/{{ sale.id }}/cancel" onsubmit="return confirm({{ _('¿Cancelar esta línea? Sus unidades regresarán al inventario.')|tojson }});">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <span>{{ sale.product.name if sale.product else 'Producto' }} × {{ sale.quantity }}</span>
                       <button class="btn ghost" type="submit">{{ _("Cancelar línea") }}</button>
                     </form>
+                    {% endif %}
+                    {% if can_process_returns %}
                     <form method="POST" action="/sales/{{ sale.id }}/return" onsubmit="return confirm({{ _('¿Registrar la devolución de esta línea? Sus unidades regresarán al inventario.')|tojson }});">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <span>{{ sale.product.name if sale.product else 'Producto' }} × {{ sale.quantity }}</span>
                       <button class="btn ghost" type="submit">{{ _("Registrar devolución") }}</button>
                     </form>
+                    {% endif %}
                     {% endfor %}
                   </details>
+                  {% endif %}
                 </td>
               </tr>
             {% endfor %}
@@ -265,7 +271,7 @@
       <div class="pos-v2__recent-empty module-empty-v2">
         <i class="fa-solid fa-receipt" aria-hidden="true"></i>
         <h3>{{ _("Aún no hay ventas registradas") }}</h3>
-        <p>{{ _("Tu primera venta aparecerá aquí con su recibo y opciones de cancelación.") }}</p>
+        {% if can_cancel_sales or can_process_returns %}<p>{{ _("Tu primera venta aparecerá aquí con su recibo y opciones de cancelación.") }}</p>{% endif %}
       </div>
     {% endif %}
   </section>

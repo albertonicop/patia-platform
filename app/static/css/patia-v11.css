@@ -1453,7 +1453,7 @@ body.patia-v11--workspace {
 }
 .patia-v11--dashboard .dashboard-v3__summary-card > a:hover,
 .patia-v11--dashboard .dashboard-v3__alerts-list > a:hover { text-decoration: underline; }
-.patia-v11--dashboard .app-topbar-v2 .language-switcher {
+.patia-v11--workspace .app-topbar-v2 .language-switcher {
   position: static; flex-shrink: 0; margin: 0; z-index: auto;
   background: var(--patia-surface); box-shadow: none; border-color: transparent;
 }

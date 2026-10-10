@@ -36,6 +36,7 @@ from .models import (
     Product,
     Recipe,
     RecipeSaleConsumption,
+    ReversedSaleLine,
     Sale,
     SalesTicket,
     StripeWebhookEvent,
@@ -395,6 +396,19 @@ def _translated_timezone_choices():
     ]
 
 
+def _ticket_reversal_status(sales):
+    reversed_lines = [sale for sale in sales if getattr(sale, "reversal_type", None)]
+    if not reversed_lines:
+        return None
+    if len(reversed_lines) != len(sales):
+        return gettext("Ticket con devolución o cancelación parcial")
+    if all(sale.reversal_type == "RETURN" for sale in reversed_lines):
+        return gettext("Ticket devuelto completamente")
+    if all(sale.reversal_type == "SALE_CANCELLATION" for sale in reversed_lines):
+        return gettext("Ticket cancelado")
+    return gettext("Ticket devuelto o cancelado completamente")
+
+
 def _group_sales_by_ticket(sales, *, limit=None, timezone_name=DEFAULT_TIMEZONE):
     grouped = {}
     for sale in sales:
@@ -419,6 +433,8 @@ def _group_sales_by_ticket(sales, *, limit=None, timezone_name=DEFAULT_TIMEZONE)
             group["created_at"] = sale.created_at
     result = list(grouped.values())
     for group in result:
+        group["status"] = _ticket_reversal_status(group["sales"])
+        group["active_sales"] = [sale for sale in group["sales"] if not getattr(sale, "reversal_type", None)]
         group["folio"] = _short_sale_folio(group["sales"])
         group["created_at_local"] = utc_to_local(
             group["created_at"],
@@ -1285,7 +1301,7 @@ def login():
         membership = membership_for_login(user)
         if membership is None:
             db.session.rollback()
-            flash(gettext("Tu acceso a esta empresa estÃ¡ desactivado. Contacta al propietario."), "danger")
+            flash(gettext("Tu acceso a esta empresa fue desactivado. Contacta al propietario."), "danger")
             return redirect(url_for("main.login"))
         db.session.commit()
         session.clear()
@@ -3519,7 +3535,7 @@ def sell():
         return redirect(url_for("main.login"))
     organization_id = current_organization_id(user)
     membership = active_membership(user)
-    cash_session = open_cash_session(organization_id)
+    cash_session = open_cash_session(organization_id, lock=request.method == "POST")
     owner = current_organization_owner(user)
     if trial_expired(user):
         return render_template("trial_expired.html")
@@ -3578,6 +3594,22 @@ def sell():
                     "danger",
                 )
                 return redirect(url_for("cash.index"))
+            amount_received = None
+            change_amount = None
+            if payment_method == "cash":
+                raw_received = request.form.get("amount_received")
+                try:
+                    if raw_received is None or not raw_received.strip():
+                        raise ValueError("cash tender is required")
+                    amount_received = money_decimal(raw_received)
+                    sale_total = money_decimal(qty * product.sale_price)
+                except ValueError:
+                    flash(gettext("Ingresa un monto recibido válido."), "danger")
+                    return redirect(url_for("main.sell"))
+                if amount_received < sale_total:
+                    flash(gettext("El efectivo recibido no cubre el total de la venta."), "danger")
+                    return redirect(url_for("main.sell"))
+                change_amount = amount_received - sale_total
             try:
                 customer = _selected_customer(
                     organization_id,
@@ -3587,6 +3619,8 @@ def sell():
                 flash(str(exc), "danger")
                 return redirect(url_for("main.sell"))
             ticket = _create_sales_ticket(user, payment_method)
+            ticket.amount_received = amount_received
+            ticket.change_amount = change_amount
             ticket.customer_id = customer.id if customer else None
             ticket.cash_register_session_id = (
                 cash_session.id if cash_session else None
@@ -3680,8 +3714,11 @@ def sell():
         .order_by(Sale.created_at.desc(), Sale.id.desc())
         .all()
     )
+    reversed_lines = ReversedSaleLine.query.options(
+        selectinload(ReversedSaleLine.sales_ticket),
+    ).filter_by(organization_id=organization_id).all()
     sale_groups = _group_sales_by_ticket(
-        sales,
+        sales + [row.ticket_line() for row in reversed_lines],
         limit=12,
         timezone_name=active_membership(user).organization.timezone,
     )
@@ -4792,7 +4829,15 @@ def _reverse_sale(sale_id, *, movement_type, success_message):
     membership = active_membership(user)
     sale = Sale.query.filter_by(
         id=sale_id, organization_id=organization_id
-    ).with_for_update().first_or_404()
+    ).with_for_update().first()
+    if not sale:
+        previous = ReversedSaleLine.query.filter_by(
+            organization_id=organization_id, original_sale_id=sale_id,
+        ).first()
+        if not previous:
+            abort(404)
+        flash(gettext("Esta venta ya fue devuelta o cancelada."), "info")
+        return redirect(url_for("main.sell"))
     payment_method = (
         sale.sales_ticket.payment_method
         if sale.sales_ticket
@@ -4888,6 +4933,15 @@ def _reverse_sale(sale_id, *, movement_type, success_message):
             ),
             sales_ticket=sale.sales_ticket,
         )
+    db.session.add(ReversedSaleLine(
+        organization_id=organization_id, original_sale_id=sale.id,
+        sales_ticket_id=sale.sales_ticket_id, ticket_id=sale.ticket_id,
+        product_name=sale.product.name if sale.product else gettext("Producto no disponible"),
+        quantity=sale.quantity, unit_price=sale.unit_price, total=sale.total,
+        created_at=sale.created_at, payment_method=payment_method,
+        currency_code=sale.currency_code, locale_code=sale.locale_code,
+        reversal_type=movement_type, performed_by_member_id=membership.id,
+    ))
     db.session.execute(
         update(InventoryMovement)
         .where(
@@ -6241,7 +6295,12 @@ def receipt(sale_id):
     organization_id = current_organization_id(user)
     sale = Sale.query.filter_by(
         id=sale_id, organization_id=organization_id
-    ).first_or_404()
+    ).first()
+    if not sale:
+        archived = ReversedSaleLine.query.filter_by(
+            original_sale_id=sale_id, organization_id=organization_id,
+        ).first_or_404()
+        sale = archived.ticket_line()
     return redirect(url_for("main.ticket", ticket_ref=_sale_ticket_key(sale)))
 
 
@@ -6254,50 +6313,43 @@ def ticket(ticket_ref):
     organization_id = current_organization_id(user)
     owner = current_organization_owner(user)
 
+    original_sale_id = None
+    ticket_header = None
     if ticket_ref.startswith("sale-") and ticket_ref[5:].isdigit():
-        sale = (
-            Sale.query.options(
-                selectinload(Sale.product),
-                selectinload(Sale.sales_ticket),
-            )
-            .filter_by(id=int(ticket_ref[5:]), organization_id=organization_id)
-            .first_or_404()
-        )
-        if sale.sales_ticket_id:
-            sales = (
-                Sale.query.options(
-                    selectinload(Sale.product),
-                    selectinload(Sale.sales_ticket),
-                )
-                .filter_by(organization_id=organization_id, sales_ticket_id=sale.sales_ticket_id)
-                .order_by(Sale.id)
-                .all()
-            )
-        else:
-            sales = [sale]
+        original_sale_id = int(ticket_ref[5:])
+        sale = Sale.query.filter_by(id=original_sale_id, organization_id=organization_id).first()
+        archived = ReversedSaleLine.query.filter_by(
+            original_sale_id=original_sale_id, organization_id=organization_id,
+        ).first() if not sale else None
+        line = sale or archived
+        if not line:
+            abort(404)
+        ticket_header = line.sales_ticket
+        ticket_ref = ticket_header.public_id if ticket_header else line.ticket_id
     else:
         ticket_header = SalesTicket.query.filter_by(
-            organization_id=organization_id,
-            public_id=ticket_ref,
+            organization_id=organization_id, public_id=ticket_ref,
         ).first()
-        sales = (
-            Sale.query.options(
-                selectinload(Sale.product),
-                selectinload(Sale.sales_ticket),
-            )
-            .filter(
-                Sale.organization_id == organization_id,
-                (
-                    Sale.sales_ticket_id == ticket_header.id
-                    if ticket_header
-                    else Sale.ticket_id == ticket_ref
-                ),
-            )
-            .order_by(Sale.id)
-            .all()
-        )
-        if not sales:
-            abort(404)
+
+    active_query = Sale.query.options(selectinload(Sale.product), selectinload(Sale.sales_ticket)).filter_by(organization_id=organization_id)
+    history_query = ReversedSaleLine.query.filter_by(organization_id=organization_id)
+    if ticket_header:
+        active_query = active_query.filter_by(sales_ticket_id=ticket_header.id)
+        history_query = history_query.filter_by(sales_ticket_id=ticket_header.id)
+    elif ticket_ref:
+        active_query = active_query.filter_by(ticket_id=ticket_ref)
+        history_query = history_query.filter_by(ticket_id=ticket_ref)
+    elif original_sale_id is not None:
+        active_query = active_query.filter_by(id=original_sale_id)
+        history_query = history_query.filter_by(original_sale_id=original_sale_id)
+    else:
+        abort(404)
+    active_lines = active_query.all()
+    reversed_lines = history_query.all()
+    sales = sorted(active_lines + [row.ticket_line() for row in reversed_lines], key=lambda line: line.id)
+    if not sales:
+        abort(404)
+    ticket_status = _ticket_reversal_status(sales)
 
     address_parts = [
         cleaned
@@ -6311,6 +6363,7 @@ def ticket(ticket_ref):
     ]
     return render_template(
         "ticket.html",
+        ticket_status=ticket_status,
         user=owner,
         sales=sales,
         ticket_id=_sale_ticket_key(sales[0]),

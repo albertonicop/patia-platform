@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=131">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v11.css') }}?v=4">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v11.css') }}?v=5">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/patia-v11-modules.css') }}?v=4">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/restaurant.css') }}?v=2">
 
@@ -25,7 +25,7 @@
 </head>
 
 <body class="app-body app-shell-v2 app-polish-v1 patia-v11 patia-v11--workspace{% if request.path == '/' %} patia-v11--dashboard{% elif request.path.startswith('/reports') or request.path.startswith('/pro/monthly-reports') %} patia-v11--reports{% elif request.path.startswith('/pro/hub') or request.path.startswith('/pro/alerts') %} patia-v11--decisions{% elif request.path.startswith('/pro/purchases') %} patia-v11--purchases{% elif request.path.startswith('/recipes') %} patia-v11--restaurant{% elif request.path.startswith('/products') or request.path.startswith('/inventory') %} patia-v11--inventory{% elif request.path.startswith('/cash-register') %} patia-v11--cash{% elif request.path.startswith('/customers') or request.path.startswith('/credit') %} patia-v11--crm{% elif request.path.startswith('/suppliers') %} patia-v11--suppliers{% elif request.path.startswith('/settings') or request.path.startswith('/team') or request.path.startswith('/subscription') %} patia-v11--settings{% elif request.path.startswith('/sell') %} patia-v11--pos{% elif request.path.startswith('/ticket') or request.path.startswith('/receipt') or request.path.startswith('/sales') %} patia-v11--receipt{% else %} patia-v11--general{% endif %}{% if request.path.startswith('/pro') %} app-shell-v2--pro{% endif %}{% if request.path == '/sell' and session.get('cashier_mode') %} app-shell-v2--cashier-mode{% endif %}">
-  {% if request.path != "/" %}{% include "_language_selector.html" %}{% endif %}
+  {% if request.path != "/" and current_membership.role != "CASHIER" %}{% include "_language_selector.html" %}{% endif %}
   <aside class="sidebar sidebar-v2">
     <div class="sidebar-v2__head">
       <div class="brand sidebar-v2__brand">
@@ -107,7 +107,7 @@
         <h1>{% block title %}{% endblock %}</h1>
       </div>
       <div class="app-topbar-v2__actions">
-        {% if request.path == "/" %}{% include "_language_selector.html" %}{% endif %}
+        {% if request.path == "/" or current_membership.role == "CASHIER" %}{% include "_language_selector.html" %}{% endif %}
         {% if can_view_reports and not admin_screen %}
           <a class="app-topbar-v2__notification" href="{{ url_for('pro.alerts') if has_pro_access else url_for('main.dashboard', _anchor='alertas-operativas') }}" aria-label="{{ _('Ver notificaciones') }}">
             <i class="fa-regular fa-bell" aria-hidden="true"></i>

@@ -1059,6 +1059,7 @@ class Sale(db.Model):
             "organization_id",
             "ticket_id",
         ),
+        {"sqlite_autoincrement": True},
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -1139,6 +1140,43 @@ class Sale(db.Model):
         "RecipeSaleConsumption", back_populates="sale",
         cascade="all, delete-orphan", passive_deletes=True,
     )
+
+
+class ReversedSaleLine(db.Model):
+    """Historical ticket line and reversal, separate from active/reportable sales."""
+    __tablename__ = "reversed_sale_line"
+    __table_args__ = (
+        db.UniqueConstraint("organization_id", "original_sale_id", name="uq_reversed_sale_line_original"),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    organization_id = db.Column(db.Integer, db.ForeignKey("organization.id", ondelete="CASCADE"), nullable=False, index=True)
+    original_sale_id = db.Column(db.Integer, nullable=False)
+    sales_ticket_id = db.Column(db.Integer, db.ForeignKey("sales_ticket.id", ondelete="CASCADE"), nullable=True, index=True)
+    ticket_id = db.Column(db.String(36), nullable=True, index=True)
+    product_name = db.Column(db.String(200), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Numeric(14, 2), nullable=False)
+    total = db.Column(db.Numeric(14, 2), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+    payment_method = db.Column(db.String(20), nullable=True)
+    currency_code = db.Column(db.String(3), nullable=False)
+    locale_code = db.Column(db.String(16), nullable=False)
+    reversal_type = db.Column(db.String(30), nullable=False)
+    reversed_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    performed_by_member_id = db.Column(db.Integer, db.ForeignKey("organization_member.id", ondelete="SET NULL"), nullable=True)
+    sales_ticket = db.relationship("SalesTicket")
+    performed_by_member = db.relationship("OrganizationMember")
+
+    def ticket_line(self):
+        from types import SimpleNamespace
+        return SimpleNamespace(
+            id=self.original_sale_id, product=SimpleNamespace(name=self.product_name),
+            sales_ticket=self.sales_ticket, ticket_id=self.ticket_id,
+            quantity=self.quantity, unit_price=self.unit_price, total=self.total,
+            created_at=self.created_at, payment_method=self.payment_method,
+            currency_code=self.currency_code, locale_code=self.locale_code,
+            reversal_type=self.reversal_type,
+        )
 
 
 class Supplier(db.Model):

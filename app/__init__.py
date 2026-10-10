@@ -283,6 +283,8 @@ def create_app():
             "can_manage_subscription": has_permission(current_membership, "manage_subscription"),
             "can_view_dashboard": has_permission(current_membership, "view_dashboard"),
             "can_use_pos": has_permission(current_membership, "use_pos"),
+            "can_cancel_sales": has_permission(current_membership, "cancel_sales"),
+            "can_process_returns": has_permission(current_membership, "process_returns"),
             "can_operate_cash_register": has_permission(
                 current_membership, "operate_cash_register"
             ),

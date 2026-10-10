@@ -198,7 +198,7 @@ class CashRegisterTests(unittest.TestCase):
         self.assertEqual(CashMovement.query.filter_by(movement_type="SALE_CASH").count(), 1)
         self.assertEqual(CashMovement.query.filter_by(movement_type="REFUND").count(), 1)
         self.assertEqual(expected_cash(CashRegisterSession.query.one().id), Decimal("100.00"))
-        self.assertEqual(client.post(f"/sales/{sale_id}/return").status_code, 404)
+        self.assertEqual(client.post(f"/sales/{sale_id}/return").status_code, 302)
         self.assertEqual(CashMovement.query.filter_by(movement_type="REFUND").count(), 1)
 
     def test_extreme_amount_returns_form_error_without_opening_register(self):

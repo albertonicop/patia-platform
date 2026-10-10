@@ -20,7 +20,7 @@ from flask_migrate import upgrade
 
 from app import create_app, db
 from app.cash.services import expected_cash
-from app.models import CashMovement, CashRegisterSession, InventoryMovement, Product, Sale, User
+from app.models import CashMovement, CashRegisterSession, InventoryMovement, Product, ReversedSaleLine, Sale, User
 from app.team.services import ensure_owner_organization
 
 
@@ -82,7 +82,7 @@ class PostgresDailyIntegrityTests(unittest.TestCase):
         self.addCleanup(self.cleanup)
         with self.app.app_context():
             # Use the production migration path; never weaken the create_all guard.
-            upgrade(directory=str(Path(__file__).resolve().parents[1] / "migrations"))
+            upgrade(directory=str(Path(__file__).resolve().parents[1] / "migrations"), revision="20261010_27")
             owner = User(email="pg-owner@patia.test", company_name="Isolated PG shop", email_verified=True)
             owner.set_password("FictitiousPassword123")
             db.session.add(owner)
@@ -160,9 +160,14 @@ class PostgresDailyIntegrityTests(unittest.TestCase):
                     self.assertFalse(second.done())
                 finally:
                     release.set()
-                self.assertEqual(sorted([first.result(timeout=10), second.result(timeout=10)]), [302, 404])
+                self.assertEqual(sorted([first.result(timeout=10), second.result(timeout=10)]), [302, 302])
         with self.app.app_context():
             self.assertEqual(Sale.query.count(), 0)
+            archived = ReversedSaleLine.query.one()
+            self.assertEqual(archived.original_sale_id, self.sale_id)
+            self.assertEqual(archived.quantity, 2)
+            self.assertEqual(archived.total, Decimal("20.00"))
+            self.assertEqual(self.client().get("/ticket/" + archived.sales_ticket.public_id).status_code, 200)
             self.assertEqual(db.session.get(Product, self.product_id).stock, 30)
             self.assertEqual(CashMovement.query.filter_by(movement_type="SALE_CASH").count(), 1)
             refunds = CashMovement.query.filter_by(movement_type="REFUND").all()
@@ -171,6 +176,9 @@ class PostgresDailyIntegrityTests(unittest.TestCase):
             movements = InventoryMovement.query.filter(InventoryMovement.movement_type.in_(("RETURN", "SALE_CANCELLATION"))).all()
             self.assertEqual(len(movements), 1)
             self.assertEqual(movements[0].quantity_delta, 2)
+            self.assertEqual(archived.performed_by_member_id, refunds[0].performed_by_member_id)
+            self.assertEqual(archived.performed_by_member_id, movements[0].performed_by_member_id)
+            self.assertEqual(archived.organization_id, self.organization_id)
             self.assertEqual(expected_cash(CashRegisterSession.query.one().id), Decimal("100.00"))
 
     def test_two_returns_reverse_stock_and_cash_once(self):
@@ -202,6 +210,9 @@ class PostgresDailyIntegrityTests(unittest.TestCase):
             connection.close()
 
     def test_logical_backup_restores_all_rows_constraints_and_sequences(self):
+        self.assertEqual(self.client().post(f"/sales/{self.sale_id}/return").status_code, 302)
+        with self.app.app_context():
+            self.assertEqual(ReversedSaleLine.query.count(), 1)
         before = self.fingerprint(self.database)
         target = self.new_database()
         binaries = Path(self.metadata["bin"])

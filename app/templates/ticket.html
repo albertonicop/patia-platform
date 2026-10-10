@@ -15,7 +15,7 @@
       </p>
       <p class="ticket-page-v2__status">
         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-        {{ _("Venta registrada correctamente") }}
+        {{ ticket_status or _("Venta registrada correctamente") }}
       </p>
     </div>
     <div class="ticket-page-v2__quick-actions" aria-label="{{ _('Acciones principales') }}">
@@ -45,6 +45,8 @@
         {% endif %}
       </div>
 
+      {% if ticket_status %}<p class="ticket-page-v2__status"><strong>{{ ticket_status }}</strong><br>{{ _("Importes originales de la venta; la devolución se registra por separado.") }}</p>{% endif %}
+
       <table class="ticket-print-v2__items">
         <caption class="sr-only">{{ _("Productos incluidos en la operación") }}</caption>
         <thead><tr><th scope="col">{{ _("Cant.") }}</th><th scope="col">{{ _("Producto") }}</th><th scope="col">{{ _("P. unit.") }}</th><th scope="col">{{ _("Importe") }}</th></tr></thead>
@@ -52,7 +54,7 @@
           {% for sale in sales %}
           <tr>
             <td>{{ sale.quantity }}</td>
-            <td>{{ sale.product.name if sale.product else _("Producto no disponible") }}</td>
+            <td>{{ sale.product.name if sale.product else _("Producto no disponible") }}{% if sale.reversal_type is defined %}<br><small>{{ _("Devuelto") if sale.reversal_type == 'RETURN' else _("Cancelado") }}</small>{% endif %}</td>
             <td>{{ sale.unit_price|money(ticket_currency_code, ticket_locale_code) }}</td>
             <td>{{ sale.total|money(ticket_currency_code, ticket_locale_code) }}</td>
           </tr>
