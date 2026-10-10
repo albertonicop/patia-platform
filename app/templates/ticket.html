@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}{{ _("Ticket") }} {{ folio }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ticket-print.css') }}?v=1">
+{% endblock %}
+
 {% block content %}
 <div class="ticket-page-v2">
   <header class="module-intro-v2 ticket-page-v2__intro no-print-v2">
@@ -53,10 +57,10 @@
         <tbody>
           {% for sale in sales %}
           <tr>
-            <td>{{ sale.quantity }}</td>
+            <td data-label="{{ _('Cant.') }}">{{ sale.quantity }}</td>
             <td>{{ sale.product.name if sale.product else _("Producto no disponible") }}{% if sale.reversal_type is defined %}<br><small>{{ _("Devuelto") if sale.reversal_type == 'RETURN' else _("Cancelado") }}</small>{% endif %}</td>
-            <td>{{ sale.unit_price|money(ticket_currency_code, ticket_locale_code) }}</td>
-            <td>{{ sale.total|money(ticket_currency_code, ticket_locale_code) }}</td>
+            <td data-label="{{ _('P. unit.') }}">{{ sale.unit_price|money(ticket_currency_code, ticket_locale_code) }}</td>
+            <td data-label="{{ _('Importe') }}">{{ sale.total|money(ticket_currency_code, ticket_locale_code) }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -92,36 +96,18 @@
 
     <aside class="card module-card-v2 ticket-page-v2__actions no-print-v2" aria-label="{{ _('Acciones del ticket') }}">
       <h3>{{ _("Opciones del ticket") }}</h3>
-      <p>{{ _("Selecciona el ancho de tu impresora antes de continuar.") }}</p>
+      <p>{{ _("Selecciona el formato antes de imprimir. Se recordará en este navegador y dispositivo.") }}</p>
       <fieldset class="ticket-page-v2__widths">
-        <legend>{{ _("Ancho de papel") }}</legend>
-        <label><input type="radio" name="ticket_width" value="58"> {{ _("58 mm") }}</label>
-        <label><input type="radio" name="ticket_width" value="80" checked> {{ _("80 mm") }}</label>
+        <legend>{{ _("Formato de impresión") }}</legend>
+        <label><input type="radio" name="ticket_width" value="58"> {{ _("Ticket térmico de 58 mm") }}</label>
+        <label><input type="radio" name="ticket_width" value="80" checked> {{ _("Ticket térmico de 80 mm") }}</label>
+        <label><input type="radio" name="ticket_width" value="letter"> {{ _("Hoja Carta") }}</label>
+        <label><input type="radio" name="ticket_width" value="a4"> {{ _("Hoja A4") }}</label>
       </fieldset>
-      <p id="pdf-help" class="ticket-page-v2__help">{{ _("En el diálogo de impresión usa escala completa y desactiva encabezados y pies si el navegador los ofrece.") }}</p>
+      <p id="pdf-help" class="ticket-page-v2__help" tabindex="-1">{{ _("En el diálogo elige tu impresora o Guardar como PDF, el papel correspondiente y escala %(scale)s. Desactiva encabezados y pies del navegador. Para térmica selecciona rollo de 58 u 80 mm y márgenes ninguno; para Carta o A4 respeta los márgenes del documento.", scale="100 %") }}</p>
     </aside>
   </div>
 </div>
 
-<script>
-const printableTicket = document.getElementById("printable-ticket");
-const widthInputs = document.querySelectorAll('input[name="ticket_width"]');
-
-function applyTicketWidth() {
-  const selected = document.querySelector('input[name="ticket_width"]:checked').value;
-  printableTicket.classList.toggle("ticket-print-v2--58", selected === "58");
-  printableTicket.classList.toggle("ticket-print-v2--80", selected === "80");
-  document.documentElement.dataset.ticketWidth = selected;
-}
-
-widthInputs.forEach(input => input.addEventListener("change", applyTicketWidth));
-document.getElementById("print-ticket").addEventListener("click", () => window.print());
-document.getElementById("save-ticket-pdf").addEventListener("click", () => {
-  document.getElementById("pdf-help").focus({preventScroll: true});
-  window.print();
-});
-document.getElementById("pdf-help").setAttribute("tabindex", "-1");
-applyTicketWidth();
-{% if auto_print %}window.addEventListener("load", () => window.print(), {once: true});{% endif %}
-</script>
+<script src="{{ url_for('static', filename='js/ticket-print.js') }}?v=1" data-auto-print="{{ 'true' if auto_print else 'false' }}"></script>
 {% endblock %}

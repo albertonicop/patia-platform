@@ -143,7 +143,11 @@ class ProfessionalTicketTests(unittest.TestCase):
 
         self.assertIn("Imprimir ticket", html)
         self.assertIn("Guardar o descargar como PDF", html)
-        self.assertIn("window.print()", html)
+        with self.client.get("/static/js/ticket-print.js") as script_response:
+            self.assertIn("window.print()", script_response.get_data(as_text=True))
+        self.assertIn("css/ticket-print.css", html)
+        self.assertIn("Hoja Carta", html)
+        self.assertIn("Hoja A4", html)
         self.assertIn("58 mm", html)
         self.assertIn("80 mm", html)
         self.assertIn("@media print", css)

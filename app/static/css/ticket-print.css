@@ -1,0 +1,128 @@
+/* Loaded only by ticket.html; override legacy receipt rules without affecting POS. */
+.app-shell-v2 .ticket-page-v2__layout { grid-template-columns: minmax(0, 1fr) minmax(0, .7fr); }
+.ticket-page-v2__layout > * { min-width: 0; }
+@media screen and (max-width: 900px) {
+  .app-shell-v2 .ticket-page-v2__layout { grid-template-columns: minmax(0, 1fr); }
+}
+#printable-ticket {
+  box-sizing: border-box;
+  color: #000;
+  background: #fff;
+  font: 10pt/1.35 Arial, sans-serif;
+  overflow-wrap: anywhere;
+  height: auto;
+  max-width: 100%;
+  padding: 12mm;
+  width: 210mm;
+  page: auto;
+}
+#printable-ticket[data-print-format="letter"] { width: 215.9mm; }
+#printable-ticket[data-print-format="58"] { width: 58mm; padding: 3mm 2mm; font-size: 8pt; }
+#printable-ticket[data-print-format="80"] { width: 80mm; padding: 4mm 3mm; font-size: 9pt; }
+#printable-ticket .ticket-print-v2__business h1 { font-size: 1.4em; line-height: 1.2; }
+#printable-ticket .ticket-print-v2__business p,
+#printable-ticket .ticket-print-v2__meta,
+#printable-ticket .ticket-print-v2__items,
+#printable-ticket .ticket-print-v2__payment,
+#printable-ticket .ticket-print-v3__credit,
+#printable-ticket .ticket-print-v2__footer,
+#printable-ticket .ticket-page-v2__status { font-size: 1em; color: #000; }
+#printable-ticket .ticket-print-v2__items { width: 100%; table-layout: fixed; border-collapse: collapse; }
+#printable-ticket caption.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+#printable-ticket .ticket-print-v2__items th { font-size: .85em; white-space: normal; }
+#printable-ticket .ticket-print-v2__items :is(th, td) { padding: 2mm 1mm; height: auto; white-space: normal; }
+#printable-ticket .ticket-print-v2__items :is(th, td):nth-child(1) { width: 12%; }
+#printable-ticket .ticket-print-v2__items :is(th, td):nth-child(2) { width: 44%; }
+#printable-ticket .ticket-print-v2__items :is(th, td):nth-child(3),
+#printable-ticket .ticket-print-v2__items :is(th, td):nth-child(4) { width: 22%; overflow-wrap: normal; }
+#printable-ticket .ticket-print-v2__items td:nth-child(1) { overflow-wrap: normal; }
+#printable-ticket .ticket-print-v2__totals dd { margin: 0; white-space: normal; overflow-wrap: normal; }
+#printable-ticket .ticket-print-v2__totals { font-size: 1em; }
+#printable-ticket .ticket-print-v2__total :is(dt, dd) { font-size: 1.25em; line-height: 1.35; }
+#printable-ticket .ticket-print-v2__payment strong { white-space: normal; overflow-wrap: normal; }
+#printable-ticket .ticket-print-v2__meta strong { overflow-wrap: anywhere; white-space: normal; }
+#printable-ticket .ticket-page-v2__status {
+  display: block; white-space: normal; overflow-wrap: break-word;
+  background: #fff; border: 1px solid #000; border-radius: 0;
+  padding: 2mm; line-height: 1.35; break-inside: avoid;
+}
+#printable-ticket .ticket-page-v2__status strong { display: block; }
+.ticket-page-v2 .ticket-page-v2__widths { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.ticket-page-v2 .ticket-page-v2__widths label { display: flex; gap: 8px; align-items: center; }
+
+/* The product gets its own line on rolls. Numeric fields have the full width,
+   so neither a long name nor a large amount squeezes or cuts another field. */
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__items thead { display: none; }
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__items,
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__items tbody { display: block; }
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__items tr {
+  display: flex; flex-direction: column; padding: 2mm 0; border-bottom: 1px dashed #888;
+}
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__items td {
+  display: block; width: 100%; padding: 0; border: 0; box-sizing: border-box; text-align: right;
+}
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__items td:nth-child(2) {
+  order: -1; text-align: left; font-weight: 600; margin-bottom: 1mm;
+}
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) td[data-label]::before {
+  content: attr(data-label) " "; float: left; font-weight: normal; margin-right: 2mm;
+}
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__totals > div {
+  display: block; margin-top: 2mm;
+}
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__totals dd { text-align: right; }
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__payment { grid-template-columns: minmax(0, 1fr); }
+#printable-ticket:is([data-print-format="58"], [data-print-format="80"]) .ticket-print-v2__payment strong { text-align: right; }
+/* Measure at physical roll width even in a narrow phone preview. */
+#printable-ticket.ticket-measuring { max-width: none !important; border: 0 !important; }
+
+@media screen and (max-width: 560px) {
+  #printable-ticket:is([data-print-format="letter"], [data-print-format="a4"]) { padding: 4mm; }
+  #printable-ticket .ticket-print-v2__items thead { display: none; }
+  #printable-ticket .ticket-print-v2__items,
+  #printable-ticket .ticket-print-v2__items tbody { display: block; }
+  #printable-ticket .ticket-print-v2__items tr { display: flex; flex-direction: column; padding: 2mm 0; }
+  #printable-ticket .ticket-print-v2__items td:nth-child(n) { display: block; width: 100%; padding: 0; border: 0; text-align: right; }
+  #printable-ticket .ticket-print-v2__items td:nth-child(2) { order: -1; text-align: left; }
+  #printable-ticket td[data-label]::before { content: attr(data-label) " "; float: left; margin-right: 2mm; }
+  #printable-ticket .ticket-print-v2__totals > div { display: block; }
+  #printable-ticket .ticket-print-v2__totals dd { text-align: right; }
+  #printable-ticket .ticket-print-v2__payment { grid-template-columns: minmax(0, 1fr); }
+  #printable-ticket .ticket-print-v2__payment strong { text-align: right; }
+}
+
+@media print {
+  html, body.app-body,
+  body.app-body .app-main-v2,
+  body.app-body .ticket-page-v2,
+  body.app-body .ticket-page-v2__layout {
+    display: block !important; position: static !important;
+    width: auto !important; max-width: none !important; min-width: 0 !important;
+    height: auto !important; min-height: 0 !important; margin: 0 !important;
+    padding: 0 !important; overflow: visible !important;
+    background: #fff !important; border: 0 !important; box-shadow: none !important;
+  }
+  body.app-body > :not(.app-main-v2),
+  body.app-body .app-main-v2 > :not(.ticket-page-v2),
+  .ticket-page-v2 > :not(.ticket-page-v2__layout),
+  .ticket-page-v2__layout > :not(#printable-ticket) { display: none !important; }
+  body.app-body #printable-ticket {
+    position: static !important; width: 100% !important; max-width: none !important;
+    margin: 0 !important; padding: 0 !important; border: 0 !important;
+    border-radius: 0 !important; box-shadow: none !important;
+    page: auto !important; overflow: visible !important;
+  }
+  body.app-body #printable-ticket[data-print-format="58"] { width: 58mm !important; padding: 3mm 2mm !important; }
+  body.app-body #printable-ticket[data-print-format="80"] { width: 80mm !important; padding: 4mm 3mm !important; }
+  body.app-body #printable-ticket, body.app-body #printable-ticket * { visibility: visible !important; }
+  #printable-ticket thead { display: table-header-group; }
+  #printable-ticket caption.sr-only { display: none; }
+  #printable-ticket tr,
+  #printable-ticket .ticket-print-v2__totals,
+  #printable-ticket .ticket-print-v2__payment,
+  #printable-ticket .ticket-print-v3__credit,
+  #printable-ticket .ticket-print-v2__footer { break-inside: avoid; page-break-inside: avoid; }
+}
